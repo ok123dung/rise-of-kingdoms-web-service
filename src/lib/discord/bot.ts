@@ -1,0 +1,345 @@
+import { Client, GatewayIntentBits, EmbedBuilder, TextChannel, ChannelType, PermissionFlagsBits } from 'discord.js'
+import { db } from '@/lib/db'
+
+class RoKDiscordBot {
+  private client: Client
+  private isReady: boolean = false
+
+  constructor() {
+    this.client = new Client({
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
+      ]
+    })
+
+    this.setupEventHandlers()
+  }
+
+  private setupEventHandlers() {
+    this.client.once('ready', () => {
+      console.log(`Discord bot logged in as ${this.client.user?.tag}`)
+      this.isReady = true
+    })
+
+    this.client.on('error', (error) => {
+      console.error('Discord bot error:', error)
+    })
+
+    // Handle slash commands
+    this.client.on('interactionCreate', async (interaction) => {
+      if (!interaction.isChatInputCommand()) return
+
+      try {
+        await this.handleSlashCommand(interaction)
+      } catch (error) {
+        console.error('Slash command error:', error)
+        await interaction.reply({
+          content: 'Có lỗi xảy ra khi xử lý lệnh.',
+          ephemeral: true
+        })
+      }
+    })
+  }
+
+  async initialize() {
+    if (!process.env.DISCORD_BOT_TOKEN) {
+      console.warn('Discord bot token not provided, skipping bot initialization')
+      return
+    }
+
+    try {
+      await this.client.login(process.env.DISCORD_BOT_TOKEN)
+    } catch (error) {
+      console.error('Failed to initialize Discord bot:', error)
+    }
+  }
+
+  private async handleSlashCommand(interaction: any) {
+    const { commandName } = interaction
+
+    switch (commandName) {
+      case 'booking-status':
+        await this.handleBookingStatus(interaction)
+        break
+      case 'services':
+        await this.handleServices(interaction)
+        break
+      case 'support':
+        await this.handleSupport(interaction)
+        break
+      default:
+        await interaction.reply({
+          content: 'Lệnh không được hỗ trợ.',
+          ephemeral: true
+        })
+    }
+  }
+
+  private async handleBookingStatus(interaction: any) {
+    const email = interaction.options.getString('email')
+    
+    try {
+      const user = await db.user.findByEmail(email)
+      if (!user) {
+        await interaction.reply({
+          content: 'Không tìm thấy tài khoản với email này.',
+          ephemeral: true
+        })
+        return
+      }
+
+      const bookings = await db.booking.findByUser(user.id)
+      
+      if (bookings.length === 0) {
+        await interaction.reply({
+          content: 'Bạn chưa có booking nào.',
+          ephemeral: true
+        })
+        return
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle('📋 Trạng thái Booking')
+        .setColor(0x0099FF)
+        .setDescription(`Tìm thấy ${bookings.length} booking(s)`)
+
+      bookings.slice(0, 5).forEach((booking, index) => {
+        const statusEmoji = this.getStatusEmoji(booking.status)
+        const paymentEmoji = this.getPaymentStatusEmoji(booking.paymentStatus)
+        
+        embed.addFields({
+          name: `${index + 1}. ${booking.serviceTier.service.name}`,
+          value: `${statusEmoji} Trạng thái: ${booking.status}\n${paymentEmoji} Thanh toán: ${booking.paymentStatus}\nSố tiền: ${booking.finalAmount.toLocaleString()} VNĐ\nMã booking: ${booking.bookingNumber}`,
+          inline: true
+        })
+      })
+
+      await interaction.reply({ embeds: [embed], ephemeral: true })
+    } catch (error) {
+      console.error('Booking status error:', error)
+      await interaction.reply({
+        content: 'Có lỗi xảy ra khi kiểm tra trạng thái booking.',
+        ephemeral: true
+      })
+    }
+  }
+
+  private async handleServices(interaction: any) {
+    try {
+      const services = await db.service.findAll()
+      
+      const embed = new EmbedBuilder()
+        .setTitle('🎮 Dịch vụ Rise of Kingdoms')
+        .setColor(0x00FF00)
+        .setDescription('Danh sách các dịch vụ hiện có:')
+        .setURL(`${process.env.NEXT_PUBLIC_SITE_URL}/services`)
+
+      services.slice(0, 10).forEach(service => {
+        const minPrice = Math.min(...service.serviceTiers.map(tier => Number(tier.price)))
+        const maxPrice = Math.max(...service.serviceTiers.map(tier => Number(tier.price)))
+        
+        embed.addFields({
+          name: service.name,
+          value: `${service.shortDescription || service.description?.substring(0, 100) || 'Không có mô tả'}\n💰 Giá: ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} VNĐ`,
+          inline: false
+        })
+      })
+
+      embed.setFooter({
+        text: 'Truy cập website để đặt dịch vụ'
+      })
+
+      await interaction.reply({ embeds: [embed] })
+    } catch (error) {
+      console.error('Services command error:', error)
+      await interaction.reply({
+        content: 'Có lỗi xảy ra khi lấy danh sách dịch vụ.',
+        ephemeral: true
+      })
+    }
+  }
+
+  private async handleSupport(interaction: any) {
+    const issue = interaction.options.getString('issue')
+    
+    try {
+      // Create support ticket
+      const supportEmbed = new EmbedBuilder()
+        .setTitle('🎫 Yêu cầu hỗ trợ mới')
+        .setColor(0xFF9900)
+        .addFields(
+          { name: 'Người yêu cầu', value: `${interaction.user.tag} (${interaction.user.id})`, inline: true },
+          { name: 'Thời gian', value: new Date().toLocaleString('vi-VN'), inline: true },
+          { name: 'Vấn đề', value: issue || 'Không có mô tả', inline: false }
+        )
+        .setTimestamp()
+
+      // Send to support channel
+      const supportChannel = await this.client.channels.fetch(process.env.DISCORD_SUPPORT_CHANNEL!) as TextChannel
+      if (supportChannel) {
+        await supportChannel.send({ embeds: [supportEmbed] })
+      }
+
+      await interaction.reply({
+        content: '✅ Yêu cầu hỗ trợ đã được gửi. Team sẽ phản hồi sớm nhất có thể.',
+        ephemeral: true
+      })
+    } catch (error) {
+      console.error('Support command error:', error)
+      await interaction.reply({
+        content: 'Có lỗi xảy ra khi gửi yêu cầu hỗ trợ.',
+        ephemeral: true
+      })
+    }
+  }
+
+  // Public methods for external use
+  async notifyNewBooking(booking: any) {
+    if (!this.isReady) return
+
+    try {
+      const embed = new EmbedBuilder()
+        .setTitle('🎉 Booking mới!')
+        .setColor(0x00FF00)
+        .addFields(
+          { name: 'Khách hàng', value: booking.user.fullName, inline: true },
+          { name: 'Email', value: booking.user.email, inline: true },
+          { name: 'Dịch vụ', value: `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`, inline: false },
+          { name: 'Số tiền', value: `${booking.finalAmount.toLocaleString()} VNĐ`, inline: true },
+          { name: 'Mã booking', value: booking.bookingNumber, inline: true },
+          { name: 'Trạng thái', value: booking.status, inline: true }
+        )
+        .setTimestamp()
+        .setFooter({ text: 'RoK Services - Booking System' })
+
+      const channel = await this.client.channels.fetch(process.env.DISCORD_BOOKINGS_CHANNEL!) as TextChannel
+      if (channel) {
+        await channel.send({ embeds: [embed] })
+      }
+    } catch (error) {
+      console.error('Failed to send booking notification:', error)
+    }
+  }
+
+  async notifyPaymentCompleted(payment: any) {
+    if (!this.isReady) return
+
+    try {
+      const embed = new EmbedBuilder()
+        .setTitle('💰 Thanh toán thành công!')
+        .setColor(0x00FF00)
+        .addFields(
+          { name: 'Khách hàng', value: payment.booking.user.fullName, inline: true },
+          { name: 'Số tiền', value: `${payment.amount.toLocaleString()} VNĐ`, inline: true },
+          { name: 'Phương thức', value: payment.paymentMethod.toUpperCase(), inline: true },
+          { name: 'Mã thanh toán', value: payment.paymentNumber, inline: true },
+          { name: 'Mã booking', value: payment.booking.bookingNumber, inline: true },
+          { name: 'Dịch vụ', value: payment.booking.serviceTier.service.name, inline: true }
+        )
+        .setTimestamp()
+        .setFooter({ text: 'RoK Services - Payment System' })
+
+      const channel = await this.client.channels.fetch(process.env.DISCORD_BOOKINGS_CHANNEL!) as TextChannel
+      if (channel) {
+        await channel.send({ embeds: [embed] })
+      }
+    } catch (error) {
+      console.error('Failed to send payment notification:', error)
+    }
+  }
+
+  async createCustomerChannel(booking: any) {
+    if (!this.isReady) return null
+
+    try {
+      const guild = await this.client.guilds.fetch(process.env.DISCORD_GUILD_ID!)
+      const category = await guild.channels.fetch(process.env.DISCORD_CUSTOMER_CATEGORY!)
+
+      const channelName = `${booking.user.fullName.toLowerCase().replace(/\s+/g, '-')}-${booking.serviceTier.service.slug}`
+      
+      const channel = await guild.channels.create({
+        name: channelName,
+        type: ChannelType.GuildText,
+        parent: category?.id,
+        permissionOverwrites: [
+          {
+            id: guild.roles.everyone.id,
+            deny: [PermissionFlagsBits.ViewChannel]
+          },
+          {
+            id: booking.user.discordId,
+            allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory]
+          }
+        ]
+      })
+
+      // Send welcome message
+      const welcomeEmbed = new EmbedBuilder()
+        .setTitle('🎮 Chào mừng đến với kênh hỗ trợ!')
+        .setColor(0x0099FF)
+        .setDescription(`Xin chào ${booking.user.fullName}! Đây là kênh riêng cho dịch vụ **${booking.serviceTier.service.name}** của bạn.`)
+        .addFields(
+          { name: 'Mã booking', value: booking.bookingNumber, inline: true },
+          { name: 'Dịch vụ', value: `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`, inline: true },
+          { name: 'Trạng thái', value: booking.status, inline: true }
+        )
+        .setFooter({ text: 'Team sẽ liên hệ với bạn sớm nhất có thể!' })
+
+      await channel.send({ embeds: [welcomeEmbed] })
+
+      return channel
+    } catch (error) {
+      console.error('Failed to create customer channel:', error)
+      return null
+    }
+  }
+
+  private getStatusEmoji(status: string): string {
+    const statusEmojis: { [key: string]: string } = {
+      'pending': '⏳',
+      'confirmed': '✅',
+      'in_progress': '🔄',
+      'completed': '🎉',
+      'cancelled': '❌',
+      'refunded': '💸'
+    }
+    return statusEmojis[status] || '❓'
+  }
+
+  private getPaymentStatusEmoji(status: string): string {
+    const paymentEmojis: { [key: string]: string } = {
+      'pending': '⏳',
+      'completed': '✅',
+      'failed': '❌',
+      'refunded': '💸'
+    }
+    return paymentEmojis[status] || '❓'
+  }
+
+  async destroy() {
+    if (this.client) {
+      await this.client.destroy()
+    }
+  }
+}
+
+// Singleton instance
+let botInstance: RoKDiscordBot | null = null
+
+export function getDiscordBot(): RoKDiscordBot {
+  if (!botInstance) {
+    botInstance = new RoKDiscordBot()
+  }
+  return botInstance
+}
+
+export async function initializeDiscordBot() {
+  const bot = getDiscordBot()
+  await bot.initialize()
+  return bot
+}
+
+export default RoKDiscordBot
