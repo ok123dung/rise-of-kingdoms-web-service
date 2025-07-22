@@ -142,7 +142,7 @@ export const authOptions: NextAuthOptions = {
             where: {
               OR: [
                 { email: profile.email },
-                { discordId: profile.id }
+                { discordId: (profile as any).id }
               ]
             },
             include: {
@@ -155,8 +155,8 @@ export const authOptions: NextAuthOptions = {
               await prisma.user.update({
                 where: { id: existingUser.id },
                 data: {
-                  discordId: profile.id,
-                  discordUsername: profile.username,
+                  discordId: (profile as any).id,
+                  discordUsername: (profile as any).username,
                   lastLogin: new Date()
                 }
               })
@@ -168,9 +168,10 @@ export const authOptions: NextAuthOptions = {
             const newUser = await prisma.user.create({
               data: {
                 email: profile.email || '',
-                fullName: profile.global_name || profile.username || 'Discord User',
-                discordId: profile.id,
-                discordUsername: profile.username,
+                fullName: (profile as any).global_name || (profile as any).username || 'Discord User',
+                discordId: (profile as any).id,
+                discordUsername: (profile as any).username,
+                password: '',
                 lastLogin: new Date()
               }
             })
@@ -200,7 +201,6 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
-    signUp: '/auth/signup',
     error: '/auth/error'
   },
   events: {

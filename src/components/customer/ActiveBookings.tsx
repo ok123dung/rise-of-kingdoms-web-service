@@ -22,7 +22,11 @@ interface ActiveBooking {
   }
 }
 
-export default function ActiveBookings() {
+interface ActiveBookingsProps {
+  userId?: string
+}
+
+export default function ActiveBookings({ userId }: ActiveBookingsProps) {
   const [bookings, setBookings] = useState<ActiveBooking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

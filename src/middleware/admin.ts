@@ -246,28 +246,9 @@ export async function logAdminAction(
   details?: any
 ): Promise<void> {
   try {
-    const { prisma } = await import('@/lib/db')
+    // TODO: Implement audit logging when AuditLog model is created
+    console.log('Audit log:', { adminId, action, resource, resourceId, details })
     
-    await prisma.auditLog.create({
-      data: {
-        userId: adminId,
-        action,
-        resource,
-        resourceId,
-        details: details ? JSON.stringify(details) : null,
-        ipAddress: '', // Would be populated from request
-        userAgent: '', // Would be populated from request
-        timestamp: new Date()
-      }
-    })
-    
-    console.log('Admin action logged:', {
-      adminId,
-      action,
-      resource,
-      resourceId,
-      timestamp: new Date().toISOString()
-    })
   } catch (error) {
     console.error('Failed to log admin action:', error)
     // Don't throw error here to avoid breaking the main operation

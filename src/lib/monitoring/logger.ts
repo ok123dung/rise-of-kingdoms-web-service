@@ -196,14 +196,22 @@ class Logger {
   ): void {
     const level = statusCode >= 500 ? LogLevel.ERROR : statusCode >= 400 ? LogLevel.WARN : LogLevel.INFO
     
-    this[level](`API ${method} ${path} - ${statusCode} (${duration}ms)`, {
+    const logContext: LogContext = {
       ...context,
       method,
       path,
       statusCode,
       duration,
       event: 'api_request'
-    })
+    }
+    
+    if (level === LogLevel.ERROR) {
+      this.error(`API ${method} ${path} - ${statusCode} (${duration}ms)`, undefined, logContext)
+    } else if (level === LogLevel.WARN) {
+      this.warn(`API ${method} ${path} - ${statusCode} (${duration}ms)`, logContext)
+    } else {
+      this.info(`API ${method} ${path} - ${statusCode} (${duration}ms)`, logContext)
+    }
   }
 
   logSecurityEvent(
@@ -361,12 +369,21 @@ export function logHealthCheck(
 ): void {
   const level = status === 'healthy' ? LogLevel.INFO : status === 'degraded' ? LogLevel.WARN : LogLevel.ERROR
   
-  getLogger()[level](`Health check: ${service} is ${status}`, {
+  const logContext = {
     service,
     status,
     details,
     event: 'health_check'
-  })
+  }
+  
+  const logger = getLogger()
+  if (level === LogLevel.ERROR) {
+    logger.error(`Health check: ${service} is ${status}`, undefined, logContext)
+  } else if (level === LogLevel.WARN) {
+    logger.warn(`Health check: ${service} is ${status}`, logContext)
+  } else {
+    logger.info(`Health check: ${service} is ${status}`, logContext)
+  }
 }
 
 // Database query logging

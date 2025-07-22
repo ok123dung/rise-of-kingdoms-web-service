@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { Eye, MoreHorizontal } from 'lucide-react'
 
 async function getRecentBookings() {
-  return await db.booking.findMany({
+  return await prisma.booking.findMany({
     take: 10,
     orderBy: { createdAt: 'desc' },
     include: {

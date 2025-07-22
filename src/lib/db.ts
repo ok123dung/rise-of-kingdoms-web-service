@@ -57,6 +57,7 @@ export const db = {
     async create(data: {
       email: string
       fullName: string
+      password?: string
       phone?: string
       discordUsername?: string
       discordId?: string
@@ -64,7 +65,10 @@ export const db = {
       rokKingdom?: string
     }) {
       return prisma.user.create({
-        data,
+        data: {
+          ...data,
+          password: data.password || ''
+        },
         include: {
           bookings: true
         }

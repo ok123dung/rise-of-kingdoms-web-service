@@ -30,7 +30,11 @@ interface CustomerStats {
   }
 }
 
-export default function CustomerStats() {
+interface CustomerStatsProps {
+  userId?: string
+}
+
+export default function CustomerStats({ userId }: CustomerStatsProps) {
   const [stats, setStats] = useState<CustomerStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

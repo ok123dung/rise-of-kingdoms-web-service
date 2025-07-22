@@ -18,7 +18,11 @@ interface RecentPayment {
   paidAt?: string
 }
 
-export default function RecentPayments() {
+interface RecentPaymentsProps {
+  userId?: string
+}
+
+export default function RecentPayments({ userId }: RecentPaymentsProps) {
   const [payments, setPayments] = useState<RecentPayment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

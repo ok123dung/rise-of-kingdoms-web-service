@@ -154,7 +154,7 @@ async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
   // Clean up old entries periodically
   if (Math.random() < 0.01) { // 1% chance
     const cutoff = now - RATE_LIMIT_WINDOW * 2;
-    for (const [k, v] of rateLimitStore.entries()) {
+    for (const [k, v] of Array.from(rateLimitStore.entries())) {
       if (v.resetTime < cutoff) {
         rateLimitStore.delete(k);
       }

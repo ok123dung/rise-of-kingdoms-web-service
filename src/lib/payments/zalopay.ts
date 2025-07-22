@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { prisma } from '@/lib/db'
+import { db, prisma } from '@/lib/db'
 
 interface ZaloPayRequest {
   bookingId: string
@@ -110,8 +110,7 @@ export class ZaloPayPayment {
           paymentMethod: 'zalopay',
           paymentGateway: 'zalopay',
           gatewayTransactionId: appTransId,
-          gatewayOrderId: appTransId,
-          status: 'pending'
+          gatewayOrderId: appTransId
         })
 
         return {
@@ -262,7 +261,7 @@ export class ZaloPayPayment {
 
       if (responseData.return_code === 1) {
         // Update payment record with refund info
-        const payment = await db.payment.findFirst({
+        const payment = await prisma.payment.findFirst({
           where: {
             gatewayResponse: {
               path: ['zpTransId'],
@@ -272,7 +271,7 @@ export class ZaloPayPayment {
         })
 
         if (payment) {
-          await db.payment.update({
+          await prisma.payment.update({
             where: { id: payment.id },
             data: {
               refundAmount: refundAmount,

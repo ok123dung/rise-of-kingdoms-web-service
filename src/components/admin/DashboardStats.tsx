@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -29,7 +29,7 @@ async function getDashboardStats() {
     lastMonthBookings
   ] = await Promise.all([
     // Total revenue this month
-    db.payment.aggregate({
+    prisma.payment.aggregate({
       where: {
         status: 'completed',
         paidAt: { gte: startOfMonth }
@@ -38,17 +38,17 @@ async function getDashboardStats() {
     }),
     
     // Total bookings this month
-    db.booking.count({
+    prisma.booking.count({
       where: { createdAt: { gte: startOfMonth } }
     }),
     
     // Total customers this month
-    db.user.count({
+    prisma.user.count({
       where: { createdAt: { gte: startOfMonth } }
     }),
     
     // Completed payments this month
-    db.payment.count({
+    prisma.payment.count({
       where: {
         status: 'completed',
         paidAt: { gte: startOfMonth }
@@ -56,19 +56,19 @@ async function getDashboardStats() {
     }),
     
     // Active leads
-    db.lead.count({
+    prisma.lead.count({
       where: {
         status: { in: ['new', 'contacted', 'qualified'] }
       }
     }),
     
     // Today's bookings
-    db.booking.count({
+    prisma.booking.count({
       where: { createdAt: { gte: startOfToday } }
     }),
     
     // Last month revenue for comparison
-    db.payment.aggregate({
+    prisma.payment.aggregate({
       where: {
         status: 'completed',
         paidAt: { 
@@ -80,7 +80,7 @@ async function getDashboardStats() {
     }),
     
     // Last month bookings for comparison
-    db.booking.count({
+    prisma.booking.count({
       where: {
         createdAt: {
           gte: startOfLastMonth,

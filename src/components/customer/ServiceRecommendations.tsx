@@ -23,7 +23,11 @@ interface ServiceRecommendation {
   estimatedDuration: string
 }
 
-export default function ServiceRecommendations() {
+interface ServiceRecommendationsProps {
+  userId?: string
+}
+
+export default function ServiceRecommendations({ userId }: ServiceRecommendationsProps) {
   const [recommendations, setRecommendations] = useState<ServiceRecommendation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

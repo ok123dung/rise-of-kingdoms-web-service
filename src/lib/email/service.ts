@@ -42,7 +42,7 @@ export class EmailService {
         subject: options.subject,
         html: options.html,
         text: options.text,
-        replyTo: options.replyTo,
+        reply_to: options.replyTo,
         attachments: options.attachments
       })
 
@@ -82,9 +82,10 @@ export class EmailService {
         subject: template.subject,
         content: template.html,
         templateId: 'booking_confirmation',
-        status: result.success ? 'sent' : 'failed',
-        sentAt: result.success ? new Date() : undefined,
-        errorMessage: result.error
+        templateData: {
+          success: result.success,
+          error: result.error
+        }
       })
 
       return result.success
@@ -115,9 +116,10 @@ export class EmailService {
         subject: template.subject,
         content: template.html,
         templateId: 'payment_confirmation',
-        status: result.success ? 'sent' : 'failed',
-        sentAt: result.success ? new Date() : undefined,
-        errorMessage: result.error
+        templateData: {
+          success: result.success,
+          error: result.error
+        }
       })
 
       return result.success
@@ -147,9 +149,10 @@ export class EmailService {
         subject: template.subject,
         content: template.html,
         templateId: 'welcome',
-        status: result.success ? 'sent' : 'failed',
-        sentAt: result.success ? new Date() : undefined,
-        errorMessage: result.error
+        templateData: {
+          success: result.success,
+          error: result.error
+        }
       })
 
       return result.success
@@ -180,9 +183,10 @@ export class EmailService {
         subject: template.subject,
         content: template.html,
         templateId: 'service_reminder',
-        status: result.success ? 'sent' : 'failed',
-        sentAt: result.success ? new Date() : undefined,
-        errorMessage: result.error
+        templateData: {
+          success: result.success,
+          error: result.error
+        }
       })
 
       return result.success
@@ -216,9 +220,10 @@ export class EmailService {
         subject: template.subject,
         content: template.html,
         templateId: 'lead_followup',
-        status: result.success ? 'sent' : 'failed',
-        sentAt: result.success ? new Date() : undefined,
-        errorMessage: result.error
+        templateData: {
+          success: result.success,
+          error: result.error
+        }
       })
 
       return result.success

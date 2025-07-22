@@ -60,7 +60,7 @@ async function createPaymentHandler(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const amount = Math.round(booking.finalAmount)
+    const amount = Math.round(Number(booking.finalAmount))
     const orderInfo = `Thanh toán dịch vụ ${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
 
     let paymentResult: any
@@ -151,7 +151,4 @@ async function createPaymentHandler(request: NextRequest) {
 }
 
 // Apply middleware
-export const POST = withRateLimit(
-  withAuth(createPaymentHandler, { requiredRole: 'customer' }),
-  { limit: 10, windowMs: 60 * 1000 } // 10 requests per minute
-)
+export const POST = withRateLimit()(withAuth(createPaymentHandler))

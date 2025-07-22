@@ -441,7 +441,7 @@ export class PerformanceMonitor {
   public static getPerformanceSummary(): any {
     const summary: any = {}
     
-    for (const [key, values] of this.metrics.entries()) {
+    for (const [key, values] of Array.from(this.metrics.entries())) {
       if (values.length > 0) {
         const avg = values.reduce((sum, val) => sum + val, 0) / values.length
         const max = Math.max(...values)

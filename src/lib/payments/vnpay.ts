@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { prisma } from '@/lib/db'
+import { db, prisma } from '@/lib/db'
 
 interface VNPayRequest {
   bookingId: string
@@ -89,16 +89,13 @@ export class VNPayPayment {
         .join('&')
 
       // Create payment record
-      await prisma.payment.create({
-        data: {
-          bookingId: request.bookingId,
-          amount: request.amount,
-          paymentMethod: 'vnpay',
-          paymentGateway: 'vnpay',
-          gatewayTransactionId: orderId,
-          gatewayOrderId: orderId,
-          status: 'pending'
-        }
+      await db.payment.create({
+        bookingId: request.bookingId,
+        amount: request.amount,
+        paymentMethod: 'vnpay',
+        paymentGateway: 'vnpay',
+        gatewayTransactionId: orderId,
+        gatewayOrderId: orderId
       })
 
       console.log('VNPay payment URL created:', { orderId, amount: request.amount })
@@ -214,8 +211,7 @@ export class VNPayPayment {
               payDate,
               responseCode,
               ...query
-            },
-            completedAt: new Date()
+            }
           }
         })
 

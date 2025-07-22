@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { prisma } from '@/lib/db'
+import { db, prisma } from '@/lib/db'
 
 interface MoMoPaymentRequest {
   bookingId: string
@@ -130,8 +130,7 @@ export class MoMoPayment {
           paymentMethod: 'momo',
           paymentGateway: 'momo',
           gatewayTransactionId: orderId,
-          gatewayOrderId: orderId,
-          status: 'pending'
+          gatewayOrderId: orderId
         })
 
         return {
@@ -320,7 +319,7 @@ export class MoMoPayment {
         // Update payment record with refund info
         const payment = await db.payment.findByGatewayTransactionId(orderId)
         if (payment) {
-          await db.payment.update({
+          await prisma.payment.update({
             where: { id: payment.id },
             data: {
               refundAmount: refundAmount,

@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { db, prisma } from '@/lib/db'
 import { getEmailService } from '@/lib/email/service'
 
 interface BankingTransferRequest {
@@ -71,13 +71,7 @@ export class BankingTransfer {
         paymentMethod: 'banking',
         paymentGateway: 'manual_banking',
         gatewayTransactionId: transferCode,
-        gatewayOrderId: transferCode,
-        status: 'pending',
-        gatewayResponse: {
-          transferContent,
-          expireTime: expireTime.toISOString(),
-          bankAccounts: this.bankAccounts
-        }
+        gatewayOrderId: transferCode
       })
 
       // Send banking instructions email
@@ -207,7 +201,7 @@ export class BankingTransfer {
     error?: string
   }> {
     try {
-      const pendingPayments = await db.payment.findMany({
+      const pendingPayments = await prisma.payment.findMany({
         where: {
           paymentMethod: 'banking',
           status: 'pending'
