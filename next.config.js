@@ -7,6 +7,9 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: false,
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
   env: {
     SITE_URL: process.env.NODE_ENV === 'production' ? 'https://rokdbot.com' : 'http://localhost:3000',
     GA_MEASUREMENT_ID: process.env.GA_MEASUREMENT_ID,
