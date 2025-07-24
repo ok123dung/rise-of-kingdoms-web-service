@@ -21,7 +21,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "echo 'Seed disabled for deployment'",
     "db:reset": "prisma migrate reset"
   },
   "keywords": [
