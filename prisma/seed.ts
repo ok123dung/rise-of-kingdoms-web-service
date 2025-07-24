@@ -38,13 +38,10 @@ async function main() {
         fullName: 'Nguyễn Văn A',
         phone: '0987654321',
         serviceInterest: 'strategy',
-        currentPower: '50M',
-        kingdom: '2847',
-        alliance: 'VN Warriors',
         source: 'discord',
         leadScore: 85,
         status: 'new',
-        notes: 'Quan tâm đến strategy cho KvK season 6'
+        notes: 'Quan tâm đến strategy cho KvK season 6 - Player 50M power từ kingdom 2847, alliance VN Warriors'
       }
     ]
   })
