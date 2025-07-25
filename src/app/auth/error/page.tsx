@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { AlertCircle, RefreshCw, Home, ArrowLeft } from 'lucide-react'
 
 const ERROR_MESSAGES = {
@@ -21,7 +22,7 @@ const ERROR_MESSAGES = {
   sessionrequired: 'Vui lòng đăng nhập để tiếp tục.'
 }
 
-export default function AuthErrorPage() {
+function AuthErrorContent() {
   const searchParams = useSearchParams()
   const error = searchParams.get('error') as keyof typeof ERROR_MESSAGES || 'default'
   
@@ -180,5 +181,17 @@ export default function AuthErrorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <AuthErrorContent />
+    </Suspense>
   )
 }

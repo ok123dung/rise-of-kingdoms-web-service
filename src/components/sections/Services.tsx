@@ -196,12 +196,13 @@ function ServiceCard({ service }: ServiceCardProps) {
             </span>
           </div>
 
-          <button
-            className="w-full btn-primary text-sm py-2.5 group-hover:bg-primary-700 transition-colors duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+          <Link
+            href="/contact"
+            className="w-full btn-primary text-sm py-2.5 group-hover:bg-primary-700 transition-colors duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-center block"
             aria-label={`Đặt dịch vụ ${title}`}
           >
             Đặt dịch vụ
-          </button>
+          </Link>
         </div>
       </div>
     </div>
