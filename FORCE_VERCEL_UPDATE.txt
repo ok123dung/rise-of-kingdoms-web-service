@@ -1,0 +1,4 @@
+Force Vercel to use latest commit with fixes
+Timestamp: $(date)
+Latest commit: ffae946 - Tailwind CSS dependency fixed
+Previous failing commit: 1e2bf29 - Old version
