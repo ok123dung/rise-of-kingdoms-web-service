@@ -60,7 +60,7 @@ async function createPaymentHandler(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const amount = Math.round(Number(booking.finalAmount))
+    const amount = Math.round(Number(booking.finalAmount.toString()))
     const orderInfo = `Thanh toán dịch vụ ${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
 
     let paymentResult: any
