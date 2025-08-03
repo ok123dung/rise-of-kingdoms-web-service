@@ -1,37 +1,41 @@
-# 🚀 RoK Services - Production Deployment Guide
+# 🚀 TRIỂN KHAI PRODUCTION - BƯỚC CUỐI CÙNG
 
-## ✅ Current Status
-- ✅ Code fixes complete - All TypeScript errors resolved
-- ✅ GitHub push complete - Latest code deployed
-- 🔄 Vercel auto-deployment in progress
-- ⏳ Need to setup production database
-- ⏳ Need to configure environment variables
+## 📋 Checklist Hoàn Thành
 
-## 🗄️ Step 1: Setup Production Database (Supabase)
+### ✅ Phase 1: Setup Database (3 phút)
+1. **Railway.app**:
+   - Vào https://railway.app
+   - Login with GitHub
+   - New Project → Provision PostgreSQL
+   - Copy connection string
+   
+2. **Update Environment**:
+   - Copy Railway URL
+   - Update `.env` file
+   - Test connection: `npx prisma db push`
 
-### Create Supabase Project
-1. Go to https://supabase.com/dashboard
-2. Click "New Project"
-3. Choose organization: `ok123dung` or create new
-4. Project name: `rok-services-production` 
-5. Database password: Generate strong password (save it!)
-6. Region: Southeast Asia (Singapore) - closest to Vietnam users
-7. Click "Create new project"
+### ✅ Phase 2: Deploy Vercel (5 phút)
+1. **Vercel.com**:
+   - Login with GitHub
+   - Import `ok123dung/rok-services`
+   - Add environment variables
+   - Deploy
 
-### Get Database Connection
-1. Go to Settings > Database
-2. Copy "Connection string" 
-3. Format: `postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres`
+2. **Environment Variables**:
+   ```
+   DATABASE_URL=<railway-url>
+   NEXTAUTH_URL=https://rok-services.vercel.app
+   NEXTAUTH_SECRET=rok-services-super-secure-production-secret-2025
+   NODE_ENV=production
+   ```
 
-### Alternative: Use Vercel Postgres (Recommended)
-```bash
-# In Vercel dashboard:
-1. Go to your project
-2. Storage tab
-3. Create Database > Postgres
-4. Database name: rok-services-db
-5. Region: Singapore (sin1)
-```
+### ✅ Phase 3: Custom Domain (5 phút)
+1. **Vercel Settings**:
+   - Add domain: rokdbot.com
+   - Get DNS records
+
+2. **Cloudflare DNS**:
+   - Add CNAME: rokdbot.com → cname.vercel-dns.com
 
 ## 🔐 Step 2: Configure Environment Variables
 
