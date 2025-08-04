@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, X, Crown, Shield, Users, BookOpen, Sparkles } from 'lucide-react'
 
 const navigation = [
@@ -20,7 +21,14 @@ export default function Header() {
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5 flex items-center space-x-3 group">
             <div className="relative">
-              <Crown className="h-10 w-10 text-amber-600 group-hover:text-amber-500 transition-all duration-300 group-hover:scale-110" />
+              <Image 
+                src="/logo.png" 
+                alt="RoK Services Logo" 
+                width={48} 
+                height={48} 
+                className="group-hover:scale-110 transition-all duration-300"
+                priority
+              />
               <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-amber-400 animate-pulse" />
             </div>
             <div>
@@ -80,7 +88,13 @@ export default function Header() {
           <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto glassmorphism px-6 py-6 sm:max-w-sm border-l border-white/20">
             <div className="flex items-center justify-between">
               <Link href="/" className="-m-1.5 p-1.5 flex items-center space-x-3">
-                <Crown className="h-8 w-8 text-amber-600" />
+                <Image 
+                  src="/logo.png" 
+                  alt="RoK Services Logo" 
+                  width={40} 
+                  height={40}
+                  priority
+                />
                 <span className="font-heading font-bold text-xl text-slate-800">
                   RoK Services
                 </span>

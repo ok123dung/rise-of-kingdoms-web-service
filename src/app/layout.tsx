@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'RoK Services - Professional Gaming Services',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'RoK Services - Dịch vụ Rise of Kingdoms #1 Việt Nam',
     description: 'Nâng tầm trải nghiệm Rise of Kingdoms với dịch vụ premium từ top player Việt Nam.',
-    images: ['/og-image.jpg'],
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
