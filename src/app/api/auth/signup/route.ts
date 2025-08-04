@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { signupSchema } from '@/lib/validation'
 import { trackRequest } from '@/lib/monitoring'
 import { sanitizeInput } from '@/lib/validation'
+import { sendWelcomeEmail } from '@/lib/email'
 
 export const POST = trackRequest('/api/auth/signup')(async function(request: NextRequest) {
   try {
@@ -78,8 +79,13 @@ export const POST = trackRequest('/api/auth/signup')(async function(request: Nex
       timestamp: new Date().toISOString()
     })
 
-    // TODO: Send welcome email
-    // await sendWelcomeEmail(user.email, user.fullName)
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(user.email, user.fullName)
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError)
+      // Continue with signup even if email fails
+    }
 
     return NextResponse.json(
       {

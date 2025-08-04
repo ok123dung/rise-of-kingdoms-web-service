@@ -4,6 +4,8 @@ import { withAuth, withRateLimit, getCurrentSession, getCurrentUser, isStaff } f
 import { db, prisma } from '@/lib/db'
 import { MoMoPayment } from '@/lib/payments/momo'
 import { ZaloPayPayment } from '@/lib/payments/zalopay'
+import { VNPayPayment } from '@/lib/payments/vnpay'
+import { BankingTransfer } from '@/lib/payments/banking'
 
 const createPaymentSchema = z.object({
   bookingId: z.string().min(1, 'Booking ID is required'),
@@ -88,18 +90,26 @@ async function createPaymentHandler(request: NextRequest) {
         break
 
       case 'vnpay':
-        // TODO: Implement VNPay
-        return NextResponse.json({
-          success: false,
-          error: 'VNPay integration not yet implemented'
-        }, { status: 501 })
+        const vnpayInstance = new VNPayPayment()
+        paymentResult = await vnpayInstance.createPaymentUrl({
+          bookingId: booking.id,
+          amount: amount,
+          orderInfo: orderInfo,
+          returnUrl: `${process.env.NEXTAUTH_URL}/api/payments/vnpay/return`
+        })
+        break
 
       case 'banking':
-        // TODO: Implement direct banking
-        return NextResponse.json({
-          success: false,
-          error: 'Direct banking integration not yet implemented'
-        }, { status: 501 })
+        // For banking, create payment record and send instructions
+        const bankingInstance = new BankingTransfer()
+        paymentResult = await bankingInstance.createTransferOrder({
+          bookingId: booking.id,
+          amount: amount,
+          customerName: booking.user.fullName,
+          customerEmail: booking.user.email,
+          customerPhone: booking.user.phone || undefined
+        })
+        break
 
       default:
         return NextResponse.json({

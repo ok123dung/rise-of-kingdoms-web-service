@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { trackRequest } from '@/lib/monitoring'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 // GET /api/services - Lấy danh sách tất cả services
 export const GET = trackRequest('/api/services')(async function(request: NextRequest) {
@@ -66,7 +68,32 @@ const createServiceSchema = z.object({
 
 export const POST = trackRequest('/api/services')(async function(request: NextRequest) {
   try {
-    // TODO: Add authentication check for admin role
+    // Check admin authentication
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // Find user first, then check staff role
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { 
+        id: true,
+        staffProfile: {
+          select: { role: true, isActive: true }
+        }
+      }
+    })
+
+    if (!user?.staffProfile || !user.staffProfile.isActive || !['admin', 'manager'].includes(user.staffProfile.role)) {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      )
+    }
     
     const body = await request.json()
     const validatedData = createServiceSchema.parse(body)
