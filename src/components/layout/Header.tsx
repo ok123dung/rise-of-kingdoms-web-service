@@ -67,12 +67,12 @@ export default function Header() {
         
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
           <Link 
-            href="/login" 
+            href="/auth/signin" 
             className="text-sm font-semibold leading-6 text-slate-700 hover:text-amber-600 transition-colors duration-200 px-4 py-2 rounded-xl hover:bg-white/50"
           >
             Đăng nhập
           </Link>
-          <Link href="/register" className="btn-primary text-sm px-6">
+          <Link href="/auth/signup" className="btn-primary text-sm px-6">
             <span className="flex items-center space-x-2">
               <span>Đăng ký</span>
               <Sparkles className="h-4 w-4" />
@@ -125,14 +125,14 @@ export default function Header() {
                 </div>
                 <div className="py-6 space-y-3">
                   <Link
-                    href="/login"
+                    href="/auth/signin"
                     className="-mx-3 block rounded-2xl px-4 py-3 text-base font-semibold leading-7 text-slate-800 hover:bg-white/20 transition-all duration-300"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Đăng nhập
                   </Link>
                   <Link
-                    href="/register"
+                    href="/auth/signup"
                     className="-mx-3 block rounded-2xl px-4 py-3 text-base font-semibold leading-7 text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all duration-300 text-center"
                     onClick={() => setMobileMenuOpen(false)}
                   >
