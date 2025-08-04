@@ -10,7 +10,8 @@ import {
   BarChart3, 
   Calendar, 
   Headphones,
-  ArrowRight 
+  ArrowRight,
+  Shield
 } from 'lucide-react'
 
 interface Service {
@@ -104,40 +105,69 @@ const services: Service[] = [
 
 export default function Services() {
   return (
-    <section className="relative bg-gradient-to-br from-white via-primary-50/30 to-white section-padding">
-      <div className="container-max">
+    <section className="relative overflow-hidden section-padding">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-amber-50/20"></div>
+      <div className="absolute top-20 right-10 animate-float opacity-10">
+        <Crown className="h-32 w-32 text-amber-400" />
+      </div>
+      <div className="absolute bottom-20 left-10 animate-float opacity-10" style={{ animationDelay: '3s' }}>
+        <Shield className="h-24 w-24 text-blue-400" />
+      </div>
+
+      <div className="container-max relative z-10">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
-            Dịch vụ chuyên nghiệp cho{' '}
-            <span className="text-gradient">Rise of Kingdoms</span>
+        <div className="text-center max-w-4xl mx-auto mb-20 animate-fadeInUp">
+          <div className="mb-6">
+            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200">
+              <Shield className="w-4 h-4 mr-2" />
+              Dịch vụ chuyên nghiệp
+            </span>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+            Dịch vụ premium cho{' '}
+            <span className="text-gradient animate-glow">Rise of Kingdoms</span>
           </h2>
-          <p className="text-lg text-gray-600 leading-relaxed">
+          
+          <p className="text-xl text-slate-600 leading-relaxed">
             Nâng tầm trải nghiệm chơi game của bạn với các dịch vụ chất lượng cao 
-            từ đội ngũ chuyên gia hàng đầu Việt Nam
+            từ đội ngũ <span className="text-amber-600 font-semibold">chuyên gia hàng đầu Việt Nam</span>
           </p>
         </div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-          {services.map((service) => (
-            <ServiceCard key={service.id} service={service} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {services.map((service, index) => (
+            <div 
+              key={service.id} 
+              className="animate-fadeInUp" 
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <ServiceCard service={service} />
+            </div>
           ))}
         </div>
 
         {/* CTA Section */}
-        <div className="text-center mt-16">
-          <p className="text-gray-600 mb-6">
-            Không tìm thấy dịch vụ phù hợp? Liên hệ với chúng tôi để được tư vấn cá nhân hóa
-          </p>
-          <Link 
-            href="/contact" 
-            className="btn-secondary inline-flex items-center space-x-2"
-            aria-label="Liên hệ để được tư vấn thêm về dịch vụ"
-          >
-            <span>Tư vấn miễn phí</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+        <div className="text-center mt-20 animate-fadeInUp">
+          <div className="glassmorphism max-w-2xl mx-auto p-8">
+            <h3 className="text-2xl font-bold text-slate-900 mb-4">
+              Cần tư vấn cá nhân hóa?
+            </h3>
+            <p className="text-slate-600 mb-8">
+              Không tìm thấy dịch vụ phù hợp? Đội ngũ chuyên gia của chúng tôi sẵn sàng 
+              tư vấn miễn phí để tìm ra giải pháp tốt nhất cho bạn.
+            </p>
+            <Link 
+              href="/contact" 
+              className="btn-primary inline-flex items-center space-x-3 text-lg px-8 py-4"
+              aria-label="Liên hệ để được tư vấn thêm về dịch vụ"
+            >
+              <span>Tư vấn miễn phí</span>
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
@@ -151,57 +181,89 @@ interface ServiceCardProps {
 function ServiceCard({ service }: ServiceCardProps) {
   const { title, description, price, icon: Icon, iconBgColor, iconColor, featured } = service
 
+  const cardClass = featured ? 'card-premium' : 'card'
+
   return (
     <div 
       className={`
-        card relative group cursor-pointer transition-all duration-300 ease-out
-        hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1
-        ${featured ? 'ring-2 ring-primary-200 shadow-lg' : ''}
+        ${cardClass} relative group cursor-pointer hover-lift
+        ${featured ? 'border-2 border-amber-200 shadow-2xl' : ''}
       `}
       role="article"
       aria-labelledby={`service-title-${service.id}`}
     >
       {/* Featured Badge */}
       {featured && (
-        <div className="absolute -top-3 -right-3 bg-accent-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-          Phổ biến
+        <div className="absolute -top-4 -right-4 z-10">
+          <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-xl animate-pulse-slow">
+            <span className="flex items-center space-x-1">
+              <Crown className="h-4 w-4" />
+              <span>Premium</span>
+            </span>
+          </div>
         </div>
       )}
 
+      {/* Shine Effect */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-shine"></div>
+      </div>
+
       {/* Icon */}
-      <div className={`
-        inline-flex items-center justify-center w-12 h-12 rounded-lg mb-4
-        ${iconBgColor} group-hover:scale-110 transition-transform duration-300
-      `}>
-        <Icon className={`h-6 w-6 ${iconColor}`} aria-hidden="true" />
+      <div className="relative">
+        <div className={`
+          inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6
+          ${iconBgColor} group-hover:scale-110 transition-all duration-500 shadow-lg
+          ${featured ? 'shadow-amber-200/50' : ''}
+        `}>
+          <Icon className={`h-8 w-8 ${iconColor} group-hover:scale-110 transition-transform duration-300`} aria-hidden="true" />
+        </div>
+        {featured && (
+          <div className="absolute -inset-2 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded-2xl blur-xl -z-10"></div>
+        )}
       </div>
 
       {/* Content */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <h3 
           id={`service-title-${service.id}`}
-          className="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200"
+          className={`text-2xl font-bold transition-colors duration-300 ${
+            featured 
+              ? 'text-slate-900 group-hover:text-amber-700' 
+              : 'text-slate-900 group-hover:text-blue-600'
+          }`}
         >
           {title}
         </h3>
         
-        <p className="text-gray-600 text-sm leading-relaxed">
+        <p className="text-slate-600 leading-relaxed">
           {description}
         </p>
 
-        <div className="pt-2 border-t border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-2xl font-bold text-primary-600">
+        <div className="pt-4 border-t border-slate-100">
+          <div className="mb-6">
+            <span className={`text-3xl font-bold ${
+              featured ? 'text-gradient' : 'text-blue-600'
+            }`}>
               {price}
+            </span>
+            <span className="text-slate-500 text-sm ml-2">
+              {featured ? '✨ Ưu đãi đặc biệt' : 'Giá cạnh tranh'}
             </span>
           </div>
 
           <Link
             href="/contact"
-            className="w-full btn-primary text-sm py-2.5 group-hover:bg-primary-700 transition-colors duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-center block"
+            className={`
+              w-full text-center block py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform
+              ${featured 
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg hover:shadow-amber-500/25 hover:scale-105' 
+                : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-blue-500/25 hover:scale-105'
+              }
+            `}
             aria-label={`Đặt dịch vụ ${title}`}
           >
-            Đặt dịch vụ
+            {featured ? '🔥 Đặt ngay' : 'Đặt dịch vụ'}
           </Link>
         </div>
       </div>

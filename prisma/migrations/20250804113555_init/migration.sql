@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "users" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "phone" TEXT,
@@ -13,38 +13,42 @@ CREATE TABLE "users" (
     "preferred_language" TEXT NOT NULL DEFAULT 'vi',
     "timezone" TEXT NOT NULL DEFAULT 'Asia/Ho_Chi_Minh',
     "status" TEXT NOT NULL DEFAULT 'active',
-    "email_verified" DATETIME,
-    "last_login" DATETIME,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL
+    "email_verified" TIMESTAMP(3),
+    "last_login" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "services" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "description" TEXT,
     "short_description" TEXT,
-    "base_price" DECIMAL NOT NULL,
+    "base_price" DECIMAL(12,2) NOT NULL,
     "currency" TEXT NOT NULL DEFAULT 'VND',
     "category" TEXT,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "is_featured" BOOLEAN NOT NULL DEFAULT false,
     "sort_order" INTEGER NOT NULL DEFAULT 0,
     "metadata" JSONB,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "services_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "service_tiers" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "service_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "price" DECIMAL NOT NULL,
-    "original_price" DECIMAL,
+    "price" DECIMAL(12,2) NOT NULL,
+    "original_price" DECIMAL(12,2),
     "features" JSONB NOT NULL,
     "limitations" JSONB,
     "is_popular" BOOLEAN NOT NULL DEFAULT false,
@@ -53,44 +57,45 @@ CREATE TABLE "service_tiers" (
     "current_customers" INTEGER NOT NULL DEFAULT 0,
     "sort_order" INTEGER NOT NULL DEFAULT 0,
     "metadata" JSONB,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL,
-    CONSTRAINT "service_tiers_service_id_fkey" FOREIGN KEY ("service_id") REFERENCES "services" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "service_tiers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "bookings" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "booking_number" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "service_tier_id" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'pending',
     "payment_status" TEXT NOT NULL DEFAULT 'pending',
-    "total_amount" DECIMAL NOT NULL,
-    "discount_amount" DECIMAL NOT NULL DEFAULT 0,
-    "final_amount" DECIMAL NOT NULL,
+    "total_amount" DECIMAL(12,2) NOT NULL,
+    "discount_amount" DECIMAL(12,2) NOT NULL DEFAULT 0,
+    "final_amount" DECIMAL(12,2) NOT NULL,
     "currency" TEXT NOT NULL DEFAULT 'VND',
     "booking_details" JSONB,
     "customer_requirements" TEXT,
-    "start_date" DATETIME,
-    "end_date" DATETIME,
+    "start_date" TIMESTAMP(3),
+    "end_date" TIMESTAMP(3),
     "assigned_staff_id" TEXT,
     "completion_percentage" INTEGER NOT NULL DEFAULT 0,
     "customer_rating" INTEGER,
     "customer_feedback" TEXT,
     "internal_notes" TEXT,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL,
-    CONSTRAINT "bookings_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "bookings_service_tier_id_fkey" FOREIGN KEY ("service_tier_id") REFERENCES "service_tiers" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "bookings_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "payments" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "booking_id" TEXT NOT NULL,
     "payment_number" TEXT NOT NULL,
-    "amount" DECIMAL NOT NULL,
+    "amount" DECIMAL(12,2) NOT NULL,
     "currency" TEXT NOT NULL DEFAULT 'VND',
     "payment_method" TEXT NOT NULL,
     "payment_gateway" TEXT NOT NULL,
@@ -99,18 +104,19 @@ CREATE TABLE "payments" (
     "status" TEXT NOT NULL DEFAULT 'pending',
     "failure_reason" TEXT,
     "gateway_response" JSONB,
-    "paid_at" DATETIME,
-    "refunded_at" DATETIME,
-    "refund_amount" DECIMAL NOT NULL DEFAULT 0,
+    "paid_at" TIMESTAMP(3),
+    "refunded_at" TIMESTAMP(3),
+    "refund_amount" DECIMAL(12,2) NOT NULL DEFAULT 0,
     "refund_reason" TEXT,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL,
-    CONSTRAINT "payments_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "bookings" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "communications" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "booking_id" TEXT,
     "type" TEXT NOT NULL,
@@ -120,18 +126,18 @@ CREATE TABLE "communications" (
     "template_id" TEXT,
     "template_data" JSONB,
     "status" TEXT NOT NULL DEFAULT 'pending',
-    "sent_at" DATETIME,
-    "delivered_at" DATETIME,
-    "read_at" DATETIME,
+    "sent_at" TIMESTAMP(3),
+    "delivered_at" TIMESTAMP(3),
+    "read_at" TIMESTAMP(3),
     "error_message" TEXT,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "communications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "communications_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "bookings" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "communications_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "leads" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "email" TEXT,
     "phone" TEXT,
     "full_name" TEXT,
@@ -144,31 +150,32 @@ CREATE TABLE "leads" (
     "status" TEXT NOT NULL DEFAULT 'new',
     "assigned_to" TEXT,
     "notes" TEXT,
-    "converted_at" DATETIME,
+    "converted_at" TIMESTAMP(3),
     "converted_booking_id" TEXT,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL,
-    CONSTRAINT "leads_assigned_to_fkey" FOREIGN KEY ("assigned_to") REFERENCES "users" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT "leads_converted_booking_id_fkey" FOREIGN KEY ("converted_booking_id") REFERENCES "bookings" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "leads_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "staff" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "role" TEXT NOT NULL,
     "permissions" JSONB,
     "specializations" JSONB,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
-    "hire_date" DATETIME,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL,
-    CONSTRAINT "staff_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "hire_date" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "staff_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "accounts" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
@@ -180,23 +187,25 @@ CREATE TABLE "accounts" (
     "scope" TEXT,
     "id_token" TEXT,
     "session_state" TEXT,
-    CONSTRAINT "accounts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+
+    CONSTRAINT "accounts_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "sessions" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "session_token" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    "expires" DATETIME NOT NULL,
-    CONSTRAINT "sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "expires" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "sessions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "verification_tokens" (
     "identifier" TEXT NOT NULL,
     "token" TEXT NOT NULL,
-    "expires" DATETIME NOT NULL
+    "expires" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateIndex
@@ -231,3 +240,36 @@ CREATE UNIQUE INDEX "verification_tokens_token_key" ON "verification_tokens"("to
 
 -- CreateIndex
 CREATE UNIQUE INDEX "verification_tokens_identifier_token_key" ON "verification_tokens"("identifier", "token");
+
+-- AddForeignKey
+ALTER TABLE "service_tiers" ADD CONSTRAINT "service_tiers_service_id_fkey" FOREIGN KEY ("service_id") REFERENCES "services"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "bookings" ADD CONSTRAINT "bookings_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "bookings" ADD CONSTRAINT "bookings_service_tier_id_fkey" FOREIGN KEY ("service_tier_id") REFERENCES "service_tiers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payments" ADD CONSTRAINT "payments_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "communications" ADD CONSTRAINT "communications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "communications" ADD CONSTRAINT "communications_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "bookings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "leads" ADD CONSTRAINT "leads_assigned_to_fkey" FOREIGN KEY ("assigned_to") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "leads" ADD CONSTRAINT "leads_converted_booking_id_fkey" FOREIGN KEY ("converted_booking_id") REFERENCES "bookings"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "staff" ADD CONSTRAINT "staff_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
