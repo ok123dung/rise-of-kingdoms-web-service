@@ -1,7 +1,19 @@
 import { Resend } from 'resend'
 import { db } from '@/lib/db'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy initialize Resend only when needed
+let resend: Resend | null = null
+
+function getResend(): Resend {
+  if (!resend) {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY environment variable is required')
+    }
+    resend = new Resend(apiKey)
+  }
+  return resend
+}
 
 interface EmailTemplate {
   subject: string
@@ -36,7 +48,14 @@ export class EmailService {
     error?: string
   }> {
     try {
-      const result = await resend.emails.send({
+      // Check if email service is configured
+      if (!process.env.RESEND_API_KEY) {
+        console.warn('RESEND_API_KEY not configured, skipping email send')
+        return { success: false, error: 'Email service not configured' }
+      }
+
+      const resendClient = getResend()
+      const result = await resendClient.emails.send({
         from: options.from || this.fromEmail,
         to: Array.isArray(options.to) ? options.to : [options.to],
         subject: options.subject,
