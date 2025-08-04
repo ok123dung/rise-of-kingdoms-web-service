@@ -8,7 +8,7 @@ import { RevenueValidation } from '@/components/revenue/RevenueValidation'
 import './globals.css'
 
 const inter = Inter({ 
-  subsets: ['latin'],
+  subsets: ['latin', 'vietnamese'],
   variable: '--font-inter',
 })
 
@@ -19,23 +19,32 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: 'Rise of Kingdoms Services - Dịch vụ chuyên nghiệp cho RoK',
-  description: 'Website cung cấp các dịch vụ chuyên nghiệp cho game Rise of Kingdoms: tư vấn chiến thuật, quản lý liên minh, training commander và nhiều hơn nữa.',
-  keywords: ['Rise of Kingdoms', 'RoK', 'gaming services', 'strategy game', 'commander guide', 'dịch vụ RoK', 'tư vấn chiến thuật'],
+  title: 'RoK Services - Dịch vụ Rise of Kingdoms #1 Việt Nam | Premium Gaming',
+  description: 'Dịch vụ Rise of Kingdoms chuyên nghiệp: Tư vấn chiến thuật, quản lý liên minh, training commander, hỗ trợ KvK. Đội ngũ top player hàng đầu Việt Nam với 1000+ khách hàng tin tưởng.',
+  keywords: ['Rise of Kingdoms', 'RoK', 'gaming services', 'strategy game', 'commander guide', 'dịch vụ RoK', 'tư vấn chiến thuật', 'KvK support', 'alliance management', 'RoK Việt Nam', 'top player RoK'],
   authors: [{ name: 'RoK Services Team' }],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'),
   openGraph: {
-    title: 'Rise of Kingdoms Services - Dịch vụ chuyên nghiệp cho RoK',
-    description: 'Nâng tầm trải nghiệm Rise of Kingdoms với dịch vụ tư vấn chiến thuật, quản lý liên minh từ chuyên gia hàng đầu Việt Nam.',
+    title: 'RoK Services - Dịch vụ Rise of Kingdoms #1 Việt Nam',
+    description: 'Nâng tầm trải nghiệm Rise of Kingdoms với dịch vụ premium từ top player Việt Nam. Tư vấn chiến thuật, quản lý liên minh, KvK support 24/7.',
     url: '/',
     siteName: 'RoK Services',
     locale: 'vi_VN',
     type: 'website',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'RoK Services - Professional Gaming Services',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rise of Kingdoms Services - Dịch vụ chuyên nghiệp cho RoK',
-    description: 'Nâng tầm trải nghiệm Rise of Kingdoms với dịch vụ tư vấn chiến thuật, quản lý liên minh từ chuyên gia hàng đầu Việt Nam.',
+    title: 'RoK Services - Dịch vụ Rise of Kingdoms #1 Việt Nam',
+    description: 'Nâng tầm trải nghiệm Rise of Kingdoms với dịch vụ premium từ top player Việt Nam.',
+    images: ['/og-image.jpg'],
   },
   robots: {
     index: true,
