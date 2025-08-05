@@ -5,6 +5,9 @@ import { MobileStickyActions } from '@/components/mobile/MobileOptimizations'
 import { PerformanceMonitor } from '@/components/performance/PerformanceMonitor'
 import { ConversionTesting } from '@/components/testing/ConversionTesting'
 import { RevenueValidation } from '@/components/revenue/RevenueValidation'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { OrganizationSchema } from '@/components/seo/StructuredData'
+import PWAProvider from '@/components/PWAProvider'
 import './globals.css'
 
 const inter = Inter({ 
@@ -24,6 +27,19 @@ export const metadata: Metadata = {
   keywords: ['Rise of Kingdoms', 'RoK', 'gaming services', 'strategy game', 'commander guide', 'dịch vụ RoK', 'tư vấn chiến thuật', 'KvK support', 'alliance management', 'RoK Việt Nam', 'top player RoK'],
   authors: [{ name: 'RoK Services Team' }],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'RoK Services',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#3B82F6' },
+    { media: '(prefers-color-scheme: dark)', color: '#1E40AF' }
+  ],
   openGraph: {
     title: 'RoK Services - Dịch vụ Rise of Kingdoms #1 Việt Nam',
     description: 'Nâng tầm trải nghiệm Rise of Kingdoms với dịch vụ premium từ top player Việt Nam. Tư vấn chiến thuật, quản lý liên minh, KvK support 24/7.',
@@ -71,10 +87,19 @@ export default function RootLayout({
         <PerformanceMonitor />
         <ConversionTesting />
         <RevenueValidation />
-        <div className="min-h-screen flex flex-col">
-          {children}
-          <MobileStickyActions />
-        </div>
+        <OrganizationSchema
+          name="RoK Services"
+          url={process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'}
+          description="Dịch vụ Rise of Kingdoms chuyên nghiệp #1 Việt Nam"
+        />
+        <PWAProvider>
+          <ErrorBoundary>
+            <div className="min-h-screen flex flex-col">
+              {children}
+              <MobileStickyActions />
+            </div>
+          </ErrorBoundary>
+        </PWAProvider>
       </body>
     </html>
   )

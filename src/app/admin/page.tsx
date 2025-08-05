@@ -1,9 +1,11 @@
 import { Suspense } from 'react'
-import DashboardStats from '@/components/admin/DashboardStats'
-import RecentBookings from '@/components/admin/RecentBookings'
-import RevenueChart from '@/components/admin/RevenueChart'
-import TopCustomers from '@/components/admin/TopCustomers'
-import QuickActions from '@/components/admin/QuickActions'
+import { 
+  DynamicDashboardStats,
+  DynamicRecentBookings,
+  DynamicRevenueChart,
+  DynamicTopCustomers,
+  DynamicQuickActions
+} from '@/components/dynamic/DynamicAdminDashboard'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 export default function AdminDashboard() {
@@ -19,35 +21,27 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Stats overview */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <DashboardStats />
-      </Suspense>
+      {/* Stats overview - loads first */}
+      <DynamicDashboardStats />
 
-      {/* Quick actions */}
-      <QuickActions />
+      {/* Quick actions - loads second */}
+      <DynamicQuickActions />
 
-      {/* Main content grid */}
+      {/* Main content grid - loads last */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Revenue chart */}
         <div className="lg:col-span-2">
-          <Suspense fallback={<LoadingSpinner />}>
-            <RevenueChart />
-          </Suspense>
+          <DynamicRevenueChart />
         </div>
 
         {/* Recent bookings */}
         <div>
-          <Suspense fallback={<LoadingSpinner />}>
-            <RecentBookings />
-          </Suspense>
+          <DynamicRecentBookings />
         </div>
 
         {/* Top customers */}
         <div>
-          <Suspense fallback={<LoadingSpinner />}>
-            <TopCustomers />
-          </Suspense>
+          <DynamicTopCustomers />
         </div>
       </div>
     </div>

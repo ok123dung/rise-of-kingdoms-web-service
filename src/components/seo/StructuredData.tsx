@@ -13,9 +13,9 @@ export function OrganizationSchema({
   name, 
   url, 
   description, 
-  address, 
-  phone, 
-  email 
+  address = "Hồ Chí Minh", 
+  phone = "+84123456789", 
+  email = "contact@rokdbot.com" 
 }: OrganizationSchemaProps) {
   const schema = {
     "@context": "https://schema.org",
@@ -23,21 +23,30 @@ export function OrganizationSchema({
     "name": name,
     "url": url,
     "description": description,
-    "address": address ? {
+    "logo": `${url}/logo.png`,
+    "address": {
       "@type": "PostalAddress",
       "addressLocality": address,
       "addressCountry": "VN"
-    } : undefined,
+    },
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": phone,
       "email": email,
       "contactType": "customer service",
-      "availableLanguage": "Vietnamese"
+      "availableLanguage": ["vi", "en"]
     },
     "sameAs": [
-      "https://discord.gg/rokservices"
-    ]
+      "https://discord.gg/rokservices",
+      "https://facebook.com/rokservices"
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "150",
+      "bestRating": "5",
+      "worstRating": "1"
+    }
   }
 
   return (

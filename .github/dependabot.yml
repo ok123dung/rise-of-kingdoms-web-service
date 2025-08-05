@@ -1,0 +1,90 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Ho_Chi_Minh"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "your-username" # Replace with actual GitHub username
+    assignees:
+      - "your-username" # Replace with actual GitHub username
+    commit-message:
+      prefix: "⬆️"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
+    # Group updates for better management
+    groups:
+      # Group all Next.js related packages
+      nextjs:
+        patterns:
+          - "next*"
+          - "@next/*"
+          - "react*"
+          - "@types/react*"
+      # Group all testing related packages
+      testing:
+        patterns:
+          - "jest*"
+          - "@testing-library/*"
+          - "@types/jest*"
+          - "playwright*"
+      # Group all linting/formatting packages
+      dev-tools:
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "@typescript-eslint/*"
+      # Group all database related packages
+      database:
+        patterns:
+          - "prisma*"
+          - "@prisma/*"
+      # Group all UI/styling packages
+      ui:
+        patterns:
+          - "tailwindcss*"
+          - "@tailwindcss/*"
+          - "lucide-react*"
+    # Ignore specific packages that need manual updates
+    ignore:
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Ho_Chi_Minh"
+    commit-message:
+      prefix: "🔧"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "automated"
+
+  # Enable version updates for Docker (if using)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Ho_Chi_Minh"
+    commit-message:
+      prefix: "🐳"
+      include: "scope"
+    labels:
+      - "docker"
+      - "automated"

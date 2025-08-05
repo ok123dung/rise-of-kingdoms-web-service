@@ -170,6 +170,24 @@ export function validateCSRFToken(req: NextRequest): boolean {
     return true;
   }
 
+  // Skip CSRF validation for public endpoints
+  const pathname = req.nextUrl.pathname
+  const publicEndpoints = [
+    '/api/auth/signup',
+    '/api/auth/signin',
+    '/api/auth/callback',
+    '/api/leads',
+    '/api/health',
+    '/api/payments/webhook',
+    '/api/payments/momo/webhook',
+    '/api/payments/vnpay/ipn',
+    '/api/payments/zalopay/callback'
+  ]
+
+  if (publicEndpoints.some(endpoint => pathname.startsWith(endpoint))) {
+    return true
+  }
+
   const token = req.headers.get('x-csrf-token');
   const sessionToken = req.cookies.get('csrf-token')?.value;
 

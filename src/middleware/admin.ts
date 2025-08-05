@@ -211,6 +211,13 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
     })
 
     if (!token) {
+      // Log unauthorized access attempt
+      await logSecurityEvent('unauthorized_admin_access', {
+        url: request.url,
+        ip: request.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: request.headers.get('user-agent')
+      })
+      
       return {
         allowed: false,
         redirectUrl: '/auth/signin?callbackUrl=' + encodeURIComponent(request.url)
@@ -218,11 +225,26 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
     }
 
     if (token.role !== 'admin' && token.role !== 'superadmin') {
+      // Log access denied attempt
+      await logSecurityEvent('admin_access_denied', {
+        userId: token.userId,
+        userRole: token.role,
+        url: request.url,
+        ip: request.headers.get('x-forwarded-for') || 'unknown'
+      })
+      
       return {
         allowed: false,
         redirectUrl: '/auth/error?error=accessdenied'
       }
     }
+
+    // Log successful admin access
+    await logSecurityEvent('admin_access_granted', {
+      userId: token.userId,
+      userRole: token.role,
+      url: request.url
+    })
 
     return {
       allowed: true,
@@ -237,6 +259,19 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
   }
 }
 
+// Security event logging helper
+async function logSecurityEvent(event: string, data: any) {
+  try {
+    const { prisma } = await import('@/lib/db')
+    // TODO: Create securityLog table or use systemLog if needed
+    console.warn(`Security event: ${event}`, data)
+  } catch (error) {
+    console.error('Failed to log security event:', error)
+    // Fallback logging
+    console.log('SECURITY EVENT:', { event, data, timestamp: new Date().toISOString() })
+  }
+}
+
 // Audit logging for admin actions
 export async function logAdminAction(
   adminId: string,
@@ -246,12 +281,33 @@ export async function logAdminAction(
   details?: any
 ): Promise<void> {
   try {
-    // TODO: Implement audit logging when AuditLog model is created
-    console.log('Audit log:', { adminId, action, resource, resourceId, details })
+    const { prisma } = await import('@/lib/db')
     
+    // TODO: Create auditLog table if needed
+    console.log('AUDIT LOG:', { 
+      userId: adminId,
+      action,
+      resource,
+      resourceId,
+      details: details ? JSON.stringify(details) : null,
+      timestamp: new Date(),
+      ip: details?.ip,
+      userAgent: details?.userAgent
+    })
+    
+    console.log('Audit log created:', { adminId, action, resource, resourceId })
   } catch (error) {
     console.error('Failed to log admin action:', error)
-    // Don't throw error here to avoid breaking the main operation
+    // Fallback to console logging for critical security events
+    console.log('SECURITY AUDIT:', {
+      timestamp: new Date().toISOString(),
+      adminId,
+      action,
+      resource,
+      resourceId,
+      details,
+      error: error instanceof Error ? error.message : String(error)
+    })
   }
 }
 

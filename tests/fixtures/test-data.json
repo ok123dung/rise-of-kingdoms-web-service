@@ -1,0 +1,166 @@
+{
+  "users": {
+    "testUser": {
+      "email": "test@rokdbot.com",
+      "name": "Nguyễn Văn Test",
+      "password": "TestPassword123!",
+      "phone": "0987654321"
+    },
+    "admin": {
+      "email": "admin@rokdbot.com",
+      "name": "Admin User",
+      "password": "AdminPassword123!",
+      "role": "admin"
+    },
+    "customer": {
+      "email": "customer@example.com",
+      "name": "Khách Hàng",
+      "password": "CustomerPass123!",
+      "phone": "0123456789"
+    }
+  },
+  
+  "services": {
+    "powerBoost": {
+      "name": "Tăng Power Rise of Kingdoms",
+      "description": "Dịch vụ tăng power nhanh chóng cho tài khoản RoK",
+      "basePrice": 500000,
+      "estimatedDays": 3
+    },
+    "speedup": {
+      "name": "Speedup Items",
+      "description": "Cung cấp speedup items cho việc phát triển",
+      "basePrice": 300000,
+      "estimatedDays": 1
+    },
+    "resources": {
+      "name": "Tài Nguyên Game",
+      "description": "Cung cấp tài nguyên trong game",
+      "basePrice": 200000,
+      "estimatedDays": 1
+    }
+  },
+
+  "bookings": {
+    "sampleBooking": {
+      "gameId": "Player123456",
+      "server": "Server 1234",
+      "serviceType": "powerBoost",
+      "requirements": "Tăng power từ 10M lên 50M",
+      "urgency": "normal",
+      "notes": "Yêu cầu hoàn thành trong 3 ngày"
+    }
+  },
+
+  "payments": {
+    "momo": {
+      "method": "momo",
+      "amount": 500000,
+      "currency": "VND",
+      "description": "Thanh toán dịch vụ RoK"
+    },
+    "vnpay": {
+      "method": "vnpay",
+      "amount": 300000,
+      "currency": "VND",
+      "description": "Thanh toán dịch vụ RoK"
+    },
+    "zalopay": {
+      "method": "zalopay",
+      "amount": 200000,
+      "currency": "VND",
+      "description": "Thanh toán dịch vụ RoK"
+    }
+  },
+
+  "testScenarios": {
+    "successfulBookingFlow": {
+      "description": "Complete booking from service selection to payment confirmation",
+      "steps": [
+        "Navigate to services page",
+        "Select a service",
+        "Fill booking form",
+        "Choose payment method",
+        "Complete payment",
+        "Verify confirmation"
+      ]
+    },
+    "userRegistration": {
+      "description": "New user registration and first booking",
+      "steps": [
+        "Navigate to signup",
+        "Register new account",
+        "Verify email (mock)",
+        "Login to account",
+        "Make first booking"
+      ]
+    },
+    "adminWorkflow": {
+      "description": "Admin managing bookings and payments",
+      "steps": [
+        "Login as admin",
+        "View dashboard",
+        "Manage pending bookings",
+        "Update booking status",
+        "Process refunds"
+      ]
+    }
+  },
+
+  "errorScenarios": {
+    "invalidPayment": {
+      "description": "Payment fails due to insufficient funds",
+      "expectedBehavior": "Show error message and allow retry"
+    },
+    "networkError": {
+      "description": "Network connection fails during booking",
+      "expectedBehavior": "Show offline message and queue request"
+    },
+    "invalidForm": {
+      "description": "Submit form with invalid data",
+      "expectedBehavior": "Show validation errors"
+    }
+  },
+
+  "performance": {
+    "thresholds": {
+      "pageLoadTime": 3000,
+      "firstContentfulPaint": 1500,
+      "largestContentfulPaint": 2500,
+      "cumulativeLayoutShift": 0.1,
+      "firstInputDelay": 100
+    },
+    "networkConditions": {
+      "3g": {
+        "downloadThroughput": 1600000,
+        "uploadThroughput": 750000,
+        "latency": 150
+      },
+      "4g": {
+        "downloadThroughput": 9000000,
+        "uploadThroughput": 9000000,
+        "latency": 40
+      }
+    }
+  },
+
+  "vietnamese": {
+    "commonPhrases": [
+      "Đặt ngay",
+      "Thanh toán",
+      "Xác nhận",
+      "Hủy bỏ",
+      "Liên hệ",
+      "Dịch vụ",
+      "Tài khoản",
+      "Đăng nhập",
+      "Đăng ký"
+    ],
+    "errorMessages": [
+      "Có lỗi xảy ra",
+      "Vui lòng thử lại",
+      "Thông tin không hợp lệ",
+      "Kết nối thất bại"
+    ]
+  }
+}

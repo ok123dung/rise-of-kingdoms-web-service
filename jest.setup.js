@@ -92,6 +92,119 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }))
 
+// Mock Prisma client
+jest.mock('@/lib/db', () => ({
+  prisma: {
+    user: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+    booking: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    payment: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    service: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+    },
+    lead: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+    },
+    $queryRaw: jest.fn(),
+    $executeRaw: jest.fn(),
+    $transaction: jest.fn(),
+  },
+  db: {
+    user: {
+      findByEmail: jest.fn(),
+      create: jest.fn(),
+    },
+    service: {
+      findAll: jest.fn(),
+      findBySlug: jest.fn(),
+    },
+    booking: {
+      create: jest.fn(),
+      findById: jest.fn(),
+    },
+  },
+}))
+
+// Mock email service
+jest.mock('@/lib/email', () => ({
+  sendEmail: jest.fn().mockResolvedValue(true),
+  sendWelcomeEmail: jest.fn().mockResolvedValue(true),
+  sendPasswordResetEmail: jest.fn().mockResolvedValue(true),
+}))
+
+// Mock monitoring
+jest.mock('@/lib/monitoring', () => ({
+  healthMonitor: {
+    performHealthCheck: jest.fn().mockResolvedValue({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      checks: {}
+    }),
+  },
+  PerformanceMonitor: {
+    recordResponseTime: jest.fn(),
+    getAverageResponseTime: jest.fn().mockReturnValue(100),
+  },
+  trackRequest: jest.fn((endpoint) => (handler) => handler),
+}))
+
+// Mock Next.js Image component
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: (props) => {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img {...props} />
+  },
+}))
+
+// Mock Lucide React icons
+jest.mock('lucide-react', () => ({
+  Mail: () => <div data-testid="mail-icon" />,
+  Lock: () => <div data-testid="lock-icon" />,
+  User: () => <div data-testid="user-icon" />,
+  Phone: () => <div data-testid="phone-icon" />,
+  Eye: () => <div data-testid="eye-icon" />,
+  EyeOff: () => <div data-testid="eye-off-icon" />,
+  AlertCircle: () => <div data-testid="alert-circle-icon" />,
+  CheckCircle: () => <div data-testid="check-circle-icon" />,
+  Loader2: () => <div data-testid="loader-icon" />,
+  ArrowLeft: () => <div data-testid="arrow-left-icon" />,
+  Search: () => <div data-testid="search-icon" />,
+  Filter: () => <div data-testid="filter-icon" />,
+}))
+
+// Mock crypto for browser environment
+Object.defineProperty(global, 'crypto', {
+  value: {
+    getRandomValues: jest.fn().mockImplementation((arr) => {
+      for (let i = 0; i < arr.length; i++) {
+        arr[i] = Math.floor(Math.random() * 256)
+      }
+      return arr
+    }),
+    randomUUID: jest.fn().mockReturnValue('123e4567-e89b-12d3-a456-426614174000'),
+  },
+})
+
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks()

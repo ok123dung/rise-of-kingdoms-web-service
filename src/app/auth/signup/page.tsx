@@ -66,12 +66,32 @@ export default function SignUpPage() {
     }
 
     try {
+      // Get CSRF token from cookie
+      const getCsrfToken = () => {
+        const cookies = document.cookie.split(';')
+        for (let cookie of cookies) {
+          const [name, value] = cookie.trim().split('=')
+          if (name === 'csrf-token') {
+            return value
+          }
+        }
+        return null
+      }
+
+      const csrfToken = getCsrfToken()
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+
+      // Add CSRF token if available
+      if (csrfToken) {
+        headers['x-csrf-token'] = csrfToken
+      }
+
       // Create user account
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           fullName: formData.fullName,
           email: formData.email,

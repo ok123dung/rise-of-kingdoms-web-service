@@ -45,12 +45,40 @@ export const withAuth = (handler: any) => {
     if (!session?.user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    
+    // Add user context to request
+    req.user = session.user
     return handler(req, ...args)
   }
 }
 
-export const withRateLimit = (maxRequests = 60) => {
-  return (handler: any) => handler // Simplified for build
+// Rate limiting implementation
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+
+export const withRateLimit = (maxRequests = 60, windowMs = 60000) => {
+  return (handler: any) => {
+    return async (req: any, ...args: any[]) => {
+      const ip = req.headers?.['x-forwarded-for'] || req.ip || 'anonymous'
+      const key = `${ip}:${req.url}`
+      const now = Date.now()
+      const limit = rateLimitMap.get(key)
+      
+      if (!limit || now > limit.resetTime) {
+        rateLimitMap.set(key, { count: 1, resetTime: now + windowMs })
+        return handler(req, ...args)
+      }
+      
+      if (limit.count >= maxRequests) {
+        return Response.json(
+          { error: 'Too many requests', retryAfter: Math.ceil((limit.resetTime - now) / 1000) },
+          { status: 429 }
+        )
+      }
+      
+      limit.count++
+      return handler(req, ...args)
+    }
+  }
 }
 
 export const isStaff = async () => {
@@ -111,6 +139,14 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error('Auth error:', error)
+          
+          // Log failed authentication attempt for security monitoring
+          const { getLogger } = await import('@/lib/monitoring/logger')
+          getLogger().logSecurityEvent('auth_failed', {
+            email: credentials?.email,
+            timestamp: new Date().toISOString()
+          })
+          
           return null
         }
       }
@@ -226,4 +262,115 @@ export const authOptions: NextAuthOptions = {
     }
   },
   debug: process.env.NODE_ENV === 'development'
+}
+
+// Security event logging
+export const logSecurityEvent = async (event: string, data: any) => {
+  try {
+    // Log security events to console for now since database tables don't exist
+    console.warn(`Security event: ${event}`, data)
+  } catch (error) {
+    console.error('Failed to log security event:', error)
+  }
+}
+
+// Password strength validation
+export const validatePasswordStrength = (password: string) => {
+  const minLength = 8
+  const hasUpperCase = /[A-Z]/.test(password)
+  const hasLowerCase = /[a-z]/.test(password)
+  const hasNumbers = /\d/.test(password)
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  
+  const score = [
+    password.length >= minLength,
+    hasUpperCase,
+    hasLowerCase,
+    hasNumbers,
+    hasSpecialChar
+  ].filter(Boolean).length
+  
+  return {
+    isValid: score >= 4,
+    score,
+    feedback: {
+      minLength: password.length >= minLength,
+      hasUpperCase,
+      hasLowerCase,
+      hasNumbers,
+      hasSpecialChar
+    }
+  }
+}
+
+// Session security enhancement
+export const enhanceSession = async (session: any, request?: any) => {
+  if (!session?.user) return session
+  
+  // Add security context
+  const securityContext = {
+    lastActivity: new Date().toISOString(),
+    userAgent: request?.headers?.['user-agent'],
+    ip: request?.headers?.['x-forwarded-for'] || request?.ip,
+    sessionId: session.user.id + '_' + Date.now()
+  }
+  
+  return {
+    ...session,
+    security: securityContext
+  }
+}
+
+// Brute force protection
+const failedAttempts = new Map<string, { count: number; lastAttempt: number; blockedUntil?: number }>()
+
+export const checkBruteForce = (identifier: string, maxAttempts = 5, blockDurationMs = 15 * 60 * 1000) => {
+  const now = Date.now()
+  const attempts = failedAttempts.get(identifier)
+  
+  if (!attempts) {
+    return { allowed: true, remainingAttempts: maxAttempts }
+  }
+  
+  if (attempts.blockedUntil && now < attempts.blockedUntil) {
+    return {
+      allowed: false,
+      remainingAttempts: 0,
+      blockedUntil: attempts.blockedUntil,
+      message: 'Account temporarily blocked due to too many failed attempts'
+    }
+  }
+  
+  if (attempts.count >= maxAttempts) {
+    attempts.blockedUntil = now + blockDurationMs
+    return {
+      allowed: false,
+      remainingAttempts: 0,
+      blockedUntil: attempts.blockedUntil,
+      message: 'Too many failed attempts. Account blocked temporarily.'
+    }
+  }
+  
+  return {
+    allowed: true,
+    remainingAttempts: maxAttempts - attempts.count
+  }
+}
+
+export const recordFailedAttempt = (identifier: string) => {
+  const now = Date.now()
+  const attempts = failedAttempts.get(identifier) || { count: 0, lastAttempt: 0 }
+  
+  // Reset count if last attempt was more than 1 hour ago
+  if (now - attempts.lastAttempt > 60 * 60 * 1000) {
+    attempts.count = 0
+  }
+  
+  attempts.count++
+  attempts.lastAttempt = now
+  failedAttempts.set(identifier, attempts)
+}
+
+export const clearFailedAttempts = (identifier: string) => {
+  failedAttempts.delete(identifier)
 }

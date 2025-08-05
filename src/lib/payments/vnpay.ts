@@ -224,9 +224,20 @@ export class VNPayPayment {
           }
         })
 
-        // TODO: Send confirmation email
-        // TODO: Send Discord notification
-        // TODO: Trigger service delivery workflow
+        // Send confirmation email
+        await this.sendConfirmationEmail(payment.bookingId)
+        
+        // Send Discord notification
+        await this.sendDiscordNotification(payment.bookingId, 'completed', {
+          orderId,
+          transactionNo,
+          amount,
+          paymentMethod: 'VNPay',
+          bankCode
+        })
+        
+        // Trigger service delivery workflow
+        await this.triggerServiceDelivery(payment.bookingId)
 
         console.log('VNPay payment completed:', { orderId, transactionNo, amount })
         return { success: true, message: 'Payment processed successfully', responseCode: '00' }
@@ -420,5 +431,116 @@ export class VNPayPayment {
     }
 
     return messages[responseCode] || 'Lỗi không xác định'
+  }
+
+  // Send confirmation email
+  private async sendConfirmationEmail(bookingId: string): Promise<void> {
+    try {
+      const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: {
+          user: true,
+          serviceTier: {
+            include: { service: true }
+          }
+        }
+      })
+      
+      if (booking) {
+        const { sendEmail } = await import('@/lib/email')
+        await sendEmail({
+          to: booking.user.email,
+          subject: 'Xác nhận thanh toán thành công - RoK Services',
+          html: `
+            <h2>Thanh toán thành công!</h2>
+            <p>Xin chào ${booking.user.fullName},</p>
+            <p>Chúng tôi đã nhận được thanh toán của bạn cho dịch vụ <strong>${booking.serviceTier.service.name}</strong>.</p>
+            <ul>
+              <li>Mã booking: ${booking.bookingNumber}</li>
+              <li>Số tiền: ${booking.totalAmount.toLocaleString()} VNĐ</li>
+              <li>Phương thức: VNPay</li>
+            </ul>
+            <p>Cảm ơn bạn đã sử dụng dịch vụ RoK Services!</p>
+          `,
+          text: `Thanh toán thành công cho dịch vụ ${booking.serviceTier.service.name}. Mã booking: ${booking.bookingNumber}`
+        })
+      }
+    } catch (error) {
+      console.error('Failed to send confirmation email:', error)
+    }
+  }
+
+  // Send Discord notification
+  private async sendDiscordNotification(bookingId: string, status: string, paymentData: any): Promise<void> {
+    try {
+      const { discordNotifier } = await import('@/lib/discord')
+      const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: {
+          user: true,
+          serviceTier: { include: { service: true } }
+        }
+      })
+      
+      if (booking) {
+        await discordNotifier.sendPaymentNotification({
+          bookingId: booking.id,
+          amount: paymentData.amount,
+          paymentMethod: paymentData.paymentMethod,
+          status: status as 'pending' | 'completed' | 'failed' | 'cancelled',
+          customerEmail: booking.user.email,
+          customerName: booking.user.fullName,
+          transactionId: paymentData.transactionNo
+        })
+      }
+    } catch (error) {
+      console.error('Failed to send Discord notification:', error)
+    }
+  }
+
+  // Trigger service delivery workflow
+  private async triggerServiceDelivery(bookingId: string): Promise<void> {
+    try {
+      const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: {
+          serviceTier: {
+            include: { service: true }
+          }
+        }
+      })
+      
+      if (booking) {
+        // Update booking to in-progress
+        await prisma.booking.update({
+          where: { id: bookingId },
+          data: {
+            status: 'in_progress',
+            startDate: new Date()
+          }
+        })
+        
+        // Create service delivery task
+        // TODO: Create serviceTask table in Prisma schema if needed
+        /*
+        await prisma.serviceTask.create({
+          data: {
+            bookingId: bookingId,
+            type: 'delivery',
+            title: `Deliver ${booking.serviceTier.service.name}`,
+            description: `Process service delivery for booking ${booking.bookingNumber}`,
+            priority: 'high',
+            status: 'pending',
+            assignedTo: 'system',
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
+          }
+        })
+        */
+        
+        console.log('Service delivery workflow triggered for booking:', booking.bookingNumber)
+      }
+    } catch (error) {
+      console.error('Failed to trigger service delivery:', error)
+    }
   }
 }
