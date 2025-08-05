@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, Poppins } from 'next/font/google'
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { MobileStickyActions } from '@/components/mobile/MobileOptimizations'
@@ -36,10 +36,6 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#3B82F6' },
-    { media: '(prefers-color-scheme: dark)', color: '#1E40AF' }
-  ],
   openGraph: {
     title: 'RoK Services - Dịch vụ Rise of Kingdoms #1 Việt Nam',
     description: 'Nâng tầm trải nghiệm Rise of Kingdoms với dịch vụ premium từ top player Việt Nam. Tư vấn chiến thuật, quản lý liên minh, KvK support 24/7.',
@@ -73,6 +69,13 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#3B82F6' },
+    { media: '(prefers-color-scheme: dark)', color: '#1E40AF' }
+  ],
 }
 
 export default function RootLayout({
