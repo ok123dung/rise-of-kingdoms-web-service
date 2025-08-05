@@ -22,7 +22,11 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "echo 'Seed disabled for deployment'",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "security:check": "npm audit --audit-level=moderate",
+    "security:full": "bash scripts/security-check.sh"
   },
   "keywords": [
     "rise-of-kingdoms",

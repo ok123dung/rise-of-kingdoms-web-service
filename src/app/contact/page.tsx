@@ -1,259 +1,330 @@
-import type { Metadata } from 'next'
+'use client'
+
+import { useState } from 'react'
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import { VietnameseGamingSchema } from '@/components/seo/VietnameseGamingSEO'
-import { 
-  Phone, 
-  Mail, 
-  MessageCircle, 
-  MapPin, 
-  Clock, 
-  Shield, 
-  Zap,
-  CheckCircle,
-  Star,
-  Users
-} from 'lucide-react'
-
-export const metadata: Metadata = {
-  title: 'Liên hệ - Tư vấn miễn phí dịch vụ Rise of Kingdoms',
-  description: 'Liên hệ ngay để được tư vấn miễn phí về dịch vụ Rise of Kingdoms. Phản hồi trong 5 phút, hỗ trợ 24/7 qua Discord, điện thoại và email.',
-  keywords: [
-    'liên hệ rok services',
-    'tư vấn rise of kingdoms',
-    'hỗ trợ rok vietnam', 
-    'discord rok services',
-    'contact rok services',
-    'rise of kingdoms support vietnam'
-  ],
-}
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    service: '',
+    message: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
+
+    try {
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          serviceInterest: formData.service,
+          message: formData.message,
+          source: 'contact_form'
+        }),
+      })
+
+      if (response.ok) {
+        setSubmitStatus('success')
+        setFormData({
+          fullName: '',
+          email: '',
+          phone: '',
+          service: '',
+          message: ''
+        })
+      } else {
+        setSubmitStatus('error')
+      }
+    } catch (error) {
+      setSubmitStatus('error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
       <Header />
-      <VietnameseGamingSchema />
-      
-      {/* Urgency Banner */}
-      <div className="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-4">
-        <div className="container-max flex items-center justify-center space-x-4 text-sm font-medium">
-          <Zap className="h-4 w-4 animate-pulse" />
-          <span>🎯 Tư vấn miễn phí 30 phút đầu tiên - Phản hồi trong 5 phút!</span>
-          <Zap className="h-4 w-4 animate-pulse" />
-        </div>
-      </div>
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+        <div className="container-max section-padding">
+          {/* Header Section */}
+          <div className="text-center max-w-3xl mx-auto mb-16 animate-fadeInUp">
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
+              Liên hệ với{' '}
+              <span className="text-gradient">RoK Services</span>
+            </h1>
+            <p className="text-xl text-slate-600 leading-relaxed">
+              Sẵn sàng nâng tầm trải nghiệm Rise of Kingdoms của bạn? 
+              Đội ngũ chuyên gia luôn sẵn sàng hỗ trợ 24/7.
+            </p>
+          </div>
 
-      <main>
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-primary-50 via-white to-accent-50 section-padding">
-          <div className="container-max">
-            <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
-                Liên hệ với <span className="text-gradient">chuyên gia RoK</span>
-              </h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-                Được hỗ trợ bởi đội ngũ top 1% players Việt Nam. Tư vấn miễn phí, 
-                phản hồi nhanh chóng và cam kết kết quả.
-              </p>
-
-              {/* Trust Indicators */}
-              <div className="flex items-center justify-center space-x-8 mb-8">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">5 phút</div>
-                  <div className="text-sm text-gray-600">Thời gian phản hồi</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">24/7</div>
-                  <div className="text-sm text-gray-600">Hỗ trợ liên tục</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">500+</div>
-                  <div className="text-sm text-gray-600">Khách hàng thành công</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Contact Form */}
-              <div className="bg-white rounded-2xl shadow-xl p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  Đặt lịch tư vấn miễn phí
+          <div className="grid lg:grid-cols-2 gap-16">
+            {/* Contact Form */}
+            <div className="animate-fadeInUp">
+              <div className="card">
+                <h2 className="text-2xl font-bold text-slate-900 mb-6">
+                  Gửi yêu cầu tư vấn
                 </h2>
 
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {submitStatus === 'success' && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center space-x-3 text-green-800">
+                    <CheckCircle className="h-5 w-5" />
+                    <span>Cảm ơn bạn\! Chúng tôi sẽ liên hệ trong vòng 2 giờ.</span>
+                  </div>
+                )}
+
+                {submitStatus === 'error' && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-3 text-red-800">
+                    <AlertCircle className="h-5 w-5" />
+                    <span>Có lỗi xảy ra. Vui lòng thử lại hoặc liên hệ trực tiếp.</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="fullName" className="block text-sm font-semibold text-slate-700 mb-2">
                         Họ và tên *
                       </label>
                       <input
                         type="text"
+                        id="fullName"
+                        name="fullName"
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="Nguyễn Văn A"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        className="input-field"
+                        placeholder="Nhập họ và tên"
                       />
                     </div>
+
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Số điện thoại *
+                      <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+                        Email *
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="input-field"
+                        placeholder="your@email.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">
+                        Số điện thoại
                       </label>
                       <input
                         type="tel"
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="0123456789"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="input-field"
+                        placeholder="0987654321"
                       />
+                    </div>
+
+                    <div>
+                      <label htmlFor="service" className="block text-sm font-semibold text-slate-700 mb-2">
+                        Dịch vụ quan tâm
+                      </label>
+                      <select
+                        id="service"
+                        name="service"
+                        value={formData.service}
+                        onChange={handleChange}
+                        className="input-field"
+                      >
+                        <option value="">Chọn dịch vụ</option>
+                        <option value="strategy-consulting">Tư vấn chiến thuật</option>
+                        <option value="alliance-management">Quản lý liên minh</option>
+                        <option value="commander-training">Training Commander</option>
+                        <option value="kvk-support">Hỗ trợ KvK</option>
+                        <option value="personal-coaching">Coaching 1-on-1</option>
+                        <option value="vip-support">VIP Support 24/7</option>
+                        <option value="other">Khác</option>
+                      </select>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Dịch vụ quan tâm *
-                    </label>
-                    <select 
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    >
-                      <option value="">Chọn dịch vụ</option>
-                      <option value="strategy">Tư vấn chiến thuật (750k-1.2M VNĐ/tháng)</option>
-                      <option value="alliance">Quản lý liên minh (1M VNĐ/tháng)</option>
-                      <option value="commander">Training Commander (300k VNĐ/session)</option>
-                      <option value="kvk">Hỗ trợ KvK (2M VNĐ/KvK)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Thông tin tài khoản RoK
+                    <label htmlFor="message" className="block text-sm font-semibold text-slate-700 mb-2">
+                      Tin nhắn *
                     </label>
                     <textarea
-                      rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="VD: Power hiện tại, Kingdom, Level, mục tiêu muốn đạt được..."
-                    ></textarea>
+                      id="message"
+                      name="message"
+                      required
+                      rows={5}
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="input-field"
+                      placeholder="Mô tả chi tiết nhu cầu của bạn, tình trạng tài khoản hiện tại, mục tiêu muốn đạt được..."
+                    />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800 text-white font-bold py-4 px-8 rounded-lg transition-all duration-200 transform hover:scale-105"
+                    disabled={isSubmitting}
+                    className="w-full btn-primary flex items-center justify-center space-x-3 text-lg py-4"
                   >
-                    Gửi yêu cầu tư vấn miễn phí
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                        <span>Đang gửi...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-5 w-5" />
+                        <span>Gửi yêu cầu</span>
+                      </>
+                    )}
                   </button>
 
-                  <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
-                    <div className="flex items-center space-x-2">
-                      <Shield className="h-4 w-4 text-green-500" />
-                      <span>Bảo mật tuyệt đối</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-blue-500" />
-                      <span>Phản hồi trong 5 phút</span>
-                    </div>
-                  </div>
+                  <p className="text-sm text-slate-500 text-center">
+                    Bằng cách gửi form, bạn đồng ý với{' '}
+                    <a href="/terms" className="text-amber-600 hover:text-amber-700">
+                      Điều khoản dịch vụ
+                    </a>{' '}
+                    và{' '}
+                    <a href="/privacy" className="text-amber-600 hover:text-amber-700">
+                      Chính sách bảo mật
+                    </a>
+                  </p>
                 </form>
               </div>
+            </div>
 
-              {/* Contact Information */}
-              <div className="space-y-8">
-                {/* Contact Methods */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">
-                    Liên hệ trực tiếp
-                  </h3>
-
-                  <div className="space-y-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <Phone className="h-6 w-6 text-green-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">Hotline</h4>
-                        <p className="text-gray-600">+84 123 456 789</p>
-                        <p className="text-sm text-gray-500">Hỗ trợ 24/7</p>
-                      </div>
+            {/* Contact Information */}
+            <div className="space-y-8 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+              {/* Contact Cards */}
+              <div className="space-y-6">
+                <div className="card hover-lift">
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-amber-100 p-3 rounded-xl">
+                      <Mail className="h-6 w-6 text-amber-600" />
                     </div>
-
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <MessageCircle className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">Discord</h4>
-                        <p className="text-gray-600">discord.gg/rokservices</p>
-                        <p className="text-sm text-gray-500">Phản hồi nhanh nhất</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Mail className="h-6 w-6 text-purple-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">Email</h4>
-                        <p className="text-gray-600">contact@rokdbot.com</p>
-                        <p className="text-sm text-gray-500">Phản hồi trong 1 giờ</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                        <MapPin className="h-6 w-6 text-red-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">Địa chỉ</h4>
-                        <p className="text-gray-600">Hồ Chí Minh, Việt Nam</p>
-                        <p className="text-sm text-gray-500">Phục vụ toàn quốc</p>
-                      </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-1">Email hỗ trợ</h3>
+                      <p className="text-slate-600 mb-2">support@rokdbot.com</p>
+                      <p className="text-sm text-slate-500">Phản hồi trong 2-4 giờ</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Payment Methods */}
-                <div className="bg-gradient-to-br from-primary-600 to-accent-600 rounded-2xl shadow-lg p-8 text-white">
-                  <h3 className="text-xl font-bold mb-6">
-                    Phương thức thanh toán
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-300" />
-                      <span>Banking chuyển khoản</span>
+                <div className="card hover-lift">
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-blue-100 p-3 rounded-xl">
+                      <Phone className="h-6 w-6 text-blue-600" />
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-300" />
-                      <span>MoMo (Ví điện tử)</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-300" />
-                      <span>ZaloPay</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-300" />
-                      <span>VNPay</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-300" />
-                      <span>Đảm bảo hoàn tiền 100%</span>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-1">Hotline</h3>
+                      <p className="text-slate-600 mb-2">0987.654.321</p>
+                      <p className="text-sm text-slate-500">Hỗ trợ 24/7</p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="mt-6 pt-6 border-t border-white/20">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Star className="h-5 w-5 text-yellow-300 fill-current" />
-                      <span className="font-semibold">4.9/5 từ 200+ đánh giá</span>
+                <div className="card hover-lift">
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-purple-100 p-3 rounded-xl">
+                      <Clock className="h-6 w-6 text-purple-600" />
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Users className="h-5 w-5 text-blue-300" />
-                      <span>Cộng đồng 1000+ game thủ</span>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-1">Giờ làm việc</h3>
+                      <p className="text-slate-600 mb-1">Thứ 2 - CN: 8:00 - 22:00</p>
+                      <p className="text-sm text-slate-500">Timezone: GMT+7 (Việt Nam)</p>
                     </div>
                   </div>
+                </div>
+
+                <div className="card hover-lift">
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-green-100 p-3 rounded-xl">
+                      <MapPin className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-1">Địa chỉ</h3>
+                      <p className="text-slate-600 mb-1">Hà Nội, Việt Nam</p>
+                      <p className="text-sm text-slate-500">Hỗ trợ toàn quốc</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Discord & Social */}
+              <div className="card bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                <h3 className="font-bold text-xl mb-4">🎮 Tham gia cộng đồng</h3>
+                <p className="mb-6 opacity-90">
+                  Kết nối với 1000+ game thủ RoK, chia sẻ kinh nghiệm và nhận tips miễn phí\!
+                </p>
+                <div className="space-y-3">
+                  <a
+                    href="#"
+                    className="block w-full bg-white/20 hover:bg-white/30 text-center py-3 px-6 rounded-lg transition-colors duration-300"
+                  >
+                    🔗 Tham gia Discord Server
+                  </a>
+                  <a
+                    href="#"
+                    className="block w-full bg-white/20 hover:bg-white/30 text-center py-3 px-6 rounded-lg transition-colors duration-300"
+                  >
+                    📱 Follow Facebook Page
+                  </a>
+                </div>
+              </div>
+
+              {/* FAQ Quick Links */}
+              <div className="card">
+                <h3 className="font-bold text-xl text-slate-900 mb-4">❓ Câu hỏi thường gặp</h3>
+                <div className="space-y-3">
+                  <a href="#" className="block text-amber-600 hover:text-amber-700 transition-colors">
+                    → Dịch vụ có an toàn không?
+                  </a>
+                  <a href="#" className="block text-amber-600 hover:text-amber-700 transition-colors">
+                    → Thời gian hoàn thành dịch vụ?
+                  </a>
+                  <a href="#" className="block text-amber-600 hover:text-amber-700 transition-colors">
+                    → Chính sách hoàn tiền?
+                  </a>
+                  <a href="#" className="block text-amber-600 hover:text-amber-700 transition-colors">
+                    → Cách thức thanh toán?
+                  </a>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
       </main>
-
       <Footer />
     </>
   )
