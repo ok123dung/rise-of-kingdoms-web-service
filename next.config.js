@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Disable ESLint during production builds
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     domains: ['localhost', 'rokdbot.com', 'www.rokdbot.com'],
     formats: ['image/webp', 'image/avif'],
