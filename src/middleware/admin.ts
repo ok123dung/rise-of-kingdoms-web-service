@@ -323,14 +323,13 @@ export async function logAdminAction(
   } catch (error) {
     console.error('Failed to log admin action:', error)
     // Fallback to console logging for critical security events
-    getLogger().error('SECURITY AUDIT FAILED', {
+    getLogger().error('SECURITY AUDIT FAILED', error as Error, {
       timestamp: new Date().toISOString(),
       adminId,
       action,
       resource,
       resourceId,
-      details,
-      error: error instanceof Error ? error.message : String(error)
+      details
     })
   }
 }

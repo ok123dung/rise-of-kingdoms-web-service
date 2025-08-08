@@ -91,8 +91,7 @@ export const POST = trackRequest('/api/auth/signup')(async function(request: Nex
 
     // Send welcome email (non-blocking)
     sendWelcomeEmail(user.email, user.fullName).catch(emailError => {
-      getLogger().error('Failed to send welcome email', { 
-        error: emailError as Error,
+      getLogger().error('Failed to send welcome email', emailError as Error, {
         userId: user!.id,
         email: user!.email
       })

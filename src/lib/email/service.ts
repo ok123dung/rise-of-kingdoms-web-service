@@ -84,13 +84,13 @@ export class EmailService {
       })
 
       if (result.error) {
-        getLogger().error('Email send error', { error: result.error })
+        getLogger().error('Email send error', new Error(result.error.message), { resendError: result.error })
         return { success: false, error: result.error.message }
       }
 
       return { success: true, messageId: result.data?.id }
     } catch (error) {
-      getLogger().error('Email service error', { error })
+      getLogger().error('Email service error', error as Error)
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error' 
@@ -127,7 +127,7 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      getLogger().error('Booking confirmation email error', { error })
+      getLogger().error('Booking confirmation email error', error as Error)
       return false
     }
   }
@@ -161,7 +161,7 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      getLogger().error('Payment confirmation email error', { error })
+      getLogger().error('Payment confirmation email error', error as Error)
       return false
     }
   }
@@ -194,7 +194,7 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      getLogger().error('Welcome email error', { error })
+      getLogger().error('Welcome email error', error as Error)
       return false
     }
   }
@@ -228,7 +228,7 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      getLogger().error('Service reminder email error', { error })
+      getLogger().error('Service reminder email error', error as Error)
       return false
     }
   }
@@ -265,7 +265,7 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      getLogger().error('Lead follow-up email error', { error })
+      getLogger().error('Lead follow-up email error', error as Error)
       return false
     }
   }

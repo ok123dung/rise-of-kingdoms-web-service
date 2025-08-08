@@ -63,7 +63,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
     })
 
     if (error) {
-      getLogger().error('Failed to send email', { error })
+      getLogger().error('Failed to send email', error)
       return { success: false, error: error.message || 'Failed to send email' }
     }
 
@@ -75,7 +75,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
 
     return { success: true, messageId: data?.id }
   } catch (error) {
-    getLogger().error('Email sending error', { error })
+    getLogger().error('Email sending error', error instanceof Error ? error : new Error(String(error)))
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown email error'
@@ -101,7 +101,7 @@ export async function sendWelcomeEmail(
 
     return result
   } catch (error) {
-    getLogger().error('Failed to send welcome email', { error })
+    getLogger().error('Failed to send welcome email', error instanceof Error ? error : new Error(String(error)))
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send welcome email'
@@ -137,7 +137,7 @@ export async function sendBookingConfirmationEmail(
 
     return result
   } catch (error) {
-    getLogger().error('Failed to send booking confirmation email', { error })
+    getLogger().error('Failed to send booking confirmation email', error instanceof Error ? error : new Error(String(error)))
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send booking confirmation'
@@ -175,7 +175,7 @@ export async function sendPaymentConfirmationEmail(
 
     return result
   } catch (error) {
-    getLogger().error('Failed to send payment confirmation email', { error })
+    getLogger().error('Failed to send payment confirmation email', error instanceof Error ? error : new Error(String(error)))
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send payment confirmation'
@@ -215,7 +215,7 @@ export async function sendLeadNotificationEmail(
 
     return result
   } catch (error) {
-    getLogger().error('Failed to send lead notification email', { error })
+    getLogger().error('Failed to send lead notification email', error instanceof Error ? error : new Error(String(error)))
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send lead notification'
@@ -252,7 +252,7 @@ export async function sendCustomEmail(
 
     return result
   } catch (error) {
-    getLogger().error('Failed to send custom email', { error })
+    getLogger().error('Failed to send custom email', error instanceof Error ? error : new Error(String(error)))
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send custom email'

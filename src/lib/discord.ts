@@ -81,7 +81,7 @@ class DiscordNotifier {
 
       getLogger().debug('Discord notification sent', { bookingId: data.bookingId })
     } catch (error) {
-      getLogger().error('Failed to send Discord notification', { error })
+      getLogger().error('Failed to send Discord notification', error as Error)
       // Don't throw - notification failures shouldn't break payment flow
     }
   }
@@ -235,7 +235,7 @@ class DiscordNotifier {
 
       getLogger().debug('Discord lead notification sent', { contact: data.email || data.phone || 'Unknown' })
     } catch (error) {
-      getLogger().error('Failed to send Discord lead notification', { error })
+      getLogger().error('Failed to send Discord lead notification', error as Error)
     }
   }
 
@@ -287,7 +287,7 @@ class DiscordNotifier {
 
       getLogger().debug('Discord system alert sent', { title })
     } catch (error) {
-      getLogger().error('Failed to send Discord system alert', { error })
+      getLogger().error('Failed to send Discord system alert', error as Error)
     }
   }
 }

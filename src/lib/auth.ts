@@ -180,7 +180,7 @@ export const authOptions: NextAuthOptions = {
             role: user.staffProfile?.role || 'customer'
           }
         } catch (error) {
-          getLogger().error('Auth error', { error })
+          getLogger().error('Auth error', error as Error)
           
           // Log failed authentication attempt for security monitoring
           const { getLogger } = await import('@/lib/monitoring/logger')
@@ -258,7 +258,7 @@ export const authOptions: NextAuthOptions = {
             token.role = 'customer'
           }
         } catch (error) {
-          getLogger().error('Discord auth error', { error })
+          getLogger().error('Discord auth error', error as Error)
         }
       }
 
@@ -314,7 +314,7 @@ export const logSecurityEvent = async (event: string, data: Record<string, unkno
     // Log security events to console for now since database tables don't exist
     getLogger().warn(`Security event: ${event}`, data)
   } catch (error) {
-    getLogger().error('Failed to log security event', { error })
+    getLogger().error('Failed to log security event', error as Error)
   }
 }
 
