@@ -40,7 +40,7 @@ const customJestConfig = {
   ],
   
   // Coverage collection
-  collectCoverage: true,
+  collectCoverage: false,
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',

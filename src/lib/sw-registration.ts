@@ -1,5 +1,7 @@
 'use client'
 
+import { clientLogger } from './client-logger'
+
 // Service Worker registration utilities
 // Optimized for Vietnamese mobile users
 
@@ -40,25 +42,25 @@ class ServiceWorkerManager {
 
   private async initializeServiceWorker() {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
-      console.log('SW: Service Worker not supported')
+      clientLogger.info('SW: Service Worker not supported')
       return
     }
 
     try {
-      console.log('SW: Registering service worker...')
+      clientLogger.info('SW: Registering service worker...')
       
       this.registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         updateViaCache: 'none'
       })
 
-      console.log('SW: Service Worker registered successfully')
+      clientLogger.info('SW: Service Worker registered successfully')
 
       // Handle registration updates
       this.registration.addEventListener('updatefound', () => {
         const newWorker = this.registration?.installing
         if (newWorker) {
-          console.log('SW: New service worker installing...')
+          clientLogger.debug('SW: New service worker installing...')
           
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
@@ -75,13 +77,13 @@ class ServiceWorkerManager {
       }, 60000) // Check every minute
 
     } catch (error) {
-      console.error('SW: Service Worker registration failed:', error)
+      clientLogger.error('SW: Service Worker registration failed:', error)
     }
   }
 
   private setupInstallPrompt() {
     window.addEventListener('beforeinstallprompt', (event) => {
-      console.log('SW: Install prompt available')
+      clientLogger.info('SW: Install prompt available')
       event.preventDefault()
       this.installPrompt = event
       
@@ -91,7 +93,7 @@ class ServiceWorkerManager {
 
     // Track successful installs
     window.addEventListener('appinstalled', () => {
-      console.log('SW: App installed successfully')
+      clientLogger.info('SW: App installed successfully')
       this.installPrompt = null
       this.hideInstallButton()
       
@@ -105,7 +107,7 @@ class ServiceWorkerManager {
 
   private setupUpdateNotifications() {
     navigator.serviceWorker?.addEventListener('controllerchange', () => {
-      console.log('SW: New service worker activated')
+      clientLogger.info('SW: New service worker activated')
       
       // Show update notification
       this.showUpdateNotification()
@@ -115,16 +117,16 @@ class ServiceWorkerManager {
   // Public methods
   async installApp(): Promise<boolean> {
     if (!this.installPrompt) {
-      console.log('SW: Install prompt not available')
+      clientLogger.debug('SW: Install prompt not available')
       return false
     }
 
     try {
-      console.log('SW: Showing install prompt')
+      clientLogger.debug('SW: Showing install prompt')
       await this.installPrompt.prompt()
       
       const choice = await this.installPrompt.userChoice
-      console.log('SW: User choice:', choice.outcome)
+      clientLogger.info('SW: User choice:', choice.outcome)
       
       if (choice.outcome === 'accepted') {
         this.trackEvent('pwa_install_accepted')
@@ -134,7 +136,7 @@ class ServiceWorkerManager {
         return false
       }
     } catch (error) {
-      console.error('SW: Install prompt error:', error)
+      clientLogger.error('SW: Install prompt error:', error)
       return false
     }
   }
@@ -154,7 +156,7 @@ class ServiceWorkerManager {
 
     const waitingWorker = this.registration.waiting
     if (waitingWorker) {
-      console.log('SW: Activating new service worker')
+      clientLogger.info('SW: Activating new service worker')
       waitingWorker.postMessage({ type: 'SKIP_WAITING' })
       
       // Reload page to use new version
@@ -184,19 +186,19 @@ class ServiceWorkerManager {
             await (registration as any).sync.register(`${action}-queue`)
           }
         } catch (error) {
-          console.warn('Background sync not supported:', error)
+          clientLogger.warn('Background sync not supported:', error)
         }
       }
       
-      console.log(`SW: Queued offline action: ${action}`)
+      clientLogger.debug(`SW: Queued offline action: ${action}`)
     } catch (error) {
-      console.error('SW: Error queuing offline action:', error)
+      clientLogger.error('SW: Error queuing offline action:', error)
     }
   }
 
   async requestNotificationPermission(): Promise<boolean> {
     if (!('Notification' in window)) {
-      console.log('SW: Notifications not supported')
+      clientLogger.info('SW: Notifications not supported')
       return false
     }
 
@@ -210,7 +212,7 @@ class ServiceWorkerManager {
 
     try {
       const permission = await Notification.requestPermission()
-      console.log('SW: Notification permission:', permission)
+      clientLogger.info('SW: Notification permission:', permission)
       
       if (permission === 'granted') {
         this.trackEvent('notification_permission_granted')
@@ -220,14 +222,14 @@ class ServiceWorkerManager {
         return false
       }
     } catch (error) {
-      console.error('SW: Error requesting notification permission:', error)
+      clientLogger.error('SW: Error requesting notification permission:', error)
       return false
     }
   }
 
   async subscribeToPushNotifications(): Promise<PushSubscription | null> {
     if (!this.registration) {
-      console.log('SW: No service worker registration')
+      clientLogger.debug('SW: No service worker registration')
       return null
     }
 
@@ -237,14 +239,14 @@ class ServiceWorkerManager {
         applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
       })
 
-      console.log('SW: Push subscription created')
+      clientLogger.info('SW: Push subscription created')
       
       // Send subscription to server
       await this.sendSubscriptionToServer(subscription)
       
       return subscription
     } catch (error) {
-      console.error('SW: Error subscribing to push notifications:', error)
+      clientLogger.error('SW: Error subscribing to push notifications:', error)
       return null
     }
   }
@@ -263,7 +265,7 @@ class ServiceWorkerManager {
         })
       })
     } catch (error) {
-      console.error('SW: Error sending subscription to server:', error)
+      clientLogger.error('SW: Error sending subscription to server:', error)
     }
   }
 
@@ -346,7 +348,7 @@ class ServiceWorkerManager {
 
   private trackEvent(event: string, data?: any) {
     // Track PWA events for analytics
-    console.log('SW: Event tracked:', event, data)
+    clientLogger.debug('SW: Event tracked:', event, data)
     
     // In a real implementation, send to analytics service
     if (typeof window !== 'undefined' && (window as any).gtag) {

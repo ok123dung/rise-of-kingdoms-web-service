@@ -3,6 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
 import { logError, getLogger } from '@/lib/monitoring/logger'
+import { clientLogger } from '@/lib/client-logger'
 
 interface Props {
   children: ReactNode
@@ -197,7 +198,7 @@ export function RSCErrorBoundary({ children }: { children: ReactNode }) {
       onError={(error) => {
         // Check if it's a hydration error
         if (error.message.includes('Hydration') || error.message.includes('hydration')) {
-          console.warn('RSC Hydration error detected:', error)
+          clientLogger.warn('RSC Hydration error detected:', error)
           // Auto-reload after a short delay for hydration errors
           setTimeout(() => {
             window.location.reload()

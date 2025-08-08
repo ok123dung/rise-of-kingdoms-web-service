@@ -1,5 +1,7 @@
 // Email utility functions for Rise of Kingdoms Services
 
+import { getLogger } from '@/lib/monitoring/logger'
+
 export interface EmailOptions {
   to: string
   subject: string
@@ -12,7 +14,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
   try {
     // In development, just log the email
     if (process.env.NODE_ENV === 'development') {
-      console.log('📧 Email would be sent:', {
+      getLogger().debug('📧 Email would be sent', {
         to: options.to,
         subject: options.subject,
         preview: options.text?.substring(0, 100) || options.html.substring(0, 100)

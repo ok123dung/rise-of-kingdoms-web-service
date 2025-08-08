@@ -1,5 +1,22 @@
-import { Client, GatewayIntentBits, EmbedBuilder, TextChannel, ChannelType, PermissionFlagsBits } from 'discord.js'
+import { Client, GatewayIntentBits, EmbedBuilder, TextChannel, ChannelType, PermissionFlagsBits, ChatInputCommandInteraction } from 'discord.js'
 import { db } from '@/lib/db'
+import type { Booking, User, ServiceTier, Service, Payment } from '@prisma/client'
+import { getLogger } from '@/lib/monitoring/logger'
+
+// Extended types with relations
+interface BookingWithRelations extends Booking {
+  user: User
+  serviceTier: ServiceTierWithService
+}
+
+interface ServiceTierWithService extends ServiceTier {
+  service: Service
+}
+
+interface PaymentWithRelations extends Payment {
+  booking: BookingWithRelations
+  amount: number
+}
 
 class RoKDiscordBot {
   private client: Client
@@ -19,13 +36,14 @@ class RoKDiscordBot {
   }
 
   private setupEventHandlers() {
-    this.client.once('ready', () => {
-      console.log(`Discord bot logged in as ${this.client.user?.tag}`)
+    this.client.once('ready', async () => {
+      const { getLogger } = await import('@/lib/monitoring/logger')
+      getLogger().info('Discord bot logged in', { tag: this.client.user?.tag })
       this.isReady = true
     })
 
     this.client.on('error', (error) => {
-      console.error('Discord bot error:', error)
+      getLogger().error('Discord bot error', { error })
     })
 
     // Handle slash commands
@@ -35,7 +53,7 @@ class RoKDiscordBot {
       try {
         await this.handleSlashCommand(interaction)
       } catch (error) {
-        console.error('Slash command error:', error)
+        getLogger().error('Slash command error', { error })
         await interaction.reply({
           content: 'Có lỗi xảy ra khi xử lý lệnh.',
           ephemeral: true
@@ -46,18 +64,18 @@ class RoKDiscordBot {
 
   async initialize() {
     if (!process.env.DISCORD_BOT_TOKEN) {
-      console.warn('Discord bot token not provided, skipping bot initialization')
+      getLogger().warn('Discord bot token not provided, skipping bot initialization')
       return
     }
 
     try {
       await this.client.login(process.env.DISCORD_BOT_TOKEN)
     } catch (error) {
-      console.error('Failed to initialize Discord bot:', error)
+      getLogger().error('Failed to initialize Discord bot', { error })
     }
   }
 
-  private async handleSlashCommand(interaction: any) {
+  private async handleSlashCommand(interaction: ChatInputCommandInteraction) {
     const { commandName } = interaction
 
     switch (commandName) {
@@ -78,7 +96,7 @@ class RoKDiscordBot {
     }
   }
 
-  private async handleBookingStatus(interaction: any) {
+  private async handleBookingStatus(interaction: ChatInputCommandInteraction) {
     const email = interaction.options.getString('email')
     
     try {
@@ -119,7 +137,7 @@ class RoKDiscordBot {
 
       await interaction.reply({ embeds: [embed], ephemeral: true })
     } catch (error) {
-      console.error('Booking status error:', error)
+      getLogger().error('Booking status error', { error })
       await interaction.reply({
         content: 'Có lỗi xảy ra khi kiểm tra trạng thái booking.',
         ephemeral: true
@@ -127,7 +145,7 @@ class RoKDiscordBot {
     }
   }
 
-  private async handleServices(interaction: any) {
+  private async handleServices(interaction: ChatInputCommandInteraction) {
     try {
       const services = await db.service.findAll()
       
@@ -154,7 +172,7 @@ class RoKDiscordBot {
 
       await interaction.reply({ embeds: [embed] })
     } catch (error) {
-      console.error('Services command error:', error)
+      getLogger().error('Services command error', { error })
       await interaction.reply({
         content: 'Có lỗi xảy ra khi lấy danh sách dịch vụ.',
         ephemeral: true
@@ -162,7 +180,7 @@ class RoKDiscordBot {
     }
   }
 
-  private async handleSupport(interaction: any) {
+  private async handleSupport(interaction: ChatInputCommandInteraction) {
     const issue = interaction.options.getString('issue')
     
     try {
@@ -178,7 +196,16 @@ class RoKDiscordBot {
         .setTimestamp()
 
       // Send to support channel
-      const supportChannel = await this.client.channels.fetch(process.env.DISCORD_SUPPORT_CHANNEL!) as TextChannel
+      const supportChannelId = process.env.DISCORD_SUPPORT_CHANNEL
+      if (!supportChannelId) {
+        getLogger().error('DISCORD_SUPPORT_CHANNEL not configured')
+        await interaction.reply({
+          content: 'Kênh hỗ trợ chưa được cấu hình.',
+          ephemeral: true
+        })
+        return
+      }
+      const supportChannel = await this.client.channels.fetch(supportChannelId) as TextChannel
       if (supportChannel) {
         await supportChannel.send({ embeds: [supportEmbed] })
       }
@@ -188,7 +215,7 @@ class RoKDiscordBot {
         ephemeral: true
       })
     } catch (error) {
-      console.error('Support command error:', error)
+      getLogger().error('Support command error', { error })
       await interaction.reply({
         content: 'Có lỗi xảy ra khi gửi yêu cầu hỗ trợ.',
         ephemeral: true
@@ -197,7 +224,7 @@ class RoKDiscordBot {
   }
 
   // Public methods for external use
-  async notifyNewBooking(booking: any) {
+  async notifyNewBooking(booking: BookingWithRelations) {
     if (!this.isReady) return
 
     try {
@@ -215,16 +242,21 @@ class RoKDiscordBot {
         .setTimestamp()
         .setFooter({ text: 'RoK Services - Booking System' })
 
-      const channel = await this.client.channels.fetch(process.env.DISCORD_BOOKINGS_CHANNEL!) as TextChannel
+      const bookingsChannelId = process.env.DISCORD_BOOKINGS_CHANNEL
+      if (!bookingsChannelId) {
+        getLogger().error('DISCORD_BOOKINGS_CHANNEL not configured')
+        return
+      }
+      const channel = await this.client.channels.fetch(bookingsChannelId) as TextChannel
       if (channel) {
         await channel.send({ embeds: [embed] })
       }
     } catch (error) {
-      console.error('Failed to send booking notification:', error)
+      getLogger().error('Failed to send booking notification', { error })
     }
   }
 
-  async notifyPaymentCompleted(payment: any) {
+  async notifyPaymentCompleted(payment: PaymentWithRelations) {
     if (!this.isReady) return
 
     try {
@@ -242,21 +274,34 @@ class RoKDiscordBot {
         .setTimestamp()
         .setFooter({ text: 'RoK Services - Payment System' })
 
-      const channel = await this.client.channels.fetch(process.env.DISCORD_BOOKINGS_CHANNEL!) as TextChannel
+      const bookingsChannelId = process.env.DISCORD_BOOKINGS_CHANNEL
+      if (!bookingsChannelId) {
+        getLogger().error('DISCORD_BOOKINGS_CHANNEL not configured')
+        return
+      }
+      const channel = await this.client.channels.fetch(bookingsChannelId) as TextChannel
       if (channel) {
         await channel.send({ embeds: [embed] })
       }
     } catch (error) {
-      console.error('Failed to send payment notification:', error)
+      getLogger().error('Failed to send payment notification', { error })
     }
   }
 
-  async createCustomerChannel(booking: any) {
+  async createCustomerChannel(booking: BookingWithRelations) {
     if (!this.isReady) return null
 
     try {
-      const guild = await this.client.guilds.fetch(process.env.DISCORD_GUILD_ID!)
-      const category = await guild.channels.fetch(process.env.DISCORD_CUSTOMER_CATEGORY!)
+      const guildId = process.env.DISCORD_GUILD_ID
+      const categoryId = process.env.DISCORD_CUSTOMER_CATEGORY
+      
+      if (!guildId || !categoryId) {
+        getLogger().error('DISCORD_GUILD_ID or DISCORD_CUSTOMER_CATEGORY not configured')
+        return null
+      }
+      
+      const guild = await this.client.guilds.fetch(guildId)
+      const category = await guild.channels.fetch(categoryId)
 
       const channelName = `${booking.user.fullName.toLowerCase().replace(/\s+/g, '-')}-${booking.serviceTier.service.slug}`
       
@@ -292,7 +337,7 @@ class RoKDiscordBot {
 
       return channel
     } catch (error) {
-      console.error('Failed to create customer channel:', error)
+      getLogger().error('Failed to create customer channel', { error })
       return null
     }
   }

@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { db, prisma } from '@/lib/db'
+import { getLogger } from '@/lib/monitoring/logger'
 
 interface MoMoPaymentRequest {
   bookingId: string
@@ -23,6 +24,58 @@ interface MoMoResponse {
   qrCodeUrl?: string
 }
 
+interface MoMoWebhookData {
+  partnerCode: string
+  orderId: string
+  requestId: string
+  amount: number
+  orderInfo: string
+  orderType: string
+  transId: string
+  resultCode: number
+  message: string
+  payType: string
+  responseTime: number
+  extraData: string
+  signature: string
+}
+
+interface MoMoQueryResponse {
+  partnerCode: string
+  orderId: string
+  requestId: string
+  extraData: string
+  amount: number
+  transId: string
+  payType: string
+  resultCode: number
+  refundTrans?: Array<{
+    orderId: string
+    amount: number
+    resultCode: number
+    transId: string
+    createdTime: number
+  }>
+  message: string
+  localMessage: string
+  responseTime: number
+  errorCode: string
+  payTime?: number
+  orderInfo: string
+  orderType: string
+}
+
+interface MoMoRefundResponse {
+  partnerCode: string
+  orderId: string
+  requestId: string
+  amount: number
+  transId: string
+  resultCode: number
+  message: string
+  responseTime: number
+}
+
 export class MoMoPayment {
   private partnerCode: string
   private accessKey: string
@@ -30,14 +83,22 @@ export class MoMoPayment {
   private endpoint: string
 
   constructor() {
-    this.partnerCode = process.env.MOMO_PARTNER_CODE!
-    this.accessKey = process.env.MOMO_ACCESS_KEY!
-    this.secretKey = process.env.MOMO_SECRET_KEY!
+    const partnerCode = process.env.MOMO_PARTNER_CODE
+    const accessKey = process.env.MOMO_ACCESS_KEY
+    const secretKey = process.env.MOMO_SECRET_KEY
+    
+    if (!partnerCode || !accessKey || !secretKey) {
+      throw new Error('MoMo payment configuration missing: MOMO_PARTNER_CODE, MOMO_ACCESS_KEY, or MOMO_SECRET_KEY')
+    }
+    
+    this.partnerCode = partnerCode
+    this.accessKey = accessKey
+    this.secretKey = secretKey
     this.endpoint = process.env.MOMO_ENDPOINT || 'https://test-payment.momo.vn/v2/gateway/api/create'
   }
 
   // Verify webhook signature to prevent fake callbacks
-  verifyWebhookSignature(data: any, receivedSignature: string): boolean {
+  verifyWebhookSignature(data: MoMoWebhookData, receivedSignature: string): boolean {
     const {
       partnerCode,
       orderId,
@@ -110,7 +171,7 @@ export class MoMoPayment {
         autoCapture: true
       }
 
-      console.log('MoMo request:', { orderId, amount: request.amount, signature: signature.substring(0, 10) + '...' })
+      getLogger().debug('MoMo request', { orderId, amount: request.amount, signaturePrefix: signature.substring(0, 10) })
 
       const response = await fetch(this.endpoint, {
         method: 'POST',
@@ -154,7 +215,7 @@ export class MoMoPayment {
   }
 
   // Xử lý webhook từ MoMo
-  async handleWebhook(webhookData: any): Promise<{
+  async handleWebhook(webhookData: MoMoWebhookData): Promise<{
     success: boolean
     message: string
   }> {
@@ -223,7 +284,7 @@ export class MoMoPayment {
         // Trigger service delivery workflow
         await this.triggerServiceDelivery(payment.bookingId)
 
-        console.log('MoMo payment completed:', { orderId, transId, amount })
+        getLogger().info('MoMo payment completed', { orderId, transId, amount })
         return { success: true, message: 'Payment processed successfully' }
       } else {
         // Payment failed
@@ -234,7 +295,7 @@ export class MoMoPayment {
 
         await db.booking.updatePaymentStatus(payment.bookingId, 'failed')
 
-        console.log('MoMo payment failed:', { orderId, resultCode, message })
+        getLogger().warn('MoMo payment failed', { orderId, resultCode, message })
         return { success: true, message: 'Payment failure processed' }
       }
     } catch (error) {
@@ -246,7 +307,7 @@ export class MoMoPayment {
   // Query payment status
   async queryPaymentStatus(orderId: string): Promise<{
     success: boolean
-    data?: any
+    data?: MoMoQueryResponse
     error?: string
   }> {
     try {
@@ -293,7 +354,7 @@ export class MoMoPayment {
   // Refund payment
   async refundPayment(orderId: string, refundAmount: number, description: string): Promise<{
     success: boolean
-    data?: any
+    data?: MoMoRefundResponse
     error?: string
   }> {
     try {
@@ -391,7 +452,7 @@ export class MoMoPayment {
   }
 
   // Send Discord notification
-  private async sendDiscordNotification(bookingId: string, status: string, paymentData: any): Promise<void> {
+  private async sendDiscordNotification(bookingId: string, status: string, paymentData: { orderId: string; transId?: string; amount: number; paymentMethod: string }): Promise<void> {
     try {
       const { discordNotifier } = await import('@/lib/discord')
       const booking = await prisma.booking.findUnique({
@@ -441,8 +502,6 @@ export class MoMoPayment {
         })
         
         // Create service delivery task
-        // TODO: Create serviceTask table in Prisma schema if needed
-        /*
         await prisma.serviceTask.create({
           data: {
             bookingId: bookingId,
@@ -451,13 +510,11 @@ export class MoMoPayment {
             description: `Process service delivery for booking ${booking.bookingNumber}`,
             priority: 'high',
             status: 'pending',
-            assignedTo: 'system',
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
           }
         })
-        */
         
-        console.log('Service delivery workflow triggered for booking:', booking.bookingNumber)
+        getLogger().info('Service delivery workflow triggered', { bookingNumber: booking.bookingNumber })
       }
     } catch (error) {
       console.error('Failed to trigger service delivery:', error)

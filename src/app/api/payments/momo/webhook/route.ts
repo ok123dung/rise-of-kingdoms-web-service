@@ -6,7 +6,8 @@ export async function POST(request: NextRequest) {
     const webhookData = await request.json()
     const signature = request.headers.get('momo-signature') || webhookData.signature
     
-    console.log('MoMo webhook received:', {
+    const { getLogger } = await import('@/lib/monitoring/logger')
+    getLogger().info('MoMo webhook received', {
       orderId: webhookData.orderId,
       resultCode: webhookData.resultCode,
       amount: webhookData.amount
@@ -16,7 +17,8 @@ export async function POST(request: NextRequest) {
     
     // CRITICAL: Verify webhook signature to prevent fake callbacks
     if (!signature || !momoPayment.verifyWebhookSignature(webhookData, signature)) {
-      console.error('MoMo webhook signature verification failed')
+      const { getLogger } = await import('@/lib/monitoring/logger')
+      getLogger().error('MoMo webhook signature verification failed')
       return NextResponse.json({
         success: false,
         message: 'Invalid signature'
@@ -31,14 +33,15 @@ export async function POST(request: NextRequest) {
         message: result.message
       })
     } else {
-      console.error('MoMo webhook processing failed:', result.message)
+      getLogger().error('MoMo webhook processing failed', { message: result.message })
       return NextResponse.json({
         success: false,
         message: result.message
       }, { status: 400 })
     }
   } catch (error) {
-    console.error('MoMo webhook error:', error)
+    const { getLogger } = await import('@/lib/monitoring/logger')
+    getLogger().error('MoMo webhook error', { error })
     return NextResponse.json({
       success: false,
       message: 'Webhook processing failed'

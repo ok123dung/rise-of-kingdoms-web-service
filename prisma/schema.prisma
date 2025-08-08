@@ -36,6 +36,8 @@ model User {
   staffProfile   Staff?
   accounts       Account[]  // NextAuth accounts
   sessions       Session[]  // NextAuth sessions
+  auditLogs      AuditLog[]
+  serviceTasks   ServiceTask[]
 
   @@map("users")
 }
@@ -117,6 +119,7 @@ model Booking {
   payments     Payment[]
   communications Communication[]
   convertedLead Lead?
+  serviceTasks ServiceTask[]
 
   @@map("bookings")
 }
@@ -252,4 +255,80 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model SystemLog {
+  id           String   @id @default(cuid())
+  level        String   // 'debug', 'info', 'warn', 'error', 'fatal'
+  message      String
+  service      String
+  environment  String
+  context      Json?
+  error        Json?
+  timestamp    DateTime @default(now())
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([level, timestamp])
+  @@index([service, timestamp])
+  @@map("system_logs")
+}
+
+model SecurityLog {
+  id         String   @id @default(cuid())
+  event      String   // 'auth_failed', 'unauthorized_access', etc.
+  userId     String?  @map("user_id")
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  url        String?
+  data       Json?
+  timestamp  DateTime @default(now())
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([event, timestamp])
+  @@index([userId, timestamp])
+  @@map("security_logs")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  action     String
+  resource   String
+  resourceId String   @map("resource_id")
+  details    Json?
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  timestamp  DateTime @default(now())
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, timestamp])
+  @@index([resource, resourceId])
+  @@map("audit_logs")
+}
+
+model ServiceTask {
+  id           String    @id @default(cuid())
+  bookingId    String    @map("booking_id")
+  type         String    // 'delivery', 'check', 'update'
+  title        String
+  description  String?   @db.Text
+  priority     String    @default("medium") // 'low', 'medium', 'high', 'urgent'
+  status       String    @default("pending") // 'pending', 'in_progress', 'completed', 'cancelled'
+  assignedTo   String?   @map("assigned_to")
+  dueDate      DateTime? @map("due_date")
+  completedAt  DateTime? @map("completed_at")
+  metadata     Json?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  booking      Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  assignedUser User?    @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
+
+  @@index([bookingId, status])
+  @@index([assignedTo, status])
+  @@map("service_tasks")
 }

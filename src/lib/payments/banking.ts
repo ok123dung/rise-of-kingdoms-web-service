@@ -1,5 +1,6 @@
 import { db, prisma } from '@/lib/db'
 import { getEmailService } from '@/lib/email/service'
+import { getLogger } from '@/lib/monitoring/logger'
 
 interface BankingTransferRequest {
   bookingId: string
@@ -86,7 +87,7 @@ export class BankingTransfer {
         booking
       })
 
-      console.log('Banking transfer order created:', { transferCode, amount: request.amount })
+      getLogger().info('Banking transfer order created', { transferCode, amount: request.amount })
 
       return {
         success: true,
@@ -141,10 +142,48 @@ export class BankingTransfer {
         await emailService.sendPaymentConfirmation(payment)
       }
 
-      // TODO: Send Discord notification
-      // TODO: Trigger service delivery workflow
+      // Send Discord notification
+      try {
+        const { discordNotifier } = await import('@/lib/discord')
+        await discordNotifier.sendPaymentNotification({
+          bookingId: booking.id,
+          amount: payment.amount,
+          paymentMethod: 'banking',
+          status: 'completed',
+          customerEmail: booking.user.email,
+          customerName: booking.user.fullName,
+          transactionId: transferCode
+        })
+      } catch (error) {
+        console.error('Failed to send Discord notification:', error)
+      }
 
-      console.log('Banking transfer confirmed:', { transferCode, adminNotes })
+      // Trigger service delivery workflow
+      try {
+        await prisma.serviceTask.create({
+          data: {
+            bookingId: payment.bookingId,
+            type: 'delivery',
+            title: `Deliver ${booking.serviceTier.service.name}`,
+            description: `Process service delivery for booking ${booking.bookingNumber}`,
+            priority: 'high',
+            status: 'pending',
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
+          }
+        })
+        
+        await prisma.booking.update({
+          where: { id: payment.bookingId },
+          data: {
+            status: 'in_progress',
+            startDate: new Date()
+          }
+        })
+      } catch (error) {
+        console.error('Failed to trigger service delivery:', error)
+      }
+
+      getLogger().info('Banking transfer confirmed', { transferCode, adminNotes })
       return { success: true, message: 'Transfer confirmed successfully' }
     } catch (error) {
       console.error('Banking transfer confirmation error:', error)
@@ -186,7 +225,7 @@ export class BankingTransfer {
         })
       }
 
-      console.log('Banking transfer rejected:', { transferCode, reason })
+      getLogger().info('Banking transfer rejected', { transferCode, reason })
       return { success: true, message: 'Transfer rejected' }
     } catch (error) {
       console.error('Banking transfer rejection error:', error)

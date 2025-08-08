@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Production
+build
+dist
+out
+.next
+
+# Testing
+coverage
+.nyc_output
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Turbo
+.turbo
+
+# Vercel
+.vercel
+
+# Prisma
+prisma/migrations
+
+# Generated files
+generated
+public/sw.js
+public/workbox-*.js
+
+# Config files
+*.config.js
+*.config.ts
+tailwind.config.ts
+postcss.config.js

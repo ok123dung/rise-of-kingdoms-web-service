@@ -25,7 +25,7 @@ export interface HealthCheck {
   responseTime?: number
   message: string
   lastChecked: string
-  details?: any
+  details?: Record<string, unknown>
 }
 
 export class HealthMonitor {
@@ -438,8 +438,8 @@ export class PerformanceMonitor {
   }
 
   // Get performance summary
-  public static getPerformanceSummary(): any {
-    const summary: any = {}
+  public static getPerformanceSummary(): Record<string, unknown> {
+    const summary: Record<string, unknown> = {}
     
     for (const [key, values] of Array.from(this.metrics.entries())) {
       if (values.length > 0) {
@@ -463,7 +463,7 @@ export class PerformanceMonitor {
 // Request tracking middleware
 export function trackRequest(endpoint: string) {
   return (handler: Function) => {
-    return async (req: NextRequest, ...args: any[]) => {
+    return async (req: NextRequest, ...args: unknown[]) => {
       const startTime = Date.now()
       
       try {

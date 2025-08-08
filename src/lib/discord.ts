@@ -1,3 +1,5 @@
+import { getLogger } from '@/lib/monitoring/logger'
+
 interface DiscordWebhookPayload {
   content?: string
   embeds?: DiscordEmbed[]
@@ -34,6 +36,16 @@ interface PaymentNotificationData {
   error?: string
 }
 
+interface LeadNotificationData {
+  leadId: string
+  fullName?: string | null
+  email?: string | null
+  phone?: string | null
+  serviceInterest?: string | null
+  source?: string | null
+  leadScore: number
+}
+
 class DiscordNotifier {
   private webhookUrl: string | undefined
 
@@ -43,7 +55,7 @@ class DiscordNotifier {
 
   async sendPaymentNotification(data: PaymentNotificationData): Promise<void> {
     if (!this.webhookUrl) {
-      console.warn('Discord webhook URL not configured, skipping notification')
+      getLogger().warn('Discord webhook URL not configured, skipping notification')
       return
     }
 
@@ -67,9 +79,9 @@ class DiscordNotifier {
         throw new Error(`Discord webhook failed: ${response.status} ${response.statusText}`)
       }
 
-      console.log(`Discord notification sent for booking ${data.bookingId}`)
+      getLogger().debug('Discord notification sent', { bookingId: data.bookingId })
     } catch (error) {
-      console.error('Failed to send Discord notification:', error)
+      getLogger().error('Failed to send Discord notification', { error })
       // Don't throw - notification failures shouldn't break payment flow
     }
   }
@@ -155,9 +167,81 @@ class DiscordNotifier {
     return statusTexts[status]
   }
 
+  async sendLeadNotification(data: LeadNotificationData): Promise<void> {
+    if (!this.webhookUrl) {
+      getLogger().warn('Discord webhook URL not configured, skipping notification')
+      return
+    }
+
+    try {
+      const embed: DiscordEmbed = {
+        title: '🎯 Lead mới!',
+        description: `Có khách hàng tiềm năng mới quan tâm đến dịch vụ`,
+        color: 0x00D166, // Green
+        fields: [
+          {
+            name: '👤 Họ tên',
+            value: data.fullName || 'Không có',
+            inline: true
+          },
+          {
+            name: '📧 Email',
+            value: data.email || 'Không có',
+            inline: true
+          },
+          {
+            name: '📱 Điện thoại',
+            value: data.phone || 'Không có',
+            inline: true
+          },
+          {
+            name: '🎮 Dịch vụ quan tâm',
+            value: data.serviceInterest || 'Chung',
+            inline: true
+          },
+          {
+            name: '📍 Nguồn',
+            value: data.source || 'Website',
+            inline: true
+          },
+          {
+            name: '⭐ Lead Score',
+            value: data.leadScore.toString(),
+            inline: true
+          }
+        ],
+        timestamp: new Date().toISOString(),
+        footer: {
+          text: 'RoK Services Lead System'
+        }
+      }
+
+      const payload: DiscordWebhookPayload = {
+        username: 'RoK Services Lead Bot',
+        embeds: [embed]
+      }
+
+      const response = await fetch(this.webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        throw new Error(`Discord webhook failed: ${response.status} ${response.statusText}`)
+      }
+
+      getLogger().debug('Discord lead notification sent', { contact: data.email || data.phone || 'Unknown' })
+    } catch (error) {
+      getLogger().error('Failed to send Discord lead notification', { error })
+    }
+  }
+
   async sendSystemAlert(title: string, message: string, level: 'info' | 'warning' | 'error' = 'info'): Promise<void> {
     if (!this.webhookUrl) {
-      console.warn('Discord webhook URL not configured, skipping alert')
+      getLogger().warn('Discord webhook URL not configured, skipping alert')
       return
     }
 
@@ -201,9 +285,9 @@ class DiscordNotifier {
         throw new Error(`Discord webhook failed: ${response.status} ${response.statusText}`)
       }
 
-      console.log(`Discord system alert sent: ${title}`)
+      getLogger().debug('Discord system alert sent', { title })
     } catch (error) {
-      console.error('Failed to send Discord system alert:', error)
+      getLogger().error('Failed to send Discord system alert', { error })
     }
   }
 }
@@ -212,4 +296,4 @@ class DiscordNotifier {
 export const discordNotifier = new DiscordNotifier()
 
 // Export types for use in other modules
-export type { PaymentNotificationData, DiscordEmbed, DiscordEmbedField }
+export type { PaymentNotificationData, LeadNotificationData, DiscordEmbed, DiscordEmbedField }

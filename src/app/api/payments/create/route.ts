@@ -6,6 +6,16 @@ import { MoMoPayment } from '@/lib/payments/momo'
 import { ZaloPayPayment } from '@/lib/payments/zalopay'
 import { VNPayPayment } from '@/lib/payments/vnpay'
 import { BankingTransfer } from '@/lib/payments/banking'
+import { getLogger } from '@/lib/monitoring/logger'
+import {
+  ValidationError,
+  NotFoundError,
+  AuthorizationError,
+  PaymentError,
+  handleApiError,
+  validateRequired,
+  ErrorMessages
+} from '@/lib/errors'
 
 const createPaymentSchema = z.object({
   bookingId: z.string().min(1, 'Booking ID is required'),
@@ -19,32 +29,32 @@ const createPaymentSchema = z.object({
 async function createPaymentHandler(request: NextRequest) {
   try {
     const body = await request.json()
-    const validatedData = createPaymentSchema.parse(body)
+    
+    // Validate request data
+    let validatedData
+    try {
+      validatedData = createPaymentSchema.parse(body)
+    } catch (error) {
+      throw new ValidationError('Invalid payment request data')
+    }
     
     // Verify booking exists and belongs to user
     const booking = await db.booking.findById(validatedData.bookingId)
     if (!booking) {
-      return NextResponse.json({
-        success: false,
-        error: 'Booking not found'
-      }, { status: 404 })
+      throw new NotFoundError('Booking')
     }
 
     // Check if user owns this booking (unless admin)
     const session = await getCurrentSession()
-    if (booking.userId !== session?.user?.id && !await isStaff()) {
-      return NextResponse.json({
-        success: false,
-        error: 'Unauthorized access to booking'
-      }, { status: 403 })
+    const userIsStaff = await isStaff()
+    
+    if (booking.userId !== session?.user?.id && !userIsStaff) {
+      throw new AuthorizationError('You do not have access to this booking')
     }
 
     // Check if booking is in valid state for payment
     if (booking.status !== 'pending' && booking.status !== 'confirmed') {
-      return NextResponse.json({
-        success: false,
-        error: 'Booking is not in valid state for payment'
-      }, { status: 400 })
+      throw new PaymentError('Booking is not in valid state for payment')
     }
 
     // Check if payment already exists and is pending/completed
@@ -56,14 +66,19 @@ async function createPaymentHandler(request: NextRequest) {
     })
 
     if (existingPayment) {
-      return NextResponse.json({
-        success: false,
-        error: 'Payment already exists for this booking'
-      }, { status: 400 })
+      throw new PaymentError('Payment already exists for this booking')
     }
 
     const amount = Math.round(Number(booking.finalAmount.toString()))
     const orderInfo = `Thanh toán dịch vụ ${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
+
+    // Log payment attempt
+    getLogger().info('Creating payment', {
+      bookingId: validatedData.bookingId,
+      paymentMethod: validatedData.paymentMethod,
+      amount,
+      userId: session?.user?.id
+    })
 
     let paymentResult: any
 
@@ -112,22 +127,24 @@ async function createPaymentHandler(request: NextRequest) {
         break
 
       default:
-        return NextResponse.json({
-          success: false,
-          error: 'Unsupported payment method'
-        }, { status: 400 })
+        throw new ValidationError('Unsupported payment method')
     }
 
     if (!paymentResult.success) {
-      return NextResponse.json({
-        success: false,
-        error: 'Payment creation failed',
-        details: paymentResult.error
-      }, { status: 500 })
+      throw new PaymentError(
+        paymentResult.error || ErrorMessages.PAYMENT_FAILED,
+        { paymentMethod: validatedData.paymentMethod }
+      )
     }
 
     // Return payment URL for redirect
     const paymentUrl = paymentResult.data?.payUrl || paymentResult.data?.order_url
+    
+    getLogger().info('Payment created successfully', {
+      bookingId: validatedData.bookingId,
+      paymentMethod: validatedData.paymentMethod,
+      orderId: paymentResult.data?.orderId || paymentResult.data?.app_trans_id
+    })
     
     return NextResponse.json({
       success: true,
@@ -142,21 +159,7 @@ async function createPaymentHandler(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Payment creation error:', error)
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        success: false,
-        error: 'Validation error',
-        details: error.errors
-      }, { status: 400 })
-    }
-
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to create payment',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    return handleApiError(error, request.headers.get('x-request-id') || undefined)
   }
 }
 

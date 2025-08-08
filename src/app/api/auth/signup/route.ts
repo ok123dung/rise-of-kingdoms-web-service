@@ -5,18 +5,31 @@ import { signupSchema } from '@/lib/validation'
 import { trackRequest } from '@/lib/monitoring'
 import { sanitizeInput } from '@/lib/validation'
 import { sendWelcomeEmail } from '@/lib/email'
+import { getLogger } from '@/lib/monitoring/logger'
+import { 
+  ConflictError, 
+  ValidationError, 
+  handleDatabaseError, 
+  handleApiError,
+  ErrorMessages 
+} from '@/lib/errors'
 
 export const POST = trackRequest('/api/auth/signup')(async function(request: NextRequest) {
   try {
     const body = await request.json()
     
     // Validate input
-    const validatedData = signupSchema.parse({
-      fullName: sanitizeInput(body.fullName),
-      email: sanitizeInput(body.email.toLowerCase()),
-      phone: body.phone ? sanitizeInput(body.phone) : null,
-      password: body.password
-    })
+    let validatedData
+    try {
+      validatedData = signupSchema.parse({
+        fullName: sanitizeInput(body.fullName),
+        email: sanitizeInput(body.email.toLowerCase()),
+        phone: body.phone ? sanitizeInput(body.phone) : null,
+        password: body.password
+      })
+    } catch (error) {
+      throw new ValidationError(ErrorMessages.INVALID_INPUT)
+    }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -26,10 +39,7 @@ export const POST = trackRequest('/api/auth/signup')(async function(request: Nex
     })
 
     if (existingUser) {
-      return NextResponse.json(
-        { message: 'Email đã được sử dụng' },
-        { status: 400 }
-      )
+      throw new ConflictError('Email đã được sử dụng')
     }
 
     // Check phone number if provided
@@ -41,10 +51,7 @@ export const POST = trackRequest('/api/auth/signup')(async function(request: Nex
       })
 
       if (existingPhone) {
-        return NextResponse.json(
-          { message: 'Số điện thoại đã được sử dụng' },
-          { status: 400 }
-        )
+        throw new ConflictError('Số điện thoại đã được sử dụng')
       }
     }
 
@@ -52,43 +59,48 @@ export const POST = trackRequest('/api/auth/signup')(async function(request: Nex
     const hashedPassword = await hash(validatedData.password, 12)
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
-        fullName: validatedData.fullName,
-        email: validatedData.email,
-        phone: validatedData.phone,
-        password: hashedPassword,
-        // role will be set via staffProfile if needed
-        emailVerified: null, // Will be verified later if needed
-      },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        phone: true,
-        // role: true, // removed since role field doesn't exist
-        createdAt: true
-      }
-    })
+    let user
+    try {
+      user = await prisma.user.create({
+        data: {
+          fullName: validatedData.fullName,
+          email: validatedData.email,
+          phone: validatedData.phone,
+          password: hashedPassword,
+          emailVerified: null, // Will be verified later if needed
+        },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phone: true,
+          createdAt: true
+        }
+      })
+    } catch (error) {
+      handleDatabaseError(error)
+    }
 
     // Log successful registration
-    console.log('New user registered:', {
+    getLogger().info('New user registered', {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
       timestamp: new Date().toISOString()
     })
 
-    // Send welcome email
-    try {
-      await sendWelcomeEmail(user.email, user.fullName)
-    } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError)
-      // Continue with signup even if email fails
-    }
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(user.email, user.fullName).catch(emailError => {
+      getLogger().error('Failed to send welcome email', { 
+        error: emailError,
+        userId: user.id,
+        email: user.email
+      })
+    })
 
     return NextResponse.json(
       {
+        success: true,
         message: 'Tài khoản đã được tạo thành công',
         user: {
           id: user.id,
@@ -101,27 +113,6 @@ export const POST = trackRequest('/api/auth/signup')(async function(request: Nex
     )
 
   } catch (error) {
-    console.error('Signup error:', error)
-
-    // Handle Prisma errors
-    if (error instanceof Error && error.message.includes('Unique constraint failed')) {
-      return NextResponse.json(
-        { message: 'Email hoặc số điện thoại đã được sử dụng' },
-        { status: 400 }
-      )
-    }
-
-    // Handle validation errors
-    if (error instanceof Error && error.name === 'ZodError') {
-      return NextResponse.json(
-        { message: 'Thông tin không hợp lệ' },
-        { status: 400 }
-      )
-    }
-
-    return NextResponse.json(
-      { message: 'Có lỗi xảy ra khi tạo tài khoản' },
-      { status: 500 }
-    )
+    return handleApiError(error, request.headers.get('x-request-id') || undefined)
   }
 })

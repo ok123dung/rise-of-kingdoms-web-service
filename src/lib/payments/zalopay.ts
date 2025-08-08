@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { db, prisma } from '@/lib/db'
+import { getLogger } from '@/lib/monitoring/logger'
 
 interface ZaloPayRequest {
   bookingId: string
@@ -18,6 +19,38 @@ interface ZaloPayResponse {
   order_token?: string
 }
 
+interface ZaloPayQueryResponse {
+  return_code: number
+  return_message: string
+  sub_return_code: number
+  sub_return_message: string
+  is_processing?: boolean
+  amount?: number
+  zp_trans_id?: string
+}
+
+interface ZaloPayRefundResponse {
+  return_code: number
+  return_message: string
+  sub_return_code: number
+  sub_return_message: string
+  m_refund_id?: string
+  refund_id?: string
+}
+
+interface ZaloPayRefundStatusResponse {
+  return_code: number
+  return_message: string
+  sub_return_code: number
+  sub_return_message: string
+  refunds?: Array<{
+    m_refund_id: string
+    zp_trans_id: string
+    amount: number
+    status: number
+  }>
+}
+
 export class ZaloPayPayment {
   private appId: string
   private key1: string
@@ -25,9 +58,17 @@ export class ZaloPayPayment {
   private endpoint: string
 
   constructor() {
-    this.appId = process.env.ZALOPAY_APP_ID!
-    this.key1 = process.env.ZALOPAY_KEY1!
-    this.key2 = process.env.ZALOPAY_KEY2!
+    const appId = process.env.ZALOPAY_APP_ID
+    const key1 = process.env.ZALOPAY_KEY1
+    const key2 = process.env.ZALOPAY_KEY2
+    
+    if (!appId || !key1 || !key2) {
+      throw new Error('ZaloPay payment configuration missing: ZALOPAY_APP_ID, ZALOPAY_KEY1, or ZALOPAY_KEY2')
+    }
+    
+    this.appId = appId
+    this.key1 = key1
+    this.key2 = key2
     this.endpoint = process.env.ZALOPAY_ENDPOINT || 'https://sb-openapi.zalopay.vn/v2/create'
   }
 
@@ -90,14 +131,14 @@ export class ZaloPayPayment {
         mac
       }
 
-      console.log('ZaloPay request:', { appTransId, amount: request.amount, mac: mac.substring(0, 10) + '...' })
+      getLogger().debug('ZaloPay request', { appTransId, amount: request.amount, macPrefix: mac.substring(0, 10) })
 
       const response = await fetch(this.endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams(requestBody as any).toString()
+        body: new URLSearchParams(Object.entries(requestBody).map(([k, v]) => [k, String(v)])).toString()
       })
 
       const responseData: ZaloPayResponse = await response.json()
@@ -134,7 +175,7 @@ export class ZaloPayPayment {
   }
 
   // Xử lý callback từ ZaloPay
-  async handleCallback(callbackData: any): Promise<{
+  async handleCallback(callbackData: { data: string; mac: string }): Promise<{
     success: boolean
     message: string
   }> {
@@ -188,7 +229,7 @@ export class ZaloPayPayment {
       // Trigger service delivery workflow
       await this.triggerServiceDelivery(payment.bookingId)
 
-      console.log('ZaloPay payment completed:', { app_trans_id, zp_trans_id, amount })
+      getLogger().info('ZaloPay payment completed', { app_trans_id, zp_trans_id, amount })
       return { success: true, message: 'Payment processed successfully' }
     } catch (error) {
       console.error('ZaloPay callback processing error:', error)
@@ -199,7 +240,7 @@ export class ZaloPayPayment {
   // Query payment status
   async queryPaymentStatus(appTransId: string): Promise<{
     success: boolean
-    data?: any
+    data?: ZaloPayQueryResponse
     error?: string
   }> {
     try {
@@ -239,7 +280,7 @@ export class ZaloPayPayment {
   // Refund payment
   async refundPayment(zpTransId: string, refundAmount: number, description: string): Promise<{
     success: boolean
-    data?: any
+    data?: ZaloPayRefundResponse
     error?: string
   }> {
     try {
@@ -264,7 +305,7 @@ export class ZaloPayPayment {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams(requestBody as any).toString()
+        body: new URLSearchParams(Object.entries(requestBody).map(([k, v]) => [k, String(v)])).toString()
       })
 
       const responseData = await response.json()
@@ -308,7 +349,7 @@ export class ZaloPayPayment {
   // Get refund status
   async getRefundStatus(mRefundId: string): Promise<{
     success: boolean
-    data?: any
+    data?: ZaloPayRefundStatusResponse
     error?: string
   }> {
     try {
@@ -328,7 +369,7 @@ export class ZaloPayPayment {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams(requestBody as any).toString()
+        body: new URLSearchParams(Object.entries(requestBody).map(([k, v]) => [k, String(v)])).toString()
       })
 
       const responseData = await response.json()
@@ -385,7 +426,7 @@ export class ZaloPayPayment {
   }
 
   // Send Discord notification
-  private async sendDiscordNotification(bookingId: string, status: string, paymentData: any): Promise<void> {
+  private async sendDiscordNotification(bookingId: string, status: string, paymentData: { orderId: string; transId: string; amount: number; paymentMethod: string }): Promise<void> {
     try {
       const { discordNotifier } = await import('@/lib/discord')
       const booking = await prisma.booking.findUnique({
@@ -435,8 +476,6 @@ export class ZaloPayPayment {
         })
         
         // Create service delivery task
-        // TODO: Create serviceTask table in Prisma schema if needed
-        /*
         await prisma.serviceTask.create({
           data: {
             bookingId: bookingId,
@@ -445,13 +484,11 @@ export class ZaloPayPayment {
             description: `Process service delivery for booking ${booking.bookingNumber}`,
             priority: 'high',
             status: 'pending',
-            assignedTo: 'system',
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
           }
         })
-        */
         
-        console.log('Service delivery workflow triggered for booking:', booking.bookingNumber)
+        getLogger().info('Service delivery workflow triggered', { bookingNumber: booking.bookingNumber })
       }
     } catch (error) {
       console.error('Failed to trigger service delivery:', error)

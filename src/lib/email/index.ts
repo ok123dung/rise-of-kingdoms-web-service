@@ -1,4 +1,4 @@
-import { Resend } from 'resend'
+import { Resend } from 'resend'\nimport { getLogger } from '@/lib/monitoring/logger'
 import {
   getWelcomeEmailTemplate,
   getBookingConfirmationTemplate,
@@ -45,7 +45,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
 }> {
   try {
     if (!process.env.RESEND_API_KEY) {
-      console.warn('RESEND_API_KEY not configured, email sending disabled')
+      getLogger().warn('RESEND_API_KEY not configured, email sending disabled')
       return { success: false, error: 'Email service not configured' }
     }
 
@@ -62,11 +62,11 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
     })
 
     if (error) {
-      console.error('Failed to send email:', error)
+      getLogger().error('Failed to send email', { error })
       return { success: false, error: error.message || 'Failed to send email' }
     }
 
-    console.log('Email sent successfully:', {
+    getLogger().info('Email sent successfully', {
       messageId: data?.id,
       to: options.to,
       subject: options.subject
@@ -74,7 +74,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
 
     return { success: true, messageId: data?.id }
   } catch (error) {
-    console.error('Email sending error:', error)
+    getLogger().error('Email sending error', { error })
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown email error'
@@ -100,7 +100,7 @@ export async function sendWelcomeEmail(
 
     return result
   } catch (error) {
-    console.error('Failed to send welcome email:', error)
+    getLogger().error('Failed to send welcome email', { error })
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send welcome email'
@@ -136,7 +136,7 @@ export async function sendBookingConfirmationEmail(
 
     return result
   } catch (error) {
-    console.error('Failed to send booking confirmation email:', error)
+    getLogger().error('Failed to send booking confirmation email', { error })
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send booking confirmation'
@@ -174,7 +174,7 @@ export async function sendPaymentConfirmationEmail(
 
     return result
   } catch (error) {
-    console.error('Failed to send payment confirmation email:', error)
+    getLogger().error('Failed to send payment confirmation email', { error })
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send payment confirmation'
@@ -214,7 +214,7 @@ export async function sendLeadNotificationEmail(
 
     return result
   } catch (error) {
-    console.error('Failed to send lead notification email:', error)
+    getLogger().error('Failed to send lead notification email', { error })
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send lead notification'
@@ -251,7 +251,7 @@ export async function sendCustomEmail(
 
     return result
   } catch (error) {
-    console.error('Failed to send custom email:', error)
+    getLogger().error('Failed to send custom email', { error })
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send custom email'

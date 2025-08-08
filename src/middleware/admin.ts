@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
+import { getLogger } from '@/lib/monitoring/logger'
+
+// JWT Token interface
+interface AuthToken {
+  userId: string
+  email: string
+  role: string
+  name?: string
+  picture?: string
+  sub?: string
+  iat?: number
+  exp?: number
+  jti?: string
+}
 
 // Admin role checking middleware
 export async function withAdminAuth(
   request: NextRequest,
-  handler: (request: NextRequest, user: any) => Promise<NextResponse>
+  handler: (request: NextRequest, user: AuthToken) => Promise<NextResponse>
 ): Promise<NextResponse> {
   try {
     // Get JWT token from request
@@ -30,7 +44,7 @@ export async function withAdminAuth(
     }
 
     // User is authenticated and has admin role
-    return await handler(request, token)
+    return await handler(request, token as AuthToken)
   } catch (error) {
     console.error('Admin auth middleware error:', error)
     return NextResponse.json(
@@ -43,7 +57,7 @@ export async function withAdminAuth(
 // Super admin role checking middleware  
 export async function withSuperAdminAuth(
   request: NextRequest,
-  handler: (request: NextRequest, user: any) => Promise<NextResponse>
+  handler: (request: NextRequest, user: AuthToken) => Promise<NextResponse>
 ): Promise<NextResponse> {
   try {
     const token = await getToken({
@@ -65,7 +79,7 @@ export async function withSuperAdminAuth(
       )
     }
 
-    return await handler(request, token)
+    return await handler(request, token as AuthToken)
   } catch (error) {
     console.error('Super admin auth middleware error:', error)
     return NextResponse.json(
@@ -78,7 +92,7 @@ export async function withSuperAdminAuth(
 // Customer role checking middleware
 export async function withCustomerAuth(
   request: NextRequest,
-  handler: (request: NextRequest, user: any) => Promise<NextResponse>
+  handler: (request: NextRequest, user: AuthToken) => Promise<NextResponse>
 ): Promise<NextResponse> {
   try {
     const token = await getToken({
@@ -102,7 +116,7 @@ export async function withCustomerAuth(
       )
     }
 
-    return await handler(request, token)
+    return await handler(request, token as AuthToken)
   } catch (error) {
     console.error('Customer auth middleware error:', error)
     return NextResponse.json(
@@ -169,7 +183,7 @@ export function protectApiRoute(
   requiredRole: 'admin' | 'superadmin' | 'customer' = 'customer'
 ) {
   return function(handler: Function) {
-    return async function(request: NextRequest, context?: any) {
+    return async function(request: NextRequest, context?: unknown) {
       const middlewareMap = {
         admin: withAdminAuth,
         superadmin: withSuperAdminAuth, 
@@ -201,7 +215,7 @@ export function useAdminCheck() {
 // Admin route protection for pages
 export async function requireAdminAccess(request: NextRequest): Promise<{
   allowed: boolean
-  user?: any
+  user?: AuthToken
   redirectUrl?: string
 }> {
   try {
@@ -260,15 +274,24 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
 }
 
 // Security event logging helper
-async function logSecurityEvent(event: string, data: any) {
+async function logSecurityEvent(event: string, data: Record<string, unknown>) {
   try {
     const { prisma } = await import('@/lib/db')
-    // TODO: Create securityLog table or use systemLog if needed
-    console.warn(`Security event: ${event}`, data)
+    await prisma.securityLog.create({
+      data: {
+        event,
+        userId: data.userId as string | undefined,
+        ip: data.ip as string | undefined,
+        userAgent: data.userAgent as string | undefined,
+        url: data.url as string | undefined,
+        data,
+        timestamp: new Date()
+      }
+    })
   } catch (error) {
     console.error('Failed to log security event:', error)
     // Fallback logging
-    console.log('SECURITY EVENT:', { event, data, timestamp: new Date().toISOString() })
+    getLogger().warn('SECURITY EVENT', { event, data, timestamp: new Date().toISOString() })
   }
 }
 
@@ -278,28 +301,29 @@ export async function logAdminAction(
   action: string,
   resource: string,
   resourceId: string,
-  details?: any
+  details?: Record<string, unknown>
 ): Promise<void> {
   try {
     const { prisma } = await import('@/lib/db')
     
-    // TODO: Create auditLog table if needed
-    console.log('AUDIT LOG:', { 
-      userId: adminId,
-      action,
-      resource,
-      resourceId,
-      details: details ? JSON.stringify(details) : null,
-      timestamp: new Date(),
-      ip: details?.ip,
-      userAgent: details?.userAgent
+    await prisma.auditLog.create({
+      data: {
+        userId: adminId,
+        action,
+        resource,
+        resourceId,
+        details,
+        ip: details?.ip as string | undefined,
+        userAgent: details?.userAgent as string | undefined,
+        timestamp: new Date()
+      }
     })
     
-    console.log('Audit log created:', { adminId, action, resource, resourceId })
+    getLogger().info('Audit log created', { adminId, action, resource, resourceId })
   } catch (error) {
     console.error('Failed to log admin action:', error)
     // Fallback to console logging for critical security events
-    console.log('SECURITY AUDIT:', {
+    getLogger().error('SECURITY AUDIT FAILED', {
       timestamp: new Date().toISOString(),
       adminId,
       action,

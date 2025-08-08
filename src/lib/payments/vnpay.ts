@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { db, prisma } from '@/lib/db'
+import { getLogger } from '@/lib/monitoring/logger'
 
 interface VNPayRequest {
   bookingId: string
@@ -16,6 +17,49 @@ interface VNPayResponse {
   vnp_Message?: string
 }
 
+interface VNPayReturnData {
+  vnp_Amount: string
+  vnp_BankCode: string
+  vnp_BankTranNo?: string
+  vnp_CardType?: string
+  vnp_OrderInfo: string
+  vnp_PayDate: string
+  vnp_ResponseCode: string
+  vnp_TmnCode: string
+  vnp_TransactionNo: string
+  vnp_TransactionStatus: string
+  vnp_TxnRef: string
+}
+
+interface VNPayQueryResponse {
+  vnp_ResponseCode: string
+  vnp_Message: string
+  vnp_TmnCode: string
+  vnp_TxnRef: string
+  vnp_Amount: string
+  vnp_OrderInfo: string
+  vnp_TransactionNo?: string
+  vnp_BankCode?: string
+  vnp_PayDate?: string
+  vnp_TransactionStatus?: string
+  vnp_SecureHash: string
+}
+
+interface VNPayRefundResponse {
+  vnp_ResponseCode: string
+  vnp_Message: string
+  vnp_TmnCode: string
+  vnp_TxnRef: string
+  vnp_Amount: string
+  vnp_OrderInfo: string
+  vnp_TransactionNo?: string
+  vnp_TransactionDate?: string
+  vnp_CreateBy?: string
+  vnp_CreateDate?: string
+  vnp_IpAddr?: string
+  vnp_SecureHash: string
+}
+
 export class VNPayPayment {
   private tmnCode: string
   private hashSecret: string
@@ -24,8 +68,15 @@ export class VNPayPayment {
   private ipnUrl: string
 
   constructor() {
-    this.tmnCode = process.env.VNPAY_TMN_CODE!
-    this.hashSecret = process.env.VNPAY_HASH_SECRET!
+    const tmnCode = process.env.VNPAY_TMN_CODE
+    const hashSecret = process.env.VNPAY_HASH_SECRET
+    
+    if (!tmnCode || !hashSecret) {
+      throw new Error('VNPay payment configuration missing: VNPAY_TMN_CODE or VNPAY_HASH_SECRET')
+    }
+    
+    this.tmnCode = tmnCode
+    this.hashSecret = hashSecret
     this.url = process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'
     this.returnUrl = process.env.NEXT_PUBLIC_SITE_URL + '/payment/vnpay/return'
     this.ipnUrl = process.env.NEXT_PUBLIC_SITE_URL + '/api/payments/vnpay/ipn'
@@ -98,7 +149,7 @@ export class VNPayPayment {
         gatewayOrderId: orderId
       })
 
-      console.log('VNPay payment URL created:', { orderId, amount: request.amount })
+      getLogger().info('VNPay payment URL created', { orderId, amount: request.amount })
 
       return {
         success: true,
@@ -119,7 +170,7 @@ export class VNPayPayment {
   // Verify return URL
   verifyReturnUrl(query: { [key: string]: string }): {
     success: boolean
-    data?: any
+    data?: VNPayReturnData
     error?: string
   } {
     try {
@@ -239,7 +290,7 @@ export class VNPayPayment {
         // Trigger service delivery workflow
         await this.triggerServiceDelivery(payment.bookingId)
 
-        console.log('VNPay payment completed:', { orderId, transactionNo, amount })
+        getLogger().info('VNPay payment completed', { orderId, transactionNo, amount })
         return { success: true, message: 'Payment processed successfully', responseCode: '00' }
       } else {
         // Payment failed
@@ -260,7 +311,7 @@ export class VNPayPayment {
           data: { paymentStatus: 'failed' }
         })
 
-        console.log('VNPay payment failed:', { orderId, responseCode })
+        getLogger().warn('VNPay payment failed', { orderId, responseCode })
         return { success: true, message: 'Payment failure processed', responseCode: '00' }
       }
     } catch (error) {
@@ -272,7 +323,7 @@ export class VNPayPayment {
   // Query payment status
   async queryPayment(orderId: string, transDate: string): Promise<{
     success: boolean
-    data?: any
+    data?: VNPayQueryResponse
     error?: string
   }> {
     try {
@@ -334,7 +385,7 @@ export class VNPayPayment {
   // Refund payment
   async refundPayment(orderId: string, amount: number, transDate: string, reason: string): Promise<{
     success: boolean
-    data?: any
+    data?: VNPayRefundResponse
     error?: string
   }> {
     try {
@@ -471,7 +522,7 @@ export class VNPayPayment {
   }
 
   // Send Discord notification
-  private async sendDiscordNotification(bookingId: string, status: string, paymentData: any): Promise<void> {
+  private async sendDiscordNotification(bookingId: string, status: string, paymentData: { orderId: string; transId?: string; amount: number; paymentMethod: string }): Promise<void> {
     try {
       const { discordNotifier } = await import('@/lib/discord')
       const booking = await prisma.booking.findUnique({
@@ -521,8 +572,6 @@ export class VNPayPayment {
         })
         
         // Create service delivery task
-        // TODO: Create serviceTask table in Prisma schema if needed
-        /*
         await prisma.serviceTask.create({
           data: {
             bookingId: bookingId,
@@ -531,13 +580,11 @@ export class VNPayPayment {
             description: `Process service delivery for booking ${booking.bookingNumber}`,
             priority: 'high',
             status: 'pending',
-            assignedTo: 'system',
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
           }
         })
-        */
         
-        console.log('Service delivery workflow triggered for booking:', booking.bookingNumber)
+        getLogger().info('Service delivery workflow triggered', { bookingNumber: booking.bookingNumber })
       }
     } catch (error) {
       console.error('Failed to trigger service delivery:', error)

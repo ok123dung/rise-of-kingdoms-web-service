@@ -1,5 +1,23 @@
 import { Resend } from 'resend'
 import { db } from '@/lib/db'
+import type { User, Booking, Payment, Lead, ServiceTier, Service } from '@prisma/client'
+import { getLogger } from '@/lib/monitoring/logger'
+
+// Extended types with relations
+interface BookingWithRelations extends Booking {
+  user: User
+  serviceTier: ServiceTierWithService
+}
+
+interface ServiceTierWithService extends ServiceTier {
+  service: Service
+}
+
+interface PaymentWithRelations extends Payment {
+  booking: BookingWithRelations
+}
+
+// Lead already has all the properties we need
 
 // Lazy initialize Resend only when needed
 let resend: Resend | null = null
@@ -50,7 +68,7 @@ export class EmailService {
     try {
       // Check if email service is configured
       if (!process.env.RESEND_API_KEY) {
-        console.warn('RESEND_API_KEY not configured, skipping email send')
+        getLogger().warn('RESEND_API_KEY not configured, skipping email send')
         return { success: false, error: 'Email service not configured' }
       }
 
@@ -66,13 +84,13 @@ export class EmailService {
       })
 
       if (result.error) {
-        console.error('Email send error:', result.error)
+        getLogger().error('Email send error', { error: result.error })
         return { success: false, error: result.error.message }
       }
 
       return { success: true, messageId: result.data?.id }
     } catch (error) {
-      console.error('Email service error:', error)
+      getLogger().error('Email service error', { error })
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error' 
@@ -81,7 +99,7 @@ export class EmailService {
   }
 
   // Booking confirmation email
-  async sendBookingConfirmation(booking: any): Promise<boolean> {
+  async sendBookingConfirmation(booking: BookingWithRelations): Promise<boolean> {
     try {
       const template = this.getBookingConfirmationTemplate(booking)
       
@@ -109,13 +127,13 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      console.error('Booking confirmation email error:', error)
+      getLogger().error('Booking confirmation email error', { error })
       return false
     }
   }
 
   // Payment confirmation email
-  async sendPaymentConfirmation(payment: any): Promise<boolean> {
+  async sendPaymentConfirmation(payment: PaymentWithRelations): Promise<boolean> {
     try {
       const template = this.getPaymentConfirmationTemplate(payment)
       
@@ -143,13 +161,13 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      console.error('Payment confirmation email error:', error)
+      getLogger().error('Payment confirmation email error', { error })
       return false
     }
   }
 
   // Welcome email for new users
-  async sendWelcomeEmail(user: any): Promise<boolean> {
+  async sendWelcomeEmail(user: User): Promise<boolean> {
     try {
       const template = this.getWelcomeTemplate(user)
       
@@ -176,13 +194,13 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      console.error('Welcome email error:', error)
+      getLogger().error('Welcome email error', { error })
       return false
     }
   }
 
   // Service reminder email
-  async sendServiceReminder(booking: any): Promise<boolean> {
+  async sendServiceReminder(booking: BookingWithRelations): Promise<boolean> {
     try {
       const template = this.getServiceReminderTemplate(booking)
       
@@ -210,13 +228,13 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      console.error('Service reminder email error:', error)
+      getLogger().error('Service reminder email error', { error })
       return false
     }
   }
 
   // Lead follow-up email
-  async sendLeadFollowUp(lead: any): Promise<boolean> {
+  async sendLeadFollowUp(lead: Lead): Promise<boolean> {
     try {
       const template = this.getLeadFollowUpTemplate(lead)
       
@@ -247,13 +265,13 @@ export class EmailService {
 
       return result.success
     } catch (error) {
-      console.error('Lead follow-up email error:', error)
+      getLogger().error('Lead follow-up email error', { error })
       return false
     }
   }
 
   // Email templates
-  private getBookingConfirmationTemplate(booking: any): EmailTemplate {
+  private getBookingConfirmationTemplate(booking: BookingWithRelations): EmailTemplate {
     const serviceName = `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
     const amount = booking.finalAmount.toLocaleString()
 
@@ -329,7 +347,7 @@ export class EmailService {
     }
   }
 
-  private getPaymentConfirmationTemplate(payment: any): EmailTemplate {
+  private getPaymentConfirmationTemplate(payment: PaymentWithRelations): EmailTemplate {
     const serviceName = `${payment.booking.serviceTier.service.name} - ${payment.booking.serviceTier.name}`
     const amount = payment.amount.toLocaleString()
 
@@ -410,7 +428,7 @@ export class EmailService {
     }
   }
 
-  private getWelcomeTemplate(user: any): EmailTemplate {
+  private getWelcomeTemplate(user: User): EmailTemplate {
     return {
       subject: 'Chào mừng đến với RoK Services! 🎮',
       html: `
@@ -483,7 +501,7 @@ export class EmailService {
     }
   }
 
-  private getServiceReminderTemplate(booking: any): EmailTemplate {
+  private getServiceReminderTemplate(booking: BookingWithRelations): EmailTemplate {
     const serviceName = `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
     const daysLeft = Math.ceil((new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
 
@@ -556,7 +574,7 @@ export class EmailService {
     }
   }
 
-  private getLeadFollowUpTemplate(lead: any): EmailTemplate {
+  private getLeadFollowUpTemplate(lead: Lead): EmailTemplate {
     return {
       subject: 'Bạn có cần hỗ trợ thêm về dịch vụ Rise of Kingdoms?',
       html: `

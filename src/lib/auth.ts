@@ -6,6 +6,48 @@ import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { getServerSession } from 'next-auth'
+import type { User } from '@prisma/client'
+import type { NextRequest } from 'next/server'
+import { getLogger } from '@/lib/monitoring/logger'
+
+// Extended user type with staff profile
+interface UserWithStaff extends User {
+  staffProfile?: {
+    id: string
+    role: string
+    permissions?: unknown
+    specializations?: unknown
+    isActive: boolean
+  } | null
+}
+
+// Discord profile type
+interface DiscordProfile {
+  id: string
+  username: string
+  global_name?: string
+  email?: string
+}
+
+// Session type
+interface SessionWithSecurity {
+  user?: {
+    id: string
+    email: string
+    name?: string | null
+    image?: string | null
+    role?: string
+  }
+  security?: {
+    lastActivity: string
+    userAgent?: string
+    ip?: string
+    sessionId: string
+  }
+}
+
+// Handler function type
+type RouteHandler = (req: NextRequest, ...args: unknown[]) => Promise<Response> | Response
 
 // Utility functions
 export const hashPassword = async (password: string) => {
@@ -35,12 +77,12 @@ export const getCurrentUser = async () => {
   })
 }
 
-export const isAdmin = (user: any) => {
+export const isAdmin = (user: UserWithStaff | null) => {
   return user?.staffProfile?.role === 'admin' || user?.staffProfile?.role === 'manager'
 }
 
-export const withAuth = (handler: any) => {
-  return async (req: any, ...args: any[]) => {
+export const withAuth = (handler: RouteHandler) => {
+  return async (req: NextRequest & { user?: { id: string; email: string; role?: string } }, ...args: unknown[]) => {
     const session = await getCurrentSession()
     if (!session?.user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
@@ -56,8 +98,8 @@ export const withAuth = (handler: any) => {
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 
 export const withRateLimit = (maxRequests = 60, windowMs = 60000) => {
-  return (handler: any) => {
-    return async (req: any, ...args: any[]) => {
+  return (handler: RouteHandler) => {
+    return async (req: NextRequest & { headers?: Headers; ip?: string }, ...args: unknown[]) => {
       const ip = req.headers?.['x-forwarded-for'] || req.ip || 'anonymous'
       const key = `${ip}:${req.url}`
       const now = Date.now()
@@ -138,7 +180,7 @@ export const authOptions: NextAuthOptions = {
             role: user.staffProfile?.role || 'customer'
           }
         } catch (error) {
-          console.error('Auth error:', error)
+          getLogger().error('Auth error', { error })
           
           // Log failed authentication attempt for security monitoring
           const { getLogger } = await import('@/lib/monitoring/logger')
@@ -152,8 +194,8 @@ export const authOptions: NextAuthOptions = {
       }
     }),
     DiscordProvider({
-      clientId: process.env.DISCORD_CLIENT_ID!,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+      clientId: process.env.DISCORD_CLIENT_ID || '',
+      clientSecret: process.env.DISCORD_CLIENT_SECRET || '',
       authorization: {
         params: {
           scope: 'identify email guilds'
@@ -178,7 +220,7 @@ export const authOptions: NextAuthOptions = {
             where: {
               OR: [
                 { email: profile.email },
-                { discordId: (profile as any).id }
+                { discordId: (profile as DiscordProfile).id }
               ]
             },
             include: {
@@ -191,8 +233,8 @@ export const authOptions: NextAuthOptions = {
               await prisma.user.update({
                 where: { id: existingUser.id },
                 data: {
-                  discordId: (profile as any).id,
-                  discordUsername: (profile as any).username,
+                  discordId: (profile as DiscordProfile).id,
+                  discordUsername: (profile as DiscordProfile).username,
                   lastLogin: new Date()
                 }
               })
@@ -204,9 +246,9 @@ export const authOptions: NextAuthOptions = {
             const newUser = await prisma.user.create({
               data: {
                 email: profile.email || '',
-                fullName: (profile as any).global_name || (profile as any).username || 'Discord User',
-                discordId: (profile as any).id,
-                discordUsername: (profile as any).username,
+                fullName: (profile as DiscordProfile).global_name || (profile as DiscordProfile).username || 'Discord User',
+                discordId: (profile as DiscordProfile).id,
+                discordUsername: (profile as DiscordProfile).username,
                 password: '',
                 lastLogin: new Date()
               }
@@ -216,7 +258,7 @@ export const authOptions: NextAuthOptions = {
             token.role = 'customer'
           }
         } catch (error) {
-          console.error('Discord auth error:', error)
+          getLogger().error('Discord auth error', { error })
         }
       }
 
@@ -241,10 +283,12 @@ export const authOptions: NextAuthOptions = {
   },
   events: {
     async signIn({ user, account, profile, isNewUser }) {
-      console.log('User signed in:', { user: user.email, provider: account?.provider, isNewUser })
+      const { getLogger } = await import('@/lib/monitoring/logger')
+      getLogger().info('User signed in', { user: user.email, provider: account?.provider, isNewUser })
     },
     async createUser({ user }) {
-      console.log('New user created:', user.email)
+      const { getLogger } = await import('@/lib/monitoring/logger')
+      getLogger().info('New user created', { email: user.email })
       
       try {
         await prisma.lead.create({
@@ -265,12 +309,12 @@ export const authOptions: NextAuthOptions = {
 }
 
 // Security event logging
-export const logSecurityEvent = async (event: string, data: any) => {
+export const logSecurityEvent = async (event: string, data: Record<string, unknown>) => {
   try {
     // Log security events to console for now since database tables don't exist
-    console.warn(`Security event: ${event}`, data)
+    getLogger().warn(`Security event: ${event}`, data)
   } catch (error) {
-    console.error('Failed to log security event:', error)
+    getLogger().error('Failed to log security event', { error })
   }
 }
 
@@ -304,7 +348,7 @@ export const validatePasswordStrength = (password: string) => {
 }
 
 // Session security enhancement
-export const enhanceSession = async (session: any, request?: any) => {
+export const enhanceSession = async (session: SessionWithSecurity, request?: NextRequest) => {
   if (!session?.user) return session
   
   // Add security context

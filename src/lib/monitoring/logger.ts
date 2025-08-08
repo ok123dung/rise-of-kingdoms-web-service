@@ -1,4 +1,11 @@
 import * as Sentry from '@sentry/nextjs'
+import type { Request as ExpressRequest, Response as ExpressResponse, NextFunction as ExpressNextFunction } from 'express'
+
+interface Express {
+  Request: ExpressRequest & { user?: { id: string } }
+  Response: ExpressResponse
+  NextFunction: ExpressNextFunction
+}
 
 export enum LogLevel {
   DEBUG = 'debug',
@@ -16,7 +23,7 @@ export interface LogContext {
   requestId?: string
   userAgent?: string
   ip?: string
-  [key: string]: any
+  [key: string]: string | number | boolean | null | undefined
 }
 
 export interface LogEntry {
@@ -74,12 +81,25 @@ class Logger {
 
   private async persistLog(entry: LogEntry): Promise<void> {
     try {
-      // Skip database persistence for now since systemLog table doesn't exist
       // Only persist important logs to database in production
       if (this.environment === 'production' && 
           (entry.level === LogLevel.ERROR || entry.level === LogLevel.FATAL || entry.level === LogLevel.WARN)) {
-        // TODO: Create systemLog table in Prisma schema if database persistence is needed
-        console.log('Would persist log to database:', entry)
+        const { prisma } = await import('@/lib/db')
+        await prisma.systemLog.create({
+          data: {
+            level: entry.level,
+            message: entry.message,
+            service: entry.service,
+            environment: entry.environment,
+            context: entry.context as any,
+            error: entry.error ? {
+              message: entry.error.message,
+              stack: entry.error.stack,
+              name: entry.error.name
+            } : null,
+            timestamp: entry.timestamp
+          }
+        })
       }
     } catch (error) {
       // Avoid infinite logging loop
@@ -333,7 +353,7 @@ export class PerformanceMonitor {
 }
 
 // Error boundary for React components
-export function logError(error: Error, errorInfo?: any): void {
+export function logError(error: Error, errorInfo?: { componentStack?: string }): void {
   getLogger().error('React error boundary caught error', error, {
     errorInfo,
     component: errorInfo?.componentStack,
@@ -343,7 +363,7 @@ export function logError(error: Error, errorInfo?: any): void {
 
 // API middleware for automatic logging
 export function createAPILogger() {
-  return (req: any, res: any, next: any) => {
+  return (req: Express.Request & { user?: { id: string } }, res: Express.Response, next: Express.NextFunction) => {
     const startTime = Date.now()
     const requestId = Math.random().toString(36).substring(7)
     
@@ -362,7 +382,7 @@ export function createAPILogger() {
 
     // Override res.end to log response
     const originalEnd = res.end
-    res.end = function(...args: any[]) {
+    res.end = function(...args: Parameters<typeof originalEnd>) {
       const duration = Date.now() - startTime
       
       getLogger().logAPIRequest(
@@ -389,7 +409,7 @@ export function createAPILogger() {
 export function logHealthCheck(
   service: string,
   status: 'healthy' | 'unhealthy' | 'degraded',
-  details?: any
+  details?: Record<string, unknown>
 ): void {
   const level = status === 'healthy' ? LogLevel.INFO : status === 'degraded' ? LogLevel.WARN : LogLevel.ERROR
   
@@ -444,7 +464,7 @@ export function logDatabaseQuery(
 export class ApplicationMonitor {
   private static instance: ApplicationMonitor
   private logger: Logger
-  private healthChecks: Map<string, { status: string; lastCheck: number; details?: any }> = new Map()
+  private healthChecks: Map<string, { status: string; lastCheck: number; details?: Record<string, unknown> }> = new Map()
   
   private constructor() {
     this.logger = getLogger()
@@ -496,7 +516,7 @@ export class ApplicationMonitor {
     }
   }
   
-  private async checkDatabase(): Promise<{ status: string; details?: any }> {
+  private async checkDatabase(): Promise<{ status: string; details?: Record<string, unknown> }> {
     try {
       // Skip database health check for now
       return { status: 'healthy', details: { message: 'Database check skipped' } }
@@ -505,7 +525,7 @@ export class ApplicationMonitor {
     }
   }
   
-  private async checkRedis(): Promise<{ status: string; details?: any }> {
+  private async checkRedis(): Promise<{ status: string; details?: Record<string, unknown> }> {
     // If Redis is configured
     if (process.env.REDIS_URL) {
       try {
@@ -518,7 +538,7 @@ export class ApplicationMonitor {
     return { status: 'healthy', details: { message: 'Redis not configured' } }
   }
   
-  private async checkExternalAPIs(): Promise<{ status: string; details?: any }> {
+  private async checkExternalAPIs(): Promise<{ status: string; details?: Record<string, unknown> }> {
     const apis = [
       { name: 'momo', url: 'https://test-payment.momo.vn' },
       { name: 'vnpay', url: 'https://sandbox.vnpayment.vn' },
@@ -540,7 +560,7 @@ export class ApplicationMonitor {
     }
   }
   
-  private async checkDiskSpace(): Promise<{ status: string; details?: any }> {
+  private async checkDiskSpace(): Promise<{ status: string; details?: Record<string, unknown> }> {
     try {
       // Only check disk space in Node.js environment
       if (typeof window === 'undefined') {
@@ -555,7 +575,7 @@ export class ApplicationMonitor {
     }
   }
   
-  private async checkMemory(): Promise<{ status: string; details?: any }> {
+  private async checkMemory(): Promise<{ status: string; details?: Record<string, unknown> }> {
     const used = process.memoryUsage()
     const totalHeap = used.heapTotal / 1024 / 1024 // MB
     const usedHeap = used.heapUsed / 1024 / 1024 // MB
@@ -571,7 +591,7 @@ export class ApplicationMonitor {
     }
   }
   
-  getHealthStatus(): { overall: string; services: any } {
+  getHealthStatus(): { overall: string; services: Record<string, { status: string; lastCheck: number; details?: Record<string, unknown> }> } {
     const services = Object.fromEntries(this.healthChecks)
     const unhealthyCount = Array.from(this.healthChecks.values())
       .filter(check => check.status === 'unhealthy').length

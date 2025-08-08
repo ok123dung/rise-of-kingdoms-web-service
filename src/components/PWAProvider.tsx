@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { swManager, useServiceWorker } from '@/lib/sw-registration'
+import { clientLogger } from '@/lib/client-logger'
 
 export default function PWAProvider({ children }: { children: React.ReactNode }) {
   const {
@@ -15,7 +16,7 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     // Initialize service worker when component mounts
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      console.log('PWA: Initializing service worker...')
+      clientLogger.info('PWA: Initializing service worker...')
       
       // Request notification permission after user interaction
       const requestPermissions = async () => {
@@ -43,7 +44,7 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
     
     // Handle offline/online events
     const handleOnline = () => {
-      console.log('PWA: Back online')
+      clientLogger.info('PWA: Back online')
       hideOfflineIndicator()
       
       // Process any queued actions
@@ -51,7 +52,7 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
     }
     
     const handleOffline = () => {
-      console.log('PWA: Gone offline')
+      clientLogger.info('PWA: Gone offline')
       showOfflineIndicator()
     }
     

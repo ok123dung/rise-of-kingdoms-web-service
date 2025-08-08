@@ -1,4 +1,11 @@
 import { PrismaClient } from '@prisma/client'
+import { getLogger } from '@/lib/monitoring/logger'
+import { 
+  handleDatabaseError, 
+  NotFoundError, 
+  retryWithBackoff,
+  ExternalServiceError 
+} from '@/lib/errors'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -16,42 +23,52 @@ export async function checkDatabaseConnection() {
     await prisma.$queryRaw`SELECT 1`
     return { status: 'healthy', message: 'Database connection successful' }
   } catch (error) {
-    console.error('Database connection failed:', error)
+    getLogger().error('Database connection failed', { error })
     return { status: 'unhealthy', message: 'Database connection failed', error }
   }
 }
 
-// Database utilities
+// Database utilities with proper error handling
 export const db = {
   // User operations
   user: {
     async findByEmail(email: string) {
-      return prisma.user.findUnique({
-        where: { email },
-        include: {
-          bookings: {
-            include: {
-              serviceTier: {
-                include: {
-                  service: true
-                }
-              },
-              payments: true
-            }
-          },
-          staffProfile: true
-        }
-      })
+      try {
+        const user = await prisma.user.findUnique({
+          where: { email },
+          include: {
+            bookings: {
+              include: {
+                serviceTier: {
+                  include: {
+                    service: true
+                  }
+                },
+                payments: true
+              }
+            },
+            staffProfile: true
+          }
+        })
+        return user
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async findByDiscordId(discordId: string) {
-      return prisma.user.findFirst({
-        where: { discordId },
-        include: {
-          bookings: true,
-          staffProfile: true
-        }
-      })
+      try {
+        const user = await prisma.user.findFirst({
+          where: { discordId },
+          include: {
+            bookings: true,
+            staffProfile: true
+          }
+        })
+        return user
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async create(data: {
@@ -64,59 +81,93 @@ export const db = {
       rokPlayerId?: string
       rokKingdom?: string
     }) {
-      return prisma.user.create({
-        data: {
-          ...data,
-          password: data.password || ''
-        },
-        include: {
-          bookings: true
-        }
-      })
+      try {
+        return await prisma.user.create({
+          data: {
+            ...data,
+            password: data.password || ''
+          },
+          include: {
+            bookings: true
+          }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async updateLastLogin(id: string) {
-      return prisma.user.update({
-        where: { id },
-        data: { lastLogin: new Date() }
-      })
+      try {
+        return await prisma.user.update({
+          where: { id },
+          data: { lastLogin: new Date() }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     }
   },
 
   // Service operations
   service: {
     async findAll() {
-      return prisma.service.findMany({
-        where: { isActive: true },
-        include: {
-          serviceTiers: {
-            where: { isAvailable: true },
-            orderBy: { sortOrder: 'asc' }
-          }
-        },
-        orderBy: { sortOrder: 'asc' }
-      })
+      try {
+        return await prisma.service.findMany({
+          where: { isActive: true },
+          include: {
+            serviceTiers: {
+              where: { isAvailable: true },
+              orderBy: { sortOrder: 'asc' }
+            }
+          },
+          orderBy: { sortOrder: 'asc' }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async findBySlug(slug: string) {
-      return prisma.service.findUnique({
-        where: { slug },
-        include: {
-          serviceTiers: {
-            where: { isAvailable: true },
-            orderBy: { sortOrder: 'asc' }
+      try {
+        const service = await prisma.service.findUnique({
+          where: { slug },
+          include: {
+            serviceTiers: {
+              where: { isAvailable: true },
+              orderBy: { sortOrder: 'asc' }
+            }
           }
+        })
+        
+        if (!service) {
+          throw new NotFoundError('Service')
         }
-      })
+        
+        return service
+      } catch (error) {
+        if (error instanceof NotFoundError) throw error
+        handleDatabaseError(error)
+      }
     },
 
     async findTierById(id: string) {
-      return prisma.serviceTier.findUnique({
-        where: { id },
-        include: {
-          service: true
+      try {
+        const tier = await prisma.serviceTier.findUnique({
+          where: { id },
+          include: {
+            service: true
+          }
+        })
+        
+        if (!tier) {
+          throw new NotFoundError('Service tier')
         }
-      })
+        
+        return tier
+      } catch (error) {
+        if (error instanceof NotFoundError) throw error
+        handleDatabaseError(error)
+      }
     }
   },
 
@@ -127,73 +178,100 @@ export const db = {
       serviceTierId: string
       totalAmount: number
       finalAmount: number
-      bookingDetails?: any
+      bookingDetails?: Record<string, unknown>
       customerRequirements?: string
       startDate?: Date
       endDate?: Date
     }) {
-      const bookingNumber = await generateBookingNumber()
-      
-      return prisma.booking.create({
-        data: {
-          ...data,
-          bookingNumber,
-          discountAmount: data.totalAmount - data.finalAmount
-        },
-        include: {
-          user: true,
-          serviceTier: {
-            include: {
-              service: true
+      try {
+        const bookingNumber = await generateBookingNumber()
+        
+        return await prisma.booking.create({
+          data: {
+            ...data,
+            bookingNumber,
+            discountAmount: data.totalAmount - data.finalAmount
+          },
+          include: {
+            user: true,
+            serviceTier: {
+              include: {
+                service: true
+              }
             }
           }
-        }
-      })
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async findById(id: string) {
-      return prisma.booking.findUnique({
-        where: { id },
-        include: {
-          user: true,
-          serviceTier: {
-            include: {
-              service: true
-            }
-          },
-          payments: true,
-          communications: true
+      try {
+        const booking = await prisma.booking.findUnique({
+          where: { id },
+          include: {
+            user: true,
+            serviceTier: {
+              include: {
+                service: true
+              }
+            },
+            payments: true,
+            communications: true
+          }
+        })
+        
+        if (!booking) {
+          throw new NotFoundError('Booking')
         }
-      })
+        
+        return booking
+      } catch (error) {
+        if (error instanceof NotFoundError) throw error
+        handleDatabaseError(error)
+      }
     },
 
     async findByUser(userId: string) {
-      return prisma.booking.findMany({
-        where: { userId },
-        include: {
-          serviceTier: {
-            include: {
-              service: true
-            }
+      try {
+        return await prisma.booking.findMany({
+          where: { userId },
+          include: {
+            serviceTier: {
+              include: {
+                service: true
+              }
+            },
+            payments: true
           },
-          payments: true
-        },
-        orderBy: { createdAt: 'desc' }
-      })
+          orderBy: { createdAt: 'desc' }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async updateStatus(id: string, status: string) {
-      return prisma.booking.update({
-        where: { id },
-        data: { status, updatedAt: new Date() }
-      })
+      try {
+        return await prisma.booking.update({
+          where: { id },
+          data: { status, updatedAt: new Date() }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async updatePaymentStatus(id: string, paymentStatus: string) {
-      return prisma.booking.update({
-        where: { id },
-        data: { paymentStatus, updatedAt: new Date() }
-      })
+      try {
+        return await prisma.booking.update({
+          where: { id },
+          data: { paymentStatus, updatedAt: new Date() }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     }
   },
 
@@ -207,59 +285,73 @@ export const db = {
       gatewayTransactionId?: string
       gatewayOrderId?: string
     }) {
-      const paymentNumber = await generatePaymentNumber()
-      
-      return prisma.payment.create({
-        data: {
-          ...data,
-          paymentNumber
-        },
-        include: {
-          booking: {
-            include: {
-              user: true,
-              serviceTier: {
-                include: {
-                  service: true
+      try {
+        const paymentNumber = await generatePaymentNumber()
+        
+        return await prisma.payment.create({
+          data: {
+            ...data,
+            paymentNumber
+          },
+          include: {
+            booking: {
+              include: {
+                user: true,
+                serviceTier: {
+                  include: {
+                    service: true
+                  }
                 }
               }
             }
           }
-        }
-      })
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
-    async updateStatus(id: string, status: string, gatewayResponse?: any) {
-      const updateData: any = { 
-        status, 
-        updatedAt: new Date() 
-      }
-      
-      if (gatewayResponse) {
-        updateData.gatewayResponse = gatewayResponse
-      }
-      
-      if (status === 'completed') {
-        updateData.paidAt = new Date()
-      }
+    async updateStatus(id: string, status: string, gatewayResponse?: Record<string, unknown>) {
+      try {
+        const updateData: Record<string, unknown> = { 
+          status, 
+          updatedAt: new Date() 
+        }
+        
+        if (gatewayResponse) {
+          updateData.gatewayResponse = gatewayResponse
+        }
+        
+        if (status === 'completed') {
+          updateData.paidAt = new Date()
+        }
 
-      return prisma.payment.update({
-        where: { id },
-        data: updateData
-      })
+        return await prisma.payment.update({
+          where: { id },
+          data: updateData
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async findByGatewayTransactionId(gatewayTransactionId: string) {
-      return prisma.payment.findFirst({
-        where: { gatewayTransactionId },
-        include: {
-          booking: {
-            include: {
-              user: true
+      try {
+        const payment = await prisma.payment.findFirst({
+          where: { gatewayTransactionId },
+          include: {
+            booking: {
+              include: {
+                user: true
+              }
             }
           }
-        }
-      })
+        })
+        
+        return payment
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     }
   },
 
@@ -275,12 +367,16 @@ export const db = {
       utmMedium?: string
       utmCampaign?: string
     }) {
-      return prisma.lead.create({
-        data: {
-          ...data,
-          leadScore: calculateLeadScore(data)
-        }
-      })
+      try {
+        return await prisma.lead.create({
+          data: {
+            ...data,
+            leadScore: calculateLeadScore(data)
+          }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async findAll(filters?: {
@@ -288,33 +384,45 @@ export const db = {
       source?: string
       assignedTo?: string
     }) {
-      return prisma.lead.findMany({
-        where: filters,
-        include: {
-          assignedUser: true,
-          convertedBooking: true
-        },
-        orderBy: { createdAt: 'desc' }
-      })
+      try {
+        return await prisma.lead.findMany({
+          where: filters,
+          include: {
+            assignedUser: true,
+            convertedBooking: true
+          },
+          orderBy: { createdAt: 'desc' }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async updateStatus(id: string, status: string) {
-      return prisma.lead.update({
-        where: { id },
-        data: { status, updatedAt: new Date() }
-      })
+      try {
+        return await prisma.lead.update({
+          where: { id },
+          data: { status, updatedAt: new Date() }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async convertToBooking(id: string, bookingId: string) {
-      return prisma.lead.update({
-        where: { id },
-        data: {
-          status: 'converted',
-          convertedAt: new Date(),
-          convertedBookingId: bookingId,
-          updatedAt: new Date()
-        }
-      })
+      try {
+        return await prisma.lead.update({
+          where: { id },
+          data: {
+            status: 'converted',
+            convertedAt: new Date(),
+            convertedBookingId: bookingId,
+            updatedAt: new Date()
+          }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     }
   },
 
@@ -328,11 +436,15 @@ export const db = {
       subject?: string
       content: string
       templateId?: string
-      templateData?: any
+      templateData?: Record<string, unknown>
     }) {
-      return prisma.communication.create({
-        data
-      })
+      try {
+        return await prisma.communication.create({
+          data
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     },
 
     async updateStatus(id: string, status: string, metadata?: {
@@ -341,54 +453,70 @@ export const db = {
       readAt?: Date
       errorMessage?: string
     }) {
-      return prisma.communication.update({
-        where: { id },
-        data: {
-          status,
-          ...metadata
-        }
-      })
+      try {
+        return await prisma.communication.update({
+          where: { id },
+          data: {
+            status,
+            ...metadata
+          }
+        })
+      } catch (error) {
+        handleDatabaseError(error)
+      }
     }
   }
 }
 
-// Helper functions
+// Helper functions with proper error handling
 async function generateBookingNumber(): Promise<string> {
-  const date = new Date()
-  const year = date.getFullYear().toString().slice(-2)
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const day = date.getDate().toString().padStart(2, '0')
-  
-  const count = await prisma.booking.count({
-    where: {
-      createdAt: {
-        gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-        lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+  try {
+    const date = new Date()
+    const year = date.getFullYear().toString().slice(-2)
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    
+    const count = await prisma.booking.count({
+      where: {
+        createdAt: {
+          gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
+          lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+        }
       }
-    }
-  })
-  
-  const sequence = (count + 1).toString().padStart(3, '0')
-  return `RK${year}${month}${day}${sequence}`
+    })
+    
+    const sequence = (count + 1).toString().padStart(3, '0')
+    return `RK${year}${month}${day}${sequence}`
+  } catch (error) {
+    getLogger().error('Failed to generate booking number', { error })
+    // Fallback to timestamp-based number
+    return `RK${Date.now()}`
+  }
 }
 
 async function generatePaymentNumber(): Promise<string> {
-  const date = new Date()
-  const year = date.getFullYear().toString().slice(-2)
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const day = date.getDate().toString().padStart(2, '0')
-  
-  const count = await prisma.payment.count({
-    where: {
-      createdAt: {
-        gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-        lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+  try {
+    const date = new Date()
+    const year = date.getFullYear().toString().slice(-2)
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    
+    const count = await prisma.payment.count({
+      where: {
+        createdAt: {
+          gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
+          lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+        }
       }
-    }
-  })
-  
-  const sequence = (count + 1).toString().padStart(4, '0')
-  return `PAY${year}${month}${day}${sequence}`
+    })
+    
+    const sequence = (count + 1).toString().padStart(4, '0')
+    return `PAY${year}${month}${day}${sequence}`
+  } catch (error) {
+    getLogger().error('Failed to generate payment number', { error })
+    // Fallback to timestamp-based number
+    return `PAY${Date.now()}`
+  }
 }
 
 function calculateLeadScore(data: {
@@ -416,4 +544,24 @@ function calculateLeadScore(data: {
   else if (data.source === 'website') score += 5
   
   return Math.min(score, 100)
+}
+
+// Database transaction wrapper with retry
+export async function withTransaction<T>(
+  fn: (tx: PrismaClient) => Promise<T>,
+  options?: { maxRetries?: number }
+): Promise<T> {
+  return retryWithBackoff(
+    async () => {
+      return await prisma.$transaction(async (tx) => {
+        return await fn(tx as PrismaClient)
+      })
+    },
+    {
+      maxRetries: options?.maxRetries || 3,
+      onRetry: (error, attempt) => {
+        getLogger().warn('Database transaction retry', { error, attempt })
+      }
+    }
+  )
 }

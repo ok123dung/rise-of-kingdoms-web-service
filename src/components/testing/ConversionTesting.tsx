@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { trackCTAClick, trackContactForm } from '@/components/analytics/GoogleAnalytics'
+import { clientLogger } from '@/lib/client-logger'
 
 // Test all conversion elements
 export function ConversionTesting() {
@@ -228,12 +229,12 @@ export function trackRevenuePotential() {
         (pricing.pro * estimatedCustomers.pro) +
         (pricing.premium * estimatedCustomers.premium)
 
-      console.log('💰 Revenue Potential Analysis:')
-      console.log(`Basic (${estimatedCustomers.basic} customers): ${(pricing.basic * estimatedCustomers.basic).toLocaleString()} VNĐ`)
-      console.log(`Pro (${estimatedCustomers.pro} customers): ${(pricing.pro * estimatedCustomers.pro).toLocaleString()} VNĐ`)
-      console.log(`Premium (${estimatedCustomers.premium} customers): ${(pricing.premium * estimatedCustomers.premium).toLocaleString()} VNĐ`)
-      console.log(`Total Monthly Revenue: ${monthlyRevenue.toLocaleString()} VNĐ`)
-      console.log(`Annual Revenue Potential: ${(monthlyRevenue * 12).toLocaleString()} VNĐ`)
+      clientLogger.info('💰 Revenue Potential Analysis:')
+      clientLogger.info(`Basic (${estimatedCustomers.basic} customers): ${(pricing.basic * estimatedCustomers.basic).toLocaleString()} VNĐ`)
+      clientLogger.info(`Pro (${estimatedCustomers.pro} customers): ${(pricing.pro * estimatedCustomers.pro).toLocaleString()} VNĐ`)
+      clientLogger.info(`Premium (${estimatedCustomers.premium} customers): ${(pricing.premium * estimatedCustomers.premium).toLocaleString()} VNĐ`)
+      clientLogger.info(`Total Monthly Revenue: ${monthlyRevenue.toLocaleString()} VNĐ`)
+      clientLogger.info(`Annual Revenue Potential: ${(monthlyRevenue * 12).toLocaleString()} VNĐ`)
     }
 
     calculateRevenue()

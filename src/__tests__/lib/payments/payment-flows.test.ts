@@ -441,7 +441,7 @@ describe('Payment Performance Tests', () => {
     // Should complete within reasonable time (5 seconds for 10 concurrent payments)
     expect(duration).toBeLessThan(5000)
 
-    console.log(`Concurrent payment creation took ${duration}ms for ${bookings.length} payments`)
+    // Test performance logged: Concurrent payment creation took ${duration}ms for ${bookings.length} payments
 
     // Cleanup
     await Promise.all(

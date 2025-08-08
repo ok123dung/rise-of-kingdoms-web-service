@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { clientLogger } from '@/lib/client-logger'
 
 // Core Web Vitals monitoring for Vietnamese users
 export function PerformanceMonitor() {
@@ -29,7 +30,7 @@ export function PerformanceMonitor() {
         try {
           lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
         } catch (e) {
-          console.warn('LCP observer not supported')
+          clientLogger.warn('LCP observer not supported')
         }
 
         // First Input Delay (FID)
@@ -50,7 +51,7 @@ export function PerformanceMonitor() {
         try {
           fidObserver.observe({ entryTypes: ['first-input'] })
         } catch (e) {
-          console.warn('FID observer not supported')
+          clientLogger.warn('FID observer not supported')
         }
 
         // Cumulative Layout Shift (CLS)
@@ -67,7 +68,7 @@ export function PerformanceMonitor() {
         try {
           clsObserver.observe({ entryTypes: ['layout-shift'] })
         } catch (e) {
-          console.warn('CLS observer not supported')
+          clientLogger.warn('CLS observer not supported')
         }
 
         // Send CLS on page unload
@@ -295,7 +296,7 @@ export function monitorPerformanceBudget() {
       try {
         observer.observe({ entryTypes: ['resource'] })
       } catch (e) {
-        console.warn('Resource observer not supported')
+        clientLogger.warn('Resource observer not supported')
       }
     }
   }

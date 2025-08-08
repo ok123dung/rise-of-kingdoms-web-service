@@ -58,9 +58,59 @@ export async function POST(request: NextRequest) {
       data: leadData
     })
     
-    // TODO: Trigger automated follow-up sequence
-    // TODO: Send notification to Discord
-    // TODO: Send confirmation email
+    // Trigger automated follow-up sequence
+    try {
+      // Schedule follow-up in communication table instead
+      const followUpDate = new Date(Date.now() + 24 * 60 * 60 * 1000)
+      // Get a default system user for automated tasks
+      const systemUser = await prisma.user.findFirst({
+        where: { email: 'system@rokdbot.com' }
+      })
+      
+      if (systemUser || lead.assignedTo) {
+        await prisma.communication.create({
+          data: {
+            userId: lead.assignedTo || systemUser?.id || '',
+            type: 'system',
+            channel: 'task',
+            subject: `Follow up with lead: ${lead.fullName || lead.email}`,
+            content: `Send follow-up email to lead interested in ${lead.serviceInterest || 'RoK services'}`,
+            templateId: 'lead_followup_reminder',
+            templateData: { leadId: lead.id, scheduledFor: followUpDate.toISOString() },
+            status: 'pending'
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Failed to schedule follow-up:', error)
+    }
+    
+    // Send notification to Discord
+    try {
+      const { discordNotifier } = await import('@/lib/discord')
+      await discordNotifier.sendLeadNotification({
+        leadId: lead.id,
+        fullName: lead.fullName,
+        email: lead.email,
+        phone: lead.phone,
+        serviceInterest: lead.serviceInterest,
+        source: lead.source,
+        leadScore: lead.leadScore
+      })
+    } catch (error) {
+      console.error('Failed to send Discord notification:', error)
+    }
+    
+    // Send confirmation email
+    if (lead.email) {
+      try {
+        const { getEmailService } = await import('@/lib/email/service')
+        const emailService = getEmailService()
+        await emailService.sendLeadFollowUp(lead)
+      } catch (error) {
+        console.error('Failed to send confirmation email:', error)
+      }
+    }
     
     return NextResponse.json({
       success: true,
@@ -89,7 +139,16 @@ export async function POST(request: NextRequest) {
 // GET /api/leads - Lấy danh sách leads (Admin only)
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Add authentication check for admin role
+    // Add authentication check for admin role
+    const { getCurrentUser } = await import('@/lib/auth')
+    const user = await getCurrentUser()
+    
+    if (!user || (!user.staffProfile || !['admin', 'manager'].includes(user.staffProfile.role))) {
+      return NextResponse.json({
+        success: false,
+        error: 'Unauthorized access'
+      }, { status: 403 })
+    }
     
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')

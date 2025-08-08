@@ -1,4 +1,8 @@
-import { createMocks } from 'node-mocks-http'
+/**
+ * @jest-environment node
+ */
+
+import { NextRequest } from 'next/server'
 import { POST } from '@/app/api/auth/signup/route'
 import { prisma } from '@/lib/db'
 import { hash } from 'bcryptjs'
@@ -6,6 +10,15 @@ import { hash } from 'bcryptjs'
 // Mock dependencies
 jest.mock('bcryptjs')
 jest.mock('@/lib/email')
+jest.mock('@/lib/db', () => ({
+  prisma: {
+    user: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+    }
+  }
+}))
 
 const mockedHash = hash as jest.MockedFunction<typeof hash>
 
@@ -28,20 +41,21 @@ describe('/api/auth/signup', () => {
         createdAt: new Date(),
       })
 
-      const { req } = createMocks({
+      const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           fullName: 'Test User',
           email: 'test@example.com',
           phone: '0987654321',
           password: 'password123'
-        }
+        })
       })
 
-      const response = await POST(req as any)
+      const response = await POST(request)
       const data = await response.json()
 
       expect(response.status).toBe(201)
+      expect(data.success).toBe(true)
       expect(data.message).toBe('Tài khoản đã được tạo thành công')
       expect(data.user).toEqual({
         id: '1',
@@ -72,67 +86,70 @@ describe('/api/auth/signup', () => {
       })
     })
 
-    it('should return 400 if email already exists', async () => {
+    it('should return 409 if email already exists', async () => {
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
         id: '1',
         email: 'existing@example.com'
       })
 
-      const { req } = createMocks({
+      const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           fullName: 'Test User',
           email: 'existing@example.com',
           password: 'password123'
-        }
+        })
       })
 
-      const response = await POST(req as any)
+      const response = await POST(request)
       const data = await response.json()
 
-      expect(response.status).toBe(400)
-      expect(data.message).toBe('Email đã được sử dụng')
+      expect(response.status).toBe(409)
+      expect(data.success).toBe(false)
+      expect(data.error.message).toBe('Email đã được sử dụng')
     })
 
-    it('should return 400 if phone number already exists', async () => {
+    it('should return 409 if phone number already exists', async () => {
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
       ;(prisma.user.findFirst as jest.Mock).mockResolvedValue({
         id: '1',
         phone: '+84987654321'
       })
 
-      const { req } = createMocks({
+      const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           fullName: 'Test User',
           email: 'test@example.com',
           phone: '0987654321',
           password: 'password123'
-        }
+        })
       })
 
-      const response = await POST(req as any)
+      const response = await POST(request)
       const data = await response.json()
 
-      expect(response.status).toBe(400)
-      expect(data.message).toBe('Số điện thoại đã được sử dụng')
+      expect(response.status).toBe(409)
+      expect(data.success).toBe(false)
+      expect(data.error.message).toBe('Số điện thoại đã được sử dụng')
     })
 
     it('should return 400 for invalid input data', async () => {
-      const { req } = createMocks({
+      const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           fullName: 'A', // Too short
           email: 'invalid-email',
           password: '123' // Too short
-        }
+        })
       })
 
-      const response = await POST(req as any)
+      const response = await POST(request)
       const data = await response.json()
 
       expect(response.status).toBe(400)
-      expect(data.message).toBe('Thông tin không hợp lệ')
+      expect(data.success).toBe(false)
+      expect(data.error.message).toBe('Thông tin không hợp lệ')
     })
 
     it('should sanitize input data', async () => {
@@ -145,16 +162,16 @@ describe('/api/auth/signup', () => {
         createdAt: new Date(),
       })
 
-      const { req } = createMocks({
+      const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           fullName: '<script>alert("xss")</script>Clean Name',
           email: '  CLEAN@EXAMPLE.COM  ',
           password: 'password123'
-        }
+        })
       })
 
-      await POST(req as any)
+      await POST(request)
 
       expect(prisma.user.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -170,20 +187,21 @@ describe('/api/auth/signup', () => {
         new Error('Database connection failed')
       )
 
-      const { req } = createMocks({
+      const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           fullName: 'Test User',
           email: 'test@example.com',
           password: 'password123'
-        }
+        })
       })
 
-      const response = await POST(req as any)
+      const response = await POST(request)
       const data = await response.json()
 
       expect(response.status).toBe(500)
-      expect(data.message).toBe('Có lỗi xảy ra khi tạo tài khoản')
+      expect(data.success).toBe(false)
+      expect(data.error.message).toBe('An unexpected error occurred')
     })
 
     it('should continue signup even if welcome email fails', async () => {
@@ -200,19 +218,20 @@ describe('/api/auth/signup', () => {
       const { sendWelcomeEmail } = require('@/lib/email')
       sendWelcomeEmail.mockRejectedValue(new Error('Email service down'))
 
-      const { req } = createMocks({
+      const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           fullName: 'Test User',
           email: 'test@example.com',
           password: 'password123'
-        }
+        })
       })
 
-      const response = await POST(req as any)
+      const response = await POST(request)
       const data = await response.json()
 
       expect(response.status).toBe(201)
+      expect(data.success).toBe(true)
       expect(data.message).toBe('Tài khoản đã được tạo thành công')
     })
 
@@ -227,17 +246,17 @@ describe('/api/auth/signup', () => {
         createdAt: new Date(),
       })
 
-      const { req } = createMocks({
+      const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           fullName: 'Test User',
           email: 'test@example.com',
           phone: '0356789012', // Valid Vietnamese mobile number
           password: 'password123'
-        }
+        })
       })
 
-      const response = await POST(req as any)
+      const response = await POST(request)
       const data = await response.json()
 
       expect(response.status).toBe(201)
