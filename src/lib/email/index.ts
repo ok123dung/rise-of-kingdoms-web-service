@@ -1,4 +1,5 @@
-import { Resend } from 'resend'\nimport { getLogger } from '@/lib/monitoring/logger'
+import { Resend } from 'resend'
+import { getLogger } from '@/lib/monitoring/logger'
 import {
   getWelcomeEmailTemplate,
   getBookingConfirmationTemplate,
