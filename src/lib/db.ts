@@ -23,7 +23,7 @@ export async function checkDatabaseConnection() {
     await prisma.$queryRaw`SELECT 1`
     return { status: 'healthy', message: 'Database connection successful' }
   } catch (error) {
-    getLogger().error('Database connection failed', { error })
+    getLogger().error('Database connection failed', error as Error)
     return { status: 'unhealthy', message: 'Database connection failed', error }
   }
 }
@@ -188,9 +188,16 @@ export const db = {
         
         return await prisma.booking.create({
           data: {
-            ...data,
             bookingNumber,
-            discountAmount: data.totalAmount - data.finalAmount
+            userId: data.userId,
+            serviceTierId: data.serviceTierId,
+            totalAmount: data.totalAmount,
+            finalAmount: data.finalAmount,
+            discountAmount: data.totalAmount - data.finalAmount,
+            bookingDetails: data.bookingDetails,
+            customerRequirements: data.customerRequirements,
+            startDate: data.startDate,
+            endDate: data.endDate
           },
           include: {
             user: true,

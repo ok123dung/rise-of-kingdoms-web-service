@@ -100,7 +100,7 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 export const withRateLimit = (maxRequests = 60, windowMs = 60000) => {
   return (handler: RouteHandler) => {
     return async (req: NextRequest & { headers?: Headers; ip?: string }, ...args: unknown[]) => {
-      const ip = req.headers?.['x-forwarded-for'] || req.ip || 'anonymous'
+      const ip = req.headers?.get?.('x-forwarded-for') || req.ip || 'anonymous'
       const key = `${ip}:${req.url}`
       const now = Date.now()
       const limit = rateLimitMap.get(key)
@@ -180,10 +180,9 @@ export const authOptions: NextAuthOptions = {
             role: user.staffProfile?.role || 'customer'
           }
         } catch (error) {
-          getLogger().error('Auth error', error as Error)
-          
           // Log failed authentication attempt for security monitoring
           const { getLogger } = await import('@/lib/monitoring/logger')
+          getLogger().error('Auth error', error as Error)
           getLogger().logSecurityEvent('auth_failed', {
             email: credentials?.email,
             timestamp: new Date().toISOString()
@@ -312,7 +311,7 @@ export const authOptions: NextAuthOptions = {
 export const logSecurityEvent = async (event: string, data: Record<string, unknown>) => {
   try {
     // Log security events to console for now since database tables don't exist
-    getLogger().warn(`Security event: ${event}`, data)
+    getLogger().warn(`Security event: ${event}`, data as LogContext)
   } catch (error) {
     getLogger().error('Failed to log security event', error as Error)
   }
@@ -354,8 +353,8 @@ export const enhanceSession = async (session: SessionWithSecurity, request?: Nex
   // Add security context
   const securityContext = {
     lastActivity: new Date().toISOString(),
-    userAgent: request?.headers?.['user-agent'],
-    ip: request?.headers?.['x-forwarded-for'] || request?.ip,
+    userAgent: request?.headers?.get?.('user-agent'),
+    ip: request?.headers?.get?.('x-forwarded-for') || request?.ip,
     sessionId: session.user.id + '_' + Date.now()
   }
   

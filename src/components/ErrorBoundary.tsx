@@ -270,7 +270,9 @@ export class AsyncErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logError(error, errorInfo)
+    logError(error, {
+      componentStack: errorInfo.componentStack ?? undefined
+    })
     
     getLogger().error('Async Error Boundary triggered', error, {
       componentStack: errorInfo.componentStack,
@@ -310,7 +312,9 @@ export class AsyncErrorBoundary extends Component<Props, State> {
 // Hook for handling errors in functional components
 export function useErrorHandler() {
   return (error: Error, errorInfo?: any) => {
-    logError(error, errorInfo)
+    logError(error, {
+      componentStack: errorInfo.componentStack ?? undefined
+    })
     
     // In development, re-throw to trigger error boundary
     if (process.env.NODE_ENV === 'development') {
