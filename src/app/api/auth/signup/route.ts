@@ -16,6 +16,17 @@ import { signupSchema, sanitizeInput } from '@/lib/validation'
 
 export const POST = trackRequest('/api/auth/signup')(async function (request: NextRequest) {
   try {
+    // Check if database is configured
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Database not configured. Please set DATABASE_URL environment variable.'
+        },
+        { status: 503 }
+      )
+    }
+
     const body = await request.json()
 
     // Validate input

@@ -7,10 +7,18 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
+// Check if database URL is configured
+const isDatabaseConfigured = !!process.env.DATABASE_URL
+
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    datasources: isDatabaseConfigured ? undefined : {
+      db: {
+        url: 'postgresql://dummy:dummy@localhost:5432/dummy?schema=public'
+      }
+    }
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
