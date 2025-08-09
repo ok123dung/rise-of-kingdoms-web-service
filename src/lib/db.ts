@@ -194,7 +194,7 @@ export const db = {
             totalAmount: data.totalAmount,
             finalAmount: data.finalAmount,
             discountAmount: data.totalAmount - data.finalAmount,
-            ...(data.bookingDetails && { bookingDetails: data.bookingDetails }),
+            ...(data.bookingDetails && { bookingDetails: data.bookingDetails as Prisma.InputJsonValue }),
             customerRequirements: data.customerRequirements,
             startDate: data.startDate,
             endDate: data.endDate
@@ -446,10 +446,11 @@ export const db = {
       templateData?: Record<string, unknown>
     }) {
       try {
+        const { templateData, ...restData } = data
         return await prisma.communication.create({
           data: {
-            ...data,
-            templateData: data.templateData || undefined
+            ...restData,
+            ...(templateData && { templateData: templateData as Prisma.InputJsonValue })
           }
         })
       } catch (error) {
