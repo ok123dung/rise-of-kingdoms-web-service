@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         message: result.message
       })
     } else {
-      getLogger().error('MoMo webhook processing failed', { message: result.message })
+      getLogger().error('MoMo webhook processing failed', new Error(result.message))
       return NextResponse.json({
         success: false,
         message: result.message
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     const { getLogger } = await import('@/lib/monitoring/logger')
-    getLogger().error('MoMo webhook error', { error })
+    getLogger().error('MoMo webhook error', error as Error)
     return NextResponse.json({
       success: false,
       message: 'Webhook processing failed'

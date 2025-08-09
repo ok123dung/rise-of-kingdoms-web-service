@@ -27,14 +27,14 @@ export async function GET(request: NextRequest) {
         Message: result.message
       })
     } else {
-      getLogger().error('VNPay IPN processing failed', { message: result.message })
+      getLogger().error('VNPay IPN processing failed', undefined, { message: result.message })
       return NextResponse.json({
         RspCode: result.responseCode || '99',
         Message: result.message
       })
     }
   } catch (error) {
-    getLogger().error('VNPay IPN error', { error })
+    getLogger().error('VNPay IPN error', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({
       RspCode: '99',
       Message: 'IPN processing failed'

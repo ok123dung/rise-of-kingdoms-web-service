@@ -20,14 +20,14 @@ export async function POST(request: NextRequest) {
         return_message: result.message
       })
     } else {
-      getLogger().error('ZaloPay callback processing failed', { message: result.message })
+      getLogger().error('ZaloPay callback processing failed', undefined, { message: result.message })
       return NextResponse.json({
         return_code: 0,
         return_message: result.message
       })
     }
   } catch (error) {
-    getLogger().error('ZaloPay callback error', { error })
+    getLogger().error('ZaloPay callback error', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({
       return_code: 0,
       return_message: 'Callback processing failed'
