@@ -89,7 +89,11 @@ export const withAuth = (handler: RouteHandler) => {
     }
     
     // Add user context to request
-    req.user = session.user
+    req.user = {
+      id: session.user.id,
+      email: session.user.email || '',
+      role: session.user.role
+    }
     return handler(req, ...args)
   }
 }
