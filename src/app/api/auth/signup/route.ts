@@ -31,12 +31,23 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
     // Test database connection
     try {
       await prisma.$connect()
+      await prisma.$queryRaw`SELECT 1`
     } catch (dbError) {
       getLogger().error('Database connection failed', dbError as Error)
+      
+      // In development, provide more details
+      const errorMessage = process.env.NODE_ENV === 'development' 
+        ? `Database connection failed: ${dbError instanceof Error ? dbError.message : 'Unknown error'}`
+        : 'Database connection failed. Please check your connection string.'
+      
       return NextResponse.json(
         {
           success: false,
-          message: 'Database connection failed. Please check your connection string.'
+          message: errorMessage,
+          details: process.env.NODE_ENV === 'development' ? {
+            hasDbUrl: !!process.env.DATABASE_URL,
+            error: dbError instanceof Error ? dbError.message : 'Unknown error'
+          } : undefined
         },
         { status: 503 }
       )
