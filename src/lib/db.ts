@@ -194,7 +194,7 @@ export const db = {
             totalAmount: data.totalAmount,
             finalAmount: data.finalAmount,
             discountAmount: data.totalAmount - data.finalAmount,
-            bookingDetails: data.bookingDetails,
+            bookingDetails: data.bookingDetails || undefined,
             customerRequirements: data.customerRequirements,
             startDate: data.startDate,
             endDate: data.endDate
@@ -447,7 +447,10 @@ export const db = {
     }) {
       try {
         return await prisma.communication.create({
-          data
+          data: {
+            ...data,
+            templateData: data.templateData || undefined
+          }
         })
       } catch (error) {
         handleDatabaseError(error)
@@ -495,7 +498,7 @@ async function generateBookingNumber(): Promise<string> {
     const sequence = (count + 1).toString().padStart(3, '0')
     return `RK${year}${month}${day}${sequence}`
   } catch (error) {
-    getLogger().error('Failed to generate booking number', { error })
+    getLogger().error('Failed to generate booking number', error as Error)
     // Fallback to timestamp-based number
     return `RK${Date.now()}`
   }
@@ -520,7 +523,7 @@ async function generatePaymentNumber(): Promise<string> {
     const sequence = (count + 1).toString().padStart(4, '0')
     return `PAY${year}${month}${day}${sequence}`
   } catch (error) {
-    getLogger().error('Failed to generate payment number', { error })
+    getLogger().error('Failed to generate payment number', error as Error)
     // Fallback to timestamp-based number
     return `PAY${Date.now()}`
   }
@@ -567,7 +570,10 @@ export async function withTransaction<T>(
     {
       maxRetries: options?.maxRetries || 3,
       onRetry: (error, attempt) => {
-        getLogger().warn('Database transaction retry', { error, attempt })
+        getLogger().warn('Database transaction retry', { 
+          errorMessage: error instanceof Error ? error.message : String(error),
+          attempt 
+        })
       }
     }
   )

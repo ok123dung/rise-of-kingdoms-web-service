@@ -1,10 +1,21 @@
 import * as Sentry from '@sentry/nextjs'
-import type { Request as ExpressRequest, Response as ExpressResponse, NextFunction as ExpressNextFunction } from 'express'
 
-interface Express {
-  Request: ExpressRequest & { user?: { id: string } }
-  Response: ExpressResponse
-  NextFunction: ExpressNextFunction
+// Express-like types for compatibility
+interface ExpressRequest {
+  user?: { id: string }
+  method?: string
+  url?: string
+  headers?: Record<string, string>
+  body?: unknown
+}
+
+interface ExpressResponse {
+  statusCode?: number
+  locals?: Record<string, unknown>
+}
+
+interface ExpressNextFunction {
+  (error?: unknown): void
 }
 
 export enum LogLevel {
@@ -96,7 +107,7 @@ class Logger {
               message: entry.error.message,
               stack: entry.error.stack,
               name: entry.error.name
-            } : null,
+            } : undefined,
             timestamp: entry.timestamp
           }
         })
@@ -355,7 +366,7 @@ export class PerformanceMonitor {
 // Error boundary for React components
 export function logError(error: Error, errorInfo?: { componentStack?: string }): void {
   getLogger().error('React error boundary caught error', error, {
-    errorInfo,
+    errorInfo: errorInfo?.componentStack || undefined,
     component: errorInfo?.componentStack,
     event: 'react_error'
   })
@@ -363,7 +374,7 @@ export function logError(error: Error, errorInfo?: { componentStack?: string }):
 
 // API middleware for automatic logging
 export function createAPILogger() {
-  return (req: Express.Request & { user?: { id: string } }, res: Express.Response, next: Express.NextFunction) => {
+  return (req: ExpressRequest & { user?: { id: string } }, res: ExpressResponse, next: ExpressNextFunction) => {
     const startTime = Date.now()
     const requestId = Math.random().toString(36).substring(7)
     
@@ -413,11 +424,11 @@ export function logHealthCheck(
 ): void {
   const level = status === 'healthy' ? LogLevel.INFO : status === 'degraded' ? LogLevel.WARN : LogLevel.ERROR
   
-  const logContext = {
+  const logContext: LogContext = {
     service,
     status,
-    details,
-    event: 'health_check'
+    event: 'health_check',
+    ...(details ? { detailsJson: JSON.stringify(details) } : {})
   }
   
   const logger = getLogger()

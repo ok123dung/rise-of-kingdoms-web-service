@@ -69,7 +69,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
 
     getLogger().info('Email sent successfully', {
       messageId: data?.id,
-      to: options.to,
+      to: Array.isArray(options.to) ? options.to : [options.to],
       subject: options.subject
     })
 

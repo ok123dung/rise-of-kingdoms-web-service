@@ -35,12 +35,11 @@ export function withErrorHandler(handler: ApiHandler): ApiHandler {
     } catch (error) {
       // Log error
       const duration = Date.now() - startTime
-      getLogger().error('API request failed', {
+      getLogger().error('API request failed', error as Error, {
         method: request.method,
         url: request.url,
         duration,
-        requestId,
-        error
+        requestId
       })
       
       // Handle the error and return appropriate response

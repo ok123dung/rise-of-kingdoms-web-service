@@ -139,7 +139,7 @@ export class BankingTransfer {
       const booking = await db.booking.findById(payment.bookingId)
       if (booking) {
         const emailService = getEmailService()
-        await emailService.sendPaymentConfirmation(payment)
+        await emailService.sendPaymentConfirmation(payment as any)
       }
 
       // Send Discord notification
@@ -147,7 +147,7 @@ export class BankingTransfer {
         const { discordNotifier } = await import('@/lib/discord')
         await discordNotifier.sendPaymentNotification({
           bookingId: booking.id,
-          amount: payment.amount,
+          amount: payment.amount.toNumber(),
           paymentMethod: 'banking',
           status: 'completed',
           customerEmail: booking.user.email,

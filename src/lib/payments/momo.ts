@@ -261,8 +261,6 @@ export class MoMoPayment {
         // Payment successful
         await db.payment.updateStatus(payment.id, 'completed', {
           transactionId: transId,
-          payType,
-          responseTime,
           ...webhookData
         })
 

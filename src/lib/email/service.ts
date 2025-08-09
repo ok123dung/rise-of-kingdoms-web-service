@@ -84,7 +84,7 @@ export class EmailService {
       })
 
       if (result.error) {
-        getLogger().error('Email send error', new Error(result.error.message), { resendError: result.error })
+        getLogger().error('Email send error', result.error)
         return { success: false, error: result.error.message }
       }
 
@@ -251,7 +251,7 @@ export class EmailService {
 
       // Log communication
       await db.communication.create({
-        userId: lead.assignedTo,
+        userId: lead.assignedTo || null,
         type: 'email',
         channel: lead.email,
         subject: template.subject,
@@ -375,7 +375,7 @@ export class EmailService {
                 <li><strong>Dịch vụ:</strong> ${serviceName}</li>
                 <li><strong>Số tiền:</strong> ${amount} VNĐ</li>
                 <li><strong>Phương thức:</strong> ${payment.paymentMethod.toUpperCase()}</li>
-                <li><strong>Thời gian:</strong> ${new Date(payment.paidAt).toLocaleString('vi-VN')}</li>
+                <li><strong>Thời gian:</strong> ${payment.paidAt ? new Date(payment.paidAt).toLocaleString('vi-VN') : 'N/A'}</li>
               </ul>
             </div>
 
@@ -503,7 +503,7 @@ export class EmailService {
 
   private getServiceReminderTemplate(booking: BookingWithRelations): EmailTemplate {
     const serviceName = `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
-    const daysLeft = Math.ceil((new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+    const daysLeft = booking.endDate ? Math.ceil((new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0
 
     return {
       subject: `Nhắc nhở: Dịch vụ ${booking.serviceTier.service.name} sắp hết hạn`,
@@ -526,7 +526,7 @@ export class EmailService {
               <ul style="list-style: none; padding: 0;">
                 <li><strong>Dịch vụ:</strong> ${serviceName}</li>
                 <li><strong>Mã booking:</strong> ${booking.bookingNumber}</li>
-                <li><strong>Ngày hết hạn:</strong> ${new Date(booking.endDate).toLocaleDateString('vi-VN')}</li>
+                <li><strong>Ngày hết hạn:</strong> ${booking.endDate ? new Date(booking.endDate).toLocaleDateString('vi-VN') : 'N/A'}</li>
                 <li><strong>Còn lại:</strong> ${daysLeft} ngày</li>
               </ul>
             </div>
@@ -565,7 +565,7 @@ export class EmailService {
         
         Dịch vụ: ${serviceName}
         Mã booking: ${booking.bookingNumber}
-        Ngày hết hạn: ${new Date(booking.endDate).toLocaleDateString('vi-VN')}
+        Ngày hết hạn: ${booking.endDate ? new Date(booking.endDate).toLocaleDateString('vi-VN') : 'N/A'}
         Còn lại: ${daysLeft} ngày
         
         Gia hạn ngay: ${process.env.NEXT_PUBLIC_SITE_URL}/renew/${booking.id}

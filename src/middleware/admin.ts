@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { getLogger } from '@/lib/monitoring/logger'
+import { Prisma } from '@prisma/client'
 
 // JWT Token interface
 interface AuthToken {
@@ -262,7 +263,12 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
 
     return {
       allowed: true,
-      user: token
+      user: {
+        userId: token.sub || '',
+        email: token.email || '',
+        role: 'admin',
+        name: token.name
+      } as AuthToken
     }
   } catch (error) {
     console.error('Admin access check failed:', error)
@@ -284,14 +290,14 @@ async function logSecurityEvent(event: string, data: Record<string, unknown>) {
         ip: data.ip as string | undefined,
         userAgent: data.userAgent as string | undefined,
         url: data.url as string | undefined,
-        data,
+        data: data as any,
         timestamp: new Date()
       }
     })
   } catch (error) {
     console.error('Failed to log security event:', error)
     // Fallback logging
-    getLogger().warn('SECURITY EVENT', { event, data, timestamp: new Date().toISOString() })
+    getLogger().warn(`SECURITY EVENT: ${event}`, { data: JSON.stringify(data), timestamp: new Date().toISOString() })
   }
 }
 
@@ -312,7 +318,7 @@ export async function logAdminAction(
         action,
         resource,
         resourceId,
-        details,
+        details: details as any,
         ip: details?.ip as string | undefined,
         userAgent: details?.userAgent as string | undefined,
         timestamp: new Date()
@@ -329,7 +335,7 @@ export async function logAdminAction(
       action,
       resource,
       resourceId,
-      details
+      details: JSON.stringify(details)
     })
   }
 }

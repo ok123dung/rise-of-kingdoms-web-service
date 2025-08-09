@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { getServerSession } from 'next-auth'
 import type { User } from '@prisma/client'
 import type { NextRequest } from 'next/server'
-import { getLogger } from '@/lib/monitoring/logger'
+import { getLogger, type LogContext } from '@/lib/monitoring/logger'
 
 // Extended user type with staff profile
 interface UserWithStaff extends User {

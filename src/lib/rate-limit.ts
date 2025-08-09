@@ -133,7 +133,7 @@ export class RateLimiter {
   // Clean up old entries from memory store (run periodically)
   static cleanupMemoryStore() {
     const now = Date.now()
-    for (const [key, record] of memoryStore.entries()) {
+    for (const [key, record] of Array.from(memoryStore.entries())) {
       if (now > record.resetTime) {
         memoryStore.delete(key)
       }

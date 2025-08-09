@@ -1,6 +1,6 @@
 // Centralized error handling system for RoK Services
 
-import { getLogger } from '@/lib/monitoring/logger'
+import { getLogger, type LogContext } from '@/lib/monitoring/logger'
 import { NextResponse } from 'next/server'
 
 // Base error class with proper typing
@@ -118,31 +118,24 @@ export function logError(error: unknown, context?: Record<string, unknown>): voi
   
   if (error instanceof AppError) {
     if (error.statusCode >= 500) {
-      logger.error('Application error', {
-        message: error.message,
-        statusCode: error.statusCode,
-        isOperational: error.isOperational,
-        context: { ...error.context, ...context },
-        stack: error.stack
-      })
+      logger.error('Application error', error, {
+        statusCode: String(error.statusCode),
+        isOperational: String(error.isOperational),
+        ...error.context,
+        ...context
+      } as LogContext)
     } else {
       logger.warn('Client error', {
         message: error.message,
-        statusCode: error.statusCode,
-        context: { ...error.context, ...context }
-      })
+        statusCode: String(error.statusCode),
+        ...error.context,
+        ...context
+      } as LogContext)
     }
   } else if (error instanceof Error) {
-    logger.error('Unexpected error', {
-      message: error.message,
-      context,
-      stack: error.stack
-    })
+    logger.error('Unexpected error', error, context as LogContext)
   } else {
-    logger.error('Unknown error', {
-      error,
-      context
-    })
+    logger.error('Unknown error', new Error(String(error)), context as LogContext)
   }
 }
 

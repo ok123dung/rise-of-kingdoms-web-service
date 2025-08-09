@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, EmbedBuilder, TextChannel, ChannelType, PermissionFlagsBits, ChatInputCommandInteraction } from 'discord.js'
 import { db } from '@/lib/db'
-import type { Booking, User, ServiceTier, Service, Payment } from '@prisma/client'
+import type { Booking, User, ServiceTier, Service, Payment, Prisma } from '@prisma/client'
+import { Decimal } from '@prisma/client/runtime/library'
 import { getLogger } from '@/lib/monitoring/logger'
 
 // Extended types with relations
@@ -15,7 +16,7 @@ interface ServiceTierWithService extends ServiceTier {
 
 interface PaymentWithRelations extends Payment {
   booking: BookingWithRelations
-  amount: number
+  amount: Decimal
 }
 
 class RoKDiscordBot {
@@ -43,7 +44,7 @@ class RoKDiscordBot {
     })
 
     this.client.on('error', (error) => {
-      getLogger().error('Discord bot error', { error })
+      getLogger().error('Discord bot error', error instanceof Error ? error : new Error(String(error)))
     })
 
     // Handle slash commands
@@ -53,7 +54,7 @@ class RoKDiscordBot {
       try {
         await this.handleSlashCommand(interaction)
       } catch (error) {
-        getLogger().error('Slash command error', { error })
+        getLogger().error('Slash command error', error instanceof Error ? error : new Error(String(error)))
         await interaction.reply({
           content: 'Có lỗi xảy ra khi xử lý lệnh.',
           ephemeral: true
@@ -71,7 +72,7 @@ class RoKDiscordBot {
     try {
       await this.client.login(process.env.DISCORD_BOT_TOKEN)
     } catch (error) {
-      getLogger().error('Failed to initialize Discord bot', { error })
+      getLogger().error('Failed to initialize Discord bot', error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -100,7 +101,7 @@ class RoKDiscordBot {
     const email = interaction.options.getString('email')
     
     try {
-      const user = await db.user.findByEmail(email)
+      const user = await db.user.findByEmail(email!)
       if (!user) {
         await interaction.reply({
           content: 'Không tìm thấy tài khoản với email này.',
@@ -137,7 +138,7 @@ class RoKDiscordBot {
 
       await interaction.reply({ embeds: [embed], ephemeral: true })
     } catch (error) {
-      getLogger().error('Booking status error', { error })
+      getLogger().error('Booking status error', error instanceof Error ? error : new Error(String(error)))
       await interaction.reply({
         content: 'Có lỗi xảy ra khi kiểm tra trạng thái booking.',
         ephemeral: true
@@ -172,7 +173,7 @@ class RoKDiscordBot {
 
       await interaction.reply({ embeds: [embed] })
     } catch (error) {
-      getLogger().error('Services command error', { error })
+      getLogger().error('Services command error', error instanceof Error ? error : new Error(String(error)))
       await interaction.reply({
         content: 'Có lỗi xảy ra khi lấy danh sách dịch vụ.',
         ephemeral: true
@@ -215,7 +216,7 @@ class RoKDiscordBot {
         ephemeral: true
       })
     } catch (error) {
-      getLogger().error('Support command error', { error })
+      getLogger().error('Support command error', error instanceof Error ? error : new Error(String(error)))
       await interaction.reply({
         content: 'Có lỗi xảy ra khi gửi yêu cầu hỗ trợ.',
         ephemeral: true
@@ -252,7 +253,7 @@ class RoKDiscordBot {
         await channel.send({ embeds: [embed] })
       }
     } catch (error) {
-      getLogger().error('Failed to send booking notification', { error })
+      getLogger().error('Failed to send booking notification', error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -284,7 +285,7 @@ class RoKDiscordBot {
         await channel.send({ embeds: [embed] })
       }
     } catch (error) {
-      getLogger().error('Failed to send payment notification', { error })
+      getLogger().error('Failed to send payment notification', error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -314,10 +315,10 @@ class RoKDiscordBot {
             id: guild.roles.everyone.id,
             deny: [PermissionFlagsBits.ViewChannel]
           },
-          {
+          ...(booking.user.discordId ? [{
             id: booking.user.discordId,
             allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory]
-          }
+          }] : [])
         ]
       })
 
@@ -337,7 +338,7 @@ class RoKDiscordBot {
 
       return channel
     } catch (error) {
-      getLogger().error('Failed to create customer channel', { error })
+      getLogger().error('Failed to create customer channel', error instanceof Error ? error : new Error(String(error)))
       return null
     }
   }

@@ -290,7 +290,7 @@ export class HealthMonitor {
         status,
         message: `Memory usage: ${memoryUsageMB.toFixed(2)}MB`,
         lastChecked: new Date().toISOString(),
-        details: memoryUsage
+        details: memoryUsage as unknown as Record<string, unknown>
       }
     } catch (error) {
       return {

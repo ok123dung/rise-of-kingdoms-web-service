@@ -199,13 +199,16 @@ export class VNPayPayment {
       return {
         success: true,
         data: {
-          orderId: query.vnp_TxnRef,
-          amount: parseInt(query.vnp_Amount) / 100, // Convert back from cents
-          responseCode: query.vnp_ResponseCode,
-          transactionNo: query.vnp_TransactionNo,
-          bankCode: query.vnp_BankCode,
-          payDate: query.vnp_PayDate
-        }
+          vnp_TxnRef: query.vnp_TxnRef,
+          vnp_Amount: query.vnp_Amount,
+          vnp_ResponseCode: query.vnp_ResponseCode,
+          vnp_TransactionNo: query.vnp_TransactionNo,
+          vnp_BankCode: query.vnp_BankCode,
+          vnp_PayDate: query.vnp_PayDate,
+          vnp_OrderInfo: query.vnp_OrderInfo || '',
+          vnp_TransactionStatus: query.vnp_TransactionStatus || '',
+          vnp_TmnCode: query.vnp_TmnCode || ''
+        } as VNPayReturnData
       }
     } catch (error) {
       console.error('VNPay return URL verification error:', error)
@@ -229,7 +232,12 @@ export class VNPayPayment {
         return { success: false, message: 'Invalid signature', responseCode: '97' }
       }
 
-      const { orderId, amount, responseCode, transactionNo, bankCode, payDate } = verifyResult.data
+      const orderId = verifyResult.data?.vnp_TxnRef
+      const amount = verifyResult.data ? parseInt(verifyResult.data.vnp_Amount) / 100 : 0
+      const responseCode = verifyResult.data?.vnp_ResponseCode
+      const transactionNo = verifyResult.data?.vnp_TransactionNo
+      const bankCode = verifyResult.data?.vnp_BankCode
+      const payDate = verifyResult.data?.vnp_PayDate
 
       // Find payment record
       const payment = await prisma.payment.findFirst({
@@ -240,7 +248,7 @@ export class VNPayPayment {
       }
 
       // Check if payment amount matches
-      if (payment.amount !== amount) {
+      if (payment.amount.toNumber() !== amount) {
         return { success: false, message: 'Amount mismatch', responseCode: '04' }
       }
 
@@ -257,7 +265,7 @@ export class VNPayPayment {
           data: {
             status: 'completed',
             gatewayResponse: {
-              transactionNo,
+              transactionNo: transactionNo || '',
               bankCode,
               payDate,
               responseCode,
@@ -280,11 +288,10 @@ export class VNPayPayment {
         
         // Send Discord notification
         await this.sendDiscordNotification(payment.bookingId, 'completed', {
-          orderId,
-          transactionNo,
+          orderId: orderId || '',
+          transId: transactionNo,
           amount,
-          paymentMethod: 'VNPay',
-          bankCode
+          paymentMethod: 'VNPay'
         })
         
         // Trigger service delivery workflow
@@ -298,7 +305,7 @@ export class VNPayPayment {
           where: { id: payment.id },
           data: {
             status: 'failed',
-            failureReason: this.getResponseMessage(responseCode),
+            failureReason: this.getResponseMessage(responseCode || '99'),
             gatewayResponse: {
               responseCode,
               ...query
@@ -541,7 +548,7 @@ export class VNPayPayment {
           status: status as 'pending' | 'completed' | 'failed' | 'cancelled',
           customerEmail: booking.user.email,
           customerName: booking.user.fullName,
-          transactionId: paymentData.transactionNo
+          transactionId: paymentData.transId
         })
       }
     } catch (error) {
