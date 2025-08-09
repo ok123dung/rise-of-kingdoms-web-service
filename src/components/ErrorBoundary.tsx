@@ -41,7 +41,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log to our monitoring system
-    logError(error, errorInfo)
+    logError(error, {
+      componentStack: errorInfo.componentStack ?? undefined
+    })
     
     // Log additional context
     getLogger().error('React Error Boundary triggered', error, {
