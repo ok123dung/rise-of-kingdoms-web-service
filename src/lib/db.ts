@@ -7,19 +7,20 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Check if database URL is configured
-const isDatabaseConfigured = !!process.env.DATABASE_URL
+// Create Prisma client with proper error handling
+function createPrismaClient() {
+  try {
+    return new PrismaClient({
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      errorFormat: 'pretty'
+    })
+  } catch (error) {
+    getLogger().error('Failed to create Prisma client', error as Error)
+    throw error
+  }
+}
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    datasources: isDatabaseConfigured ? undefined : {
-      db: {
-        url: 'postgresql://dummy:dummy@localhost:5432/dummy?schema=public'
-      }
-    }
-  })
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 

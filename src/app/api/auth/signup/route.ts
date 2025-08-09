@@ -18,10 +18,25 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
   try {
     // Check if database is configured
     if (!process.env.DATABASE_URL) {
+      getLogger().error('DATABASE_URL not configured')
       return NextResponse.json(
         {
           success: false,
           message: 'Database not configured. Please set DATABASE_URL environment variable.'
+        },
+        { status: 503 }
+      )
+    }
+
+    // Test database connection
+    try {
+      await prisma.$connect()
+    } catch (dbError) {
+      getLogger().error('Database connection failed', dbError as Error)
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Database connection failed. Please check your connection string.'
         },
         { status: 503 }
       )
