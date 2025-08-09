@@ -194,7 +194,7 @@ export const db = {
             totalAmount: data.totalAmount,
             finalAmount: data.finalAmount,
             discountAmount: data.totalAmount - data.finalAmount,
-            bookingDetails: data.bookingDetails || undefined,
+            bookingDetails: data.bookingDetails || null,
             customerRequirements: data.customerRequirements,
             startDate: data.startDate,
             endDate: data.endDate
