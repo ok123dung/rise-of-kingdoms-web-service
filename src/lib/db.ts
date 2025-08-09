@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 import { getLogger } from '@/lib/monitoring/logger'
 import { 
   handleDatabaseError, 
@@ -194,7 +194,7 @@ export const db = {
             totalAmount: data.totalAmount,
             finalAmount: data.finalAmount,
             discountAmount: data.totalAmount - data.finalAmount,
-            bookingDetails: data.bookingDetails || null,
+            ...(data.bookingDetails && { bookingDetails: data.bookingDetails }),
             customerRequirements: data.customerRequirements,
             startDate: data.startDate,
             endDate: data.endDate
