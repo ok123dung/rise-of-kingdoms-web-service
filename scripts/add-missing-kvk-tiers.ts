@@ -31,10 +31,7 @@ async function addMissingKvKTiers() {
             'Discord support during KvK',
             'Post-KvK performance review'
           ],
-          limitations: [
-            'No real-time coordination',
-            'Limited to 1 kingdom'
-          ],
+          limitations: ['No real-time coordination', 'Limited to 1 kingdom'],
           isPopular: false,
           isAvailable: true,
           maxCustomers: 20,
@@ -90,15 +87,14 @@ async function addMissingKvKTiers() {
     })
 
     console.log('✅ Successfully added KvK service tiers')
-    
+
     // Verify
     const updatedService = await prisma.service.findUnique({
       where: { slug: 'kvk-support' },
       include: { serviceTiers: true }
     })
-    
+
     console.log(`📊 KvK service now has ${updatedService?.serviceTiers.length} tiers`)
-    
   } catch (error) {
     console.error('❌ Failed to add KvK tiers:', error)
   } finally {

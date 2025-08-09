@@ -70,7 +70,7 @@ class DiscordNotifier {
       const response = await fetch(this.webhookUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
       })
@@ -88,10 +88,10 @@ class DiscordNotifier {
 
   private createPaymentEmbed(data: PaymentNotificationData): DiscordEmbed {
     const statusColors = {
-      pending: 0xFFA500,    // Orange
-      completed: 0x00FF00,  // Green
-      failed: 0xFF0000,     // Red
-      cancelled: 0x808080   // Gray
+      pending: 0xffa500, // Orange
+      completed: 0x00ff00, // Green
+      failed: 0xff0000, // Red
+      cancelled: 0x808080 // Gray
     }
 
     const statusEmojis = {
@@ -177,7 +177,7 @@ class DiscordNotifier {
       const embed: DiscordEmbed = {
         title: '🎯 Lead mới!',
         description: `Có khách hàng tiềm năng mới quan tâm đến dịch vụ`,
-        color: 0x00D166, // Green
+        color: 0x00d166, // Green
         fields: [
           {
             name: '👤 Họ tên',
@@ -224,7 +224,7 @@ class DiscordNotifier {
       const response = await fetch(this.webhookUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
       })
@@ -233,13 +233,19 @@ class DiscordNotifier {
         throw new Error(`Discord webhook failed: ${response.status} ${response.statusText}`)
       }
 
-      getLogger().debug('Discord lead notification sent', { contact: data.email || data.phone || 'Unknown' })
+      getLogger().debug('Discord lead notification sent', {
+        contact: data.email || data.phone || 'Unknown'
+      })
     } catch (error) {
       getLogger().error('Failed to send Discord lead notification', error as Error)
     }
   }
 
-  async sendSystemAlert(title: string, message: string, level: 'info' | 'warning' | 'error' = 'info'): Promise<void> {
+  async sendSystemAlert(
+    title: string,
+    message: string,
+    level: 'info' | 'warning' | 'error' = 'info'
+  ): Promise<void> {
     if (!this.webhookUrl) {
       getLogger().warn('Discord webhook URL not configured, skipping alert')
       return
@@ -247,9 +253,9 @@ class DiscordNotifier {
 
     try {
       const colors = {
-        info: 0x3498DB,     // Blue
-        warning: 0xF39C12,  // Orange
-        error: 0xE74C3C     // Red
+        info: 0x3498db, // Blue
+        warning: 0xf39c12, // Orange
+        error: 0xe74c3c // Red
       }
 
       const emojis = {
@@ -276,7 +282,7 @@ class DiscordNotifier {
       const response = await fetch(this.webhookUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
       })

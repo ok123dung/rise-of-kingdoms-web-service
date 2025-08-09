@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { trackCTAClick, trackContactForm } from '@/components/analytics/GoogleAnalytics'
 import { clientLogger } from '@/lib/client-logger'
 
@@ -21,7 +22,9 @@ export function ConversionTesting() {
       }
 
       // Test 2: CTA buttons
-      const ctaButtons = document.querySelectorAll('a[href="/contact"], a[href*="discord"], button[type="submit"]')
+      const ctaButtons = document.querySelectorAll(
+        'a[href="/contact"], a[href*="discord"], button[type="submit"]'
+      )
       if (ctaButtons.length >= 5) {
         results.push('✅ Multiple CTAs found: ' + ctaButtons.length)
       } else {
@@ -29,8 +32,12 @@ export function ConversionTesting() {
       }
 
       // Test 3: Social proof elements
-      const testimonials = document.querySelectorAll('[class*="testimonial"], [class*="case-study"]')
-      const statsElements = document.querySelectorAll('[class*="font-bold"][class*="text-"][class*="-600"]')
+      const testimonials = document.querySelectorAll(
+        '[class*="testimonial"], [class*="case-study"]'
+      )
+      const statsElements = document.querySelectorAll(
+        '[class*="font-bold"][class*="text-"][class*="-600"]'
+      )
       if (testimonials.length > 0 || statsElements.length > 0) {
         results.push('✅ Social proof elements found')
       } else {
@@ -55,7 +62,11 @@ export function ConversionTesting() {
       const pricingElements = document.querySelectorAll('*')
       let hasPricing = false
       pricingElements.forEach(el => {
-        if (el.textContent?.includes('750.000') || el.textContent?.includes('900.000') || el.textContent?.includes('1.200.000')) {
+        if (
+          el.textContent?.includes('750.000') ||
+          el.textContent?.includes('900.000') ||
+          el.textContent?.includes('1.200.000')
+        ) {
           hasPricing = true
         }
       })
@@ -77,7 +88,11 @@ export function ConversionTesting() {
       const paymentElements = document.querySelectorAll('*')
       let hasVietnamesePayments = false
       paymentElements.forEach(el => {
-        if (el.textContent?.includes('MoMo') || el.textContent?.includes('ZaloPay') || el.textContent?.includes('VNPay')) {
+        if (
+          el.textContent?.includes('MoMo') ||
+          el.textContent?.includes('ZaloPay') ||
+          el.textContent?.includes('VNPay')
+        ) {
           hasVietnamesePayments = true
         }
       })
@@ -100,8 +115,8 @@ export function ConversionTesting() {
   }
 
   return (
-    <div className="fixed top-4 right-4 bg-black bg-opacity-90 text-white p-4 rounded-lg text-xs max-w-xs z-50">
-      <h3 className="font-bold mb-2">🧪 Conversion Tests</h3>
+    <div className="fixed right-4 top-4 z-50 max-w-xs rounded-lg bg-black bg-opacity-90 p-4 text-xs text-white">
+      <h3 className="mb-2 font-bold">🧪 Conversion Tests</h3>
       <div className="space-y-1">
         {testResults.map((result, index) => (
           <div key={index} className="text-xs">
@@ -120,7 +135,7 @@ export function trackCTAClicks() {
       const target = event.target as HTMLElement
       const ctaText = target.textContent || ''
       const href = target.getAttribute('href') || ''
-      
+
       // Track different types of CTAs
       if (ctaText.includes('tư vấn') || ctaText.includes('liên hệ')) {
         trackCTAClick(ctaText, 'consultation_cta')
@@ -132,7 +147,9 @@ export function trackCTAClicks() {
     }
 
     // Add click tracking to all CTAs
-    const ctaElements = document.querySelectorAll('a[href="/contact"], a[href*="discord"], a[href*="tel:"], button[type="submit"]')
+    const ctaElements = document.querySelectorAll(
+      'a[href="/contact"], a[href*="discord"], a[href*="tel:"], button[type="submit"]'
+    )
     ctaElements.forEach(element => {
       element.addEventListener('click', handleCTAClick)
     })
@@ -151,13 +168,13 @@ export function trackFormSubmissions() {
     const handleFormSubmit = (event: Event) => {
       const form = event.target as HTMLFormElement
       const formData = new FormData(form)
-      const serviceType = formData.get('service') as string || 'unknown'
-      
+      const serviceType = (formData.get('service') as string) || 'unknown'
+
       trackContactForm(serviceType)
-      
+
       // Prevent actual submission in demo
       event.preventDefault()
-      
+
       // Show success message
       alert('🎉 Form submitted successfully! In production, this would send to our team.')
     }
@@ -195,9 +212,11 @@ export function useConversionOptimization() {
     setTimeout(() => {
       const pricingCards = document.querySelectorAll('[class*="card"]')
       pricingCards.forEach((card, index) => {
-        if (index === 1) { // Pro package
+        if (index === 1) {
+          // Pro package
           const badge = document.createElement('div')
-          badge.className = 'absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse'
+          badge.className =
+            'absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse'
           badge.textContent = 'Chỉ còn 3 slot'
           const htmlCard = card as HTMLElement
           htmlCard.style.position = 'relative'
@@ -224,15 +243,21 @@ export function trackRevenuePotential() {
         premium: 4
       }
 
-      const monthlyRevenue = 
-        (pricing.basic * estimatedCustomers.basic) +
-        (pricing.pro * estimatedCustomers.pro) +
-        (pricing.premium * estimatedCustomers.premium)
+      const monthlyRevenue =
+        pricing.basic * estimatedCustomers.basic +
+        pricing.pro * estimatedCustomers.pro +
+        pricing.premium * estimatedCustomers.premium
 
       clientLogger.info('💰 Revenue Potential Analysis:')
-      clientLogger.info(`Basic (${estimatedCustomers.basic} customers): ${(pricing.basic * estimatedCustomers.basic).toLocaleString()} VNĐ`)
-      clientLogger.info(`Pro (${estimatedCustomers.pro} customers): ${(pricing.pro * estimatedCustomers.pro).toLocaleString()} VNĐ`)
-      clientLogger.info(`Premium (${estimatedCustomers.premium} customers): ${(pricing.premium * estimatedCustomers.premium).toLocaleString()} VNĐ`)
+      clientLogger.info(
+        `Basic (${estimatedCustomers.basic} customers): ${(pricing.basic * estimatedCustomers.basic).toLocaleString()} VNĐ`
+      )
+      clientLogger.info(
+        `Pro (${estimatedCustomers.pro} customers): ${(pricing.pro * estimatedCustomers.pro).toLocaleString()} VNĐ`
+      )
+      clientLogger.info(
+        `Premium (${estimatedCustomers.premium} customers): ${(pricing.premium * estimatedCustomers.premium).toLocaleString()} VNĐ`
+      )
       clientLogger.info(`Total Monthly Revenue: ${monthlyRevenue.toLocaleString()} VNĐ`)
       clientLogger.info(`Annual Revenue Potential: ${(monthlyRevenue * 12).toLocaleString()} VNĐ`)
     }

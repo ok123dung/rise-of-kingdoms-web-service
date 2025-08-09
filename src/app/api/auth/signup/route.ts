@@ -1,23 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { hash } from 'bcryptjs'
-import { prisma } from '@/lib/db'
-import { signupSchema } from '@/lib/validation'
-import { trackRequest } from '@/lib/monitoring'
-import { sanitizeInput } from '@/lib/validation'
-import { sendWelcomeEmail } from '@/lib/email'
-import { getLogger } from '@/lib/monitoring/logger'
-import { 
-  ConflictError, 
-  ValidationError, 
-  handleDatabaseError, 
-  handleApiError,
-  ErrorMessages 
-} from '@/lib/errors'
+import { type NextRequest, NextResponse } from 'next/server'
 
-export const POST = trackRequest('/api/auth/signup')(async function(request: NextRequest) {
+import { prisma } from '@/lib/db'
+import { sendWelcomeEmail } from '@/lib/email'
+import {
+  ConflictError,
+  ValidationError,
+  handleDatabaseError,
+  handleApiError,
+  ErrorMessages
+} from '@/lib/errors'
+import { trackRequest } from '@/lib/monitoring'
+import { getLogger } from '@/lib/monitoring/logger'
+import { signupSchema, sanitizeInput } from '@/lib/validation'
+
+export const POST = trackRequest('/api/auth/signup')(async function (request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Validate input
     let validatedData
     try {
@@ -67,7 +67,7 @@ export const POST = trackRequest('/api/auth/signup')(async function(request: Nex
           email: validatedData.email,
           phone: validatedData.phone,
           password: hashedPassword,
-          emailVerified: null, // Will be verified later if needed
+          emailVerified: null // Will be verified later if needed
         },
         select: {
           id: true,
@@ -92,8 +92,8 @@ export const POST = trackRequest('/api/auth/signup')(async function(request: Nex
     // Send welcome email (non-blocking)
     sendWelcomeEmail(user.email, user.fullName).catch(emailError => {
       getLogger().error('Failed to send welcome email', emailError as Error, {
-        userId: user!.id,
-        email: user!.email
+        userId: user.id,
+        email: user.email
       })
     })
 
@@ -110,7 +110,6 @@ export const POST = trackRequest('/api/auth/signup')(async function(request: Nex
       },
       { status: 201 }
     )
-
   } catch (error) {
     return handleApiError(error, request.headers.get('x-request-id') || undefined)
   }

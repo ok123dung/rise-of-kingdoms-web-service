@@ -1,40 +1,40 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import { VietnameseGamingSchema } from '@/components/seo/VietnameseGamingSEO'
-import { 
-  Target, 
-  TrendingUp, 
-  Shield, 
-  Crown, 
-  Gem, 
-  Users, 
-  Clock, 
-  CheckCircle, 
-  Star, 
-  ArrowRight, 
-  Phone, 
-  Award, 
+import {
+  TrendingUp,
+  Shield,
+  Crown,
+  Gem,
+  Clock,
+  CheckCircle,
+  Star,
+  ArrowRight,
+  Phone,
+  Award,
   BarChart3,
   Zap,
-  Calendar,
   MessageCircle
 } from 'lucide-react'
+import Link from 'next/link'
+
+import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/Header'
+import { VietnameseGamingSchema } from '@/components/seo/VietnameseGamingSEO'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Tư vấn chiến thuật Rise of Kingdoms - Dịch vụ chuyên gia RoK',
-  description: 'Dịch vụ tư vấn chiến thuật Rise of Kingdoms chuyên nghiệp: Tối ưu farm gem 4-15k/ngày, build commander hiệu quả, tăng power nhanh chóng. Đội ngũ chuyên gia top 1% Việt Nam.',
+  description:
+    'Dịch vụ tư vấn chiến thuật Rise of Kingdoms chuyên nghiệp: Tối ưu farm gem 4-15k/ngày, build commander hiệu quả, tăng power nhanh chóng. Đội ngũ chuyên gia top 1% Việt Nam.',
   keywords: [
-    'Rise of Kingdoms strategy', 
-    'RoK consulting Vietnam', 
-    'tư vấn chiến thuật RoK', 
-    'Rise of Kingdoms gem farming', 
+    'Rise of Kingdoms strategy',
+    'RoK consulting Vietnam',
+    'tư vấn chiến thuật RoK',
+    'Rise of Kingdoms gem farming',
     'commander build guide',
     'RoK power increase',
     'Rise of Kingdoms coaching',
     'chiến thuật Rise of Kingdoms'
-  ],
+  ]
 }
 
 interface PricingTier {
@@ -121,7 +121,8 @@ const caseStudies = [
       gems: '12k/ngày'
     },
     improvement: '+144% Power, +500% Gem farming',
-    testimonial: 'Chiến thuật farm gem và build commander của team cực kỳ hiệu quả. Từ một F2P player, giờ tôi có thể cạnh tranh với những spender nhỏ.',
+    testimonial:
+      'Chiến thuật farm gem và build commander của team cực kỳ hiệu quả. Từ một F2P player, giờ tôi có thể cạnh tranh với những spender nhỏ.',
     service: 'Pro Strategy'
   },
   {
@@ -139,7 +140,8 @@ const caseStudies = [
       gems: '18k/ngày'
     },
     improvement: '+175% Power, Kingdom Top 3',
-    testimonial: 'Premium coaching giúp tôi hiểu sâu về meta game. Đặc biệt là chiến thuật KvK, alliance của chúng tôi đã thắng 4 KvK liên tiếp.',
+    testimonial:
+      'Premium coaching giúp tôi hiểu sâu về meta game. Đặc biệt là chiến thuật KvK, alliance của chúng tôi đã thắng 4 KvK liên tiếp.',
     service: 'Premium Strategy'
   },
   {
@@ -157,7 +159,8 @@ const caseStudies = [
       gems: '8k/ngày'
     },
     improvement: '+178% Power trong 2 tháng',
-    testimonial: 'Là newbie, tôi không biết gì về RoK. Basic strategy package giúp tôi có nền tảng vững chắc và phát triển nhanh chóng.',
+    testimonial:
+      'Là newbie, tôi không biết gì về RoK. Basic strategy package giúp tôi có nền tảng vững chắc và phát triển nhanh chóng.',
     service: 'Basic Strategy'
   }
 ]
@@ -166,7 +169,8 @@ const methodology = [
   {
     step: 1,
     title: 'Phân tích tài khoản toàn diện',
-    description: 'Đánh giá chi tiết commanders, buildings, research, resources và xác định điểm mạnh/yếu',
+    description:
+      'Đánh giá chi tiết commanders, buildings, research, resources và xác định điểm mạnh/yếu',
     duration: '1-2 ngày',
     deliverable: 'Báo cáo phân tích 15+ trang'
   },
@@ -219,9 +223,9 @@ export default function StrategyServicePage() {
     <>
       <Header />
       <VietnameseGamingSchema />
-      
+
       {/* Urgency Banner */}
-      <div className="bg-gradient-to-r from-accent-600 to-accent-700 text-white py-3 px-4">
+      <div className="bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-white">
         <div className="container-max flex items-center justify-center space-x-4 text-sm font-medium">
           <Clock className="h-4 w-4 animate-pulse" />
           <span>🔥 Tháng 12: Giảm 20% tất cả gói Strategy + Tặng 1 tuần Premium coaching!</span>
@@ -231,20 +235,21 @@ export default function StrategyServicePage() {
 
       <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-primary-50 via-white to-accent-50 section-padding">
+        <section className="section-padding bg-gradient-to-br from-primary-50 via-white to-accent-50">
           <div className="container-max">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
               <div>
-                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
-                  Tư vấn chiến thuật <span className="text-gradient">Rise of Kingdoms</span> chuyên nghiệp
+                <h1 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                  Tư vấn chiến thuật <span className="text-gradient">Rise of Kingdoms</span> chuyên
+                  nghiệp
                 </h1>
-                <p className="text-xl text-gray-600 mb-6">
-                  Tăng power 100-200% trong 3 tháng với chiến thuật được kiểm chứng từ top 1% players Việt Nam. 
-                  Farm gem 4-20k/ngày an toàn, build commanders tối ưu.
+                <p className="mb-6 text-xl text-gray-600">
+                  Tăng power 100-200% trong 3 tháng với chiến thuật được kiểm chứng từ top 1%
+                  players Việt Nam. Farm gem 4-20k/ngày an toàn, build commanders tối ưu.
                 </p>
-                
+
                 {/* Key Benefits */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="mb-8 grid grid-cols-2 gap-4">
                   <div className="flex items-center space-x-3">
                     <Gem className="h-6 w-6 text-yellow-500" />
                     <span className="font-medium">4-20k gems/ngày</span>
@@ -264,41 +269,41 @@ export default function StrategyServicePage() {
                 </div>
 
                 {/* Primary CTA */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Link 
-                    href="#pricing" 
-                    className="bg-gradient-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 inline-flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  <Link
+                    className="inline-flex transform items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-accent-600 to-accent-700 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all duration-200 hover:-translate-y-1 hover:from-accent-700 hover:to-accent-800 hover:shadow-xl"
+                    href="#pricing"
                   >
                     <Phone className="h-5 w-5" />
                     <span>Tư vấn miễn phí 30 phút</span>
                     <ArrowRight className="h-5 w-5" />
                   </Link>
-                  <Link 
-                    href="#case-studies" 
-                    className="border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 inline-flex items-center justify-center space-x-2"
+                  <Link
+                    className="inline-flex items-center justify-center space-x-2 rounded-xl border-2 border-primary-600 px-8 py-4 font-semibold text-primary-600 transition-all duration-200 hover:bg-primary-600 hover:text-white"
+                    href="#case-studies"
                   >
                     <BarChart3 className="h-5 w-5" />
                     <span>Xem case studies</span>
                   </Link>
                 </div>
-                
-                <p className="text-sm text-gray-500 mt-4">
+
+                <p className="mt-4 text-sm text-gray-500">
                   ⚡ Đảm bảo hoàn tiền 100% trong 7 ngày • Chỉ còn 3 slot tháng này
                 </p>
               </div>
 
               {/* Stats/Social Proof */}
-              <div className="bg-white rounded-2xl shadow-xl p-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+              <div className="rounded-2xl bg-white p-8 shadow-xl">
+                <h3 className="mb-6 text-center text-2xl font-bold text-gray-900">
                   Kết quả khách hàng
                 </h3>
-                
+
                 <div className="space-y-6">
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-green-600 mb-2">+178%</div>
+                    <div className="mb-2 text-4xl font-bold text-green-600">+178%</div>
                     <div className="text-gray-600">Power tăng trung bình</div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
                       <div className="text-2xl font-bold text-blue-600">15k</div>
@@ -312,7 +317,7 @@ export default function StrategyServicePage() {
 
                   <div className="border-t pt-4">
                     <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                      <Star className="h-4 w-4 fill-current text-yellow-400" />
                       <span>4.9/5 từ 200+ khách hàng</span>
                     </div>
                   </div>
@@ -323,18 +328,18 @@ export default function StrategyServicePage() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="section-padding bg-white">
+        <section className="section-padding bg-white" id="pricing">
           <div className="container-max">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-gray-900">
                 Chọn gói phù hợp với mục tiêu của bạn
               </h2>
-              <p className="text-lg text-gray-600 mb-6">
+              <p className="mb-6 text-lg text-gray-600">
                 Từ người chơi mới đến top player, chúng tôi có giải pháp cho mọi level
               </p>
 
               {/* Trust Badges */}
-              <div className="flex items-center justify-center space-x-8 mb-8">
+              <div className="mb-8 flex items-center justify-center space-x-8">
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <Award className="h-5 w-5 text-yellow-500" />
                   <span>Hoàn tiền 100%</span>
@@ -350,21 +355,18 @@ export default function StrategyServicePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {pricingTiers.map((tier) => (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              {pricingTiers.map(tier => (
                 <PricingCard key={tier.id} tier={tier} />
               ))}
             </div>
 
             {/* Bottom CTA */}
-            <div className="text-center mt-12">
-              <p className="text-gray-600 mb-4">
+            <div className="mt-12 text-center">
+              <p className="mb-4 text-gray-600">
                 Không chắc gói nào phù hợp? Tư vấn miễn phí với chuyên gia
               </p>
-              <Link
-                href="/contact"
-                className="btn-secondary inline-flex items-center space-x-2"
-              >
+              <Link className="btn-secondary inline-flex items-center space-x-2" href="/contact">
                 <MessageCircle className="h-4 w-4" />
                 <span>Chat với chuyên gia</span>
               </Link>
@@ -375,8 +377,8 @@ export default function StrategyServicePage() {
         {/* Methodology Section */}
         <section className="section-padding bg-gray-50">
           <div className="container-max">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-gray-900">
                 Quy trình 7 bước chuyên nghiệp
               </h2>
               <p className="text-lg text-gray-600">
@@ -386,17 +388,17 @@ export default function StrategyServicePage() {
 
             <div className="space-y-8">
               {methodology.map((step, index) => (
-                <MethodologyStep key={step.step} step={step} index={index} />
+                <MethodologyStep key={step.step} index={index} step={step} />
               ))}
             </div>
           </div>
         </section>
 
         {/* Case Studies Section */}
-        <section id="case-studies" className="section-padding bg-white">
+        <section className="section-padding bg-white" id="case-studies">
           <div className="container-max">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-gray-900">
                 Kết quả thực tế từ khách hàng
               </h2>
               <p className="text-lg text-gray-600">
@@ -404,7 +406,7 @@ export default function StrategyServicePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
               {caseStudies.map((study, index) => (
                 <CaseStudyCard key={index} study={study} />
               ))}
@@ -415,35 +417,33 @@ export default function StrategyServicePage() {
         {/* FAQ Section */}
         <section className="section-padding bg-gray-50">
           <div className="container-max">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Câu hỏi thường gặp
-              </h2>
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-gray-900">Câu hỏi thường gặp</h2>
               <p className="text-lg text-gray-600">
                 Giải đáp những thắc mắc về dịch vụ tư vấn chiến thuật
               </p>
             </div>
 
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="mx-auto max-w-4xl space-y-6">
               <FAQItem
-                question="Bao lâu để thấy kết quả cải thiện power?"
                 answer="Thông thường bạn sẽ thấy cải thiện rõ rệt trong 2-3 tuần đầu. Power tăng 30-50% trong tháng đầu là hoàn toàn bình thường với chiến thuật của chúng tôi."
+                question="Bao lâu để thấy kết quả cải thiện power?"
               />
               <FAQItem
-                question="Chiến thuật farm gem có an toàn không?"
                 answer="Hoàn toàn an toàn! Chúng tôi chỉ sử dụng các phương pháp được Lilith Games cho phép. Tỷ lệ bị ban < 0.1% và chúng tôi bảo hiểm 100% tài khoản."
+                question="Chiến thuật farm gem có an toàn không?"
               />
               <FAQItem
-                question="Tôi có thể hủy dịch vụ bất cứ lúc nào không?"
                 answer="Có, bạn có thể hủy bất cứ lúc nào. Hoàn tiền 100% trong 7 ngày đầu, sau đó hoàn tiền theo tỷ lệ thời gian sử dụng."
+                question="Tôi có thể hủy dịch vụ bất cứ lúc nào không?"
               />
               <FAQItem
-                question="Dịch vụ có phù hợp với F2P players không?"
                 answer="Tuyệt đối! Nhiều khách hàng F2P của chúng tôi đã tăng power 150-200% và cạnh tranh được với low spenders nhờ chiến thuật tối ưu."
+                question="Dịch vụ có phù hợp với F2P players không?"
               />
               <FAQItem
-                question="Tôi cần cung cấp thông tin gì để bắt đầu?"
                 answer="Chỉ cần thông tin tài khoản RoK và mục tiêu cá nhân. Chúng tôi sẽ hướng dẫn setup an toàn và bảo mật tuyệt đối."
+                question="Tôi cần cung cấp thông tin gì để bắt đầu?"
               />
             </div>
           </div>
@@ -452,40 +452,23 @@ export default function StrategyServicePage() {
         {/* Contact/Booking Section */}
         <section className="section-padding bg-gradient-to-br from-primary-600 to-accent-600 text-white">
           <div className="container-max text-center">
-            <h2 className="text-3xl font-bold mb-4">
-              Sẵn sàng tăng power 100-200%?
-            </h2>
-            <p className="text-xl mb-8 opacity-90">
+            <h2 className="mb-4 text-3xl font-bold">Sẵn sàng tăng power 100-200%?</h2>
+            <p className="mb-8 text-xl opacity-90">
               Tham gia cùng 500+ game thủ đã thành công với chiến thuật của chúng tôi
             </p>
 
-            <div className="bg-white rounded-2xl p-8 max-w-2xl mx-auto text-gray-900">
-              <h3 className="text-2xl font-bold mb-6">Đặt lịch tư vấn miễn phí</h3>
+            <div className="mx-auto max-w-2xl rounded-2xl bg-white p-8 text-gray-900">
+              <h3 className="mb-6 text-2xl font-bold">Đặt lịch tư vấn miễn phí</h3>
 
               <form className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Họ và tên"
-                    className="input-field"
-                    required
-                  />
-                  <input
-                    type="tel"
-                    placeholder="Số điện thoại"
-                    className="input-field"
-                    required
-                  />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <input required className="input-field" placeholder="Họ và tên" type="text" />
+                  <input required className="input-field" placeholder="Số điện thoại" type="tel" />
                 </div>
 
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="input-field"
-                  required
-                />
+                <input required className="input-field" placeholder="Email" type="email" />
 
-                <select className="input-field" required>
+                <select required className="input-field">
                   <option value="">Chọn gói quan tâm</option>
                   <option value="basic">Basic Strategy (750k/tháng)</option>
                   <option value="pro">Pro Strategy (900k/tháng)</option>
@@ -493,14 +476,14 @@ export default function StrategyServicePage() {
                 </select>
 
                 <textarea
+                  className="input-field"
                   placeholder="Mô tả tình trạng tài khoản hiện tại (power, level, mục tiêu...)"
                   rows={4}
-                  className="input-field"
-                ></textarea>
+                />
 
                 <button
+                  className="w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-8 py-4 font-bold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
                   type="submit"
-                  className="w-full bg-gradient-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800 text-white font-bold py-4 px-8 rounded-lg transition-all duration-200"
                 >
                   Đặt lịch tư vấn miễn phí ngay
                 </button>
@@ -518,7 +501,7 @@ export default function StrategyServicePage() {
               </div>
             </div>
 
-            <p className="text-sm opacity-75 mt-6">
+            <p className="mt-6 text-sm opacity-75">
               🔥 Chỉ còn 3 slot tư vấn miễn phí tháng này • Đảm bảo hoàn tiền 100%
             </p>
           </div>
@@ -526,22 +509,22 @@ export default function StrategyServicePage() {
       </main>
 
       {/* Sticky CTA Bar for Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-4 shadow-lg md:hidden">
         <div className="flex space-x-3">
           <Link
+            className="flex-1 rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white"
             href="#pricing"
-            className="flex-1 bg-gradient-to-r from-accent-600 to-accent-700 text-white font-semibold py-3 px-4 rounded-lg text-center"
           >
             Xem giá
           </Link>
           <Link
+            className="flex-1 rounded-lg bg-primary-600 px-4 py-3 text-center font-semibold text-white"
             href="/contact"
-            className="flex-1 bg-primary-600 text-white font-semibold py-3 px-4 rounded-lg text-center"
           >
             Tư vấn ngay
           </Link>
         </div>
-        <p className="text-xs text-gray-500 text-center mt-2">⚡ Tư vấn miễn phí 30 phút</p>
+        <p className="mt-2 text-center text-xs text-gray-500">⚡ Tư vấn miễn phí 30 phút</p>
       </div>
 
       <Footer />
@@ -556,21 +539,23 @@ interface PricingCardProps {
 
 function PricingCard({ tier }: PricingCardProps) {
   return (
-    <div className={`
-      card relative group hover:shadow-xl transition-all duration-300
-      ${tier.popular ? 'ring-2 ring-primary-500 shadow-lg scale-105' : ''}
-    `}>
+    <div
+      className={`
+      card group relative transition-all duration-300 hover:shadow-xl
+      ${tier.popular ? 'scale-105 shadow-lg ring-2 ring-primary-500' : ''}
+    `}
+    >
       {tier.popular && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-          <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 transform">
+          <span className="rounded-full bg-primary-600 px-4 py-1 text-sm font-semibold text-white">
             Phổ biến nhất
           </span>
         </div>
       )}
 
-      <div className="text-center mb-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">{tier.name}</h3>
-        <p className="text-gray-600 text-sm mb-4">{tier.description}</p>
+      <div className="mb-6 text-center">
+        <h3 className="mb-2 text-xl font-semibold text-gray-900">{tier.name}</h3>
+        <p className="mb-4 text-sm text-gray-600">{tier.description}</p>
 
         <div className="mb-4">
           <div className="text-3xl font-bold text-primary-600">{tier.price}</div>
@@ -580,10 +565,10 @@ function PricingCard({ tier }: PricingCardProps) {
         </div>
       </div>
 
-      <ul className="space-y-3 mb-8">
+      <ul className="mb-8 space-y-3">
         {tier.features.map((feature, index) => (
           <li key={index} className="flex items-start space-x-3">
-            <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+            <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
             <span className="text-sm text-gray-600">{feature}</span>
           </li>
         ))}
@@ -591,15 +576,12 @@ function PricingCard({ tier }: PricingCardProps) {
 
       <div className="space-y-3">
         <Link
+          className="block w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
           href="/contact"
-          className="w-full bg-gradient-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 text-center block"
         >
           {tier.cta}
         </Link>
-        <Link
-          href="/contact"
-          className="w-full btn-secondary text-center block text-sm"
-        >
+        <Link className="btn-secondary block w-full text-center text-sm" href="/contact">
           Tư vấn miễn phí
         </Link>
       </div>
@@ -622,17 +604,17 @@ function MethodologyStep({ step, index }: MethodologyStepProps) {
   return (
     <div className="flex items-start space-x-6">
       <div className="flex-shrink-0">
-        <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-lg font-bold text-white">
           {step.step}
         </div>
       </div>
 
       <div className="flex-1">
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">{step.title}</h3>
-          <p className="text-gray-600 mb-4">{step.description}</p>
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-2 text-xl font-semibold text-gray-900">{step.title}</h3>
+          <p className="mb-4 text-gray-600">{step.description}</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4 text-blue-500" />
               <span className="text-gray-600">Thời gian: {step.duration}</span>
@@ -671,20 +653,22 @@ interface CaseStudyCardProps {
 
 function CaseStudyCard({ study }: CaseStudyCardProps) {
   return (
-    <div className="card group hover:shadow-lg transition-all duration-300">
+    <div className="card group transition-all duration-300 hover:shadow-lg">
       {/* Header */}
-      <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">{study.playerName}</h3>
-        <p className="text-sm text-gray-500">{study.kingdom} • {study.timeframe}</p>
-        <div className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full mt-2">
+      <div className="mb-6 text-center">
+        <h3 className="mb-1 text-lg font-semibold text-gray-900">{study.playerName}</h3>
+        <p className="text-sm text-gray-500">
+          {study.kingdom} • {study.timeframe}
+        </p>
+        <div className="mt-2 inline-block rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
           {study.service}
         </div>
       </div>
 
       {/* Before/After Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="mb-6 grid grid-cols-2 gap-4">
         <div className="text-center">
-          <div className="text-sm font-medium text-gray-500 mb-2">TRƯỚC</div>
+          <div className="mb-2 text-sm font-medium text-gray-500">TRƯỚC</div>
           <div className="space-y-1">
             <div className="text-lg font-bold text-gray-700">{study.beforeStats.power}</div>
             <div className="text-sm text-gray-600">{study.beforeStats.rank}</div>
@@ -693,7 +677,7 @@ function CaseStudyCard({ study }: CaseStudyCardProps) {
         </div>
 
         <div className="text-center">
-          <div className="text-sm font-medium text-gray-500 mb-2">SAU</div>
+          <div className="mb-2 text-sm font-medium text-gray-500">SAU</div>
           <div className="space-y-1">
             <div className="text-lg font-bold text-green-600">{study.afterStats.power}</div>
             <div className="text-sm text-green-600">{study.afterStats.rank}</div>
@@ -703,14 +687,14 @@ function CaseStudyCard({ study }: CaseStudyCardProps) {
       </div>
 
       {/* Improvement Badge */}
-      <div className="text-center mb-4">
-        <div className="inline-block bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+      <div className="mb-4 text-center">
+        <div className="inline-block rounded-lg bg-gradient-to-r from-green-500 to-blue-500 px-4 py-2 text-sm font-bold text-white">
           {study.improvement}
         </div>
       </div>
 
       {/* Testimonial */}
-      <blockquote className="text-gray-600 italic text-sm leading-relaxed border-l-4 border-primary-200 pl-4">
+      <blockquote className="border-l-4 border-primary-200 pl-4 text-sm italic leading-relaxed text-gray-600">
         "{study.testimonial}"
       </blockquote>
     </div>
@@ -724,13 +708,9 @@ interface FAQItemProps {
 
 function FAQItem({ question, answer }: FAQItemProps) {
   return (
-    <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-3">
-        {question}
-      </h3>
-      <p className="text-gray-600 leading-relaxed">
-        {answer}
-      </p>
+    <div className="rounded-lg border border-gray-200 p-6 transition-shadow duration-200 hover:shadow-md">
+      <h3 className="mb-3 text-lg font-semibold text-gray-900">{question}</h3>
+      <p className="leading-relaxed text-gray-600">{answer}</p>
     </div>
   )
 }

@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import { swManager, useServiceWorker } from '@/lib/sw-registration'
+
 import { clientLogger } from '@/lib/client-logger'
+import { swManager, useServiceWorker } from '@/lib/sw-registration'
 
 export default function PWAProvider({ children }: { children: React.ReactNode }) {
   const {
@@ -17,7 +18,7 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
     // Initialize service worker when component mounts
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       clientLogger.info('PWA: Initializing service worker...')
-      
+
       // Request notification permission after user interaction
       const requestPermissions = async () => {
         // Wait for user interaction before requesting permissions
@@ -27,43 +28,43 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
             document.removeEventListener('touchstart', handleInteraction)
             resolve(void 0)
           }
-          
+
           document.addEventListener('click', handleInteraction, { once: true })
           document.addEventListener('touchstart', handleInteraction, { once: true })
-          
+
           // Fallback timeout
           setTimeout(resolve, 5000)
         })
-        
+
         // Request notification permission
         await requestNotificationPermission()
       }
-      
+
       requestPermissions()
     }
-    
+
     // Handle offline/online events
     const handleOnline = () => {
       clientLogger.info('PWA: Back online')
       hideOfflineIndicator()
-      
+
       // Process any queued actions
       swManager?.queueOfflineAction('sync', { timestamp: Date.now() })
     }
-    
+
     const handleOffline = () => {
       clientLogger.info('PWA: Gone offline')
       showOfflineIndicator()
     }
-    
+
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
-    
+
     // Check initial online status
     if (!navigator.onLine) {
       showOfflineIndicator()
     }
-    
+
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
@@ -79,11 +80,12 @@ function showOfflineIndicator() {
   if (existing) {
     existing.remove()
   }
-  
+
   // Create offline indicator
   const indicator = document.createElement('div')
   indicator.id = 'offline-indicator'
-  indicator.className = 'fixed top-0 left-0 right-0 bg-red-600 text-white p-2 text-center text-sm z-50 transform -translate-y-full transition-transform duration-300'
+  indicator.className =
+    'fixed top-0 left-0 right-0 bg-red-600 text-white p-2 text-center text-sm z-50 transform -translate-y-full transition-transform duration-300'
   indicator.innerHTML = `
     <div class="flex items-center justify-center space-x-2">
       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -92,9 +94,9 @@ function showOfflineIndicator() {
       <span>Không có kết nối internet. Một số tính năng có thể bị hạn chế.</span>
     </div>
   `
-  
+
   document.body.appendChild(indicator)
-  
+
   // Animate in
   setTimeout(() => {
     indicator.style.transform = 'translateY(0)'

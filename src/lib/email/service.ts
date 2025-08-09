@@ -1,7 +1,9 @@
 import { Resend } from 'resend'
+
 import { db } from '@/lib/db'
-import type { User, Booking, Payment, Lead, ServiceTier, Service } from '@prisma/client'
 import { getLogger } from '@/lib/monitoring/logger'
+
+import type { User, Booking, Payment, Lead, ServiceTier, Service } from '@prisma/client'
 
 // Extended types with relations
 interface BookingWithRelations extends Booking {
@@ -91,9 +93,9 @@ export class EmailService {
       return { success: true, messageId: result.data?.id }
     } catch (error) {
       getLogger().error('Email service error', error as Error)
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
       }
     }
   }
@@ -102,7 +104,7 @@ export class EmailService {
   async sendBookingConfirmation(booking: BookingWithRelations): Promise<boolean> {
     try {
       const template = this.getBookingConfirmationTemplate(booking)
-      
+
       const result = await this.sendEmail({
         to: booking.user.email,
         subject: template.subject,
@@ -136,7 +138,7 @@ export class EmailService {
   async sendPaymentConfirmation(payment: PaymentWithRelations): Promise<boolean> {
     try {
       const template = this.getPaymentConfirmationTemplate(payment)
-      
+
       const result = await this.sendEmail({
         to: payment.booking.user.email,
         subject: template.subject,
@@ -170,7 +172,7 @@ export class EmailService {
   async sendWelcomeEmail(user: User): Promise<boolean> {
     try {
       const template = this.getWelcomeTemplate(user)
-      
+
       const result = await this.sendEmail({
         to: user.email,
         subject: template.subject,
@@ -203,7 +205,7 @@ export class EmailService {
   async sendServiceReminder(booking: BookingWithRelations): Promise<boolean> {
     try {
       const template = this.getServiceReminderTemplate(booking)
-      
+
       const result = await this.sendEmail({
         to: booking.user.email,
         subject: template.subject,
@@ -237,7 +239,7 @@ export class EmailService {
   async sendLeadFollowUp(lead: Lead): Promise<boolean> {
     try {
       const template = this.getLeadFollowUpTemplate(lead)
-      
+
       if (!lead.email) {
         return false
       }
@@ -249,19 +251,21 @@ export class EmailService {
         text: template.text
       })
 
-      // Log communication
-      await db.communication.create({
-        userId: lead.assignedTo || null,
-        type: 'email',
-        channel: lead.email,
-        subject: template.subject,
-        content: template.html,
-        templateId: 'lead_followup',
-        templateData: {
-          success: result.success,
-          error: result.error
-        }
-      })
+      // Log communication if lead is assigned
+      if (lead.assignedTo) {
+        await db.communication.create({
+          userId: lead.assignedTo,
+          type: 'email',
+          channel: lead.email,
+          subject: template.subject,
+          content: template.html,
+          templateId: 'lead_followup',
+          templateData: {
+            success: result.success,
+            error: result.error
+          }
+        })
+      }
 
       return result.success
     } catch (error) {
@@ -503,7 +507,11 @@ export class EmailService {
 
   private getServiceReminderTemplate(booking: BookingWithRelations): EmailTemplate {
     const serviceName = `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
-    const daysLeft = booking.endDate ? Math.ceil((new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0
+    const daysLeft = booking.endDate
+      ? Math.ceil(
+          (new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+        )
+      : 0
 
     return {
       subject: `Nhắc nhở: Dịch vụ ${booking.serviceTier.service.name} sắp hết hạn`,

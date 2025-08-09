@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 // Static services data for now since Railway DB has issues
 const staticServices = [
@@ -6,7 +6,8 @@ const staticServices = [
     id: 'strategy-consulting',
     slug: 'strategy-consulting',
     name: 'Tư vấn chiến thuật',
-    description: 'Phân tích và tối ưu chiến thuật cho từng tình huống trong game với đội ngũ chuyên gia top 1% server. Chúng tôi sẽ phân tích chi tiết tài khoản, tối ưu formation, và đưa ra kế hoạch phát triển cá nhân hóa.',
+    description:
+      'Phân tích và tối ưu chiến thuật cho từng tình huống trong game với đội ngũ chuyên gia top 1% server. Chúng tôi sẽ phân tích chi tiết tài khoản, tối ưu formation, và đưa ra kế hoạch phát triển cá nhân hóa.',
     shortDescription: 'Tư vấn chiến thuật chuyên nghiệp',
     basePrice: 500000,
     currency: 'VND',
@@ -34,7 +35,8 @@ const staticServices = [
     id: 'alliance-management',
     slug: 'alliance-management',
     name: 'Quản lý liên minh',
-    description: 'Hỗ trợ toàn diện trong việc quản lý, tuyển dụng và phát triển liên minh mạnh mẽ. Từ thiết lập cấu trúc quản lý đến phát triển hệ thống event và training thành viên.',
+    description:
+      'Hỗ trợ toàn diện trong việc quản lý, tuyển dụng và phát triển liên minh mạnh mẽ. Từ thiết lập cấu trúc quản lý đến phát triển hệ thống event và training thành viên.',
     shortDescription: 'Quản lý liên minh chuyên nghiệp',
     basePrice: 1000000,
     currency: 'VND',
@@ -61,7 +63,8 @@ const staticServices = [
     id: 'kvk-support',
     slug: 'kvk-support',
     name: 'Hỗ trợ KvK',
-    description: 'Chiến thuật và coordination chuyên nghiệp cho Kingdom vs Kingdom. Hỗ trợ từ planning phase đến execution với real-time coordination và post-KvK analysis.',
+    description:
+      'Chiến thuật và coordination chuyên nghiệp cho Kingdom vs Kingdom. Hỗ trợ từ planning phase đến execution với real-time coordination và post-KvK analysis.',
     shortDescription: 'Hỗ trợ KvK chuyên nghiệp',
     basePrice: 2000000,
     currency: 'VND',
@@ -89,7 +92,8 @@ const staticServices = [
     id: 'vip-support',
     slug: 'vip-support',
     name: 'VIP Support 24/7',
-    description: 'Gói dịch vụ cao cấp nhất với hỗ trợ ưu tiên và tư vấn chuyên nghiệp mọi lúc mọi nơi. Bao gồm tất cả dịch vụ khác với dedicated account manager.',
+    description:
+      'Gói dịch vụ cao cấp nhất với hỗ trợ ưu tiên và tư vấn chuyên nghiệp mọi lúc mọi nơi. Bao gồm tất cả dịch vụ khác với dedicated account manager.',
     shortDescription: 'VIP Support 24/7',
     basePrice: 3000000,
     currency: 'VND',
@@ -116,7 +120,8 @@ const staticServices = [
     id: 'commander-training',
     slug: 'commander-training',
     name: 'Training Commander',
-    description: 'Hướng dẫn chi tiết cách build và phát triển commander hiệu quả nhất. Từ talent tree optimization đến equipment và pairing strategies.',
+    description:
+      'Hướng dẫn chi tiết cách build và phát triển commander hiệu quả nhất. Từ talent tree optimization đến equipment và pairing strategies.',
     shortDescription: 'Training commander chuyên nghiệp',
     basePrice: 300000,
     currency: 'VND',
@@ -143,7 +148,8 @@ const staticServices = [
     id: 'personal-coaching',
     slug: 'personal-coaching',
     name: 'Coaching 1-on-1',
-    description: 'Hướng dẫn cá nhân hóa từ chuyên gia top player hàng đầu. Customize hoàn toàn theo nhu cầu và mục tiêu cá nhân của từng player.',
+    description:
+      'Hướng dẫn cá nhân hóa từ chuyên gia top player hàng đầu. Customize hoàn toàn theo nhu cầu và mục tiêu cá nhân của từng player.',
     shortDescription: 'Coaching cá nhân 1-on-1',
     basePrice: 200000,
     currency: 'VND',
@@ -178,29 +184,35 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { slug } = params
-    
+
     // Find service by slug from static data
     const service = staticServices.find(s => s.slug === slug && s.isActive)
-    
+
     if (!service) {
-      return NextResponse.json({
-        success: false,
-        error: 'Service not found',
-        message: `Service with slug '${slug}' does not exist or is not active`
-      }, { status: 404 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Service not found',
+          message: `Service with slug '${slug}' does not exist or is not active`
+        },
+        { status: 404 }
+      )
     }
-    
+
     return NextResponse.json({
       success: true,
       data: service
     })
   } catch (error) {
     console.error('Service detail API error:', error)
-    
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to fetch service details',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to fetch service details',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
   }
 }

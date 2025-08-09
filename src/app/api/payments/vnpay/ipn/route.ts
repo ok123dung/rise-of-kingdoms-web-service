@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { VNPayPayment } from '@/lib/payments/vnpay'
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { getLogger } from '@/lib/monitoring/logger'
+import { VNPayPayment } from '@/lib/payments/vnpay'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const query: { [key: string]: string } = {}
-    
+
     // Convert URLSearchParams to object
     searchParams.forEach((value, key) => {
       query[key] = value

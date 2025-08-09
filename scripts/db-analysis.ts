@@ -22,7 +22,9 @@ async function analyzeDatabase() {
     })
     console.log(`\n👥 USERS (${userCount} total):`)
     users.forEach(user => {
-      console.log(`   - ${user.fullName} (${user.email}): ${user.rokPower ? `${user.rokPower} power` : 'No power set'} - ${user.status}`)
+      console.log(
+        `   - ${user.fullName} (${user.email}): ${user.rokPower ? `${user.rokPower} power` : 'No power set'} - ${user.status}`
+      )
     })
 
     // Check Services
@@ -34,7 +36,9 @@ async function analyzeDatabase() {
     })
     console.log(`\n🛠️ SERVICES (${serviceCount} total):`)
     services.forEach(service => {
-      console.log(`   - ${service.name} (${service.slug}): ${service.serviceTiers.length} tiers, ${service.basePrice} VNĐ`)
+      console.log(
+        `   - ${service.name} (${service.slug}): ${service.serviceTiers.length} tiers, ${service.basePrice} VNĐ`
+      )
     })
 
     // Check Bookings
@@ -61,7 +65,9 @@ async function analyzeDatabase() {
       const customer = booking.user.fullName
       const amount = booking.finalAmount
       const paymentCount = booking.payments.length
-      console.log(`   - ${customer}: ${service} (${tier}) - ${amount} VNĐ - ${paymentCount} payment(s) - ${booking.status}`)
+      console.log(
+        `   - ${customer}: ${service} (${tier}) - ${amount} VNĐ - ${paymentCount} payment(s) - ${booking.status}`
+      )
     })
 
     // Check Payments
@@ -80,7 +86,9 @@ async function analyzeDatabase() {
     console.log(`\n💳 PAYMENTS (${paymentCount} total):`)
     payments.forEach(payment => {
       const customer = payment.booking.user.fullName
-      console.log(`   - ${customer}: ${payment.amount} VNĐ via ${payment.paymentMethod} - ${payment.status}`)
+      console.log(
+        `   - ${customer}: ${payment.amount} VNĐ via ${payment.paymentMethod} - ${payment.status}`
+      )
     })
 
     // Check Leads
@@ -97,7 +105,9 @@ async function analyzeDatabase() {
     })
     console.log(`\n🎯 LEADS (${leadCount} total):`)
     leads.forEach(lead => {
-      console.log(`   - ${lead.fullName} (${lead.email}): ${lead.serviceInterest} interest, score ${lead.leadScore}, ${lead.status} from ${lead.source}`)
+      console.log(
+        `   - ${lead.fullName} (${lead.email}): ${lead.serviceInterest} interest, score ${lead.leadScore}, ${lead.status} from ${lead.source}`
+      )
     })
 
     // Revenue Analysis
@@ -110,7 +120,9 @@ async function analyzeDatabase() {
     })
     console.log(`\n💰 REVENUE ANALYSIS:`)
     console.log(`   - Total Revenue: ${totalRevenue._sum.amount || 0} VNĐ`)
-    console.log(`   - Average Booking Value: ${Math.round(Number(avgBookingValue._avg.finalAmount) || 0)} VNĐ`)
+    console.log(
+      `   - Average Booking Value: ${Math.round(Number(avgBookingValue._avg.finalAmount) || 0)} VNĐ`
+    )
 
     // Database Health Check
     console.log(`\n🔧 DATABASE HEALTH:`)
@@ -139,7 +151,6 @@ async function analyzeDatabase() {
     console.log(`\n⚠️ POTENTIAL ISSUES:`)
     console.log(`   - Users without bookings: ${usersWithoutBookings}`)
     console.log(`   - Bookings without payments: ${bookingsWithoutPayments}`)
-
   } catch (error) {
     console.error('❌ Database analysis failed:', error)
   } finally {

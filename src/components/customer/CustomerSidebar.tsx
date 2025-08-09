@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { 
+
+import {
   LayoutDashboard,
   ShoppingBag,
   CreditCard,
@@ -15,6 +14,8 @@ import {
   Menu,
   Home
 } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const navigation = [
   { name: 'Tổng quan', href: '/dashboard', icon: LayoutDashboard },
@@ -23,7 +24,7 @@ const navigation = [
   { name: 'Tin nhắn', href: '/dashboard/messages', icon: MessageSquare },
   { name: 'Gia hạn dịch vụ', href: '/dashboard/renewals', icon: RefreshCw },
   { name: 'Hồ sơ cá nhân', href: '/dashboard/profile', icon: User },
-  { name: 'Hỗ trợ', href: '/dashboard/support', icon: HelpCircle },
+  { name: 'Hỗ trợ', href: '/dashboard/support', icon: HelpCircle }
 ]
 
 export default function CustomerSidebar() {
@@ -36,10 +37,10 @@ export default function CustomerSidebar() {
       <div className={`lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 z-50 flex">
           <div className="relative flex w-full max-w-xs flex-1 flex-col bg-white">
-            <div className="absolute top-0 right-0 -mr-12 pt-2">
+            <div className="absolute right-0 top-0 -mr-12 pt-2">
               <button
-                type="button"
                 className="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                type="button"
                 onClick={() => setSidebarOpen(false)}
               >
                 <X className="h-6 w-6 text-white" />
@@ -47,7 +48,7 @@ export default function CustomerSidebar() {
             </div>
             <SidebarContent />
           </div>
-          <div className="w-14 flex-shrink-0"></div>
+          <div className="w-14 flex-shrink-0" />
         </div>
       </div>
 
@@ -61,8 +62,8 @@ export default function CustomerSidebar() {
       {/* Mobile menu button */}
       <div className="lg:hidden">
         <button
+          className="fixed left-4 top-4 z-40 rounded-md bg-white p-2 text-gray-400 shadow-lg"
           type="button"
-          className="fixed top-4 left-4 z-40 rounded-md bg-white p-2 text-gray-400 shadow-lg"
           onClick={() => setSidebarOpen(true)}
         >
           <Menu className="h-6 w-6" />
@@ -75,28 +76,29 @@ export default function CustomerSidebar() {
     return (
       <>
         <div className="flex h-16 shrink-0 items-center">
-          <Link href="/dashboard" className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">RK</span>
+          <Link className="flex items-center space-x-3" href="/dashboard">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600">
+              <span className="text-sm font-bold text-white">RK</span>
             </div>
             <span className="text-xl font-bold text-gray-900">RoK Services</span>
           </Link>
         </div>
         <nav className="flex flex-1 flex-col">
-          <ul role="list" className="flex flex-1 flex-col gap-y-7">
+          <ul className="flex flex-1 flex-col gap-y-7" role="list">
             <li>
-              <ul role="list" className="-mx-2 space-y-1">
-                {navigation.map((item) => {
+              <ul className="-mx-2 space-y-1" role="list">
+                {navigation.map(item => {
                   const isActive = pathname === item.href
                   return (
                     <li key={item.name}>
                       <Link
                         href={item.href}
                         className={`
-                          group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors
-                          ${isActive
-                            ? 'bg-primary-600 text-white'
-                            : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                          group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors
+                          ${
+                            isActive
+                              ? 'bg-primary-600 text-white'
+                              : 'text-gray-700 hover:bg-gray-50 hover:text-primary-600'
                           }
                         `}
                       >
@@ -112,17 +114,15 @@ export default function CustomerSidebar() {
                 })}
               </ul>
             </li>
-            
+
             {/* Quick links */}
             <li>
-              <div className="text-xs font-semibold leading-6 text-gray-400">
-                Liên kết nhanh
-              </div>
-              <ul role="list" className="-mx-2 mt-2 space-y-1">
+              <div className="text-xs font-semibold leading-6 text-gray-400">Liên kết nhanh</div>
+              <ul className="-mx-2 mt-2 space-y-1" role="list">
                 <li>
                   <Link
+                    className="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-primary-600"
                     href="/"
-                    className="text-gray-700 hover:text-primary-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                   >
                     <Home className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-primary-600" />
                     Trang chủ
@@ -130,8 +130,8 @@ export default function CustomerSidebar() {
                 </li>
                 <li>
                   <Link
+                    className="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-primary-600"
                     href="/services"
-                    className="text-gray-700 hover:text-primary-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                   >
                     <ShoppingBag className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-primary-600" />
                     Đặt dịch vụ mới
@@ -141,17 +141,15 @@ export default function CustomerSidebar() {
             </li>
           </ul>
         </nav>
-        
+
         {/* Support section */}
         <div className="border-t border-gray-200 pt-4">
-          <div className="bg-primary-50 rounded-lg p-4">
+          <div className="rounded-lg bg-primary-50 p-4">
             <h3 className="text-sm font-medium text-primary-900">Cần hỗ trợ?</h3>
-            <p className="text-xs text-primary-700 mt-1">
-              Team hỗ trợ 24/7 qua Discord
-            </p>
+            <p className="mt-1 text-xs text-primary-700">Team hỗ trợ 24/7 qua Discord</p>
             <Link
-              href={process.env.NEXT_PUBLIC_DISCORD_INVITE || '#'}
               className="mt-2 inline-flex items-center text-xs font-medium text-primary-600 hover:text-primary-500"
+              href={process.env.NEXT_PUBLIC_DISCORD_INVITE || '#'}
             >
               Tham gia Discord
             </Link>

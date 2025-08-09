@@ -1,14 +1,14 @@
-import { prisma } from '@/lib/db'
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  ShoppingBag, 
-  Users, 
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  ShoppingBag,
+  Users,
   CreditCard,
-  UserCheck,
-  Calendar
+  UserCheck
 } from 'lucide-react'
+
+import { prisma } from '@/lib/db'
 
 async function getDashboardStats() {
   const now = new Date()
@@ -36,17 +36,17 @@ async function getDashboardStats() {
       },
       _sum: { amount: true }
     }),
-    
+
     // Total bookings this month
     prisma.booking.count({
       where: { createdAt: { gte: startOfMonth } }
     }),
-    
+
     // Total customers this month
     prisma.user.count({
       where: { createdAt: { gte: startOfMonth } }
     }),
-    
+
     // Completed payments this month
     prisma.payment.count({
       where: {
@@ -54,31 +54,31 @@ async function getDashboardStats() {
         paidAt: { gte: startOfMonth }
       }
     }),
-    
+
     // Active leads
     prisma.lead.count({
       where: {
         status: { in: ['new', 'contacted', 'qualified'] }
       }
     }),
-    
+
     // Today's bookings
     prisma.booking.count({
       where: { createdAt: { gte: startOfToday } }
     }),
-    
+
     // Last month revenue for comparison
     prisma.payment.aggregate({
       where: {
         status: 'completed',
-        paidAt: { 
+        paidAt: {
           gte: startOfLastMonth,
           lte: endOfLastMonth
         }
       },
       _sum: { amount: true }
     }),
-    
+
     // Last month bookings for comparison
     prisma.booking.count({
       where: {
@@ -91,13 +91,14 @@ async function getDashboardStats() {
   ])
 
   // Calculate growth percentages
-  const revenueGrowth = lastMonthRevenue._sum.amount 
-    ? ((Number(totalRevenue._sum.amount || 0) - Number(lastMonthRevenue._sum.amount)) / Number(lastMonthRevenue._sum.amount)) * 100
+  const revenueGrowth = lastMonthRevenue._sum.amount
+    ? ((Number(totalRevenue._sum.amount || 0) - Number(lastMonthRevenue._sum.amount)) /
+        Number(lastMonthRevenue._sum.amount)) *
+      100
     : 0
 
-  const bookingGrowth = lastMonthBookings > 0
-    ? ((totalBookings - lastMonthBookings) / lastMonthBookings) * 100
-    : 0
+  const bookingGrowth =
+    lastMonthBookings > 0 ? ((totalBookings - lastMonthBookings) / lastMonthBookings) * 100 : 0
 
   return {
     revenue: {
@@ -164,18 +165,16 @@ export default async function DashboardStats() {
 
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
-      {statCards.map((stat) => (
+      {statCards.map(stat => (
         <div
           key={stat.name}
           className="relative overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:px-6 sm:py-6"
         >
           <dt>
             <div className={`absolute rounded-md p-3 ${stat.color}`}>
-              <stat.icon className="h-6 w-6" aria-hidden="true" />
+              <stat.icon aria-hidden="true" className="h-6 w-6" />
             </div>
-            <p className="ml-16 truncate text-sm font-medium text-gray-500">
-              {stat.name}
-            </p>
+            <p className="ml-16 truncate text-sm font-medium text-gray-500">{stat.name}</p>
           </dt>
           <dd className="ml-16 flex items-baseline">
             <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
@@ -194,9 +193,7 @@ export default async function DashboardStats() {
               </p>
             )}
           </dd>
-          {stat.subtitle && (
-            <p className="ml-16 text-xs text-gray-400 mt-1">{stat.subtitle}</p>
-          )}
+          {stat.subtitle && <p className="ml-16 mt-1 text-xs text-gray-400">{stat.subtitle}</p>}
         </div>
       ))}
     </div>

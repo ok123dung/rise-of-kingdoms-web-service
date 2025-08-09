@@ -6,11 +6,7 @@ interface LoadingSpinnerProps {
   text?: string
 }
 
-export default function LoadingSpinner({ 
-  size = 'md', 
-  className, 
-  text 
-}: LoadingSpinnerProps) {
+export default function LoadingSpinner({ size = 'md', className, text }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-8 w-8',
@@ -26,18 +22,14 @@ export default function LoadingSpinner({
   return (
     <div className={cn('flex flex-col items-center justify-center gap-2', className)}>
       <div
+        aria-label={text || 'Loading'}
+        role="status"
         className={cn(
           'animate-spin rounded-full border-2 border-gray-200 border-t-blue-600',
           sizeClasses[size]
         )}
-        role="status"
-        aria-label={text || "Loading"}
       />
-      {text && (
-        <p className={cn('text-gray-600 font-medium', textSizes[size])}>
-          {text}
-        </p>
-      )}
+      {text && <p className={cn('font-medium text-gray-600', textSizes[size])}>{text}</p>}
     </div>
   )
 }

@@ -1,71 +1,63 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 // Payment gateway components - heavy because they include external scripts
-export const DynamicMoMoPayment = dynamic(
-  () => import('@/components/payment/MoMoPayment'),
-  {
-    loading: () => (
-      <div className="bg-white border-2 border-gray-200 rounded-lg p-6 animate-pulse">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-pink-200 rounded"></div>
-          <div>
-            <div className="h-5 bg-gray-300 rounded w-24 mb-2"></div>
-            <div className="h-4 bg-gray-300 rounded w-32"></div>
-          </div>
-        </div>
-        <div className="mt-4 text-center">
-          <div className="h-4 bg-gray-300 rounded w-48 mx-auto"></div>
+export const DynamicMoMoPayment = dynamic(() => import('@/components/payment/MoMoPayment'), {
+  loading: () => (
+    <div className="animate-pulse rounded-lg border-2 border-gray-200 bg-white p-6">
+      <div className="flex items-center space-x-4">
+        <div className="h-12 w-12 rounded bg-pink-200" />
+        <div>
+          <div className="mb-2 h-5 w-24 rounded bg-gray-300" />
+          <div className="h-4 w-32 rounded bg-gray-300" />
         </div>
       </div>
-    ),
-    ssr: false
-  }
-)
+      <div className="mt-4 text-center">
+        <div className="mx-auto h-4 w-48 rounded bg-gray-300" />
+      </div>
+    </div>
+  ),
+  ssr: false
+})
 
-export const DynamicVNPayPayment = dynamic(
-  () => import('@/components/payment/VNPayPayment'),
-  {
-    loading: () => (
-      <div className="bg-white border-2 border-gray-200 rounded-lg p-6 animate-pulse">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-blue-200 rounded"></div>
-          <div>
-            <div className="h-5 bg-gray-300 rounded w-24 mb-2"></div>
-            <div className="h-4 bg-gray-300 rounded w-36"></div>
-          </div>
-        </div>
-        <div className="mt-4 text-center">
-          <div className="h-4 bg-gray-300 rounded w-52 mx-auto"></div>
+export const DynamicVNPayPayment = dynamic(() => import('@/components/payment/VNPayPayment'), {
+  loading: () => (
+    <div className="animate-pulse rounded-lg border-2 border-gray-200 bg-white p-6">
+      <div className="flex items-center space-x-4">
+        <div className="h-12 w-12 rounded bg-blue-200" />
+        <div>
+          <div className="mb-2 h-5 w-24 rounded bg-gray-300" />
+          <div className="h-4 w-36 rounded bg-gray-300" />
         </div>
       </div>
-    ),
-    ssr: false
-  }
-)
+      <div className="mt-4 text-center">
+        <div className="mx-auto h-4 w-52 rounded bg-gray-300" />
+      </div>
+    </div>
+  ),
+  ssr: false
+})
 
-export const DynamicZaloPayPayment = dynamic(
-  () => import('@/components/payment/ZaloPayPayment'),
-  {
-    loading: () => (
-      <div className="bg-white border-2 border-gray-200 rounded-lg p-6 animate-pulse">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-blue-200 rounded"></div>
-          <div>
-            <div className="h-5 bg-gray-300 rounded w-24 mb-2"></div>
-            <div className="h-4 bg-gray-300 rounded w-40"></div>
-          </div>
-        </div>
-        <div className="mt-4 text-center">
-          <div className="h-4 bg-gray-300 rounded w-44 mx-auto"></div>
+export const DynamicZaloPayPayment = dynamic(() => import('@/components/payment/ZaloPayPayment'), {
+  loading: () => (
+    <div className="animate-pulse rounded-lg border-2 border-gray-200 bg-white p-6">
+      <div className="flex items-center space-x-4">
+        <div className="h-12 w-12 rounded bg-blue-200" />
+        <div>
+          <div className="mb-2 h-5 w-24 rounded bg-gray-300" />
+          <div className="h-4 w-40 rounded bg-gray-300" />
         </div>
       </div>
-    ),
-    ssr: false
-  }
-)
+      <div className="mt-4 text-center">
+        <div className="mx-auto h-4 w-44 rounded bg-gray-300" />
+      </div>
+    </div>
+  ),
+  ssr: false
+})
 
 // QR Code component (can be heavy due to QR generation)
 export const DynamicQRCodeGenerator = dynamic(
@@ -73,10 +65,10 @@ export const DynamicQRCodeGenerator = dynamic(
   {
     loading: () => (
       <div className="flex flex-col items-center space-y-4">
-        <div className="w-48 h-48 bg-gray-200 rounded flex items-center justify-center animate-pulse">
+        <div className="flex h-48 w-48 animate-pulse items-center justify-center rounded bg-gray-200">
           <LoadingSpinner />
         </div>
-        <div className="h-4 bg-gray-300 rounded w-36"></div>
+        <div className="h-4 w-36 rounded bg-gray-300" />
       </div>
     ),
     ssr: false
@@ -84,60 +76,60 @@ export const DynamicQRCodeGenerator = dynamic(
 )
 
 // Payment history component (potentially large data)
-export const DynamicPaymentHistory = dynamic(
-  () => import('@/components/payment/PaymentHistory'),
-  {
-    loading: () => (
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b">
-          <div className="h-6 bg-gray-300 rounded w-40"></div>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-4 border rounded-lg animate-pulse">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gray-300 rounded"></div>
-                  <div>
-                    <div className="h-4 bg-gray-300 rounded w-32 mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-24"></div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="h-4 bg-gray-300 rounded w-20 mb-2"></div>
-                  <div className="h-3 bg-green-300 rounded w-16"></div>
+export const DynamicPaymentHistory = dynamic(() => import('@/components/payment/PaymentHistory'), {
+  loading: () => (
+    <div className="rounded-lg bg-white shadow">
+      <div className="border-b p-6">
+        <div className="h-6 w-40 rounded bg-gray-300" />
+      </div>
+      <div className="p-6">
+        <div className="space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="flex animate-pulse items-center justify-between rounded-lg border p-4"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="h-10 w-10 rounded bg-gray-300" />
+                <div>
+                  <div className="mb-2 h-4 w-32 rounded bg-gray-300" />
+                  <div className="h-3 w-24 rounded bg-gray-300" />
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="text-right">
+                <div className="mb-2 h-4 w-20 rounded bg-gray-300" />
+                <div className="h-3 w-16 rounded bg-green-300" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    ),
-    ssr: false
-  }
-)
+    </div>
+  ),
+  ssr: false
+})
 
 // Payment analytics (heavy charts and calculations)
 export const DynamicPaymentAnalytics = dynamic(
   () => import('@/components/analytics/PaymentAnalytics'),
   {
     loading: () => (
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="h-6 bg-gray-300 rounded mb-6 w-48"></div>
-        
+      <div className="rounded-lg bg-white p-6 shadow">
+        <div className="mb-6 h-6 w-48 rounded bg-gray-300" />
+
         {/* Revenue chart skeleton */}
         <div className="mb-8">
-          <div className="h-4 bg-gray-300 rounded w-32 mb-4"></div>
-          <div className="h-64 bg-gray-200 rounded animate-pulse"></div>
+          <div className="mb-4 h-4 w-32 rounded bg-gray-300" />
+          <div className="h-64 animate-pulse rounded bg-gray-200" />
         </div>
-        
+
         {/* Payment method breakdown */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="text-center p-4 border rounded-lg animate-pulse">
-              <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-3"></div>
-              <div className="h-4 bg-gray-300 rounded w-20 mx-auto mb-2"></div>
-              <div className="h-3 bg-gray-300 rounded w-16 mx-auto"></div>
+            <div key={i} className="animate-pulse rounded-lg border p-4 text-center">
+              <div className="mx-auto mb-3 h-16 w-16 rounded-full bg-gray-300" />
+              <div className="mx-auto mb-2 h-4 w-20 rounded bg-gray-300" />
+              <div className="mx-auto h-3 w-16 rounded bg-gray-300" />
             </div>
           ))}
         </div>
@@ -148,57 +140,54 @@ export const DynamicPaymentAnalytics = dynamic(
 )
 
 // Refund management component
-export const DynamicRefundManager = dynamic(
-  () => import('@/components/payment/RefundManager'),
-  {
-    loading: () => (
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b">
-          <div className="h-6 bg-gray-300 rounded w-36"></div>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="h-4 bg-gray-300 rounded w-24 mb-2"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-              </div>
-              <div>
-                <div className="h-4 bg-gray-300 rounded w-20 mb-2"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-              </div>
+export const DynamicRefundManager = dynamic(() => import('@/components/payment/RefundManager'), {
+  loading: () => (
+    <div className="rounded-lg bg-white shadow">
+      <div className="border-b p-6">
+        <div className="h-6 w-36 rounded bg-gray-300" />
+      </div>
+      <div className="p-6">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <div className="mb-2 h-4 w-24 rounded bg-gray-300" />
+              <div className="h-10 rounded bg-gray-200" />
             </div>
             <div>
-              <div className="h-4 bg-gray-300 rounded w-28 mb-2"></div>
-              <div className="h-24 bg-gray-200 rounded"></div>
+              <div className="mb-2 h-4 w-20 rounded bg-gray-300" />
+              <div className="h-10 rounded bg-gray-200" />
             </div>
-            <div className="flex justify-end space-x-3">
-              <div className="h-10 bg-gray-300 rounded w-20"></div>
-              <div className="h-10 bg-red-300 rounded w-32"></div>
-            </div>
+          </div>
+          <div>
+            <div className="mb-2 h-4 w-28 rounded bg-gray-300" />
+            <div className="h-24 rounded bg-gray-200" />
+          </div>
+          <div className="flex justify-end space-x-3">
+            <div className="h-10 w-20 rounded bg-gray-300" />
+            <div className="h-10 w-32 rounded bg-red-300" />
           </div>
         </div>
       </div>
-    ),
-    ssr: false
-  }
-)
+    </div>
+  ),
+  ssr: false
+})
 
 // Payment security verification
 export const DynamicPaymentSecurity = dynamic(
   () => import('@/components/payment/PaymentSecurity'),
   {
     loading: () => (
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-6 h-6 bg-green-300 rounded animate-pulse"></div>
-          <div className="h-5 bg-gray-300 rounded w-32"></div>
+      <div className="rounded-lg border border-green-200 bg-gradient-to-r from-green-50 to-blue-50 p-6">
+        <div className="mb-4 flex items-center space-x-3">
+          <div className="h-6 w-6 animate-pulse rounded bg-green-300" />
+          <div className="h-5 w-32 rounded bg-gray-300" />
         </div>
         <div className="space-y-2">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-300 rounded-full"></div>
-              <div className="h-4 bg-gray-300 rounded w-48"></div>
+              <div className="h-4 w-4 rounded-full bg-green-300" />
+              <div className="h-4 w-48 rounded bg-gray-300" />
             </div>
           ))}
         </div>
@@ -214,19 +203,19 @@ export const DynamicAdvancedPaymentSelector = dynamic(
   {
     loading: () => (
       <div className="space-y-4">
-        <div className="h-6 bg-gray-300 rounded w-48 mb-6"></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mb-6 h-6 w-48 rounded bg-gray-300" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="border-2 border-gray-300 rounded-lg p-6 animate-pulse">
-              <div className="w-16 h-16 bg-gray-300 rounded mx-auto mb-4"></div>
-              <div className="h-5 bg-gray-300 rounded w-24 mx-auto mb-2"></div>
-              <div className="h-4 bg-gray-300 rounded w-32 mx-auto mb-4"></div>
-              <div className="h-4 bg-gray-300 rounded w-20 mx-auto"></div>
+            <div key={i} className="animate-pulse rounded-lg border-2 border-gray-300 p-6">
+              <div className="mx-auto mb-4 h-16 w-16 rounded bg-gray-300" />
+              <div className="mx-auto mb-2 h-5 w-24 rounded bg-gray-300" />
+              <div className="mx-auto mb-4 h-4 w-32 rounded bg-gray-300" />
+              <div className="mx-auto h-4 w-20 rounded bg-gray-300" />
             </div>
           ))}
         </div>
         <div className="mt-8 flex justify-center">
-          <div className="h-12 bg-blue-300 rounded w-48"></div>
+          <div className="h-12 w-48 rounded bg-blue-300" />
         </div>
       </div>
     ),

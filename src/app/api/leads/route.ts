@@ -1,34 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+
 import { prisma } from '@/lib/db'
 import { leadValidationSchema, sanitizeUserInput, sanitizePhoneNumber } from '@/lib/validation'
-import { z } from 'zod'
 
 // POST /api/leads - Tạo lead mới từ contact form
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Sanitize input data
     const sanitizedData = {
       ...body,
       fullName: body.fullName ? sanitizeUserInput(body.fullName) : undefined,
       phone: body.phone ? sanitizePhoneNumber(body.phone) : undefined,
-      notes: body.notes ? sanitizeUserInput(body.notes) : undefined,
+      notes: body.notes ? sanitizeUserInput(body.notes) : undefined
     }
-    
+
     const validatedData = leadValidationSchema.parse(sanitizedData)
-    
+
     // Check for existing lead with same email or phone
     const existingLead = await prisma.lead.findFirst({
       where: {
         OR: [
           ...(validatedData.email ? [{ email: validatedData.email }] : []),
-          ...(validatedData.phone ? [{ phone: validatedData.phone }] : []),
+          ...(validatedData.phone ? [{ phone: validatedData.phone }] : [])
         ]
       }
     })
-    
+
     if (existingLead) {
       // Update existing lead instead of creating new one
       const updatedLead = await prisma.lead.update({
@@ -39,25 +40,25 @@ export async function POST(request: NextRequest) {
           updatedAt: new Date()
         }
       })
-      
+
       return NextResponse.json({
         success: true,
         data: updatedLead,
         message: 'Lead updated successfully'
       })
     }
-    
+
     // Create new lead
     const leadData = {
       ...validatedData,
       leadScore: calculateLeadScore(validatedData),
-      status: 'new',
+      status: 'new'
     }
-    
+
     const lead = await prisma.lead.create({
       data: leadData
     })
-    
+
     // Trigger automated follow-up sequence
     try {
       // Schedule follow-up in communication table instead
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
       const systemUser = await prisma.user.findFirst({
         where: { email: 'system@rokdbot.com' }
       })
-      
+
       if (systemUser || lead.assignedTo) {
         await prisma.communication.create({
           data: {
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error('Failed to schedule follow-up:', error)
     }
-    
+
     // Send notification to Discord
     try {
       const { discordNotifier } = await import('@/lib/discord')
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error('Failed to send Discord notification:', error)
     }
-    
+
     // Send confirmation email
     if (lead.email) {
       try {
@@ -111,28 +112,37 @@ export async function POST(request: NextRequest) {
         console.error('Failed to send confirmation email:', error)
       }
     }
-    
-    return NextResponse.json({
-      success: true,
-      data: lead,
-      message: 'Lead created successfully'
-    }, { status: 201 })
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: lead,
+        message: 'Lead created successfully'
+      },
+      { status: 201 }
+    )
   } catch (error) {
     console.error('Error creating lead:', error)
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        success: false,
-        error: 'Validation error',
-        details: error.errors
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Validation error',
+          details: error.errors
+        },
+        { status: 400 }
+      )
     }
-    
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to create lead',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to create lead',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -142,30 +152,30 @@ export async function GET(request: NextRequest) {
     // Add authentication check for admin role
     const { getCurrentUser } = await import('@/lib/auth')
     const user = await getCurrentUser()
-    
-    if (!user || (!user.staffProfile || !['admin', 'manager'].includes(user.staffProfile.role))) {
-      return NextResponse.json({
-        success: false,
-        error: 'Unauthorized access'
-      }, { status: 403 })
+
+    if (!user || !user.staffProfile || !['admin', 'manager'].includes(user.staffProfile.role)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Unauthorized access'
+        },
+        { status: 403 }
+      )
     }
-    
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const source = searchParams.get('source')
     const assignedTo = searchParams.get('assignedTo')
-    
+
     const filters: any = {}
     if (status) filters.status = status
     if (source) filters.source = source
     if (assignedTo) filters.assignedTo = assignedTo
-    
+
     const leads = await prisma.lead.findMany({
       where: filters,
-      orderBy: [
-        { leadScore: 'desc' },
-        { createdAt: 'desc' }
-      ],
+      orderBy: [{ leadScore: 'desc' }, { createdAt: 'desc' }],
       include: {
         assignedUser: {
           select: {
@@ -176,7 +186,7 @@ export async function GET(request: NextRequest) {
         }
       }
     })
-    
+
     return NextResponse.json({
       success: true,
       data: leads,
@@ -184,12 +194,15 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error fetching leads:', error)
-    
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to fetch leads',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to fetch leads',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -201,21 +214,21 @@ function calculateLeadScore(data: {
   source?: string
 }): number {
   let score = 0
-  
+
   // Contact information scoring
   if (data.email) score += 20
   if (data.phone) score += 25
   if (data.fullName) score += 15
-  
+
   // Service interest scoring
   if (data.serviceInterest === 'premium') score += 30
   else if (data.serviceInterest === 'pro') score += 20
   else if (data.serviceInterest === 'basic') score += 10
-  
+
   // Source scoring
   if (data.source === 'referral') score += 15
   else if (data.source === 'discord') score += 10
   else if (data.source === 'website') score += 5
-  
+
   return Math.min(score, 100)
 }

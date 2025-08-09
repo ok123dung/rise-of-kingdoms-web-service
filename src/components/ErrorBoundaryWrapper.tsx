@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 interface ErrorBoundaryWrapperProps {
@@ -36,11 +37,7 @@ export function ErrorBoundaryWrapper({
   onError
 }: ErrorBoundaryWrapperProps) {
   return (
-    <ErrorBoundary
-      fallback={fallback}
-      showDetails={showDetails}
-      onError={onError}
-    >
+    <ErrorBoundary fallback={fallback} showDetails={showDetails} onError={onError}>
       {children}
     </ErrorBoundary>
   )
@@ -56,23 +53,23 @@ export function PageErrorBoundary({
 }) {
   return (
     <ErrorBoundary
+      showDetails={process.env.NODE_ENV === 'development'}
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center space-y-4 p-8">
-            <h1 className="text-4xl font-bold text-destructive">Oops!</h1>
-            <p className="text-lg text-muted-foreground">
+        <div className="bg-background flex min-h-screen items-center justify-center">
+          <div className="space-y-4 p-8 text-center">
+            <h1 className="text-destructive text-4xl font-bold">Oops!</h1>
+            <p className="text-muted-foreground text-lg">
               {pageName ? `Error loading ${pageName}` : 'Something went wrong'}
             </p>
             <button
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
             >
               Refresh Page
             </button>
           </div>
         </div>
       }
-      showDetails={process.env.NODE_ENV === 'development'}
     >
       {children}
     </ErrorBoundary>
@@ -92,8 +89,10 @@ export function SectionErrorBoundary({
   return (
     <ErrorBoundary
       fallback={
-        <div className={`p-4 border border-destructive/20 rounded-md bg-destructive/5 ${className}`}>
-          <p className="text-sm text-destructive">
+        <div
+          className={`border-destructive/20 bg-destructive/5 rounded-md border p-4 ${className}`}
+        >
+          <p className="text-destructive text-sm">
             {sectionName ? `Error in ${sectionName}` : 'Failed to load this section'}
           </p>
         </div>
@@ -116,9 +115,7 @@ export function AsyncBoundary({
 }) {
   return (
     <React.Suspense fallback={fallback || <div className="animate-pulse">Loading...</div>}>
-      <ErrorBoundary fallback={errorFallback}>
-        {children}
-      </ErrorBoundary>
+      <ErrorBoundary fallback={errorFallback}>{children}</ErrorBoundary>
     </React.Suspense>
   )
 }

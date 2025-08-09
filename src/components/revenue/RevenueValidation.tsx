@@ -64,8 +64,9 @@ export function RevenueValidation() {
       })
 
       // Check SEO elements
-      const title = document.title
-      const metaDescription = document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
+      const { title } = document
+      const metaDescription =
+        document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
       if (title.includes('Rise of Kingdoms') && metaDescription.includes('dịch vụ')) {
         newMetrics.seoOptimized = true
       }
@@ -96,14 +97,14 @@ export function RevenueValidation() {
       // Conservative estimates based on Vietnamese gaming market
       const estimatedCustomers = {
         basic: 12, // Entry-level users
-        pro: 6,    // Serious players
+        pro: 6, // Serious players
         premium: 3 // Top players
       }
 
-      const monthlyRevenue = 
-        (pricing.basic * estimatedCustomers.basic) +
-        (pricing.pro * estimatedCustomers.pro) +
-        (pricing.premium * estimatedCustomers.premium)
+      const monthlyRevenue =
+        pricing.basic * estimatedCustomers.basic +
+        pricing.pro * estimatedCustomers.pro +
+        pricing.premium * estimatedCustomers.premium
 
       setRevenueProjection({
         monthly: monthlyRevenue,
@@ -125,49 +126,61 @@ export function RevenueValidation() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 bg-white border-2 border-gray-300 rounded-lg p-4 shadow-lg text-xs max-w-sm z-50">
-      <h3 className="font-bold mb-3 text-green-600">💰 Revenue Readiness</h3>
-      
-      <div className="space-y-2 mb-4">
-        <div className={`flex items-center space-x-2 ${metrics.pricingAccuracy ? 'text-green-600' : 'text-red-600'}`}>
+    <div className="fixed bottom-4 left-4 z-50 max-w-sm rounded-lg border-2 border-gray-300 bg-white p-4 text-xs shadow-lg">
+      <h3 className="mb-3 font-bold text-green-600">💰 Revenue Readiness</h3>
+
+      <div className="mb-4 space-y-2">
+        <div
+          className={`flex items-center space-x-2 ${metrics.pricingAccuracy ? 'text-green-600' : 'text-red-600'}`}
+        >
           <span>{metrics.pricingAccuracy ? '✅' : '❌'}</span>
           <span>VNĐ Pricing Display</span>
         </div>
-        
-        <div className={`flex items-center space-x-2 ${metrics.leadGenerationReady ? 'text-green-600' : 'text-red-600'}`}>
+
+        <div
+          className={`flex items-center space-x-2 ${metrics.leadGenerationReady ? 'text-green-600' : 'text-red-600'}`}
+        >
           <span>{metrics.leadGenerationReady ? '✅' : '❌'}</span>
           <span>Lead Generation Ready</span>
         </div>
-        
-        <div className={`flex items-center space-x-2 ${metrics.paymentMethodsVisible ? 'text-green-600' : 'text-red-600'}`}>
+
+        <div
+          className={`flex items-center space-x-2 ${metrics.paymentMethodsVisible ? 'text-green-600' : 'text-red-600'}`}
+        >
           <span>{metrics.paymentMethodsVisible ? '✅' : '❌'}</span>
           <span>VN Payment Methods</span>
         </div>
-        
-        <div className={`flex items-center space-x-2 ${metrics.seoOptimized ? 'text-green-600' : 'text-red-600'}`}>
+
+        <div
+          className={`flex items-center space-x-2 ${metrics.seoOptimized ? 'text-green-600' : 'text-red-600'}`}
+        >
           <span>{metrics.seoOptimized ? '✅' : '❌'}</span>
           <span>SEO Optimized</span>
         </div>
-        
-        <div className={`flex items-center space-x-2 ${metrics.conversionElementsActive ? 'text-green-600' : 'text-red-600'}`}>
+
+        <div
+          className={`flex items-center space-x-2 ${metrics.conversionElementsActive ? 'text-green-600' : 'text-red-600'}`}
+        >
           <span>{metrics.conversionElementsActive ? '✅' : '❌'}</span>
           <span>Conversion Elements</span>
         </div>
-        
-        <div className={`flex items-center space-x-2 ${metrics.mobileOptimized ? 'text-green-600' : 'text-red-600'}`}>
+
+        <div
+          className={`flex items-center space-x-2 ${metrics.mobileOptimized ? 'text-green-600' : 'text-red-600'}`}
+        >
           <span>{metrics.mobileOptimized ? '✅' : '❌'}</span>
           <span>Mobile Optimized</span>
         </div>
       </div>
 
-      <div className="border-t pt-3 mb-3">
+      <div className="mb-3 border-t pt-3">
         <div className={`font-bold ${allMetricsPassed ? 'text-green-600' : 'text-orange-600'}`}>
-          Readiness: {readinessScore}/6 ({Math.round((readinessScore/6)*100)}%)
+          Readiness: {readinessScore}/6 ({Math.round((readinessScore / 6) * 100)}%)
         </div>
       </div>
 
       <div className="border-t pt-3 text-xs">
-        <div className="font-bold text-blue-600 mb-2">Revenue Projection:</div>
+        <div className="mb-2 font-bold text-blue-600">Revenue Projection:</div>
         <div>Monthly: {revenueProjection.monthly.toLocaleString()} VNĐ</div>
         <div>Annual: {revenueProjection.annual.toLocaleString()} VNĐ</div>
         <div className="mt-2 text-gray-600">
@@ -178,7 +191,7 @@ export function RevenueValidation() {
       </div>
 
       {allMetricsPassed && (
-        <div className="mt-3 p-2 bg-green-100 rounded text-green-800 font-bold text-center">
+        <div className="mt-3 rounded bg-green-100 p-2 text-center font-bold text-green-800">
           🚀 READY FOR REVENUE!
         </div>
       )}
@@ -235,7 +248,7 @@ export function trackRevenueMetrics() {
     // Track time spent on pricing sections
     const pricingSection = document.querySelector('[id*="pricing"]')
     if (pricingSection) {
-      const observer = new IntersectionObserver((entries) => {
+      const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             setTimeout(() => {
@@ -258,23 +271,23 @@ export function trackRevenueMetrics() {
 // Lead quality scoring
 export function calculateLeadQuality(formData: FormData): number {
   let score = 0
-  
+
   // Service type scoring
   const service = formData.get('service') as string
   if (service === 'premium') score += 40
   else if (service === 'pro') score += 30
   else if (service === 'basic') score += 20
-  
+
   // Contact method scoring
   const phone = formData.get('phone') as string
   if (phone && phone.length >= 10) score += 20
-  
+
   // Account info scoring
   const accountInfo = formData.get('account_info') as string
   if (accountInfo && accountInfo.length > 50) score += 20
-  
+
   // Urgency indicators
   if (accountInfo?.includes('urgent') || accountInfo?.includes('ngay')) score += 10
-  
+
   return Math.min(score, 100)
 }

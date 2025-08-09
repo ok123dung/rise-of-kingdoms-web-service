@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import { clientLogger } from '@/lib/client-logger'
 
 // Core Web Vitals monitoring for Vietnamese users
@@ -13,10 +14,10 @@ export function PerformanceMonitor() {
     const observeWebVitals = () => {
       // Largest Contentful Paint (LCP)
       if ('PerformanceObserver' in window) {
-        const lcpObserver = new PerformanceObserver((list) => {
+        const lcpObserver = new PerformanceObserver(list => {
           const entries = list.getEntries()
           const lastEntry = entries[entries.length - 1]
-          
+
           if (lastEntry && window.gtag) {
             window.gtag('event', 'web_vitals', {
               event_category: 'performance',
@@ -26,7 +27,7 @@ export function PerformanceMonitor() {
             })
           }
         })
-        
+
         try {
           lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
         } catch (e) {
@@ -34,7 +35,7 @@ export function PerformanceMonitor() {
         }
 
         // First Input Delay (FID)
-        const fidObserver = new PerformanceObserver((list) => {
+        const fidObserver = new PerformanceObserver(list => {
           const entries = list.getEntries()
           entries.forEach((entry: any) => {
             if (window.gtag) {
@@ -56,7 +57,7 @@ export function PerformanceMonitor() {
 
         // Cumulative Layout Shift (CLS)
         let clsValue = 0
-        const clsObserver = new PerformanceObserver((list) => {
+        const clsObserver = new PerformanceObserver(list => {
           const entries = list.getEntries()
           entries.forEach((entry: any) => {
             if (!entry.hadRecentInput) {
@@ -89,8 +90,10 @@ export function PerformanceMonitor() {
     const monitorPageLoad = () => {
       window.addEventListener('load', () => {
         setTimeout(() => {
-          const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
-          
+          const navigation = performance.getEntriesByType(
+            'navigation'
+          )[0] as PerformanceNavigationTiming
+
           if (navigation && window.gtag) {
             // Page load time
             const loadTime = navigation.loadEventEnd - navigation.fetchStart
@@ -103,7 +106,7 @@ export function PerformanceMonitor() {
             // Time to First Byte (TTFB)
             const ttfb = navigation.responseStart - navigation.fetchStart
             window.gtag('event', 'ttfb', {
-              event_category: 'performance', 
+              event_category: 'performance',
               value: Math.round(ttfb),
               custom_parameter_1: 'server_performance'
             })
@@ -123,8 +126,8 @@ export function PerformanceMonitor() {
     // Monitor connection quality (for Vietnamese users)
     const monitorConnection = () => {
       if ('connection' in navigator) {
-        const connection = (navigator as any).connection
-        
+        const { connection } = navigator as any
+
         if (connection && window.gtag) {
           window.gtag('event', 'connection_type', {
             event_category: 'performance',
@@ -170,7 +173,7 @@ export function PerformanceMonitor() {
     const monitorGamingHours = () => {
       const hour = new Date().getHours()
       const isGamingHours = hour >= 18 && hour <= 23 // 6PM - 11PM Vietnam peak gaming time
-      
+
       if (window.gtag) {
         window.gtag('event', 'access_time', {
           event_category: 'performance',
@@ -191,11 +194,13 @@ export function PerformanceMonitor() {
     // Monitor scroll depth (engagement metric)
     let maxScrollDepth = 0
     const monitorScrollDepth = () => {
-      const scrollDepth = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100)
-      
+      const scrollDepth = Math.round(
+        (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100
+      )
+
       if (scrollDepth > maxScrollDepth) {
         maxScrollDepth = scrollDepth
-        
+
         // Track milestone scroll depths
         if ([25, 50, 75, 90].includes(scrollDepth) && window.gtag) {
           window.gtag('event', 'scroll_depth', {
@@ -246,12 +251,12 @@ export function usePerformanceOptimization() {
     // Optimize for slow connections
     const optimizeForSlowConnections = () => {
       if ('connection' in navigator) {
-        const connection = (navigator as any).connection
-        
+        const { connection } = navigator as any
+
         if (connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g') {
           // Reduce image quality for slow connections
           const images = document.querySelectorAll('img')
-          images.forEach((img) => {
+          images.forEach(img => {
             if (img.src && !img.src.includes('w_auto')) {
               // Add Cloudflare image optimization parameters
               img.src = img.src.replace(/\.(jpg|jpeg|png|webp)/, '_w_400.$1')
@@ -273,10 +278,10 @@ export function monitorPerformanceBudget() {
   // Monitor bundle size
   const checkBundleSize = () => {
     if ('PerformanceObserver' in window) {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries()
         let totalSize = 0
-        
+
         entries.forEach((entry: any) => {
           if (entry.transferSize) {
             totalSize += entry.transferSize

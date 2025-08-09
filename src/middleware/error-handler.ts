@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, type NextResponse } from 'next/server'
+
 import { handleApiError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
 
@@ -13,11 +14,11 @@ export function withErrorHandler(handler: ApiHandler): ApiHandler {
   return async (request: NextRequest, context?: { params?: Record<string, string> }) => {
     const requestId = request.headers.get('x-request-id') || crypto.randomUUID()
     const startTime = Date.now()
-    
+
     try {
       // Add request ID to headers for tracking
       const response = await handler(request, context)
-      
+
       // Log successful request
       const duration = Date.now() - startTime
       getLogger().info('API request completed', {
@@ -27,10 +28,10 @@ export function withErrorHandler(handler: ApiHandler): ApiHandler {
         duration,
         requestId
       })
-      
+
       // Add request ID to response headers
       response.headers.set('x-request-id', requestId)
-      
+
       return response
     } catch (error) {
       // Log error
@@ -41,11 +42,11 @@ export function withErrorHandler(handler: ApiHandler): ApiHandler {
         duration,
         requestId
       })
-      
+
       // Handle the error and return appropriate response
       const errorResponse = handleApiError(error, requestId)
       errorResponse.headers.set('x-request-id', requestId)
-      
+
       return errorResponse
     }
   }
@@ -59,8 +60,7 @@ export function compose(...middlewares: Array<(handler: ApiHandler) => ApiHandle
 }
 
 // Export commonly used compositions
-export const withApiMiddleware = (handler: ApiHandler) =>
-  compose(withErrorHandler)(handler)
+export const withApiMiddleware = (handler: ApiHandler) => compose(withErrorHandler)(handler)
 
 // With auth and error handling
 export const withAuthAndError = (

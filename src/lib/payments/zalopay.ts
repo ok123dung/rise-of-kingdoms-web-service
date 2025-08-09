@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+
 import { db, prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
@@ -61,11 +62,13 @@ export class ZaloPayPayment {
     const appId = process.env.ZALOPAY_APP_ID
     const key1 = process.env.ZALOPAY_KEY1
     const key2 = process.env.ZALOPAY_KEY2
-    
+
     if (!appId || !key1 || !key2) {
-      throw new Error('ZaloPay payment configuration missing: ZALOPAY_APP_ID, ZALOPAY_KEY1, or ZALOPAY_KEY2')
+      throw new Error(
+        'ZaloPay payment configuration missing: ZALOPAY_APP_ID, ZALOPAY_KEY1, or ZALOPAY_KEY2'
+      )
     }
-    
+
     this.appId = appId
     this.key1 = key1
     this.key2 = key2
@@ -96,18 +99,20 @@ export class ZaloPayPayment {
 
       const transId = `${Date.now()}`
       const appTransId = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}_${booking.bookingNumber}_${transId}`
-      
+
       const embedData = JSON.stringify({
         bookingId: request.bookingId,
         redirecturl: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`
       })
 
-      const items = JSON.stringify([{
-        itemid: booking.serviceTier.id,
-        itemname: booking.serviceTier.service.name,
-        itemprice: request.amount,
-        itemquantity: 1
-      }])
+      const items = JSON.stringify([
+        {
+          itemid: booking.serviceTier.id,
+          itemname: booking.serviceTier.service.name,
+          itemprice: request.amount,
+          itemquantity: 1
+        }
+      ])
 
       const orderData = {
         app_id: parseInt(this.appId),
@@ -119,7 +124,8 @@ export class ZaloPayPayment {
         item: items,
         description: request.description,
         bank_code: '',
-        callback_url: request.callbackUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
+        callback_url:
+          request.callbackUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
       }
 
       // Tạo MAC signature
@@ -131,14 +137,20 @@ export class ZaloPayPayment {
         mac
       }
 
-      getLogger().debug('ZaloPay request', { appTransId, amount: request.amount, macPrefix: mac.substring(0, 10) })
+      getLogger().debug('ZaloPay request', {
+        appTransId,
+        amount: request.amount,
+        macPrefix: mac.substring(0, 10)
+      })
 
       const response = await fetch(this.endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams(Object.entries(requestBody).map(([k, v]) => [k, String(v)])).toString()
+        body: new URLSearchParams(
+          Object.entries(requestBody).map(([k, v]) => [k, String(v)])
+        ).toString()
       })
 
       const responseData: ZaloPayResponse = await response.json()
@@ -184,7 +196,7 @@ export class ZaloPayPayment {
 
       // Verify MAC
       const expectedMac = crypto.createHmac('sha256', this.key2).update(dataStr).digest('hex')
-      
+
       if (receivedMac !== expectedMac) {
         console.error('ZaloPay callback MAC verification failed')
         return { success: false, message: 'Invalid MAC' }
@@ -195,7 +207,7 @@ export class ZaloPayPayment {
 
       // Parse embed data
       const embedDataObj = JSON.parse(embed_data)
-      const bookingId = embedDataObj.bookingId
+      const { bookingId } = embedDataObj
 
       // Tìm payment record
       const payment = await db.payment.findByGatewayTransactionId(app_trans_id)
@@ -217,7 +229,7 @@ export class ZaloPayPayment {
 
       // Send confirmation email
       await this.sendConfirmationEmail(payment.bookingId)
-      
+
       // Send Discord notification
       await this.sendDiscordNotification(payment.bookingId, 'completed', {
         orderId: app_trans_id,
@@ -225,7 +237,7 @@ export class ZaloPayPayment {
         amount,
         paymentMethod: 'ZaloPay'
       })
-      
+
       // Trigger service delivery workflow
       await this.triggerServiceDelivery(payment.bookingId)
 
@@ -278,7 +290,11 @@ export class ZaloPayPayment {
   }
 
   // Refund payment
-  async refundPayment(zpTransId: string, refundAmount: number, description: string): Promise<{
+  async refundPayment(
+    zpTransId: string,
+    refundAmount: number,
+    description: string
+  ): Promise<{
     success: boolean
     data?: ZaloPayRefundResponse
     error?: string
@@ -286,7 +302,7 @@ export class ZaloPayPayment {
     try {
       const timestamp = Date.now()
       const uid = `${timestamp}${Math.floor(111 + Math.random() * 999)}`
-      
+
       const data = `${this.appId}|${zpTransId}|${refundAmount}|${description}|${timestamp}`
       const mac = crypto.createHmac('sha256', this.key1).update(data).digest('hex')
 
@@ -305,7 +321,9 @@ export class ZaloPayPayment {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams(Object.entries(requestBody).map(([k, v]) => [k, String(v)])).toString()
+        body: new URLSearchParams(
+          Object.entries(requestBody).map(([k, v]) => [k, String(v)])
+        ).toString()
       })
 
       const responseData = await response.json()
@@ -369,7 +387,9 @@ export class ZaloPayPayment {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams(Object.entries(requestBody).map(([k, v]) => [k, String(v)])).toString()
+        body: new URLSearchParams(
+          Object.entries(requestBody).map(([k, v]) => [k, String(v)])
+        ).toString()
       })
 
       const responseData = await response.json()
@@ -400,7 +420,7 @@ export class ZaloPayPayment {
           }
         }
       })
-      
+
       if (booking) {
         const { sendEmail } = await import('@/lib/email')
         await sendEmail({
@@ -426,7 +446,11 @@ export class ZaloPayPayment {
   }
 
   // Send Discord notification
-  private async sendDiscordNotification(bookingId: string, status: string, paymentData: { orderId: string; transId: string; amount: number; paymentMethod: string }): Promise<void> {
+  private async sendDiscordNotification(
+    bookingId: string,
+    status: string,
+    paymentData: { orderId: string; transId: string; amount: number; paymentMethod: string }
+  ): Promise<void> {
     try {
       const { discordNotifier } = await import('@/lib/discord')
       const booking = await prisma.booking.findUnique({
@@ -436,7 +460,7 @@ export class ZaloPayPayment {
           serviceTier: { include: { service: true } }
         }
       })
-      
+
       if (booking) {
         await discordNotifier.sendPaymentNotification({
           bookingId: booking.id,
@@ -464,7 +488,7 @@ export class ZaloPayPayment {
           }
         }
       })
-      
+
       if (booking) {
         // Update booking to in-progress
         await prisma.booking.update({
@@ -474,7 +498,7 @@ export class ZaloPayPayment {
             startDate: new Date()
           }
         })
-        
+
         // Create service delivery task
         await prisma.serviceTask.create({
           data: {
@@ -487,8 +511,10 @@ export class ZaloPayPayment {
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
           }
         })
-        
-        getLogger().info('Service delivery workflow triggered', { bookingNumber: booking.bookingNumber })
+
+        getLogger().info('Service delivery workflow triggered', {
+          bookingNumber: booking.bookingNumber
+        })
       }
     } catch (error) {
       console.error('Failed to trigger service delivery:', error)

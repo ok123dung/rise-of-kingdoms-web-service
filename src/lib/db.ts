@@ -1,19 +1,17 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient, type Prisma } from '@prisma/client'
+
+import { handleDatabaseError, NotFoundError, retryWithBackoff } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
-import { 
-  handleDatabaseError, 
-  NotFoundError, 
-  retryWithBackoff,
-  ExternalServiceError 
-} from '@/lib/errors'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
-})
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
+  })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
@@ -138,11 +136,11 @@ export const db = {
             }
           }
         })
-        
+
         if (!service) {
           throw new NotFoundError('Service')
         }
-        
+
         return service
       } catch (error) {
         if (error instanceof NotFoundError) throw error
@@ -158,11 +156,11 @@ export const db = {
             service: true
           }
         })
-        
+
         if (!tier) {
           throw new NotFoundError('Service tier')
         }
-        
+
         return tier
       } catch (error) {
         if (error instanceof NotFoundError) throw error
@@ -185,7 +183,7 @@ export const db = {
     }) {
       try {
         const bookingNumber = await generateBookingNumber()
-        
+
         return await prisma.booking.create({
           data: {
             bookingNumber,
@@ -194,7 +192,9 @@ export const db = {
             totalAmount: data.totalAmount,
             finalAmount: data.finalAmount,
             discountAmount: data.totalAmount - data.finalAmount,
-            ...(data.bookingDetails && { bookingDetails: data.bookingDetails as Prisma.InputJsonValue }),
+            ...(data.bookingDetails && {
+              bookingDetails: data.bookingDetails as Prisma.InputJsonValue
+            }),
             customerRequirements: data.customerRequirements,
             startDate: data.startDate,
             endDate: data.endDate
@@ -228,11 +228,11 @@ export const db = {
             communications: true
           }
         })
-        
+
         if (!booking) {
           throw new NotFoundError('Booking')
         }
-        
+
         return booking
       } catch (error) {
         if (error instanceof NotFoundError) throw error
@@ -294,7 +294,7 @@ export const db = {
     }) {
       try {
         const paymentNumber = await generatePaymentNumber()
-        
+
         return await prisma.payment.create({
           data: {
             ...data,
@@ -320,15 +320,15 @@ export const db = {
 
     async updateStatus(id: string, status: string, gatewayResponse?: Record<string, unknown>) {
       try {
-        const updateData: Record<string, unknown> = { 
-          status, 
-          updatedAt: new Date() 
+        const updateData: Record<string, unknown> = {
+          status,
+          updatedAt: new Date()
         }
-        
+
         if (gatewayResponse) {
           updateData.gatewayResponse = gatewayResponse
         }
-        
+
         if (status === 'completed') {
           updateData.paidAt = new Date()
         }
@@ -354,7 +354,7 @@ export const db = {
             }
           }
         })
-        
+
         return payment
       } catch (error) {
         handleDatabaseError(error)
@@ -386,11 +386,7 @@ export const db = {
       }
     },
 
-    async findAll(filters?: {
-      status?: string
-      source?: string
-      assignedTo?: string
-    }) {
+    async findAll(filters?: { status?: string; source?: string; assignedTo?: string }) {
       try {
         return await prisma.lead.findMany({
           where: filters,
@@ -458,12 +454,16 @@ export const db = {
       }
     },
 
-    async updateStatus(id: string, status: string, metadata?: {
-      sentAt?: Date
-      deliveredAt?: Date
-      readAt?: Date
-      errorMessage?: string
-    }) {
+    async updateStatus(
+      id: string,
+      status: string,
+      metadata?: {
+        sentAt?: Date
+        deliveredAt?: Date
+        readAt?: Date
+        errorMessage?: string
+      }
+    ) {
       try {
         return await prisma.communication.update({
           where: { id },
@@ -486,7 +486,7 @@ async function generateBookingNumber(): Promise<string> {
     const year = date.getFullYear().toString().slice(-2)
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
     const day = date.getDate().toString().padStart(2, '0')
-    
+
     const count = await prisma.booking.count({
       where: {
         createdAt: {
@@ -495,7 +495,7 @@ async function generateBookingNumber(): Promise<string> {
         }
       }
     })
-    
+
     const sequence = (count + 1).toString().padStart(3, '0')
     return `RK${year}${month}${day}${sequence}`
   } catch (error) {
@@ -511,7 +511,7 @@ async function generatePaymentNumber(): Promise<string> {
     const year = date.getFullYear().toString().slice(-2)
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
     const day = date.getDate().toString().padStart(2, '0')
-    
+
     const count = await prisma.payment.count({
       where: {
         createdAt: {
@@ -520,7 +520,7 @@ async function generatePaymentNumber(): Promise<string> {
         }
       }
     })
-    
+
     const sequence = (count + 1).toString().padStart(4, '0')
     return `PAY${year}${month}${day}${sequence}`
   } catch (error) {
@@ -538,22 +538,22 @@ function calculateLeadScore(data: {
   source?: string
 }): number {
   let score = 0
-  
+
   // Contact information scoring
   if (data.email) score += 20
   if (data.phone) score += 25
   if (data.fullName) score += 15
-  
+
   // Service interest scoring
   if (data.serviceInterest === 'premium') score += 30
   else if (data.serviceInterest === 'pro') score += 20
   else if (data.serviceInterest === 'basic') score += 10
-  
+
   // Source scoring
   if (data.source === 'referral') score += 15
   else if (data.source === 'discord') score += 10
   else if (data.source === 'website') score += 5
-  
+
   return Math.min(score, 100)
 }
 
@@ -564,16 +564,16 @@ export async function withTransaction<T>(
 ): Promise<T> {
   return retryWithBackoff(
     async () => {
-      return await prisma.$transaction(async (tx) => {
+      return await prisma.$transaction(async tx => {
         return await fn(tx as PrismaClient)
       })
     },
     {
       maxRetries: options?.maxRetries || 3,
       onRetry: (error, attempt) => {
-        getLogger().warn('Database transaction retry', { 
+        getLogger().warn('Database transaction retry', {
           errorMessage: error instanceof Error ? error.message : String(error),
-          attempt 
+          attempt
         })
       }
     }

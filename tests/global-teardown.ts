@@ -1,6 +1,6 @@
 async function globalTeardown() {
   console.log('🧹 Starting global test teardown...')
-  
+
   // Cleanup test database or other global resources
   try {
     // Add any cleanup logic here

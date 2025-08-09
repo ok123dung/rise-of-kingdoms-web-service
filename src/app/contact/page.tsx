@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle } from 'lucide-react'
-import Header from '@/components/layout/Header'
+
 import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/Header'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -16,7 +18,9 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
@@ -32,7 +36,7 @@ export default function ContactPage() {
       const response = await fetch('/api/leads', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           fullName: formData.fullName,
@@ -41,7 +45,7 @@ export default function ContactPage() {
           serviceInterest: formData.service,
           message: formData.message,
           source: 'contact_form'
-        }),
+        })
       })
 
       if (response.ok) {
@@ -69,100 +73,109 @@ export default function ContactPage() {
       <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         <div className="container-max section-padding">
           {/* Header Section */}
-          <div className="text-center max-w-3xl mx-auto mb-16 animate-fadeInUp">
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
-              Liên hệ với{' '}
-              <span className="text-gradient">RoK Services</span>
+          <div className="animate-fadeInUp mx-auto mb-16 max-w-3xl text-center">
+            <h1 className="mb-6 text-4xl font-bold text-slate-900 md:text-5xl">
+              Liên hệ với <span className="text-gradient">RoK Services</span>
             </h1>
-            <p className="text-xl text-slate-600 leading-relaxed">
-              Sẵn sàng nâng tầm trải nghiệm Rise of Kingdoms của bạn? 
-              Đội ngũ chuyên gia luôn sẵn sàng hỗ trợ 24/7.
+            <p className="text-xl leading-relaxed text-slate-600">
+              Sẵn sàng nâng tầm trải nghiệm Rise of Kingdoms của bạn? Đội ngũ chuyên gia luôn sẵn
+              sàng hỗ trợ 24/7.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16">
+          <div className="grid gap-16 lg:grid-cols-2">
             {/* Contact Form */}
             <div className="animate-fadeInUp">
               <div className="card">
-                <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                  Gửi yêu cầu tư vấn
-                </h2>
+                <h2 className="mb-6 text-2xl font-bold text-slate-900">Gửi yêu cầu tư vấn</h2>
 
                 {submitStatus === 'success' && (
-                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center space-x-3 text-green-800">
+                  <div className="mb-6 flex items-center space-x-3 rounded-xl border border-green-200 bg-green-50 p-4 text-green-800">
                     <CheckCircle className="h-5 w-5" />
                     <span>Cảm ơn bạn\! Chúng tôi sẽ liên hệ trong vòng 2 giờ.</span>
                   </div>
                 )}
 
                 {submitStatus === 'error' && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-3 text-red-800">
+                  <div className="mb-6 flex items-center space-x-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
                     <AlertCircle className="h-5 w-5" />
                     <span>Có lỗi xảy ra. Vui lòng thử lại hoặc liên hệ trực tiếp.</span>
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                  <div className="grid gap-6 md:grid-cols-2">
                     <div>
-                      <label htmlFor="fullName" className="block text-sm font-semibold text-slate-700 mb-2">
+                      <label
+                        className="mb-2 block text-sm font-semibold text-slate-700"
+                        htmlFor="fullName"
+                      >
                         Họ và tên *
                       </label>
                       <input
-                        type="text"
+                        required
+                        className="input-field"
                         id="fullName"
                         name="fullName"
-                        required
+                        placeholder="Nhập họ và tên"
+                        type="text"
                         value={formData.fullName}
                         onChange={handleChange}
-                        className="input-field"
-                        placeholder="Nhập họ và tên"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+                      <label
+                        className="mb-2 block text-sm font-semibold text-slate-700"
+                        htmlFor="email"
+                      >
                         Email *
                       </label>
                       <input
-                        type="email"
+                        required
+                        className="input-field"
                         id="email"
                         name="email"
-                        required
+                        placeholder="your@email.com"
+                        type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="input-field"
-                        placeholder="your@email.com"
                       />
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid gap-6 md:grid-cols-2">
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">
+                      <label
+                        className="mb-2 block text-sm font-semibold text-slate-700"
+                        htmlFor="phone"
+                      >
                         Số điện thoại
                       </label>
                       <input
-                        type="tel"
+                        className="input-field"
                         id="phone"
                         name="phone"
+                        placeholder="0987654321"
+                        type="tel"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="input-field"
-                        placeholder="0987654321"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="service" className="block text-sm font-semibold text-slate-700 mb-2">
+                      <label
+                        className="mb-2 block text-sm font-semibold text-slate-700"
+                        htmlFor="service"
+                      >
                         Dịch vụ quan tâm
                       </label>
                       <select
+                        className="input-field"
                         id="service"
                         name="service"
                         value={formData.service}
                         onChange={handleChange}
-                        className="input-field"
                       >
                         <option value="">Chọn dịch vụ</option>
                         <option value="strategy-consulting">Tư vấn chiến thuật</option>
@@ -177,29 +190,32 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label
+                      className="mb-2 block text-sm font-semibold text-slate-700"
+                      htmlFor="message"
+                    >
                       Tin nhắn *
                     </label>
                     <textarea
+                      required
+                      className="input-field"
                       id="message"
                       name="message"
-                      required
+                      placeholder="Mô tả chi tiết nhu cầu của bạn, tình trạng tài khoản hiện tại, mục tiêu muốn đạt được..."
                       rows={5}
                       value={formData.message}
                       onChange={handleChange}
-                      className="input-field"
-                      placeholder="Mô tả chi tiết nhu cầu của bạn, tình trạng tài khoản hiện tại, mục tiêu muốn đạt được..."
                     />
                   </div>
 
                   <button
-                    type="submit"
+                    className="btn-primary flex w-full items-center justify-center space-x-3 py-4 text-lg"
                     disabled={isSubmitting}
-                    className="w-full btn-primary flex items-center justify-center space-x-3 text-lg py-4"
+                    type="submit"
                   >
                     {isSubmitting ? (
                       <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
                         <span>Đang gửi...</span>
                       </>
                     ) : (
@@ -210,13 +226,13 @@ export default function ContactPage() {
                     )}
                   </button>
 
-                  <p className="text-sm text-slate-500 text-center">
+                  <p className="text-center text-sm text-slate-500">
                     Bằng cách gửi form, bạn đồng ý với{' '}
-                    <a href="/terms" className="text-amber-600 hover:text-amber-700">
+                    <a className="text-amber-600 hover:text-amber-700" href="/terms">
                       Điều khoản dịch vụ
                     </a>{' '}
                     và{' '}
-                    <a href="/privacy" className="text-amber-600 hover:text-amber-700">
+                    <a className="text-amber-600 hover:text-amber-700" href="/privacy">
                       Chính sách bảo mật
                     </a>
                   </p>
@@ -225,17 +241,17 @@ export default function ContactPage() {
             </div>
 
             {/* Contact Information */}
-            <div className="space-y-8 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+            <div className="animate-fadeInUp space-y-8" style={{ animationDelay: '0.2s' }}>
               {/* Contact Cards */}
               <div className="space-y-6">
                 <div className="card hover-lift">
                   <div className="flex items-start space-x-4">
-                    <div className="bg-amber-100 p-3 rounded-xl">
+                    <div className="rounded-xl bg-amber-100 p-3">
                       <Mail className="h-6 w-6 text-amber-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Email hỗ trợ</h3>
-                      <p className="text-slate-600 mb-2">support@rokdbot.com</p>
+                      <h3 className="mb-1 font-semibold text-slate-900">Email hỗ trợ</h3>
+                      <p className="mb-2 text-slate-600">support@rokdbot.com</p>
                       <p className="text-sm text-slate-500">Phản hồi trong 2-4 giờ</p>
                     </div>
                   </div>
@@ -243,12 +259,12 @@ export default function ContactPage() {
 
                 <div className="card hover-lift">
                   <div className="flex items-start space-x-4">
-                    <div className="bg-blue-100 p-3 rounded-xl">
+                    <div className="rounded-xl bg-blue-100 p-3">
                       <Phone className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Hotline</h3>
-                      <p className="text-slate-600 mb-2">0987.654.321</p>
+                      <h3 className="mb-1 font-semibold text-slate-900">Hotline</h3>
+                      <p className="mb-2 text-slate-600">0987.654.321</p>
                       <p className="text-sm text-slate-500">Hỗ trợ 24/7</p>
                     </div>
                   </div>
@@ -256,12 +272,12 @@ export default function ContactPage() {
 
                 <div className="card hover-lift">
                   <div className="flex items-start space-x-4">
-                    <div className="bg-purple-100 p-3 rounded-xl">
+                    <div className="rounded-xl bg-purple-100 p-3">
                       <Clock className="h-6 w-6 text-purple-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Giờ làm việc</h3>
-                      <p className="text-slate-600 mb-1">Thứ 2 - CN: 8:00 - 22:00</p>
+                      <h3 className="mb-1 font-semibold text-slate-900">Giờ làm việc</h3>
+                      <p className="mb-1 text-slate-600">Thứ 2 - CN: 8:00 - 22:00</p>
                       <p className="text-sm text-slate-500">Timezone: GMT+7 (Việt Nam)</p>
                     </div>
                   </div>
@@ -269,12 +285,12 @@ export default function ContactPage() {
 
                 <div className="card hover-lift">
                   <div className="flex items-start space-x-4">
-                    <div className="bg-green-100 p-3 rounded-xl">
+                    <div className="rounded-xl bg-green-100 p-3">
                       <MapPin className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Địa chỉ</h3>
-                      <p className="text-slate-600 mb-1">Hà Nội, Việt Nam</p>
+                      <h3 className="mb-1 font-semibold text-slate-900">Địa chỉ</h3>
+                      <p className="mb-1 text-slate-600">Hà Nội, Việt Nam</p>
                       <p className="text-sm text-slate-500">Hỗ trợ toàn quốc</p>
                     </div>
                   </div>
@@ -283,20 +299,20 @@ export default function ContactPage() {
 
               {/* Discord & Social */}
               <div className="card bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-                <h3 className="font-bold text-xl mb-4">🎮 Tham gia cộng đồng</h3>
+                <h3 className="mb-4 text-xl font-bold">🎮 Tham gia cộng đồng</h3>
                 <p className="mb-6 opacity-90">
                   Kết nối với 1000+ game thủ RoK, chia sẻ kinh nghiệm và nhận tips miễn phí\!
                 </p>
                 <div className="space-y-3">
                   <a
+                    className="block w-full rounded-lg bg-white/20 px-6 py-3 text-center transition-colors duration-300 hover:bg-white/30"
                     href="#"
-                    className="block w-full bg-white/20 hover:bg-white/30 text-center py-3 px-6 rounded-lg transition-colors duration-300"
                   >
                     🔗 Tham gia Discord Server
                   </a>
                   <a
+                    className="block w-full rounded-lg bg-white/20 px-6 py-3 text-center transition-colors duration-300 hover:bg-white/30"
                     href="#"
-                    className="block w-full bg-white/20 hover:bg-white/30 text-center py-3 px-6 rounded-lg transition-colors duration-300"
                   >
                     📱 Follow Facebook Page
                   </a>
@@ -305,18 +321,30 @@ export default function ContactPage() {
 
               {/* FAQ Quick Links */}
               <div className="card">
-                <h3 className="font-bold text-xl text-slate-900 mb-4">❓ Câu hỏi thường gặp</h3>
+                <h3 className="mb-4 text-xl font-bold text-slate-900">❓ Câu hỏi thường gặp</h3>
                 <div className="space-y-3">
-                  <a href="#" className="block text-amber-600 hover:text-amber-700 transition-colors">
+                  <a
+                    className="block text-amber-600 transition-colors hover:text-amber-700"
+                    href="#"
+                  >
                     → Dịch vụ có an toàn không?
                   </a>
-                  <a href="#" className="block text-amber-600 hover:text-amber-700 transition-colors">
+                  <a
+                    className="block text-amber-600 transition-colors hover:text-amber-700"
+                    href="#"
+                  >
                     → Thời gian hoàn thành dịch vụ?
                   </a>
-                  <a href="#" className="block text-amber-600 hover:text-amber-700 transition-colors">
+                  <a
+                    className="block text-amber-600 transition-colors hover:text-amber-700"
+                    href="#"
+                  >
                     → Chính sách hoàn tiền?
                   </a>
-                  <a href="#" className="block text-amber-600 hover:text-amber-700 transition-colors">
+                  <a
+                    className="block text-amber-600 transition-colors hover:text-amber-700"
+                    href="#"
+                  >
                     → Cách thức thanh toán?
                   </a>
                 </div>

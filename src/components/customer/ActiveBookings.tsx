@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
+
 import { Calendar, Clock, AlertCircle, CheckCircle, PlayCircle, PauseCircle } from 'lucide-react'
 import Link from 'next/link'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface ActiveBooking {
   id: string
@@ -40,7 +42,7 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
       setLoading(true)
       // Simulate API call - replace with real endpoint
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       // Mock active bookings data
       const mockBookings: ActiveBooking[] = [
         {
@@ -72,7 +74,7 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
           }
         }
       ]
-      
+
       setBookings(mockBookings)
     } catch (err) {
       setError('Không thể tải danh sách dịch vụ đang hoạt động')
@@ -135,7 +137,11 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
   }
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase()
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
   }
 
   if (loading) {
@@ -144,7 +150,7 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
         <CardHeader>
           <CardTitle>Dịch vụ đang hoạt động</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-[200px]">
+        <CardContent className="flex h-[200px] items-center justify-center">
           <LoadingSpinner text="Đang tải..." />
         </CardContent>
       </Card>
@@ -157,12 +163,12 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
         <CardHeader>
           <CardTitle>Dịch vụ đang hoạt động</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-[200px]">
+        <CardContent className="flex h-[200px] items-center justify-center">
           <div className="text-center text-red-600">
             <p>{error}</p>
-            <button 
+            <button
+              className="mt-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
               onClick={fetchActiveBookings}
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Thử lại
             </button>
@@ -178,13 +184,13 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
         <CardHeader>
           <CardTitle>Dịch vụ đang hoạt động</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-[200px]">
+        <CardContent className="flex h-[200px] items-center justify-center">
           <div className="text-center text-gray-500">
-            <AlertCircle className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+            <AlertCircle className="mx-auto mb-2 h-12 w-12 text-gray-300" />
             <p className="text-sm">Bạn chưa có dịch vụ nào đang hoạt động</p>
             <Link
+              className="mt-3 inline-block rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
               href="/services"
-              className="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
             >
               Đặt dịch vụ mới
             </Link>
@@ -201,32 +207,30 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
           <PlayCircle className="h-5 w-5" />
           Dịch vụ đang hoạt động
         </CardTitle>
-        <p className="text-sm text-gray-600">
-          {bookings.length} dịch vụ đang được thực hiện
-        </p>
+        <p className="text-sm text-gray-600">{bookings.length} dịch vụ đang được thực hiện</p>
       </CardHeader>
-      
+
       <CardContent className="p-0">
         <div className="divide-y">
-          {bookings.map((booking) => (
-            <Link 
+          {bookings.map(booking => (
+            <Link
               key={booking.id}
+              className="block transition-colors hover:bg-gray-50"
               href={`/dashboard/bookings/${booking.id}`}
-              className="block hover:bg-gray-50 transition-colors"
             >
               <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
+                <div className="mb-4 flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-gray-900">
-                        {booking.serviceName}
-                      </h3>
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(booking.status)}`}>
+                    <div className="mb-1 flex items-center gap-2">
+                      <h3 className="font-semibold text-gray-900">{booking.serviceName}</h3>
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium ${getStatusColor(booking.status)}`}
+                      >
                         {getStatusIcon(booking.status)}
                         {getStatusText(booking.status)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                    <div className="mb-2 flex items-center gap-4 text-sm text-gray-600">
                       <span className="font-medium">{booking.tierName}</span>
                       <span>•</span>
                       <span>#{booking.bookingNumber}</span>
@@ -238,12 +242,12 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
                       </div>
                       {booking.assignedStaff && (
                         <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-xs font-semibold text-white">
                             {booking.assignedStaff.avatar ? (
-                              <img 
-                                src={booking.assignedStaff.avatar} 
+                              <img
                                 alt={booking.assignedStaff.name}
-                                className="w-full h-full rounded-full object-cover"
+                                className="h-full w-full rounded-full object-cover"
+                                src={booking.assignedStaff.avatar}
                               />
                             ) : (
                               getInitials(booking.assignedStaff.name)
@@ -259,13 +263,13 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
                 {/* Progress bar */}
                 {booking.status === 'in_progress' && (
                   <div className="mb-4">
-                    <div className="flex items-center justify-between text-sm mb-2">
+                    <div className="mb-2 flex items-center justify-between text-sm">
                       <span className="text-gray-600">Tiến độ</span>
                       <span className="font-medium">{booking.progress}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-blue-600 to-blue-400 h-2 rounded-full transition-all duration-300"
+                    <div className="h-2 w-full rounded-full bg-gray-200">
+                      <div
+                        className="h-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-300"
                         style={{ width: `${booking.progress}%` }}
                       />
                     </div>
@@ -274,10 +278,10 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
 
                 {/* Next session info */}
                 {booking.nextSession && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm text-blue-800 font-medium">
+                      <span className="text-sm font-medium text-blue-800">
                         Phiên tiếp theo: {formatDateTime(booking.nextSession)}
                       </span>
                     </div>
@@ -289,10 +293,10 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
         </div>
 
         {/* View all bookings link */}
-        <div className="p-4 border-t bg-gray-50">
-          <Link 
+        <div className="border-t bg-gray-50 p-4">
+          <Link
+            className="block text-center text-sm font-medium text-blue-600 hover:text-blue-800"
             href="/dashboard/bookings"
-            className="block text-center text-blue-600 hover:text-blue-800 font-medium text-sm"
           >
             Xem tất cả dịch vụ →
           </Link>

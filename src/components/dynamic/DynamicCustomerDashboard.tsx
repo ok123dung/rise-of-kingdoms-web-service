@@ -1,39 +1,37 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 // Customer dashboard components with optimized loading
-export const DynamicCustomerHeader = dynamic(
-  () => import('@/components/customer/CustomerHeader'),
-  {
-    loading: () => (
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="h-8 w-32 bg-gray-300 rounded animate-pulse"></div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
-              <div className="h-8 w-24 bg-gray-300 rounded animate-pulse"></div>
-            </div>
+export const DynamicCustomerHeader = dynamic(() => import('@/components/customer/CustomerHeader'), {
+  loading: () => (
+    <header className="border-b bg-white shadow-sm">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 justify-between">
+          <div className="flex items-center">
+            <div className="h-8 w-32 animate-pulse rounded bg-gray-300" />
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-300" />
+            <div className="h-8 w-24 animate-pulse rounded bg-gray-300" />
           </div>
         </div>
-      </header>
-    ),
-    ssr: false
-  }
-)
+      </div>
+    </header>
+  ),
+  ssr: false
+})
 
 export const DynamicCustomerSidebar = dynamic(
   () => import('@/components/customer/CustomerSidebar'),
   {
     loading: () => (
       <aside className="w-64 bg-white shadow-sm">
-        <div className="p-4 space-y-2">
+        <div className="space-y-2 p-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-10 bg-gray-200 rounded animate-pulse"></div>
+            <div key={i} className="h-10 animate-pulse rounded bg-gray-200" />
           ))}
         </div>
       </aside>
@@ -42,100 +40,94 @@ export const DynamicCustomerSidebar = dynamic(
   }
 )
 
-export const DynamicCustomerStats = dynamic(
-  () => import('@/components/customer/CustomerStats'),
-  {
-    loading: () => (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-white p-6 rounded-lg shadow animate-pulse">
-            <div className="h-5 bg-gray-300 rounded mb-2 w-24"></div>
-            <div className="h-8 bg-gray-300 rounded w-16"></div>
-          </div>
-        ))}
-      </div>
-    ),
-    ssr: false
-  }
-)
-
-export const DynamicActiveBookings = dynamic(
-  () => import('@/components/customer/ActiveBookings'),
-  {
-    loading: () => (
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b">
-          <div className="h-6 bg-gray-300 rounded w-40"></div>
+export const DynamicCustomerStats = dynamic(() => import('@/components/customer/CustomerStats'), {
+  loading: () => (
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="animate-pulse rounded-lg bg-white p-6 shadow">
+          <div className="mb-2 h-5 w-24 rounded bg-gray-300" />
+          <div className="h-8 w-16 rounded bg-gray-300" />
         </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="border rounded-lg p-4 animate-pulse">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="h-5 bg-gray-300 rounded w-32"></div>
-                  <div className="h-6 bg-blue-300 rounded w-20"></div>
-                </div>
-                <div className="h-4 bg-gray-300 rounded mb-2 w-48"></div>
-                <div className="h-4 bg-gray-300 rounded w-24"></div>
+      ))}
+    </div>
+  ),
+  ssr: false
+})
+
+export const DynamicActiveBookings = dynamic(() => import('@/components/customer/ActiveBookings'), {
+  loading: () => (
+    <div className="rounded-lg bg-white shadow">
+      <div className="border-b p-6">
+        <div className="h-6 w-40 rounded bg-gray-300" />
+      </div>
+      <div className="p-6">
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="animate-pulse rounded-lg border p-4">
+              <div className="mb-2 flex items-start justify-between">
+                <div className="h-5 w-32 rounded bg-gray-300" />
+                <div className="h-6 w-20 rounded bg-blue-300" />
               </div>
-            ))}
-          </div>
+              <div className="mb-2 h-4 w-48 rounded bg-gray-300" />
+              <div className="h-4 w-24 rounded bg-gray-300" />
+            </div>
+          ))}
         </div>
       </div>
-    ),
-    ssr: false
-  }
-)
+    </div>
+  ),
+  ssr: false
+})
 
-export const DynamicRecentPayments = dynamic(
-  () => import('@/components/customer/RecentPayments'),
-  {
-    loading: () => (
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b">
-          <div className="h-6 bg-gray-300 rounded w-36"></div>
-        </div>
-        <div className="p-6">
-          <div className="space-y-3">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex items-center justify-between py-3 border-b last:border-b-0 animate-pulse">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-300 rounded"></div>
-                  <div>
-                    <div className="h-4 bg-gray-300 rounded mb-1 w-20"></div>
-                    <div className="h-3 bg-gray-300 rounded w-16"></div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="h-4 bg-gray-300 rounded mb-1 w-16"></div>
-                  <div className="h-3 bg-green-300 rounded w-12"></div>
+export const DynamicRecentPayments = dynamic(() => import('@/components/customer/RecentPayments'), {
+  loading: () => (
+    <div className="rounded-lg bg-white shadow">
+      <div className="border-b p-6">
+        <div className="h-6 w-36 rounded bg-gray-300" />
+      </div>
+      <div className="p-6">
+        <div className="space-y-3">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="flex animate-pulse items-center justify-between border-b py-3 last:border-b-0"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="h-8 w-8 rounded bg-gray-300" />
+                <div>
+                  <div className="mb-1 h-4 w-20 rounded bg-gray-300" />
+                  <div className="h-3 w-16 rounded bg-gray-300" />
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="text-right">
+                <div className="mb-1 h-4 w-16 rounded bg-gray-300" />
+                <div className="h-3 w-12 rounded bg-green-300" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    ),
-    ssr: false
-  }
-)
+    </div>
+  ),
+  ssr: false
+})
 
 export const DynamicServiceRecommendations = dynamic(
   () => import('@/components/customer/ServiceRecommendations'),
   {
     loading: () => (
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b">
-          <div className="h-6 bg-gray-300 rounded w-44"></div>
+      <div className="rounded-lg bg-white shadow">
+        <div className="border-b p-6">
+          <div className="h-6 w-44 rounded bg-gray-300" />
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="border rounded-lg p-4 animate-pulse">
-                <div className="h-5 bg-gray-300 rounded mb-2 w-32"></div>
-                <div className="h-4 bg-gray-300 rounded mb-2 w-full"></div>
-                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                <div className="mt-4 h-8 bg-blue-300 rounded w-24"></div>
+              <div key={i} className="animate-pulse rounded-lg border p-4">
+                <div className="mb-2 h-5 w-32 rounded bg-gray-300" />
+                <div className="mb-2 h-4 w-full rounded bg-gray-300" />
+                <div className="h-4 w-3/4 rounded bg-gray-300" />
+                <div className="mt-4 h-8 w-24 rounded bg-blue-300" />
               </div>
             ))}
           </div>
@@ -147,55 +139,49 @@ export const DynamicServiceRecommendations = dynamic(
 )
 
 // Heavy UI components
-export const DynamicPaymentModal = dynamic(
-  () => import('@/components/modals/PaymentModal'),
-  {
-    loading: () => (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg p-6 w-96">
-          <LoadingSpinner />
-          <p className="text-center mt-4">Loading payment options...</p>
-        </div>
+export const DynamicPaymentModal = dynamic(() => import('@/components/modals/PaymentModal'), {
+  loading: () => (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-96 rounded-lg bg-white p-6">
+        <LoadingSpinner />
+        <p className="mt-4 text-center">Loading payment options...</p>
       </div>
-    ),
-    ssr: false
-  }
-)
+    </div>
+  ),
+  ssr: false
+})
 
-export const DynamicBookingModal = dynamic(
-  () => import('@/components/modals/BookingModal'),
-  {
-    loading: () => (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-          <div className="h-6 bg-gray-300 rounded mb-4 w-48"></div>
-          <div className="space-y-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i}>
-                <div className="h-4 bg-gray-300 rounded mb-2 w-24"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-end space-x-3 mt-6">
-            <div className="h-10 bg-gray-300 rounded w-20"></div>
-            <div className="h-10 bg-blue-300 rounded w-24"></div>
-          </div>
+export const DynamicBookingModal = dynamic(() => import('@/components/modals/BookingModal'), {
+  loading: () => (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-2xl rounded-lg bg-white p-6">
+        <div className="mb-4 h-6 w-48 rounded bg-gray-300" />
+        <div className="space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i}>
+              <div className="mb-2 h-4 w-24 rounded bg-gray-300" />
+              <div className="h-10 rounded bg-gray-200" />
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 flex justify-end space-x-3">
+          <div className="h-10 w-20 rounded bg-gray-300" />
+          <div className="h-10 w-24 rounded bg-blue-300" />
         </div>
       </div>
-    ),
-    ssr: false
-  }
-)
+    </div>
+  ),
+  ssr: false
+})
 
 // Analytics components (potentially heavy)
 export const DynamicCustomerAnalytics = dynamic(
   () => import('@/components/analytics/CustomerAnalytics'),
   {
     loading: () => (
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="h-6 bg-gray-300 rounded mb-4 w-32"></div>
-        <div className="h-48 bg-gray-200 rounded animate-pulse"></div>
+      <div className="rounded-lg bg-white p-6 shadow">
+        <div className="mb-4 h-6 w-32 rounded bg-gray-300" />
+        <div className="h-48 animate-pulse rounded bg-gray-200" />
       </div>
     ),
     ssr: false

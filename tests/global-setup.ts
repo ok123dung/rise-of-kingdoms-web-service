@@ -1,8 +1,8 @@
-import { chromium, FullConfig } from '@playwright/test'
+import { chromium, type FullConfig } from '@playwright/test'
 
 async function globalSetup(config: FullConfig) {
   console.log('🚀 Starting global test setup...')
-  
+
   // Setup test database or other global resources
   if (process.env.NODE_ENV !== 'test') {
     console.warn('⚠️  Tests should run with NODE_ENV=test')
@@ -12,12 +12,12 @@ async function globalSetup(config: FullConfig) {
   const browser = await chromium.launch()
   const context = await browser.newContext()
   const page = await context.newPage()
-  
+
   try {
     console.log('🔍 Checking if server is available...')
-    await page.goto(config.webServer?.url || 'http://localhost:3000', { 
+    await page.goto(config.webServer?.url || 'http://localhost:3000', {
       waitUntil: 'networkidle',
-      timeout: 30000 
+      timeout: 30000
     })
     console.log('✅ Server is running and accessible')
   } catch (error) {

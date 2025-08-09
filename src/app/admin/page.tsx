@@ -1,12 +1,10 @@
-import { Suspense } from 'react'
-import { 
+import {
   DynamicDashboardStats,
   DynamicRecentBookings,
   DynamicRevenueChart,
   DynamicTopCustomers,
   DynamicQuickActions
 } from '@/components/dynamic/DynamicAdminDashboard'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 export default function AdminDashboard() {
   return (
@@ -16,9 +14,7 @@ export default function AdminDashboard() {
         <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
           Dashboard
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Tổng quan hoạt động kinh doanh RoK Services
-        </p>
+        <p className="mt-1 text-sm text-gray-500">Tổng quan hoạt động kinh doanh RoK Services</p>
       </div>
 
       {/* Stats overview - loads first */}

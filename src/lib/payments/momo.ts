@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+
 import { db, prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
@@ -86,15 +87,18 @@ export class MoMoPayment {
     const partnerCode = process.env.MOMO_PARTNER_CODE
     const accessKey = process.env.MOMO_ACCESS_KEY
     const secretKey = process.env.MOMO_SECRET_KEY
-    
+
     if (!partnerCode || !accessKey || !secretKey) {
-      throw new Error('MoMo payment configuration missing: MOMO_PARTNER_CODE, MOMO_ACCESS_KEY, or MOMO_SECRET_KEY')
+      throw new Error(
+        'MoMo payment configuration missing: MOMO_PARTNER_CODE, MOMO_ACCESS_KEY, or MOMO_SECRET_KEY'
+      )
     }
-    
+
     this.partnerCode = partnerCode
     this.accessKey = accessKey
     this.secretKey = secretKey
-    this.endpoint = process.env.MOMO_ENDPOINT || 'https://test-payment.momo.vn/v2/gateway/api/create'
+    this.endpoint =
+      process.env.MOMO_ENDPOINT || 'https://test-payment.momo.vn/v2/gateway/api/create'
   }
 
   // Verify webhook signature to prevent fake callbacks
@@ -118,10 +122,7 @@ export class MoMoPayment {
     const rawSignature = `accessKey=${this.accessKey}&amount=${amount}&extraData=${extraData}&message=${message}&orderId=${orderId}&orderInfo=${orderInfo}&orderType=${orderType}&partnerCode=${partnerCode}&payType=${payType}&requestId=${requestId}&responseTime=${responseTime}&resultCode=${resultCode}&transId=${transId}`
 
     // Generate HMAC SHA256 signature
-    const signature = crypto
-      .createHmac('sha256', this.secretKey)
-      .update(rawSignature)
-      .digest('hex')
+    const signature = crypto.createHmac('sha256', this.secretKey).update(rawSignature).digest('hex')
 
     return signature === receivedSignature
   }
@@ -140,9 +141,12 @@ export class MoMoPayment {
 
       const orderId = `MOMO_${booking.bookingNumber}_${Date.now()}`
       const requestId = `REQ_${Date.now()}`
-      const orderInfo = request.orderInfo || `Thanh toán dịch vụ RoK - ${booking.serviceTier.service.name}`
-      const redirectUrl = request.redirectUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`
-      const ipnUrl = request.ipnUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/momo/webhook`
+      const orderInfo =
+        request.orderInfo || `Thanh toán dịch vụ RoK - ${booking.serviceTier.service.name}`
+      const redirectUrl =
+        request.redirectUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`
+      const ipnUrl =
+        request.ipnUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/momo/webhook`
       const extraData = request.extraData || ''
 
       // Tạo raw signature
@@ -171,7 +175,11 @@ export class MoMoPayment {
         autoCapture: true
       }
 
-      getLogger().debug('MoMo request', { orderId, amount: request.amount, signaturePrefix: signature.substring(0, 10) })
+      getLogger().debug('MoMo request', {
+        orderId,
+        amount: request.amount,
+        signaturePrefix: signature.substring(0, 10)
+      })
 
       const response = await fetch(this.endpoint, {
         method: 'POST',
@@ -270,7 +278,7 @@ export class MoMoPayment {
 
         // Send confirmation email
         await this.sendConfirmationEmail(payment.bookingId)
-        
+
         // Send Discord notification
         await this.sendDiscordNotification(payment.bookingId, 'completed', {
           orderId,
@@ -278,7 +286,7 @@ export class MoMoPayment {
           amount,
           paymentMethod: 'MoMo'
         })
-        
+
         // Trigger service delivery workflow
         await this.triggerServiceDelivery(payment.bookingId)
 
@@ -311,7 +319,7 @@ export class MoMoPayment {
     try {
       const requestId = `QUERY_${Date.now()}`
       const rawSignature = `accessKey=${this.accessKey}&orderId=${orderId}&partnerCode=${this.partnerCode}&requestId=${requestId}`
-      
+
       const signature = crypto
         .createHmac('sha256', this.secretKey)
         .update(rawSignature)
@@ -350,7 +358,11 @@ export class MoMoPayment {
   }
 
   // Refund payment
-  async refundPayment(orderId: string, refundAmount: number, description: string): Promise<{
+  async refundPayment(
+    orderId: string,
+    refundAmount: number,
+    description: string
+  ): Promise<{
     success: boolean
     data?: MoMoRefundResponse
     error?: string
@@ -358,7 +370,7 @@ export class MoMoPayment {
     try {
       const requestId = `REFUND_${Date.now()}`
       const rawSignature = `accessKey=${this.accessKey}&amount=${refundAmount}&description=${description}&orderId=${orderId}&partnerCode=${this.partnerCode}&requestId=${requestId}`
-      
+
       const signature = crypto
         .createHmac('sha256', this.secretKey)
         .update(rawSignature)
@@ -424,7 +436,7 @@ export class MoMoPayment {
           }
         }
       })
-      
+
       if (booking) {
         const { sendEmail } = await import('@/lib/email')
         await sendEmail({
@@ -450,7 +462,11 @@ export class MoMoPayment {
   }
 
   // Send Discord notification
-  private async sendDiscordNotification(bookingId: string, status: string, paymentData: { orderId: string; transId?: string; amount: number; paymentMethod: string }): Promise<void> {
+  private async sendDiscordNotification(
+    bookingId: string,
+    status: string,
+    paymentData: { orderId: string; transId?: string; amount: number; paymentMethod: string }
+  ): Promise<void> {
     try {
       const { discordNotifier } = await import('@/lib/discord')
       const booking = await prisma.booking.findUnique({
@@ -460,7 +476,7 @@ export class MoMoPayment {
           serviceTier: { include: { service: true } }
         }
       })
-      
+
       if (booking) {
         await discordNotifier.sendPaymentNotification({
           bookingId: booking.id,
@@ -488,7 +504,7 @@ export class MoMoPayment {
           }
         }
       })
-      
+
       if (booking) {
         // Update booking to in-progress
         await prisma.booking.update({
@@ -498,7 +514,7 @@ export class MoMoPayment {
             startDate: new Date()
           }
         })
-        
+
         // Create service delivery task
         await prisma.serviceTask.create({
           data: {
@@ -511,8 +527,10 @@ export class MoMoPayment {
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
           }
         })
-        
-        getLogger().info('Service delivery workflow triggered', { bookingNumber: booking.bookingNumber })
+
+        getLogger().info('Service delivery workflow triggered', {
+          bookingNumber: booking.bookingNumber
+        })
       }
     } catch (error) {
       console.error('Failed to trigger service delivery:', error)

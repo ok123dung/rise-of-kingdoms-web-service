@@ -1,8 +1,3 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import { VietnameseGamingSchema } from '@/components/seo/VietnameseGamingSEO'
 import {
   Target,
   Users,
@@ -15,18 +10,30 @@ import {
   Check,
   Star,
   ArrowRight,
-  Shield,
-  Zap,
   Clock,
   Award,
   UserCheck,
   Phone
 } from 'lucide-react'
+import Link from 'next/link'
+
+import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/Header'
+import { VietnameseGamingSchema } from '@/components/seo/VietnameseGamingSEO'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Dịch vụ Rise of Kingdoms - Bảng giá và gói dịch vụ chi tiết',
-  description: 'Khám phá các gói dịch vụ Rise of Kingdoms chuyên nghiệp: Tư vấn chiến thuật, quản lý liên minh, training commander với giá cả hợp lý.',
-  keywords: ['Rise of Kingdoms services', 'RoK pricing', 'gaming services Vietnam', 'alliance management', 'KvK support'],
+  description:
+    'Khám phá các gói dịch vụ Rise of Kingdoms chuyên nghiệp: Tư vấn chiến thuật, quản lý liên minh, training commander với giá cả hợp lý.',
+  keywords: [
+    'Rise of Kingdoms services',
+    'RoK pricing',
+    'gaming services Vietnam',
+    'alliance management',
+    'KvK support'
+  ]
 }
 
 interface ServicePlan {
@@ -171,7 +178,8 @@ const testimonials = [
     name: 'Nguyễn Văn Anh',
     kingdom: 'Kingdom 2847',
     rating: 5,
-    comment: 'Dịch vụ tư vấn chiến thuật rất chuyên nghiệp. Power tăng từ 50M lên 120M chỉ trong 2 tháng!',
+    comment:
+      'Dịch vụ tư vấn chiến thuật rất chuyên nghiệp. Power tăng từ 50M lên 120M chỉ trong 2 tháng!',
     service: 'Tư vấn chiến thuật',
     result: '+140% Power tăng',
     timeframe: '2 tháng',
@@ -236,7 +244,7 @@ export default function ServicesPage() {
       <VietnameseGamingSchema />
 
       {/* Urgency Banner */}
-      <div className="bg-gradient-to-r from-accent-600 to-accent-700 text-white py-3 px-4">
+      <div className="bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-white">
         <div className="container-max flex items-center justify-center space-x-4 text-sm font-medium">
           <Clock className="h-4 w-4 animate-pulse" />
           <span>🔥 Ưu đãi tháng 12: Chỉ còn 5 slot tư vấn miễn phí - Đăng ký ngay!</span>
@@ -246,18 +254,18 @@ export default function ServicesPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-primary-50 via-white to-accent-50 section-padding">
+        <section className="section-padding bg-gradient-to-br from-primary-50 via-white to-accent-50">
           <div className="container-max text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
+            <h1 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
               Dịch vụ <span className="text-gradient">Rise of Kingdoms</span> chuyên nghiệp
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
-              Nâng tầm trải nghiệm chơi game với các gói dịch vụ được thiết kế riêng cho từng nhu cầu.
-              Từ người chơi mới đến top player đều có thể tìm thấy giải pháp phù hợp.
+            <p className="mx-auto mb-6 max-w-3xl text-xl text-gray-600">
+              Nâng tầm trải nghiệm chơi game với các gói dịch vụ được thiết kế riêng cho từng nhu
+              cầu. Từ người chơi mới đến top player đều có thể tìm thấy giải pháp phù hợp.
             </p>
 
             {/* Trust Signals */}
-            <div className="flex items-center justify-center space-x-6 mb-8 text-sm text-gray-600">
+            <div className="mb-8 flex items-center justify-center space-x-6 text-sm text-gray-600">
               <div className="flex items-center space-x-2">
                 <Award className="h-5 w-5 text-yellow-500" />
                 <span>Đảm bảo hoàn tiền 100%</span>
@@ -275,28 +283,30 @@ export default function ServicesPage() {
             {/* Primary CTA */}
             <div className="mb-8">
               <Link
+                className="inline-flex transform items-center space-x-2 rounded-xl bg-gradient-to-r from-accent-600 to-accent-700 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all duration-200 hover:-translate-y-1 hover:from-accent-700 hover:to-accent-800 hover:shadow-xl"
                 href="/contact"
-                className="bg-gradient-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200 inline-flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 <Phone className="h-5 w-5" />
                 <span>Đặt lịch tư vấn miễn phí ngay</span>
                 <ArrowRight className="h-5 w-5" />
               </Link>
-              <p className="text-sm text-gray-500 mt-2">⚡ Phản hồi trong 5 phút - Không cam kết mua</p>
+              <p className="mt-2 text-sm text-gray-500">
+                ⚡ Phản hồi trong 5 phút - Không cam kết mua
+              </p>
             </div>
-            
+
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary-600 mb-2">1000+</div>
+                <div className="mb-2 text-3xl font-bold text-primary-600">1000+</div>
                 <div className="text-gray-600">Khách hàng hài lòng</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-accent-600 mb-2">95%</div>
+                <div className="mb-2 text-3xl font-bold text-accent-600">95%</div>
                 <div className="text-gray-600">Tỷ lệ thành công</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">24/7</div>
+                <div className="mb-2 text-3xl font-bold text-green-600">24/7</div>
                 <div className="text-gray-600">Hỗ trợ liên tục</div>
               </div>
             </div>
@@ -306,17 +316,15 @@ export default function ServicesPage() {
         {/* Pricing Section */}
         <section className="section-padding bg-white">
           <div className="container-max">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Chọn gói dịch vụ phù hợp
-              </h2>
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-gray-900">Chọn gói dịch vụ phù hợp</h2>
               <p className="text-lg text-gray-600">
                 Mỗi gói dịch vụ được thiết kế để mang lại giá trị tối đa cho investment của bạn
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {servicePlans.map((plan) => (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+              {servicePlans.map(plan => (
                 <PricingCard key={plan.id} plan={plan} />
               ))}
             </div>
@@ -326,16 +334,16 @@ export default function ServicesPage() {
         {/* Testimonials */}
         <section className="section-padding bg-gray-50">
           <div className="container-max">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-gray-900">
                 Khách hàng nói gì về chúng tôi
               </h2>
-              <p className="text-lg text-gray-600 mb-6">
+              <p className="mb-6 text-lg text-gray-600">
                 Hơn 1000+ game thủ đã tin tưởng và đạt được mục tiêu với dịch vụ của chúng tôi
               </p>
 
               {/* Trust Indicators */}
-              <div className="flex items-center justify-center space-x-8 mb-12">
+              <div className="mb-12 flex items-center justify-center space-x-8">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-green-600">98%</div>
                   <div className="text-sm text-gray-600">Khách hàng hài lòng</div>
@@ -351,22 +359,25 @@ export default function ServicesPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {testimonials.map((testimonial, index) => (
                 <TestimonialCard key={index} testimonial={testimonial} />
               ))}
             </div>
 
             {/* Social Proof Avatar Grid */}
-            <div className="text-center mt-12">
-              <p className="text-gray-600 mb-4">Được tin tưởng bởi game thủ từ khắp Việt Nam</p>
+            <div className="mt-12 text-center">
+              <p className="mb-4 text-gray-600">Được tin tưởng bởi game thủ từ khắp Việt Nam</p>
               <div className="flex items-center justify-center space-x-2">
                 {['👨‍💼', '👩‍💼', '👨‍🎮', '👩‍🎯', '👨‍💻', '👩‍📊', '👨‍🎯', '👩‍💻'].map((avatar, i) => (
-                  <div key={i} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-lg">
+                  <div
+                    key={i}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg shadow-md"
+                  >
                     {avatar}
                   </div>
                 ))}
-                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center shadow-md text-sm font-semibold text-primary-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-600 shadow-md">
                   +992
                 </div>
               </div>
@@ -377,64 +388,60 @@ export default function ServicesPage() {
         {/* FAQ Section */}
         <section className="section-padding bg-white">
           <div className="container-max">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Câu hỏi thường gặp
-              </h2>
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-gray-900">Câu hỏi thường gặp</h2>
               <p className="text-lg text-gray-600">
                 Tìm hiểu thêm về dịch vụ và quy trình làm việc của chúng tôi
               </p>
             </div>
 
-            <div className="max-w-4xl mx-auto">
+            <div className="mx-auto max-w-4xl">
               <div className="space-y-6">
                 <FAQItem
-                  question="Làm thế nào để bắt đầu sử dụng dịch vụ?"
                   answer="Bạn chỉ cần liên hệ qua Discord hoặc form trên website. Chúng tôi sẽ tư vấn miễn phí và đề xuất gói dịch vụ phù hợp nhất với nhu cầu của bạn."
+                  question="Làm thế nào để bắt đầu sử dụng dịch vụ?"
                 />
                 <FAQItem
-                  question="Có đảm bảo kết quả không?"
                   answer="Chúng tôi cam kết 95% khách hàng đạt được mục tiêu đề ra. Nếu không hài lòng, bạn sẽ được hoàn tiền 100% trong 7 ngày đầu."
+                  question="Có đảm bảo kết quả không?"
                 />
                 <FAQItem
-                  question="Thời gian thực hiện dịch vụ là bao lâu?"
                   answer="Tùy vào từng dịch vụ: Phân tích tài khoản (1-2 ngày), Training Commander (1 session), Quản lý liên minh (ongoing), KvK support (theo lịch KvK)."
+                  question="Thời gian thực hiện dịch vụ là bao lâu?"
                 />
                 <FAQItem
-                  question="Có hỗ trợ cho người chơi mới không?"
                   answer="Có! Chúng tôi có gói dịch vụ dành riêng cho newbie với giá ưu đãi. Đội ngũ sẽ hướng dẫn từ A-Z để bạn có nền tảng vững chắc."
+                  question="Có hỗ trợ cho người chơi mới không?"
                 />
                 <FAQItem
-                  question="Chính sách hoàn tiền như thế nào?"
                   answer="Chúng tôi cam kết hoàn tiền 100% trong 7 ngày đầu tiên nếu bạn không hài lòng với dịch vụ. Không cần lý do, chỉ cần thông báo qua Discord hoặc hotline."
+                  question="Chính sách hoàn tiền như thế nào?"
                 />
                 <FAQItem
-                  question="Thanh toán như thế nào?"
                   answer="Chúng tôi chấp nhận thanh toán qua banking, Momo, ZaloPay. Có thể thanh toán theo tháng hoặc trả trước để được ưu đãi. Hỗ trợ trả góp cho gói VIP."
+                  question="Thanh toán như thế nào?"
                 />
               </div>
             </div>
 
             {/* CTA */}
-            <div className="text-center mt-16">
-              <div className="bg-gradient-to-r from-primary-600 to-accent-600 rounded-2xl p-8 text-white">
-                <h3 className="text-2xl font-bold mb-4">
-                  Sẵn sàng nâng tầm gameplay của bạn?
-                </h3>
-                <p className="text-lg mb-6 opacity-90">
+            <div className="mt-16 text-center">
+              <div className="rounded-2xl bg-gradient-to-r from-primary-600 to-accent-600 p-8 text-white">
+                <h3 className="mb-4 text-2xl font-bold">Sẵn sàng nâng tầm gameplay của bạn?</h3>
+                <p className="mb-6 text-lg opacity-90">
                   Tham gia cùng hơn 1000+ game thủ đã thành công với dịch vụ của chúng tôi
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col justify-center gap-4 sm:flex-row">
                   <Link
+                    className="inline-flex items-center justify-center space-x-2 rounded-lg bg-white px-6 py-3 font-semibold text-primary-600 transition-colors duration-200 hover:bg-gray-100"
                     href="/contact"
-                    className="bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-6 rounded-lg transition-colors duration-200 inline-flex items-center justify-center space-x-2"
                   >
                     <span>Tư vấn miễn phí</span>
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
+                    className="inline-flex items-center justify-center space-x-2 rounded-lg border-2 border-white px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-white hover:text-primary-600"
                     href="https://discord.gg/rokservices"
-                    className="border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-6 rounded-lg transition-colors duration-200 inline-flex items-center justify-center space-x-2"
                     target="_blank"
                   >
                     <MessageCircle className="h-4 w-4" />
@@ -448,23 +455,23 @@ export default function ServicesPage() {
       </main>
 
       {/* Sticky CTA Bar for Mobile */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-4 shadow-lg md:hidden">
         <div className="flex space-x-3">
           <Link
+            className="flex-1 rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white"
             href="/contact"
-            className="flex-1 bg-gradient-to-r from-accent-600 to-accent-700 text-white font-semibold py-3 px-4 rounded-lg text-center"
           >
             Tư vấn miễn phí
           </Link>
           <Link
+            className="flex-1 rounded-lg bg-primary-600 px-4 py-3 text-center font-semibold text-white"
             href="https://discord.gg/rokservices"
-            className="flex-1 bg-primary-600 text-white font-semibold py-3 px-4 rounded-lg text-center"
             target="_blank"
           >
             Chat Discord
           </Link>
         </div>
-        <p className="text-xs text-gray-500 text-center mt-2">⚡ Phản hồi trong 5 phút</p>
+        <p className="mt-2 text-center text-xs text-gray-500">⚡ Phản hồi trong 5 phút</p>
       </div>
 
       <Footer />
@@ -480,37 +487,39 @@ function PricingCard({ plan }: PricingCardProps) {
   const Icon = plan.icon
 
   return (
-    <div className={`
-      card relative group hover:shadow-xl transition-all duration-300
-      ${plan.popular ? 'ring-2 ring-primary-500 shadow-lg scale-105' : ''}
-    `}>
+    <div
+      className={`
+      card group relative transition-all duration-300 hover:shadow-xl
+      ${plan.popular ? 'scale-105 shadow-lg ring-2 ring-primary-500' : ''}
+    `}
+    >
       {plan.popular && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-          <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 transform">
+          <span className="rounded-full bg-primary-600 px-4 py-1 text-sm font-semibold text-white">
             Phổ biến nhất
           </span>
         </div>
       )}
 
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg mb-4">
+      <div className="mb-6 text-center">
+        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
           <Icon className="h-6 w-6 text-primary-600" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">{plan.name}</h3>
-        <p className="text-gray-600 text-sm">{plan.description}</p>
+        <h3 className="mb-2 text-xl font-semibold text-gray-900">{plan.name}</h3>
+        <p className="text-sm text-gray-600">{plan.description}</p>
       </div>
 
-      <div className="text-center mb-6">
+      <div className="mb-6 text-center">
         <div className="text-3xl font-bold text-primary-600">{plan.price}</div>
         {plan.originalPrice && (
           <div className="text-sm text-gray-500 line-through">{plan.originalPrice}</div>
         )}
       </div>
 
-      <ul className="space-y-3 mb-8">
+      <ul className="mb-8 space-y-3">
         {plan.features.map((feature, index) => (
           <li key={index} className="flex items-start space-x-3">
-            <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+            <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
             <span className="text-sm text-gray-600">{feature}</span>
           </li>
         ))}
@@ -518,15 +527,12 @@ function PricingCard({ plan }: PricingCardProps) {
 
       <div className="space-y-3">
         <Link
+          className="block w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
           href="/contact"
-          className="w-full bg-gradient-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 text-center block"
         >
           Đặt lịch tư vấn miễn phí
         </Link>
-        <Link
-          href={plan.href}
-          className="w-full btn-secondary text-center block text-sm"
-        >
+        <Link className="btn-secondary block w-full text-center text-sm" href={plan.href}>
           Xem chi tiết dịch vụ
         </Link>
       </div>
@@ -549,16 +555,16 @@ interface TestimonialCardProps {
 
 function TestimonialCard({ testimonial }: TestimonialCardProps) {
   return (
-    <div className="card relative group hover:shadow-lg transition-all duration-300">
+    <div className="card group relative transition-all duration-300 hover:shadow-lg">
       {/* Result Badge */}
-      <div className="absolute -top-3 -right-3 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+      <div className="absolute -right-3 -top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
         {testimonial.result}
       </div>
 
-      <div className="flex items-center mb-4">
-        <div className="text-2xl mr-3">{testimonial.avatar}</div>
+      <div className="mb-4 flex items-center">
+        <div className="mr-3 text-2xl">{testimonial.avatar}</div>
         <div className="flex-1">
-          <div className="flex text-yellow-400 mb-1">
+          <div className="mb-1 flex text-yellow-400">
             {[...Array(testimonial.rating)].map((_, i) => (
               <Star key={i} className="h-4 w-4 fill-current" />
             ))}
@@ -567,12 +573,12 @@ function TestimonialCard({ testimonial }: TestimonialCardProps) {
         </div>
       </div>
 
-      <p className="text-gray-600 mb-4 italic leading-relaxed">"{testimonial.comment}"</p>
+      <p className="mb-4 italic leading-relaxed text-gray-600">"{testimonial.comment}"</p>
 
       <div className="border-t pt-4">
         <div className="font-semibold text-gray-900">{testimonial.name}</div>
         <div className="text-sm text-gray-500">{testimonial.kingdom}</div>
-        <div className="text-sm text-primary-600 font-medium">{testimonial.service}</div>
+        <div className="text-sm font-medium text-primary-600">{testimonial.service}</div>
       </div>
     </div>
   )
@@ -585,13 +591,9 @@ interface FAQItemProps {
 
 function FAQItem({ question, answer }: FAQItemProps) {
   return (
-    <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-3">
-        {question}
-      </h3>
-      <p className="text-gray-600 leading-relaxed">
-        {answer}
-      </p>
+    <div className="rounded-lg border border-gray-200 p-6 transition-shadow duration-200 hover:shadow-md">
+      <h3 className="mb-3 text-lg font-semibold text-gray-900">{question}</h3>
+      <p className="leading-relaxed text-gray-600">{answer}</p>
     </div>
   )
 }

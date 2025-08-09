@@ -14,7 +14,7 @@ declare global {
   interface WindowEventMap {
     beforeinstallprompt: BeforeInstallPromptEvent
   }
-  
+
   interface BeforeInstallPromptEvent extends Event {
     prompt(): Promise<void>
     userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
@@ -48,7 +48,7 @@ class ServiceWorkerManager {
 
     try {
       clientLogger.info('SW: Registering service worker...')
-      
+
       this.registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         updateViaCache: 'none'
@@ -61,7 +61,7 @@ class ServiceWorkerManager {
         const newWorker = this.registration?.installing
         if (newWorker) {
           clientLogger.debug('SW: New service worker installing...')
-          
+
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               this.updateAvailable = true
@@ -75,18 +75,17 @@ class ServiceWorkerManager {
       setInterval(() => {
         this.registration?.update()
       }, 60000) // Check every minute
-
     } catch (error) {
       clientLogger.error('SW: Service Worker registration failed:', error)
     }
   }
 
   private setupInstallPrompt() {
-    window.addEventListener('beforeinstallprompt', (event) => {
+    window.addEventListener('beforeinstallprompt', event => {
       clientLogger.info('SW: Install prompt available')
       event.preventDefault()
       this.installPrompt = event
-      
+
       // Show custom install button
       this.showInstallButton()
     })
@@ -96,7 +95,7 @@ class ServiceWorkerManager {
       clientLogger.info('SW: App installed successfully')
       this.installPrompt = null
       this.hideInstallButton()
-      
+
       // Track in analytics
       this.trackEvent('pwa_installed', {
         platform: this.getPlatform(),
@@ -108,7 +107,7 @@ class ServiceWorkerManager {
   private setupUpdateNotifications() {
     navigator.serviceWorker?.addEventListener('controllerchange', () => {
       clientLogger.info('SW: New service worker activated')
-      
+
       // Show update notification
       this.showUpdateNotification()
     })
@@ -124,10 +123,10 @@ class ServiceWorkerManager {
     try {
       clientLogger.debug('SW: Showing install prompt')
       await this.installPrompt.prompt()
-      
+
       const choice = await this.installPrompt.userChoice
       clientLogger.info('SW: User choice:', choice.outcome)
-      
+
       if (choice.outcome === 'accepted') {
         this.trackEvent('pwa_install_accepted')
         return true
@@ -158,7 +157,7 @@ class ServiceWorkerManager {
     if (waitingWorker) {
       clientLogger.info('SW: Activating new service worker')
       waitingWorker.postMessage({ type: 'SKIP_WAITING' })
-      
+
       // Reload page to use new version
       window.location.reload()
     }
@@ -168,16 +167,16 @@ class ServiceWorkerManager {
     try {
       // In a real implementation, use IndexedDB
       const queuedActions = JSON.parse(localStorage.getItem('offline_queue') || '[]')
-      
+
       queuedActions.push({
         id: Date.now().toString(),
         action,
         data,
         timestamp: new Date().toISOString()
       })
-      
+
       localStorage.setItem('offline_queue', JSON.stringify(queuedActions))
-      
+
       // Register for background sync when back online
       if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
         try {
@@ -189,7 +188,7 @@ class ServiceWorkerManager {
           clientLogger.warn('Background sync not supported:', error)
         }
       }
-      
+
       clientLogger.debug(`SW: Queued offline action: ${action}`)
     } catch (error) {
       clientLogger.error('SW: Error queuing offline action:', error)
@@ -213,7 +212,7 @@ class ServiceWorkerManager {
     try {
       const permission = await Notification.requestPermission()
       clientLogger.info('SW: Notification permission:', permission)
-      
+
       if (permission === 'granted') {
         this.trackEvent('notification_permission_granted')
         return true
@@ -240,10 +239,10 @@ class ServiceWorkerManager {
       })
 
       clientLogger.info('SW: Push subscription created')
-      
+
       // Send subscription to server
       await this.sendSubscriptionToServer(subscription)
-      
+
       return subscription
     } catch (error) {
       clientLogger.error('SW: Error subscribing to push notifications:', error)
@@ -272,17 +271,18 @@ class ServiceWorkerManager {
   private showInstallButton() {
     // Create or show install button
     let installButton = document.getElementById('pwa-install-button')
-    
+
     if (!installButton) {
       installButton = document.createElement('button')
       installButton.id = 'pwa-install-button'
-      installButton.className = 'fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 hover:bg-blue-700 transition-colors'
+      installButton.className =
+        'fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 hover:bg-blue-700 transition-colors'
       installButton.innerHTML = '📱 Cài đặt App'
       installButton.onclick = () => this.installApp()
-      
+
       document.body.appendChild(installButton)
     }
-    
+
     installButton.style.display = 'block'
   }
 
@@ -296,7 +296,8 @@ class ServiceWorkerManager {
   private notifyUpdateAvailable() {
     // Show update notification
     const notification = document.createElement('div')
-    notification.className = 'fixed top-4 right-4 bg-green-600 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm'
+    notification.className =
+      'fixed top-4 right-4 bg-green-600 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm'
     notification.innerHTML = `
       <div class="flex items-center space-x-3">
         <div class="flex-shrink-0">
@@ -313,9 +314,9 @@ class ServiceWorkerManager {
         </button>
       </div>
     `
-    
+
     document.body.appendChild(notification)
-    
+
     // Auto-hide after 10 seconds
     setTimeout(() => {
       notification.remove()
@@ -325,11 +326,12 @@ class ServiceWorkerManager {
   private showUpdateNotification() {
     // Show simple success message
     const notification = document.createElement('div')
-    notification.className = 'fixed top-4 right-4 bg-blue-600 text-white p-4 rounded-lg shadow-lg z-50'
+    notification.className =
+      'fixed top-4 right-4 bg-blue-600 text-white p-4 rounded-lg shadow-lg z-50'
     notification.innerHTML = '✅ Ứng dụng đã được cập nhật!'
-    
+
     document.body.appendChild(notification)
-    
+
     setTimeout(() => {
       notification.remove()
     }, 3000)
@@ -337,22 +339,22 @@ class ServiceWorkerManager {
 
   private getPlatform(): string {
     const userAgent = navigator.userAgent.toLowerCase()
-    
+
     if (/android/.test(userAgent)) return 'android'
     if (/iphone|ipad/.test(userAgent)) return 'ios'
     if (/windows/.test(userAgent)) return 'windows'
     if (/mac/.test(userAgent)) return 'mac'
-    
+
     return 'unknown'
   }
 
   private trackEvent(event: string, data?: any) {
     // Track PWA events for analytics
     clientLogger.debug('SW: Event tracked:', event, data)
-    
+
     // In a real implementation, send to analytics service
     if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', event, {
+      ;(window as any).gtag('event', event, {
         event_category: 'PWA',
         ...data
       })
@@ -365,7 +367,7 @@ export const swManager = typeof window !== 'undefined' ? ServiceWorkerManager.ge
 
 // Make available globally for easy access
 if (typeof window !== 'undefined') {
-  (window as any).swManager = swManager
+  ;(window as any).swManager = swManager
 }
 
 // Hook into React for easy usage in components
@@ -375,11 +377,11 @@ export function useServiceWorker() {
     isUpdateAvailable: () => swManager?.isUpdateAvailable() ?? false,
     installApp: () => swManager?.installApp() ?? Promise.resolve(false),
     updateApp: () => swManager?.updateApp() ?? Promise.resolve(),
-    queueOfflineAction: (action: string, data: any) => 
+    queueOfflineAction: (action: string, data: any) =>
       swManager?.queueOfflineAction(action, data) ?? Promise.resolve(),
-    requestNotificationPermission: () => 
+    requestNotificationPermission: () =>
       swManager?.requestNotificationPermission() ?? Promise.resolve(false),
-    subscribeToPushNotifications: () => 
+    subscribeToPushNotifications: () =>
       swManager?.subscribeToPushNotifications() ?? Promise.resolve(null)
   }
 }

@@ -9,7 +9,7 @@ export interface EmailTemplate {
 // Welcome email template
 export function getWelcomeEmailTemplate(userFullName: string, userEmail: string): EmailTemplate {
   const subject = 'Chào mừng bạn đến với RoK Services! 🎮'
-  
+
   const html = `
     <!DOCTYPE html>
     <html lang="vi">
@@ -95,7 +95,7 @@ export function getWelcomeEmailTemplate(userFullName: string, userEmail: string)
     </body>
     </html>
   `
-  
+
   const text = `
 Chào mừng ${userFullName} đến với RoK Services!
 
@@ -122,7 +122,7 @@ Liên hệ hỗ trợ: support@rokdbot.com
 Trân trọng,
 RoK Services Team
   `
-  
+
   return { subject, html, text }
 }
 
@@ -135,12 +135,12 @@ export function getBookingConfirmationTemplate(
   bookingDate: Date
 ): EmailTemplate {
   const subject = `Xác nhận đặt dịch vụ #${bookingNumber} - RoK Services`
-  
+
   const formattedAmount = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND'
   }).format(amount)
-  
+
   const formattedDate = new Intl.DateTimeFormat('vi-VN', {
     weekday: 'long',
     year: 'numeric',
@@ -149,7 +149,7 @@ export function getBookingConfirmationTemplate(
     hour: '2-digit',
     minute: '2-digit'
   }).format(bookingDate)
-  
+
   const html = `
     <!DOCTYPE html>
     <html lang="vi">
@@ -237,7 +237,7 @@ export function getBookingConfirmationTemplate(
     </body>
     </html>
   `
-  
+
   const text = `
 ✅ ĐẶT DỊCH VỤ THÀNH CÔNG!
 
@@ -265,7 +265,7 @@ Cảm ơn bạn đã tin tưởng RoK Services!
 Trân trọng,
 Đội ngũ RoK Services
   `
-  
+
   return { subject, html, text }
 }
 
@@ -279,28 +279,28 @@ export function getPaymentConfirmationTemplate(
   paymentDate: Date
 ): EmailTemplate {
   const subject = `Thanh toán thành công #${bookingNumber} - RoK Services`
-  
+
   const formattedAmount = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND'
   }).format(amount)
-  
+
   const formattedDate = new Intl.DateTimeFormat('vi-VN', {
     weekday: 'long',
     year: 'numeric',
-    month: 'long', 
+    month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   }).format(paymentDate)
-  
+
   const paymentMethodNames: { [key: string]: string } = {
-    'momo': 'Ví MoMo',
-    'zalopay': 'ZaloPay',
-    'vnpay': 'VNPay',
-    'banking': 'Chuyển khoản ngân hàng'
+    momo: 'Ví MoMo',
+    zalopay: 'ZaloPay',
+    vnpay: 'VNPay',
+    banking: 'Chuyển khoản ngân hàng'
   }
-  
+
   const html = `
     <!DOCTYPE html>
     <html lang="vi">
@@ -399,7 +399,7 @@ export function getPaymentConfirmationTemplate(
     </body>
     </html>
   `
-  
+
   const text = `
 💳 THANH TOÁN THÀNH CÔNG!
 
@@ -433,7 +433,7 @@ Cảm ơn bạn đã tin tưởng RoK Services!
 
 Team RoK Services
   `
-  
+
   return { subject, html, text }
 }
 
@@ -447,16 +447,16 @@ export function getLeadNotificationTemplate(
   notes: string | null
 ): EmailTemplate {
   const subject = `🔥 Lead mới: ${leadName} quan tâm ${serviceInterest}`
-  
+
   const serviceNames: { [key: string]: string } = {
-    'strategy': 'Tư vấn chiến thuật',
-    'farming': 'Farm Gem',
-    'kvk': 'KvK Support',
-    'alliance': 'Quản lý liên minh',
-    'premium': 'Dịch vụ cao cấp',
-    'coaching': 'Coaching cá nhân'
+    strategy: 'Tư vấn chiến thuật',
+    farming: 'Farm Gem',
+    kvk: 'KvK Support',
+    alliance: 'Quản lý liên minh',
+    premium: 'Dịch vụ cao cấp',
+    coaching: 'Coaching cá nhân'
   }
-  
+
   const html = `
     <!DOCTYPE html>
     <html lang="vi">
@@ -495,12 +495,16 @@ export function getLeadNotificationTemplate(
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Email:</strong></td>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><a href="mailto:${leadEmail}">${leadEmail}</a></td>
             </tr>
-            ${leadPhone ? `
+            ${
+              leadPhone
+                ? `
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>SĐT:</strong></td>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><a href="tel:${leadPhone}">${leadPhone}</a></td>
             </tr>
-            ` : ''}
+            `
+                : ''
+            }
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Quan tâm:</strong></td>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><span style="background: #F59E0B; color: white; padding: 4px 8px; border-radius: 4px;">${serviceNames[serviceInterest] || serviceInterest}</span></td>
@@ -515,14 +519,18 @@ export function getLeadNotificationTemplate(
             </tr>
           </table>
           
-          ${notes ? `
+          ${
+            notes
+              ? `
           <div style="margin-top: 20px;">
             <strong>📝 Ghi chú từ khách hàng:</strong>
             <div style="background: #f9fafb; padding: 15px; border-radius: 6px; margin-top: 10px; font-style: italic;">
               "${notes}"
             </div>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
         
         <div class="actions">
@@ -546,7 +554,7 @@ export function getLeadNotificationTemplate(
     </body>
     </html>
   `
-  
+
   const text = `
 🔥 LEAD MỚI - CẦN PHẢN HỒI NGAY!
 
@@ -570,6 +578,6 @@ Hành động ngay:
 
 RoK Services CRM
   `
-  
+
   return { subject, html, text }
 }

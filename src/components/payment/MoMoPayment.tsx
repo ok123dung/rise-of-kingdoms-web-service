@@ -18,10 +18,12 @@ export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: M
     try {
       // Mock MoMo payment processing
       await new Promise(resolve => setTimeout(resolve, 2000))
-      
+
       // Generate mock QR code
-      setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=momo://pay?amount=${amount}&booking=${bookingId}`)
-      
+      setQrCode(
+        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=momo://pay?amount=${amount}&booking=${bookingId}`
+      )
+
       // Simulate payment completion after QR scan
       setTimeout(() => {
         onSuccess?.({
@@ -40,10 +42,10 @@ export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: M
   }
 
   return (
-    <div className="bg-white border-2 border-pink-200 rounded-lg p-6">
-      <div className="flex items-center space-x-4 mb-4">
-        <div className="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center">
-          <span className="text-white font-bold text-lg">M</span>
+    <div className="rounded-lg border-2 border-pink-200 bg-white p-6">
+      <div className="mb-4 flex items-center space-x-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-500">
+          <span className="text-lg font-bold text-white">M</span>
         </div>
         <div>
           <h3 className="font-semibold text-gray-900">MoMo</h3>
@@ -53,13 +55,13 @@ export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: M
 
       {!qrCode ? (
         <div className="text-center">
-          <p className="text-gray-600 mb-4">
+          <p className="mb-4 text-gray-600">
             Thanh toán {amount.toLocaleString('vi-VN')} VNĐ qua MoMo
           </p>
           <button
-            onClick={handlePayment}
+            className="rounded-lg bg-pink-500 px-6 py-3 text-white hover:bg-pink-600 disabled:cursor-not-allowed disabled:bg-gray-400"
             disabled={isProcessing}
-            className="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            onClick={handlePayment}
           >
             {isProcessing ? 'Đang tạo QR...' : 'Tạo mã QR MoMo'}
           </button>
@@ -67,13 +69,11 @@ export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: M
       ) : (
         <div className="text-center">
           <div className="mb-4">
-            <img src={qrCode} alt="MoMo QR Code" className="mx-auto rounded-lg shadow" />
+            <img alt="MoMo QR Code" className="mx-auto rounded-lg shadow" src={qrCode} />
           </div>
-          <p className="text-sm text-gray-600 mb-2">
-            Mở ứng dụng MoMo và quét mã QR để thanh toán
-          </p>
+          <p className="mb-2 text-sm text-gray-600">Mở ứng dụng MoMo và quét mã QR để thanh toán</p>
           <div className="flex items-center justify-center space-x-2 text-green-600">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <div className="h-3 w-3 animate-pulse rounded-full bg-green-500" />
             <span className="text-sm">Đang chờ thanh toán...</span>
           </div>
         </div>

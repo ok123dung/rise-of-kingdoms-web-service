@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test'
+import { type Page, expect } from '@playwright/test'
 
 export class TestHelpers {
   constructor(private page: Page) {}
@@ -26,7 +26,7 @@ export class TestHelpers {
     // Check mobile viewport
     await this.page.setViewportSize({ width: 375, height: 667 })
     await this.waitForPageLoad()
-    
+
     // Ensure no horizontal scroll
     const hasHorizontalScroll = await this.page.evaluate(() => {
       return document.documentElement.scrollWidth > document.documentElement.clientWidth
@@ -35,7 +35,9 @@ export class TestHelpers {
 
     // Check touch targets are at least 44px
     const smallTouchTargets = await this.page.evaluate(() => {
-      const buttons = Array.from(document.querySelectorAll('button, a, input[type="submit"], input[type="button"]'))
+      const buttons = Array.from(
+        document.querySelectorAll('button, a, input[type="submit"], input[type="button"]')
+      )
       return buttons.filter(el => {
         const rect = el.getBoundingClientRect()
         return rect.width < 44 || rect.height < 44
@@ -57,7 +59,7 @@ export class TestHelpers {
     expect(unlabeledInputs.length).toBe(0)
 
     // Check for heading hierarchy
-    const headings = await this.page.$$eval('h1, h2, h3, h4, h5, h6', headings => 
+    const headings = await this.page.$$eval('h1, h2, h3, h4, h5, h6', headings =>
       headings.map(h => parseInt(h.tagName.substring(1)))
     )
     if (headings.length > 0) {
@@ -70,9 +72,12 @@ export class TestHelpers {
    */
   async checkPerformance() {
     const metrics = await this.page.evaluate(() => {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming
       return {
-        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+        domContentLoaded:
+          navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
         loadComplete: navigation.loadEventEnd - navigation.loadEventStart,
         totalLoadTime: navigation.loadEventEnd - navigation.fetchStart
       }
@@ -117,7 +122,7 @@ export class TestHelpers {
     // This would simulate a payment flow in test environment
     await this.page.click(`[data-testid="payment-${paymentMethod}"]`)
     await this.waitForPageLoad()
-    
+
     // In real tests, you'd interact with payment gateway test environment
     // For now, we'll simulate success
     if (this.page.url().includes('payment')) {
@@ -133,7 +138,8 @@ export class TestHelpers {
    */
   async checkVietnameseContent() {
     const pageText = await this.page.textContent('body')
-    const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(pageText || '')
+    const hasVietnamese =
+      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(pageText || '')
     expect(hasVietnamese).toBeTruthy()
   }
 
@@ -142,13 +148,13 @@ export class TestHelpers {
    */
   async waitForStableElement(selector: string, timeout = 5000) {
     await this.page.waitForSelector(selector, { state: 'visible', timeout })
-    
+
     // Wait for element to stop moving (animations to complete)
     await this.page.waitForFunction(
-      (sel) => {
+      sel => {
         const element = document.querySelector(sel)
         if (!element) return false
-        
+
         const rect1 = element.getBoundingClientRect()
         return new Promise(resolve => {
           setTimeout(() => {
@@ -167,7 +173,7 @@ export class TestHelpers {
    */
   async checkConsoleErrors() {
     const errors: string[] = []
-    
+
     this.page.on('console', msg => {
       if (msg.type() === 'error') {
         errors.push(msg.text())
@@ -176,12 +182,11 @@ export class TestHelpers {
 
     // Give some time for errors to appear
     await this.page.waitForTimeout(1000)
-    
+
     // Filter out known non-critical errors
-    const criticalErrors = errors.filter(error => 
-      !error.includes('favicon.ico') &&
-      !error.includes('404') &&
-      !error.includes('DevTools')
+    const criticalErrors = errors.filter(
+      error =>
+        !error.includes('favicon.ico') && !error.includes('404') && !error.includes('DevTools')
     )
 
     expect(criticalErrors.length).toBe(0)
@@ -198,9 +203,9 @@ export const TestData = {
     phone: '0123456789',
     password: 'MatKhau123!'
   },
-  
+
   admin: {
-    email: 'admin@rokdbot.com', 
+    email: 'admin@rokdbot.com',
     name: 'Admin User',
     password: 'AdminPass123!'
   },

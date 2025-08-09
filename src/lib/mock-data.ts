@@ -5,7 +5,8 @@ export const mockServices = [
     id: 'mock-1',
     name: 'ROK Strategy & Tactics',
     slug: 'strategy',
-    description: 'Comprehensive strategy guidance for Rise of Kingdoms - from city development to alliance warfare',
+    description:
+      'Comprehensive strategy guidance for Rise of Kingdoms - from city development to alliance warfare',
     shortDescription: 'Expert RoK strategy consultation and tactical guidance',
     basePrice: 1000000,
     currency: 'VND',
@@ -26,7 +27,7 @@ export const mockServices = [
         features: ['Kingdom development plan', 'Commander recommendations', 'Basic tactics guide']
       },
       {
-        id: 'tier-2', 
+        id: 'tier-2',
         name: 'Strategy Pro',
         slug: 'strategy-pro',
         description: 'Advanced strategy for competitive players',
@@ -41,7 +42,7 @@ export const mockServices = [
   {
     id: 'mock-2',
     name: 'ROK Power Up',
-    slug: 'power-up', 
+    slug: 'power-up',
     description: 'Rapid power growth and account development for Rise of Kingdoms',
     shortDescription: 'Fast power increase and efficient account building',
     basePrice: 800000,
@@ -93,7 +94,7 @@ export const mockBookings = [
   },
   {
     id: 'booking-2',
-    bookingNumber: 'RK25072202', 
+    bookingNumber: 'RK25072202',
     user: {
       fullName: 'Trần Thị B',
       email: 'rokplayer@gmail.com'

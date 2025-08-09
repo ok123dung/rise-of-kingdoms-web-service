@@ -1,9 +1,11 @@
 'use client'
 
-import React, { Component, ErrorInfo, ReactNode } from 'react'
+import React, { Component, type ErrorInfo, type ReactNode } from 'react'
+
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
-import { logError, getLogger } from '@/lib/monitoring/logger'
+
 import { clientLogger } from '@/lib/client-logger'
+import { logError, getLogger } from '@/lib/monitoring/logger'
 
 interface Props {
   children: ReactNode
@@ -44,7 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
     logError(error, {
       componentStack: errorInfo.componentStack ?? undefined
     })
-    
+
     // Log additional context
     getLogger().error('React Error Boundary triggered', error, {
       componentStack: errorInfo.componentStack,
@@ -95,57 +97,59 @@ export class ErrorBoundary extends Component<Props, State> {
 
       // Default error UI
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <AlertTriangle className="h-6 w-6 text-red-600" />
             </div>
-            
+
             <div className="text-center">
-              <h1 className="text-xl font-semibold text-gray-900 mb-2">
+              <h1 className="mb-2 text-xl font-semibold text-gray-900">
                 Oops! Something went wrong
               </h1>
-              <p className="text-gray-600 mb-6">
-                We encountered an unexpected error. Our team has been notified and is working to fix this issue.
+              <p className="mb-6 text-gray-600">
+                We encountered an unexpected error. Our team has been notified and is working to fix
+                this issue.
               </p>
 
               {errorId && (
-                <div className="bg-gray-100 rounded-md p-3 mb-6">
+                <div className="mb-6 rounded-md bg-gray-100 p-3">
                   <p className="text-sm text-gray-700">
                     <span className="font-medium">Error ID:</span> {errorId}
                   </p>
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <button
+                  className="flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
                   onClick={this.handleRetry}
-                  className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Try Again
                 </button>
-                
+
                 <button
+                  className="flex items-center justify-center rounded-md bg-gray-600 px-4 py-2 text-white transition-colors hover:bg-gray-700"
                   onClick={this.handleGoHome}
-                  className="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
                 >
-                  <Home className="w-4 h-4 mr-2" />
+                  <Home className="mr-2 h-4 w-4" />
                   Go Home
                 </button>
               </div>
 
               {(isDevelopment || this.props.showDetails) && error && (
                 <details className="mt-6 text-left">
-                  <summary className="cursor-pointer text-sm font-medium text-gray-700 mb-2">
-                    <Bug className="w-4 h-4 inline mr-1" />
+                  <summary className="mb-2 cursor-pointer text-sm font-medium text-gray-700">
+                    <Bug className="mr-1 inline h-4 w-4" />
                     Error Details
                   </summary>
-                  <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                    <pre className="text-xs text-red-800 whitespace-pre-wrap overflow-auto max-h-40">
+                  <div className="rounded-md border border-red-200 bg-red-50 p-3">
+                    <pre className="max-h-40 overflow-auto whitespace-pre-wrap text-xs text-red-800">
                       {error.name}: {error.message}
                       {error.stack && '\n\n' + error.stack}
-                      {errorInfo?.componentStack && '\n\nComponent Stack:' + errorInfo.componentStack}
+                      {errorInfo?.componentStack &&
+                        '\n\nComponent Stack:' + errorInfo.componentStack}
                     </pre>
                   </div>
                 </details>
@@ -172,7 +176,7 @@ export function withErrorBoundary<P extends object>(
   )
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`
-  
+
   return WrappedComponent
 }
 
@@ -181,23 +185,23 @@ export function RSCErrorBoundary({ children }: { children: ReactNode }) {
   return (
     <ErrorBoundary
       fallback={
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center gap-2 text-yellow-800 mb-2">
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+          <div className="mb-2 flex items-center gap-2 text-yellow-800">
             <AlertTriangle className="h-4 w-4" />
             <span className="font-medium">Hydration Error</span>
           </div>
           <p className="text-sm text-yellow-700">
             Trang đang được tải lại để khắc phục sự cố hydration.
           </p>
-          <button 
-            onClick={() => window.location.reload()}
+          <button
             className="mt-2 text-sm text-yellow-800 underline hover:no-underline"
+            onClick={() => window.location.reload()}
           >
             Tải lại trang
           </button>
         </div>
       }
-      onError={(error) => {
+      onError={error => {
         // Check if it's a hydration error
         if (error.message.includes('Hydration') || error.message.includes('hydration')) {
           clientLogger.warn('RSC Hydration error detected:', error)
@@ -241,7 +245,7 @@ export class AsyncErrorBoundary extends Component<Props, State> {
   handleUnhandledRejection = (event: PromiseRejectionEvent) => {
     const error = new Error(event.reason?.message || 'Unhandled promise rejection')
     const errorId = Math.random().toString(36).substring(7)
-    
+
     // Log the error
     getLogger().error('Unhandled promise rejection', error, {
       reason: event.reason,
@@ -273,7 +277,7 @@ export class AsyncErrorBoundary extends Component<Props, State> {
     logError(error, {
       componentStack: errorInfo.componentStack ?? undefined
     })
-    
+
     getLogger().error('Async Error Boundary triggered', error, {
       componentStack: errorInfo.componentStack,
       errorBoundary: 'async',
@@ -286,22 +290,22 @@ export class AsyncErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      return this.props.fallback || (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-          <div className="flex">
-            <AlertTriangle className="w-5 h-5 text-red-400" />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
-                Something went wrong
-              </h3>
-              <div className="mt-2">
-                <p className="text-sm text-red-700">
-                  {this.state.error?.message || 'An unexpected error occurred'}
-                </p>
+      return (
+        this.props.fallback || (
+          <div className="rounded-md border border-red-200 bg-red-50 p-4">
+            <div className="flex">
+              <AlertTriangle className="h-5 w-5 text-red-400" />
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Something went wrong</h3>
+                <div className="mt-2">
+                  <p className="text-sm text-red-700">
+                    {this.state.error?.message || 'An unexpected error occurred'}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )
       )
     }
 
@@ -315,7 +319,7 @@ export function useErrorHandler() {
     logError(error, {
       componentStack: errorInfo.componentStack ?? undefined
     })
-    
+
     // In development, re-throw to trigger error boundary
     if (process.env.NODE_ENV === 'development') {
       throw error
@@ -324,24 +328,20 @@ export function useErrorHandler() {
 }
 
 // Error boundary for specific features
-export function FeatureErrorBoundary({ 
-  children, 
+export function FeatureErrorBoundary({
+  children,
   featureName,
   fallbackMessage = 'This feature is temporarily unavailable'
 }: Props & { featureName: string; fallbackMessage?: string }) {
   return (
     <ErrorBoundary
       fallback={
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+        <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4">
           <div className="flex">
-            <AlertTriangle className="w-5 h-5 text-yellow-400" />
+            <AlertTriangle className="h-5 w-5 text-yellow-400" />
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">
-                {featureName} Unavailable
-              </h3>
-              <p className="mt-1 text-sm text-yellow-700">
-                {fallbackMessage}
-              </p>
+              <h3 className="text-sm font-medium text-yellow-800">{featureName} Unavailable</h3>
+              <p className="mt-1 text-sm text-yellow-700">{fallbackMessage}</p>
             </div>
           </div>
         </div>

@@ -1,24 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { 
-  BarChart3, 
-  Users, 
-  CreditCard, 
+
+import {
+  BarChart3,
+  Users,
+  CreditCard,
   TrendingUp,
-  Calendar,
   MessageCircle,
   AlertCircle,
-  CheckCircle,
-  Clock,
   DollarSign,
-  UserCheck,
-  Activity,
   Shield,
   LogOut
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 interface DashboardStats {
   totalRevenue: number
@@ -114,7 +110,7 @@ export default function AdminDashboard() {
           { name: 'KvK Support - Elite', bookings: 0, revenue: 0 }
         ]
       }
-      
+
       setStats(mockStats)
       setLoading(false)
     } catch (error) {
@@ -139,9 +135,11 @@ export default function AdminDashboard() {
       contacted: 'bg-purple-100 text-purple-800',
       qualified: 'bg-green-100 text-green-800'
     }
-    
+
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800'}`}>
+      <span
+        className={`rounded-full px-2 py-1 text-xs font-medium ${statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800'}`}
+      >
         {status}
       </span>
     )
@@ -156,8 +154,8 @@ export default function AdminDashboard() {
   // Show loading state
   if (status === 'loading' || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
       </div>
     )
   }
@@ -174,9 +172,9 @@ export default function AdminDashboard() {
 
   if (!stats) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
           <h2 className="text-xl font-semibold text-gray-900">Không thể tải dữ liệu</h2>
           <p className="text-gray-600">Vui lòng thử lại sau</p>
         </div>
@@ -185,38 +183,36 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl p-6">
       {/* Admin Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600">Tổng quan business Rise of Kingdoms Services</p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           {/* User Info */}
-          <div className="flex items-center gap-3 bg-white rounded-lg shadow-sm p-3 border">
-            <div className="p-2 bg-blue-100 rounded-full">
+          <div className="flex items-center gap-3 rounded-lg border bg-white p-3 shadow-sm">
+            <div className="rounded-full bg-blue-100 p-2">
               <Shield className="h-4 w-4 text-blue-600" />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
                 {session?.user?.name || session?.user?.email}
               </p>
-              <p className="text-xs text-gray-500 capitalize">
-                {session?.user?.role} • Online
-              </p>
+              <p className="text-xs capitalize text-gray-500">{session?.user?.role} • Online</p>
             </div>
           </div>
-          
+
           {/* Logout Button */}
           <button
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-800"
+            title="Đăng xuất"
             onClick={() => {
               // Handle logout
               window.location.href = '/auth/signin'
             }}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Đăng xuất"
           >
             <LogOut className="h-4 w-4" />
           </button>
@@ -224,8 +220,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-lg bg-white p-6 shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Tổng doanh thu</p>
@@ -233,75 +229,78 @@ export default function AdminDashboard() {
                 {formatCurrency(stats.totalRevenue)}
               </p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
+            <div className="rounded-full bg-green-100 p-3">
               <DollarSign className="h-6 w-6 text-green-600" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-green-600 text-sm font-medium">+100%</span>
-            <span className="text-gray-600 text-sm ml-1">từ tháng trước</span>
+            <span className="text-sm font-medium text-green-600">+100%</span>
+            <span className="ml-1 text-sm text-gray-600">từ tháng trước</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="rounded-lg bg-white p-6 shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Tổng đơn hàng</p>
               <p className="text-2xl font-bold text-gray-900">{stats.totalBookings}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
+            <div className="rounded-full bg-blue-100 p-3">
               <BarChart3 className="h-6 w-6 text-blue-600" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-blue-600 text-sm font-medium">+100%</span>
-            <span className="text-gray-600 text-sm ml-1">từ tháng trước</span>
+            <span className="text-sm font-medium text-blue-600">+100%</span>
+            <span className="ml-1 text-sm text-gray-600">từ tháng trước</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="rounded-lg bg-white p-6 shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Tổng khách hàng</p>
               <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
             </div>
-            <div className="p-3 bg-purple-100 rounded-full">
+            <div className="rounded-full bg-purple-100 p-3">
               <Users className="h-6 w-6 text-purple-600" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-purple-600 text-sm font-medium">+100%</span>
-            <span className="text-gray-600 text-sm ml-1">từ tháng trước</span>
+            <span className="text-sm font-medium text-purple-600">+100%</span>
+            <span className="ml-1 text-sm text-gray-600">từ tháng trước</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="rounded-lg bg-white p-6 shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Tỷ lệ chuyển đổi</p>
               <p className="text-2xl font-bold text-gray-900">{stats.conversionRate.toFixed(1)}%</p>
             </div>
-            <div className="p-3 bg-orange-100 rounded-full">
+            <div className="rounded-full bg-orange-100 p-3">
               <TrendingUp className="h-6 w-6 text-orange-600" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-orange-600 text-sm font-medium">Tốt</span>
-            <span className="text-gray-600 text-sm ml-1">so với trung bình</span>
+            <span className="text-sm font-medium text-orange-600">Tốt</span>
+            <span className="ml-1 text-sm text-gray-600">so với trung bình</span>
           </div>
         </div>
       </div>
 
       {/* Charts and Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Recent Bookings */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Đơn hàng gần đây</h3>
+        <div className="rounded-lg bg-white p-6 shadow-md">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">Đơn hàng gần đây</h3>
           <div className="space-y-4">
             {stats.recentBookings.map((booking, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
+              >
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-full">
+                  <div className="rounded-full bg-blue-100 p-2">
                     <CreditCard className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
@@ -311,9 +310,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    {formatCurrency(booking.amount)}
-                  </p>
+                  <p className="font-semibold text-gray-900">{formatCurrency(booking.amount)}</p>
                   {getStatusBadge(booking.status)}
                 </div>
               </div>
@@ -322,8 +319,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top Services */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Dịch vụ phổ biến</h3>
+        <div className="rounded-lg bg-white p-6 shadow-md">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">Dịch vụ phổ biến</h3>
           <div className="space-y-4">
             {stats.topServices.map((service, index) => (
               <div key={index} className="flex items-center justify-between">
@@ -332,9 +329,7 @@ export default function AdminDashboard() {
                   <p className="text-sm text-gray-600">{service.bookings} đơn hàng</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    {formatCurrency(service.revenue)}
-                  </p>
+                  <p className="font-semibold text-gray-900">{formatCurrency(service.revenue)}</p>
                 </div>
               </div>
             ))}
@@ -343,62 +338,58 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Leads */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Leads mới nhất</h3>
+      <div className="rounded-lg bg-white p-6 shadow-md">
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Leads mới nhất</h3>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Khách hàng
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Dịch vụ quan tâm
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Điểm lead
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Nguồn
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Trạng thái
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Hành động
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 bg-white">
               {stats.recentLeads.map((lead, index) => (
                 <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="whitespace-nowrap px-6 py-4">
                     <div>
                       <p className="font-medium text-gray-900">{lead.fullName}</p>
                       <p className="text-sm text-gray-600">{lead.email}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="whitespace-nowrap px-6 py-4">
                     <span className="capitalize text-gray-900">{lead.serviceInterest}</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getLeadScoreColor(lead.leadScore)}`}>
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs font-medium ${getLeadScoreColor(lead.leadScore)}`}
+                    >
                       {lead.leadScore}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="whitespace-nowrap px-6 py-4">
                     <span className="capitalize text-gray-600">{lead.source}</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(lead.status)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">
-                      Liên hệ
-                    </button>
-                    <button className="text-green-600 hover:text-green-900">
-                      Convert
-                    </button>
+                  <td className="whitespace-nowrap px-6 py-4">{getStatusBadge(lead.status)}</td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                    <button className="mr-3 text-blue-600 hover:text-blue-900">Liên hệ</button>
+                    <button className="text-green-600 hover:text-green-900">Convert</button>
                   </td>
                 </tr>
               ))}
@@ -409,21 +400,21 @@ export default function AdminDashboard() {
 
       {/* Quick Actions */}
       <div className="mt-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="flex items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg border-2 border-blue-200 transition-colors">
-            <Users className="h-5 w-5 text-blue-600 mr-2" />
-            <span className="text-blue-600 font-medium">Quản lý khách hàng</span>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Thao tác nhanh</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <button className="flex items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-50 p-4 transition-colors hover:bg-blue-100">
+            <Users className="mr-2 h-5 w-5 text-blue-600" />
+            <span className="font-medium text-blue-600">Quản lý khách hàng</span>
           </button>
-          
-          <button className="flex items-center justify-center p-4 bg-green-50 hover:bg-green-100 rounded-lg border-2 border-green-200 transition-colors">
-            <BarChart3 className="h-5 w-5 text-green-600 mr-2" />
-            <span className="text-green-600 font-medium">Xem báo cáo</span>
+
+          <button className="flex items-center justify-center rounded-lg border-2 border-green-200 bg-green-50 p-4 transition-colors hover:bg-green-100">
+            <BarChart3 className="mr-2 h-5 w-5 text-green-600" />
+            <span className="font-medium text-green-600">Xem báo cáo</span>
           </button>
-          
-          <button className="flex items-center justify-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg border-2 border-purple-200 transition-colors">
-            <MessageCircle className="h-5 w-5 text-purple-600 mr-2" />
-            <span className="text-purple-600 font-medium">Discord dashboard</span>
+
+          <button className="flex items-center justify-center rounded-lg border-2 border-purple-200 bg-purple-50 p-4 transition-colors hover:bg-purple-100">
+            <MessageCircle className="mr-2 h-5 w-5 text-purple-600" />
+            <span className="font-medium text-purple-600">Discord dashboard</span>
           </button>
         </div>
       </div>

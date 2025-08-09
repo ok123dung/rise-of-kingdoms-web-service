@@ -1,21 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { withAuth, withRateLimit, getCurrentSession, getCurrentUser, isStaff } from '@/lib/auth'
+
+import { withAuth, withRateLimit, getCurrentSession, isStaff } from '@/lib/auth'
 import { db, prisma } from '@/lib/db'
-import { MoMoPayment } from '@/lib/payments/momo'
-import { ZaloPayPayment } from '@/lib/payments/zalopay'
-import { VNPayPayment } from '@/lib/payments/vnpay'
-import { BankingTransfer } from '@/lib/payments/banking'
-import { getLogger } from '@/lib/monitoring/logger'
 import {
   ValidationError,
   NotFoundError,
   AuthorizationError,
   PaymentError,
   handleApiError,
-  validateRequired,
   ErrorMessages
 } from '@/lib/errors'
+import { getLogger } from '@/lib/monitoring/logger'
+import { BankingTransfer } from '@/lib/payments/banking'
+import { MoMoPayment } from '@/lib/payments/momo'
+import { VNPayPayment } from '@/lib/payments/vnpay'
+import { ZaloPayPayment } from '@/lib/payments/zalopay'
 
 const createPaymentSchema = z.object({
   bookingId: z.string().min(1, 'Booking ID is required'),
@@ -29,7 +29,7 @@ const createPaymentSchema = z.object({
 async function createPaymentHandler(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Validate request data
     let validatedData
     try {
@@ -37,7 +37,7 @@ async function createPaymentHandler(request: NextRequest) {
     } catch (error) {
       throw new ValidationError('Invalid payment request data')
     }
-    
+
     // Verify booking exists and belongs to user
     const booking = await db.booking.findById(validatedData.bookingId)
     if (!booking) {
@@ -47,7 +47,7 @@ async function createPaymentHandler(request: NextRequest) {
     // Check if user owns this booking (unless admin)
     const session = await getCurrentSession()
     const userIsStaff = await isStaff()
-    
+
     if (booking.userId !== session?.user?.id && !userIsStaff) {
       throw new AuthorizationError('You do not have access to this booking')
     }
@@ -131,21 +131,20 @@ async function createPaymentHandler(request: NextRequest) {
     }
 
     if (!paymentResult.success) {
-      throw new PaymentError(
-        paymentResult.error || ErrorMessages.PAYMENT_FAILED,
-        { paymentMethod: validatedData.paymentMethod }
-      )
+      throw new PaymentError(paymentResult.error || ErrorMessages.PAYMENT_FAILED, {
+        paymentMethod: validatedData.paymentMethod
+      })
     }
 
     // Return payment URL for redirect
     const paymentUrl = paymentResult.data?.payUrl || paymentResult.data?.order_url
-    
+
     getLogger().info('Payment created successfully', {
       bookingId: validatedData.bookingId,
       paymentMethod: validatedData.paymentMethod,
       orderId: paymentResult.data?.orderId || paymentResult.data?.app_trans_id
     })
-    
+
     return NextResponse.json({
       success: true,
       data: {
@@ -157,7 +156,6 @@ async function createPaymentHandler(request: NextRequest) {
       },
       message: 'Payment created successfully'
     })
-
   } catch (error) {
     return handleApiError(error, request.headers.get('x-request-id') || undefined)
   }

@@ -1,8 +1,18 @@
-import { Client, GatewayIntentBits, EmbedBuilder, TextChannel, ChannelType, PermissionFlagsBits, ChatInputCommandInteraction } from 'discord.js'
+import { type Decimal } from '@prisma/client/runtime/library'
+import {
+  Client,
+  GatewayIntentBits,
+  EmbedBuilder,
+  type TextChannel,
+  ChannelType,
+  PermissionFlagsBits,
+  type ChatInputCommandInteraction
+} from 'discord.js'
+
 import { db } from '@/lib/db'
-import type { Booking, User, ServiceTier, Service, Payment, Prisma } from '@prisma/client'
-import { Decimal } from '@prisma/client/runtime/library'
 import { getLogger } from '@/lib/monitoring/logger'
+
+import type { Booking, User, ServiceTier, Service, Payment } from '@prisma/client'
 
 // Extended types with relations
 interface BookingWithRelations extends Booking {
@@ -21,7 +31,7 @@ interface PaymentWithRelations extends Payment {
 
 class RoKDiscordBot {
   private client: Client
-  private isReady: boolean = false
+  private isReady = false
 
   constructor() {
     this.client = new Client({
@@ -43,18 +53,24 @@ class RoKDiscordBot {
       this.isReady = true
     })
 
-    this.client.on('error', (error) => {
-      getLogger().error('Discord bot error', error instanceof Error ? error : new Error(String(error)))
+    this.client.on('error', error => {
+      getLogger().error(
+        'Discord bot error',
+        error instanceof Error ? error : new Error(String(error))
+      )
     })
 
     // Handle slash commands
-    this.client.on('interactionCreate', async (interaction) => {
+    this.client.on('interactionCreate', async interaction => {
       if (!interaction.isChatInputCommand()) return
 
       try {
         await this.handleSlashCommand(interaction)
       } catch (error) {
-        getLogger().error('Slash command error', error instanceof Error ? error : new Error(String(error)))
+        getLogger().error(
+          'Slash command error',
+          error instanceof Error ? error : new Error(String(error))
+        )
         await interaction.reply({
           content: 'Có lỗi xảy ra khi xử lý lệnh.',
           ephemeral: true
@@ -72,7 +88,10 @@ class RoKDiscordBot {
     try {
       await this.client.login(process.env.DISCORD_BOT_TOKEN)
     } catch (error) {
-      getLogger().error('Failed to initialize Discord bot', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Failed to initialize Discord bot',
+        error instanceof Error ? error : new Error(String(error))
+      )
     }
   }
 
@@ -99,7 +118,7 @@ class RoKDiscordBot {
 
   private async handleBookingStatus(interaction: ChatInputCommandInteraction) {
     const email = interaction.options.getString('email')
-    
+
     try {
       const user = await db.user.findByEmail(email!)
       if (!user) {
@@ -111,7 +130,7 @@ class RoKDiscordBot {
       }
 
       const bookings = await db.booking.findByUser(user.id)
-      
+
       if (bookings.length === 0) {
         await interaction.reply({
           content: 'Bạn chưa có booking nào.',
@@ -122,13 +141,13 @@ class RoKDiscordBot {
 
       const embed = new EmbedBuilder()
         .setTitle('📋 Trạng thái Booking')
-        .setColor(0x0099FF)
+        .setColor(0x0099ff)
         .setDescription(`Tìm thấy ${bookings.length} booking(s)`)
 
       bookings.slice(0, 5).forEach((booking, index) => {
         const statusEmoji = this.getStatusEmoji(booking.status)
         const paymentEmoji = this.getPaymentStatusEmoji(booking.paymentStatus)
-        
+
         embed.addFields({
           name: `${index + 1}. ${booking.serviceTier.service.name}`,
           value: `${statusEmoji} Trạng thái: ${booking.status}\n${paymentEmoji} Thanh toán: ${booking.paymentStatus}\nSố tiền: ${booking.finalAmount.toLocaleString()} VNĐ\nMã booking: ${booking.bookingNumber}`,
@@ -138,7 +157,10 @@ class RoKDiscordBot {
 
       await interaction.reply({ embeds: [embed], ephemeral: true })
     } catch (error) {
-      getLogger().error('Booking status error', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Booking status error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       await interaction.reply({
         content: 'Có lỗi xảy ra khi kiểm tra trạng thái booking.',
         ephemeral: true
@@ -149,17 +171,17 @@ class RoKDiscordBot {
   private async handleServices(interaction: ChatInputCommandInteraction) {
     try {
       const services = await db.service.findAll()
-      
+
       const embed = new EmbedBuilder()
         .setTitle('🎮 Dịch vụ Rise of Kingdoms')
-        .setColor(0x00FF00)
+        .setColor(0x00ff00)
         .setDescription('Danh sách các dịch vụ hiện có:')
         .setURL(`${process.env.NEXT_PUBLIC_SITE_URL}/services`)
 
       services.slice(0, 10).forEach(service => {
         const minPrice = Math.min(...service.serviceTiers.map(tier => Number(tier.price)))
         const maxPrice = Math.max(...service.serviceTiers.map(tier => Number(tier.price)))
-        
+
         embed.addFields({
           name: service.name,
           value: `${service.shortDescription || service.description?.substring(0, 100) || 'Không có mô tả'}\n💰 Giá: ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} VNĐ`,
@@ -173,7 +195,10 @@ class RoKDiscordBot {
 
       await interaction.reply({ embeds: [embed] })
     } catch (error) {
-      getLogger().error('Services command error', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Services command error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       await interaction.reply({
         content: 'Có lỗi xảy ra khi lấy danh sách dịch vụ.',
         ephemeral: true
@@ -183,14 +208,18 @@ class RoKDiscordBot {
 
   private async handleSupport(interaction: ChatInputCommandInteraction) {
     const issue = interaction.options.getString('issue')
-    
+
     try {
       // Create support ticket
       const supportEmbed = new EmbedBuilder()
         .setTitle('🎫 Yêu cầu hỗ trợ mới')
-        .setColor(0xFF9900)
+        .setColor(0xff9900)
         .addFields(
-          { name: 'Người yêu cầu', value: `${interaction.user.tag} (${interaction.user.id})`, inline: true },
+          {
+            name: 'Người yêu cầu',
+            value: `${interaction.user.tag} (${interaction.user.id})`,
+            inline: true
+          },
           { name: 'Thời gian', value: new Date().toLocaleString('vi-VN'), inline: true },
           { name: 'Vấn đề', value: issue || 'Không có mô tả', inline: false }
         )
@@ -206,7 +235,7 @@ class RoKDiscordBot {
         })
         return
       }
-      const supportChannel = await this.client.channels.fetch(supportChannelId) as TextChannel
+      const supportChannel = (await this.client.channels.fetch(supportChannelId)) as TextChannel
       if (supportChannel) {
         await supportChannel.send({ embeds: [supportEmbed] })
       }
@@ -216,7 +245,10 @@ class RoKDiscordBot {
         ephemeral: true
       })
     } catch (error) {
-      getLogger().error('Support command error', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Support command error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       await interaction.reply({
         content: 'Có lỗi xảy ra khi gửi yêu cầu hỗ trợ.',
         ephemeral: true
@@ -231,11 +263,15 @@ class RoKDiscordBot {
     try {
       const embed = new EmbedBuilder()
         .setTitle('🎉 Booking mới!')
-        .setColor(0x00FF00)
+        .setColor(0x00ff00)
         .addFields(
           { name: 'Khách hàng', value: booking.user.fullName, inline: true },
           { name: 'Email', value: booking.user.email, inline: true },
-          { name: 'Dịch vụ', value: `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`, inline: false },
+          {
+            name: 'Dịch vụ',
+            value: `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`,
+            inline: false
+          },
           { name: 'Số tiền', value: `${booking.finalAmount.toLocaleString()} VNĐ`, inline: true },
           { name: 'Mã booking', value: booking.bookingNumber, inline: true },
           { name: 'Trạng thái', value: booking.status, inline: true }
@@ -248,12 +284,15 @@ class RoKDiscordBot {
         getLogger().error('DISCORD_BOOKINGS_CHANNEL not configured')
         return
       }
-      const channel = await this.client.channels.fetch(bookingsChannelId) as TextChannel
+      const channel = (await this.client.channels.fetch(bookingsChannelId)) as TextChannel
       if (channel) {
         await channel.send({ embeds: [embed] })
       }
     } catch (error) {
-      getLogger().error('Failed to send booking notification', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Failed to send booking notification',
+        error instanceof Error ? error : new Error(String(error))
+      )
     }
   }
 
@@ -263,7 +302,7 @@ class RoKDiscordBot {
     try {
       const embed = new EmbedBuilder()
         .setTitle('💰 Thanh toán thành công!')
-        .setColor(0x00FF00)
+        .setColor(0x00ff00)
         .addFields(
           { name: 'Khách hàng', value: payment.booking.user.fullName, inline: true },
           { name: 'Số tiền', value: `${payment.amount.toLocaleString()} VNĐ`, inline: true },
@@ -280,12 +319,15 @@ class RoKDiscordBot {
         getLogger().error('DISCORD_BOOKINGS_CHANNEL not configured')
         return
       }
-      const channel = await this.client.channels.fetch(bookingsChannelId) as TextChannel
+      const channel = (await this.client.channels.fetch(bookingsChannelId)) as TextChannel
       if (channel) {
         await channel.send({ embeds: [embed] })
       }
     } catch (error) {
-      getLogger().error('Failed to send payment notification', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Failed to send payment notification',
+        error instanceof Error ? error : new Error(String(error))
+      )
     }
   }
 
@@ -295,17 +337,17 @@ class RoKDiscordBot {
     try {
       const guildId = process.env.DISCORD_GUILD_ID
       const categoryId = process.env.DISCORD_CUSTOMER_CATEGORY
-      
+
       if (!guildId || !categoryId) {
         getLogger().error('DISCORD_GUILD_ID or DISCORD_CUSTOMER_CATEGORY not configured')
         return null
       }
-      
+
       const guild = await this.client.guilds.fetch(guildId)
       const category = await guild.channels.fetch(categoryId)
 
       const channelName = `${booking.user.fullName.toLowerCase().replace(/\s+/g, '-')}-${booking.serviceTier.service.slug}`
-      
+
       const channel = await guild.channels.create({
         name: channelName,
         type: ChannelType.GuildText,
@@ -315,21 +357,35 @@ class RoKDiscordBot {
             id: guild.roles.everyone.id,
             deny: [PermissionFlagsBits.ViewChannel]
           },
-          ...(booking.user.discordId ? [{
-            id: booking.user.discordId,
-            allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory]
-          }] : [])
+          ...(booking.user.discordId
+            ? [
+                {
+                  id: booking.user.discordId,
+                  allow: [
+                    PermissionFlagsBits.ViewChannel,
+                    PermissionFlagsBits.SendMessages,
+                    PermissionFlagsBits.ReadMessageHistory
+                  ]
+                }
+              ]
+            : [])
         ]
       })
 
       // Send welcome message
       const welcomeEmbed = new EmbedBuilder()
         .setTitle('🎮 Chào mừng đến với kênh hỗ trợ!')
-        .setColor(0x0099FF)
-        .setDescription(`Xin chào ${booking.user.fullName}! Đây là kênh riêng cho dịch vụ **${booking.serviceTier.service.name}** của bạn.`)
+        .setColor(0x0099ff)
+        .setDescription(
+          `Xin chào ${booking.user.fullName}! Đây là kênh riêng cho dịch vụ **${booking.serviceTier.service.name}** của bạn.`
+        )
         .addFields(
           { name: 'Mã booking', value: booking.bookingNumber, inline: true },
-          { name: 'Dịch vụ', value: `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`, inline: true },
+          {
+            name: 'Dịch vụ',
+            value: `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`,
+            inline: true
+          },
           { name: 'Trạng thái', value: booking.status, inline: true }
         )
         .setFooter({ text: 'Team sẽ liên hệ với bạn sớm nhất có thể!' })
@@ -338,29 +394,32 @@ class RoKDiscordBot {
 
       return channel
     } catch (error) {
-      getLogger().error('Failed to create customer channel', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Failed to create customer channel',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return null
     }
   }
 
   private getStatusEmoji(status: string): string {
     const statusEmojis: { [key: string]: string } = {
-      'pending': '⏳',
-      'confirmed': '✅',
-      'in_progress': '🔄',
-      'completed': '🎉',
-      'cancelled': '❌',
-      'refunded': '💸'
+      pending: '⏳',
+      confirmed: '✅',
+      in_progress: '🔄',
+      completed: '🎉',
+      cancelled: '❌',
+      refunded: '💸'
     }
     return statusEmojis[status] || '❓'
   }
 
   private getPaymentStatusEmoji(status: string): string {
     const paymentEmojis: { [key: string]: string } = {
-      'pending': '⏳',
-      'completed': '✅',
-      'failed': '❌',
-      'refunded': '💸'
+      pending: '⏳',
+      completed: '✅',
+      failed: '❌',
+      refunded: '💸'
     }
     return paymentEmojis[status] || '❓'
   }

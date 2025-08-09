@@ -1,10 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
+import {
+  Star,
+  Clock,
+  CheckCircle,
+  Shield,
+  Award,
+  Users,
+  ArrowRight,
+  MessageCircle,
+  Phone,
+  Mail
+} from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { Star, Clock, CheckCircle, Shield, Award, Users, ArrowRight, MessageCircle, Phone, Mail } from 'lucide-react'
-import Header from '@/components/layout/Header'
+
 import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/Header'
 
 interface Service {
   id: string
@@ -38,7 +51,7 @@ export default function ServiceDetailPage() {
   const params = useParams()
   const router = useRouter()
   const slug = params.slug as string
-  
+
   const [service, setService] = useState<Service | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -242,7 +255,7 @@ export default function ServiceDetailPage() {
         }
       ]
     }
-    
+
     return tiersByService[serviceSlug] || []
   }
 
@@ -250,24 +263,24 @@ export default function ServiceDetailPage() {
     const fetchService = async () => {
       try {
         setLoading(true)
-        
+
         // Fetch all services and find the matching one
         const response = await fetch('/api/services')
         const data = await response.json()
-        
+
         if (!data.success) {
           throw new Error(data.message || 'Failed to fetch services')
         }
-        
+
         const foundService = data.data.find((s: Service) => s.slug === slug)
-        
+
         if (!foundService) {
           setError('Dịch vụ không tồn tại')
           return
         }
-        
+
         setService(foundService)
-        
+
         // Set default tier selection
         const tiers = getServiceTiers(slug)
         const popularTier = tiers.find(t => t.isPopular)
@@ -276,7 +289,6 @@ export default function ServiceDetailPage() {
         } else if (tiers.length > 0) {
           setSelectedTier(tiers[0].id)
         }
-        
       } catch (error) {
         console.error('Error fetching service:', error)
         setError('Không thể tải thông tin dịch vụ')
@@ -292,7 +304,7 @@ export default function ServiceDetailPage() {
 
   const handleBookService = () => {
     if (!service || !selectedTier) return
-    
+
     // Redirect to booking page with service and tier info
     const bookingUrl = `/booking?service=${service.slug}&tier=${selectedTier}`
     router.push(bookingUrl)
@@ -306,9 +318,9 @@ export default function ServiceDetailPage() {
     return (
       <>
         <Header />
-        <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30 flex items-center justify-center">
+        <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-amber-600" />
             <p className="text-slate-600">Đang tải thông tin dịch vụ...</p>
           </div>
         </main>
@@ -321,14 +333,11 @@ export default function ServiceDetailPage() {
     return (
       <>
         <Header />
-        <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30 flex items-center justify-center">
+        <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-900 mb-4">Không tìm thấy dịch vụ</h1>
-            <p className="text-slate-600 mb-6">{error || 'Dịch vụ bạn tìm kiếm không tồn tại'}</p>
-            <button
-              onClick={() => router.push('/services')}
-              className="btn-primary"
-            >
+            <h1 className="mb-4 text-2xl font-bold text-slate-900">Không tìm thấy dịch vụ</h1>
+            <p className="mb-6 text-slate-600">{error || 'Dịch vụ bạn tìm kiếm không tồn tại'}</p>
+            <button className="btn-primary" onClick={() => router.push('/services')}>
               Quay lại danh sách dịch vụ
             </button>
           </div>
@@ -347,30 +356,28 @@ export default function ServiceDetailPage() {
       <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         {/* Hero Section */}
         <section className="section-padding-y container-max">
-          <div className="max-w-4xl mx-auto text-center animate-fadeInUp">
-            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <div className="animate-fadeInUp mx-auto max-w-4xl text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-sm font-medium text-amber-800">
               <Star className="h-4 w-4" />
               {service.isFeatured ? 'Dịch vụ nổi bật' : 'Dịch vụ chuyên nghiệp'}
             </div>
-            
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
-              {service.name}
-            </h1>
-            
-            <p className="text-xl text-slate-600 leading-relaxed mb-8 max-w-3xl mx-auto">
+
+            <h1 className="mb-6 text-4xl font-bold text-slate-900 md:text-5xl">{service.name}</h1>
+
+            <p className="mx-auto mb-8 max-w-3xl text-xl leading-relaxed text-slate-600">
               {service.description}
             </p>
 
-            <div className="flex flex-wrap justify-center gap-4 mb-8">
-              <div className="flex items-center gap-2 bg-white/60 backdrop-blur px-4 py-2 rounded-lg">
+            <div className="mb-8 flex flex-wrap justify-center gap-4">
+              <div className="flex items-center gap-2 rounded-lg bg-white/60 px-4 py-2 backdrop-blur">
                 <Shield className="h-5 w-5 text-green-600" />
                 <span className="text-sm font-medium">An toàn 100%</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/60 backdrop-blur px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-2 rounded-lg bg-white/60 px-4 py-2 backdrop-blur">
                 <Award className="h-5 w-5 text-blue-600" />
                 <span className="text-sm font-medium">Chuyên gia hàng đầu</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/60 backdrop-blur px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-2 rounded-lg bg-white/60 px-4 py-2 backdrop-blur">
                 <Users className="h-5 w-5 text-purple-600" />
                 <span className="text-sm font-medium">500+ khách hàng</span>
               </div>
@@ -380,18 +387,16 @@ export default function ServiceDetailPage() {
 
         {/* Service Details */}
         <section className="section-padding container-max">
-          <div className="grid lg:grid-cols-3 gap-12">
+          <div className="grid gap-12 lg:grid-cols-3">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="space-y-8 lg:col-span-2">
               {/* Features */}
               <div className="card animate-fadeInUp">
-                <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                  Tính năng chính
-                </h2>
-                <div className="grid md:grid-cols-2 gap-4">
+                <h2 className="mb-6 text-2xl font-bold text-slate-900">Tính năng chính</h2>
+                <div className="grid gap-4 md:grid-cols-2">
                   {service.metadata.features.map((feature, index) => (
                     <div key={index} className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
                       <span className="text-slate-700">{feature}</span>
                     </div>
                   ))}
@@ -401,13 +406,11 @@ export default function ServiceDetailPage() {
               {/* Requirements */}
               {service.metadata.requirements && (
                 <div className="card animate-fadeInUp">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                    Yêu cầu
-                  </h2>
+                  <h2 className="mb-6 text-2xl font-bold text-slate-900">Yêu cầu</h2>
                   <div className="space-y-3">
                     {service.metadata.requirements.map((requirement, index) => (
                       <div key={index} className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-amber-500" />
                         <span className="text-slate-700">{requirement}</span>
                       </div>
                     ))}
@@ -417,44 +420,48 @@ export default function ServiceDetailPage() {
 
               {/* Process */}
               <div className="card animate-fadeInUp">
-                <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                  Quy trình thực hiện
-                </h2>
+                <h2 className="mb-6 text-2xl font-bold text-slate-900">Quy trình thực hiện</h2>
                 <div className="space-y-6">
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center font-bold text-sm">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-600">
                       1
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Đặt dịch vụ</h3>
-                      <p className="text-slate-600 text-sm">Chọn gói dịch vụ phù hợp và thanh toán</p>
+                      <h3 className="mb-1 font-semibold text-slate-900">Đặt dịch vụ</h3>
+                      <p className="text-sm text-slate-600">
+                        Chọn gói dịch vụ phù hợp và thanh toán
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center font-bold text-sm">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-600">
                       2
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Phân tích</h3>
-                      <p className="text-slate-600 text-sm">Team chuyên gia phân tích tài khoản và tình huống</p>
+                      <h3 className="mb-1 font-semibold text-slate-900">Phân tích</h3>
+                      <p className="text-sm text-slate-600">
+                        Team chuyên gia phân tích tài khoản và tình huống
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center font-bold text-sm">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-600">
                       3
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Thực hiện</h3>
-                      <p className="text-slate-600 text-sm">Cung cấp dịch vụ theo timeline đã cam kết</p>
+                      <h3 className="mb-1 font-semibold text-slate-900">Thực hiện</h3>
+                      <p className="text-sm text-slate-600">
+                        Cung cấp dịch vụ theo timeline đã cam kết
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center font-bold text-sm">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-600">
                       4
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Hoàn thành</h3>
-                      <p className="text-slate-600 text-sm">Báo cáo kết quả và hỗ trợ follow-up</p>
+                      <h3 className="mb-1 font-semibold text-slate-900">Hoàn thành</h3>
+                      <p className="text-sm text-slate-600">Báo cáo kết quả và hỗ trợ follow-up</p>
                     </div>
                   </div>
                 </div>
@@ -465,16 +472,14 @@ export default function ServiceDetailPage() {
             <div className="space-y-6">
               {/* Pricing */}
               <div className="card animate-fadeInUp sticky top-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-6">
-                  Chọn gói dịch vụ
-                </h3>
-                
+                <h3 className="mb-6 text-xl font-bold text-slate-900">Chọn gói dịch vụ</h3>
+
                 {serviceTiers.length > 0 ? (
                   <div className="space-y-4">
-                    {serviceTiers.map((tier) => (
+                    {serviceTiers.map(tier => (
                       <div
                         key={tier.id}
-                        className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all ${
+                        className={`relative cursor-pointer rounded-xl border-2 p-4 transition-all ${
                           selectedTier === tier.id
                             ? 'border-amber-500 bg-amber-50'
                             : 'border-slate-200 hover:border-amber-300'
@@ -482,12 +487,12 @@ export default function ServiceDetailPage() {
                         onClick={() => setSelectedTier(tier.id)}
                       >
                         {tier.isPopular && (
-                          <div className="absolute -top-3 left-4 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                          <div className="absolute -top-3 left-4 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white">
                             Phổ biến
                           </div>
                         )}
-                        
-                        <div className="flex items-center justify-between mb-2">
+
+                        <div className="mb-2 flex items-center justify-between">
                           <h4 className="font-bold text-slate-900">{tier.name}</h4>
                           <div className="text-right">
                             <div className="text-2xl font-bold text-slate-900">
@@ -496,14 +501,14 @@ export default function ServiceDetailPage() {
                             <div className="text-sm text-slate-500">VNĐ</div>
                           </div>
                         </div>
-                        
-                        <p className="text-sm text-slate-600 mb-3">{tier.description}</p>
-                        
-                        <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
+
+                        <p className="mb-3 text-sm text-slate-600">{tier.description}</p>
+
+                        <div className="mb-3 flex items-center gap-2 text-sm text-slate-500">
                           <Clock className="h-4 w-4" />
                           <span>{tier.duration}</span>
                         </div>
-                        
+
                         <div className="space-y-2">
                           {tier.features.slice(0, 3).map((feature, index) => (
                             <div key={index} className="flex items-center gap-2 text-sm">
@@ -519,27 +524,26 @@ export default function ServiceDetailPage() {
                         </div>
                       </div>
                     ))}
-                    
+
                     <button
-                      onClick={handleBookService}
+                      className="btn-primary flex w-full items-center justify-center gap-2 py-4 text-lg"
                       disabled={!selectedTier}
-                      className="w-full btn-primary flex items-center justify-center gap-2 py-4 text-lg"
+                      onClick={handleBookService}
                     >
                       <span>Đặt dịch vụ ngay</span>
                       <ArrowRight className="h-5 w-5" />
                     </button>
-                    
+
                     <div className="text-center text-sm text-slate-500">
                       💰 Thanh toán an toàn • 🔒 Bảo mật thông tin
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-6">
-                    <p className="text-slate-600 mb-4">Liên hệ để biết thêm chi tiết về gói dịch vụ</p>
-                    <button
-                      onClick={handleContactSupport}
-                      className="btn-primary"
-                    >
+                  <div className="py-6 text-center">
+                    <p className="mb-4 text-slate-600">
+                      Liên hệ để biết thêm chi tiết về gói dịch vụ
+                    </p>
+                    <button className="btn-primary" onClick={handleContactSupport}>
                       Liên hệ tư vấn
                     </button>
                   </div>
@@ -548,14 +552,14 @@ export default function ServiceDetailPage() {
 
               {/* Contact Support */}
               <div className="card animate-fadeInUp bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-                <h3 className="font-bold text-xl mb-4">🤝 Cần tư vấn?</h3>
-                <p className="mb-6 opacity-90 text-sm">
+                <h3 className="mb-4 text-xl font-bold">🤝 Cần tư vấn?</h3>
+                <p className="mb-6 text-sm opacity-90">
                   Đội ngũ chuyên gia sẵn sàng tư vấn miễn phí về dịch vụ phù hợp nhất cho bạn.
                 </p>
                 <div className="space-y-3">
                   <button
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/20 px-4 py-3 text-center transition-colors duration-300 hover:bg-white/30"
                     onClick={handleContactSupport}
-                    className="w-full bg-white/20 hover:bg-white/30 text-center py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2"
                   >
                     <MessageCircle className="h-4 w-4" />
                     <span>Chat tư vấn</span>

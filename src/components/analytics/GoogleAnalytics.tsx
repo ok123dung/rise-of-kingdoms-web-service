@@ -41,7 +41,7 @@ export const trackEvent = (eventName: string, parameters?: Record<string, any>) 
       event_category: 'engagement',
       event_label: parameters?.label || '',
       value: parameters?.value || 0,
-      ...parameters,
+      ...parameters
     })
   }
 }
@@ -50,7 +50,7 @@ export const trackServiceView = (serviceName: string) => {
   trackEvent('service_view', {
     event_category: 'services',
     event_label: serviceName,
-    service_type: serviceName,
+    service_type: serviceName
   })
 }
 
@@ -58,7 +58,7 @@ export const trackPricingView = (pricingTier: string) => {
   trackEvent('pricing_view', {
     event_category: 'pricing',
     event_label: pricingTier,
-    pricing_tier: pricingTier,
+    pricing_tier: pricingTier
   })
 }
 
@@ -66,7 +66,7 @@ export const trackContactForm = (formType: string) => {
   trackEvent('contact_form_submit', {
     event_category: 'conversion',
     event_label: formType,
-    form_type: formType,
+    form_type: formType
   })
 }
 
@@ -74,7 +74,7 @@ export const trackCTAClick = (ctaText: string, location: string) => {
   trackEvent('cta_click', {
     event_category: 'conversion',
     event_label: ctaText,
-    cta_location: location,
+    cta_location: location
   })
 }
 

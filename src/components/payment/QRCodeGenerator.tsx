@@ -11,13 +11,7 @@ export default function QRCodeGenerator({ data, size = 200, title }: QRCodeGener
 
   return (
     <div className="flex flex-col items-center space-y-4">
-      <img 
-        src={qrUrl} 
-        alt="QR Code" 
-        className="rounded-lg shadow"
-        width={size}
-        height={size}
-      />
+      <img alt="QR Code" className="rounded-lg shadow" height={size} src={qrUrl} width={size} />
       {title && <p className="text-sm text-gray-600">{title}</p>}
     </div>
   )

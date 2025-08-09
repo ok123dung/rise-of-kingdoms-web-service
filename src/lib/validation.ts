@@ -33,7 +33,13 @@ export const rokPowerSchema = z
   .bigint()
   .min(BigInt(0), 'Power cannot be negative')
   .optional()
-  .or(z.string().regex(/^\d+$/, 'Power must be a number').transform(val => BigInt(val)).optional())
+  .or(
+    z
+      .string()
+      .regex(/^\d+$/, 'Power must be a number')
+      .transform(val => BigInt(val))
+      .optional()
+  )
 
 // User registration/update validation
 export const userValidationSchema = z.object({
@@ -58,7 +64,7 @@ export const userValidationSchema = z.object({
     .optional(),
   rokPlayerId: rokPlayerIdSchema,
   rokKingdom: rokKingdomSchema,
-  rokPower: rokPowerSchema,
+  rokPower: rokPowerSchema
 })
 
 // Signup validation schema (simplified for registration)
@@ -105,7 +111,7 @@ export const leadValidationSchema = z.object({
   utmSource: z.string().max(100).optional(),
   utmMedium: z.string().max(100).optional(),
   utmCampaign: z.string().max(100).optional(),
-  notes: z.string().max(1000).optional(),
+  notes: z.string().max(1000).optional()
 })
 
 // Booking validation schema
@@ -116,7 +122,7 @@ export const bookingValidationSchema = z.object({
     .min(10, 'Requirements must be at least 10 characters')
     .max(2000, 'Requirements must be less than 2000 characters')
     .optional(),
-  bookingDetails: z.record(z.any()).optional(),
+  bookingDetails: z.record(z.any()).optional()
 })
 
 // Payment validation schema
@@ -127,7 +133,7 @@ export const paymentValidationSchema = z.object({
     .positive('Amount must be positive')
     .max(10000000, 'Amount cannot exceed 10M VNĐ'),
   currency: z.enum(['VND']).default('VND'),
-  paymentMethod: z.enum(['momo', 'zalopay', 'vnpay', 'banking']),
+  paymentMethod: z.enum(['momo', 'zalopay', 'vnpay', 'banking'])
 })
 
 // Service validation schema (admin only)
@@ -157,7 +163,7 @@ export const serviceValidationSchema = z.object({
   currency: z.enum(['VND']).default('VND'),
   category: z
     .enum(['consulting', 'farming', 'kvk', 'management', 'coaching', 'analysis'])
-    .optional(),
+    .optional()
 })
 
 // Service tier validation schema
@@ -170,10 +176,7 @@ export const serviceTierValidationSchema = z.object({
   slug: z
     .string()
     .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens'),
-  price: z
-    .number()
-    .positive('Price must be positive')
-    .max(10000000, 'Price cannot exceed 10M VNĐ'),
+  price: z.number().positive('Price must be positive').max(10000000, 'Price cannot exceed 10M VNĐ'),
   originalPrice: z
     .number()
     .positive('Original price must be positive')
@@ -182,14 +185,8 @@ export const serviceTierValidationSchema = z.object({
   features: z
     .array(z.string().min(3, 'Feature must be at least 3 characters'))
     .min(1, 'At least one feature is required'),
-  limitations: z
-    .array(z.string())
-    .optional(),
-  maxCustomers: z
-    .number()
-    .int()
-    .positive('Max customers must be positive')
-    .optional(),
+  limitations: z.array(z.string()).optional(),
+  maxCustomers: z.number().int().positive('Max customers must be positive').optional()
 })
 
 // Validation helper functions
@@ -267,7 +264,7 @@ export function sanitizeUserInput(input: string): string {
 export function sanitizePhoneNumber(phone: string): string {
   // Remove all non-digit characters except +
   const cleaned = phone.replace(/[^\d+]/g, '')
-  
+
   // Convert Vietnamese phone formats to standard format
   if (cleaned.startsWith('84')) {
     return '+' + cleaned
@@ -276,7 +273,7 @@ export function sanitizePhoneNumber(phone: string): string {
   } else if (cleaned.startsWith('+84')) {
     return cleaned
   }
-  
+
   return cleaned
 }
 
@@ -288,5 +285,5 @@ export {
   bookingValidationSchema as bookingSchema,
   paymentValidationSchema as paymentSchema,
   serviceValidationSchema as serviceSchema,
-  serviceTierValidationSchema as serviceTierSchema,
+  serviceTierValidationSchema as serviceTierSchema
 }

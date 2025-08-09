@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { BarChart3, TrendingUp, Users, Calendar, Clock, Award } from 'lucide-react'
+
+import { BarChart3, TrendingUp, Calendar, Award } from 'lucide-react'
 
 interface AnalyticsData {
   totalBookings: number
@@ -35,7 +36,7 @@ export default function CustomerAnalytics() {
     const loadAnalytics = async () => {
       setLoading(true)
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       setData({
         totalBookings: 15,
         completedServices: 12,
@@ -69,18 +70,18 @@ export default function CustomerAnalytics() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="rounded-lg bg-white p-6 shadow">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-300 rounded mb-4 w-48"></div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="mb-4 h-6 w-48 rounded bg-gray-300" />
+          <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="p-4 bg-gray-100 rounded-lg">
-                <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                <div className="h-8 bg-gray-300 rounded"></div>
+              <div key={i} className="rounded-lg bg-gray-100 p-4">
+                <div className="mb-2 h-4 rounded bg-gray-300" />
+                <div className="h-8 rounded bg-gray-300" />
               </div>
             ))}
           </div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-64 rounded bg-gray-200" />
         </div>
       </div>
     )
@@ -89,18 +90,18 @@ export default function CustomerAnalytics() {
   if (!data) return null
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="rounded-lg bg-white shadow">
       {/* Header */}
-      <div className="p-6 border-b">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-            <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
+      <div className="border-b p-6">
+        <div className="flex items-center justify-between">
+          <h3 className="flex items-center text-lg font-semibold text-gray-900">
+            <BarChart3 className="mr-2 h-5 w-5 text-blue-600" />
             Thống kê sử dụng dịch vụ
           </h3>
           <select
+            className="rounded-md border border-gray-300 px-3 py-1 text-sm"
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value as '3m' | '6m' | '1y')}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+            onChange={e => setTimeRange(e.target.value as '3m' | '6m' | '1y')}
           >
             <option value="3m">3 tháng qua</option>
             <option value="6m">6 tháng qua</option>
@@ -111,68 +112,64 @@ export default function CustomerAnalytics() {
 
       <div className="p-6">
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="p-4 bg-blue-50 rounded-lg">
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="rounded-lg bg-blue-50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 mb-1">Tổng booking</p>
+                <p className="mb-1 text-sm text-blue-600">Tổng booking</p>
                 <p className="text-2xl font-bold text-blue-900">{data.totalBookings}</p>
               </div>
-              <Calendar className="w-8 h-8 text-blue-600" />
+              <Calendar className="h-8 w-8 text-blue-600" />
             </div>
           </div>
 
-          <div className="p-4 bg-green-50 rounded-lg">
+          <div className="rounded-lg bg-green-50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-600 mb-1">Hoàn thành</p>
+                <p className="mb-1 text-sm text-green-600">Hoàn thành</p>
                 <p className="text-2xl font-bold text-green-900">{data.completedServices}</p>
               </div>
-              <Award className="w-8 h-8 text-green-600" />
+              <Award className="h-8 w-8 text-green-600" />
             </div>
           </div>
 
-          <div className="p-4 bg-purple-50 rounded-lg">
+          <div className="rounded-lg bg-purple-50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-purple-600 mb-1">Tổng chi tiêu</p>
+                <p className="mb-1 text-sm text-purple-600">Tổng chi tiêu</p>
                 <p className="text-2xl font-bold text-purple-900">
                   {(data.totalSpent / 1000000).toFixed(1)}M
                 </p>
               </div>
-              <TrendingUp className="w-8 h-8 text-purple-600" />
+              <TrendingUp className="h-8 w-8 text-purple-600" />
             </div>
           </div>
 
-          <div className="p-4 bg-yellow-50 rounded-lg">
+          <div className="rounded-lg bg-yellow-50 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-yellow-600 mb-1">Đánh giá TB</p>
+                <p className="mb-1 text-sm text-yellow-600">Đánh giá TB</p>
                 <p className="text-2xl font-bold text-yellow-900">{data.averageRating}</p>
               </div>
-              <div className="text-yellow-500">
-                {'★'.repeat(Math.floor(data.averageRating))}
-              </div>
+              <div className="text-yellow-500">{'★'.repeat(Math.floor(data.averageRating))}</div>
             </div>
           </div>
         </div>
 
         {/* Monthly Trend Chart */}
         <div className="mb-8">
-          <h4 className="text-sm font-medium text-gray-700 mb-4">Xu hướng theo tháng</h4>
-          <div className="h-64 bg-gray-50 rounded-lg p-4 flex items-end justify-between">
+          <h4 className="mb-4 text-sm font-medium text-gray-700">Xu hướng theo tháng</h4>
+          <div className="flex h-64 items-end justify-between rounded-lg bg-gray-50 p-4">
             {data.monthlyData.map((month, index) => (
               <div key={month.month} className="flex flex-col items-center space-y-2">
-                <div className="text-xs text-gray-600">
-                  {(month.spent / 1000000).toFixed(1)}M
-                </div>
-                <div 
-                  className="w-8 bg-blue-500 rounded-t"
-                  style={{ 
+                <div className="text-xs text-gray-600">{(month.spent / 1000000).toFixed(1)}M</div>
+                <div
+                  className="w-8 rounded-t bg-blue-500"
+                  style={{
                     height: `${(month.spent / Math.max(...data.monthlyData.map(m => m.spent))) * 200}px`,
                     minHeight: '4px'
                   }}
-                ></div>
+                />
                 <div className="text-xs text-gray-600">{month.month}</div>
               </div>
             ))}
@@ -180,12 +177,15 @@ export default function CustomerAnalytics() {
         </div>
 
         {/* Service Breakdown */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-4">Phân bố dịch vụ</h4>
+            <h4 className="mb-4 text-sm font-medium text-gray-700">Phân bố dịch vụ</h4>
             <div className="space-y-3">
               {data.serviceBreakdown.map((service, index) => (
-                <div key={service.service} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div
+                  key={service.service}
+                  className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                >
                   <div className="flex-1">
                     <div className="font-medium text-gray-900">{service.service}</div>
                     <div className="text-sm text-gray-600">{service.count} lần sử dụng</div>
@@ -205,47 +205,47 @@ export default function CustomerAnalytics() {
 
           {/* Performance Metrics */}
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-4">Chỉ số hiệu suất</h4>
+            <h4 className="mb-4 text-sm font-medium text-gray-700">Chỉ số hiệu suất</h4>
             <div className="space-y-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg bg-gray-50 p-4">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="text-sm text-gray-600">Thời gian phản hồi trung bình</span>
                   <span className="font-medium">{data.performanceMetrics.responseTime}h</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full" 
+                <div className="h-2 w-full rounded-full bg-gray-200">
+                  <div
+                    className="h-2 rounded-full bg-green-500"
                     style={{ width: `${100 - (data.performanceMetrics.responseTime / 24) * 100}%` }}
-                  ></div>
+                  />
                 </div>
               </div>
 
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg bg-gray-50 p-4">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="text-sm text-gray-600">Tỷ lệ hài lòng</span>
                   <span className="font-medium">{data.performanceMetrics.satisfactionRate}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-500 h-2 rounded-full" 
+                <div className="h-2 w-full rounded-full bg-gray-200">
+                  <div
+                    className="h-2 rounded-full bg-blue-500"
                     style={{ width: `${data.performanceMetrics.satisfactionRate}%` }}
-                  ></div>
+                  />
                 </div>
               </div>
 
-              <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="rounded-lg bg-gray-50 p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Khách hàng thân thiết</span>
                   <div className="flex items-center">
                     {data.performanceMetrics.repeatCustomer ? (
                       <>
-                        <span className="text-green-600 font-medium mr-2">Có</span>
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="mr-2 font-medium text-green-600">Có</span>
+                        <div className="h-3 w-3 rounded-full bg-green-500" />
                       </>
                     ) : (
                       <>
-                        <span className="text-gray-600 font-medium mr-2">Chưa</span>
-                        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                        <span className="mr-2 font-medium text-gray-600">Chưa</span>
+                        <div className="h-3 w-3 rounded-full bg-gray-400" />
                       </>
                     )}
                   </div>
@@ -256,9 +256,9 @@ export default function CustomerAnalytics() {
         </div>
 
         {/* Recommendations */}
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">💡 Gợi ý cho bạn</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
+        <div className="mt-8 rounded-lg bg-blue-50 p-4">
+          <h4 className="mb-2 font-medium text-blue-900">💡 Gợi ý cho bạn</h4>
+          <ul className="space-y-1 text-sm text-blue-800">
             <li>• Bạn là khách hàng thân thiết! Liên hệ để nhận ưu đãi đặc biệt</li>
             <li>• Dịch vụ Coaching 1-1 phù hợp nhất với bạn, hãy book thêm để cải thiện</li>
             <li>• Thời điểm tốt nhất để book: Thứ 2-5, 19:00-22:00</li>

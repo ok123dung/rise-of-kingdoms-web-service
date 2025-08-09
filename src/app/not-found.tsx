@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
+import { Home, ArrowLeft, Search, Crown, Shield, Star, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Home, ArrowLeft, Search, Crown, Shield, Star, Zap } from 'lucide-react'
-import Header from '@/components/layout/Header'
+
 import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/Header'
 
 export default function NotFound() {
   const router = useRouter()
@@ -60,39 +62,39 @@ export default function NotFound() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30 flex items-center justify-center">
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         <div className="container-max section-padding text-center">
-          
           {/* Main Error Section */}
-          <div className="max-w-2xl mx-auto animate-fadeInUp">
+          <div className="animate-fadeInUp mx-auto max-w-2xl">
             {/* 404 Animation */}
             <div className="relative mb-8">
-              <div className="text-8xl md:text-9xl font-bold text-transparent bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text animate-bounce">
+              <div className="animate-bounce bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-8xl font-bold text-transparent md:text-9xl">
                 404
               </div>
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-amber-500 rounded-full animate-ping opacity-75"></div>
-              <div className="absolute -bottom-2 -left-4 w-8 h-8 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="absolute -right-4 -top-4 h-12 w-12 animate-ping rounded-full bg-amber-500 opacity-75" />
+              <div className="absolute -bottom-2 -left-4 h-8 w-8 animate-pulse rounded-full bg-blue-500" />
             </div>
 
             {/* Error Message */}
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+            <h1 className="mb-4 text-3xl font-bold text-slate-900 md:text-4xl">
               Oops! Trang không tồn tại
             </h1>
-            
-            <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-              Có vẻ như bạn đã đi lạc trong kingdom. Đừng lo, chúng tôi sẽ giúp bạn tìm đường về nhà! 🏰
+
+            <p className="mb-8 text-xl leading-relaxed text-slate-600">
+              Có vẻ như bạn đã đi lạc trong kingdom. Đừng lo, chúng tôi sẽ giúp bạn tìm đường về
+              nhà! 🏰
             </p>
 
             {/* Countdown Timer */}
             {!isRedirecting && (
-              <div className="bg-white/60 backdrop-blur rounded-xl p-6 mb-8 border border-amber-200">
-                <p className="text-slate-700 mb-4">
+              <div className="mb-8 rounded-xl border border-amber-200 bg-white/60 p-6 backdrop-blur">
+                <p className="mb-4 text-slate-700">
                   Tự động chuyển về trang chủ trong:{' '}
-                  <span className="font-bold text-amber-600 text-xl">{countdown}</span> giây
+                  <span className="text-xl font-bold text-amber-600">{countdown}</span> giây
                 </p>
                 <button
+                  className="text-sm font-medium text-amber-600 hover:text-amber-700"
                   onClick={stopCountdown}
-                  className="text-amber-600 hover:text-amber-700 font-medium text-sm"
                 >
                   Hủy tự động chuyển trang
                 </button>
@@ -100,22 +102,22 @@ export default function NotFound() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <div className="mb-12 flex flex-col justify-center gap-4 sm:flex-row">
               <Link
+                className="btn-primary flex items-center justify-center gap-2 px-8 py-4 text-lg"
                 href="/"
-                className="btn-primary flex items-center justify-center gap-2 text-lg py-4 px-8"
                 onClick={stopCountdown}
               >
                 <Home className="h-5 w-5" />
                 <span>Về trang chủ</span>
               </Link>
-              
+
               <button
+                className="btn-secondary flex items-center justify-center gap-2 px-8 py-4 text-lg"
                 onClick={() => {
                   stopCountdown()
                   router.back()
                 }}
-                className="btn-secondary flex items-center justify-center gap-2 text-lg py-4 px-8"
               >
                 <ArrowLeft className="h-5 w-5" />
                 <span>Quay lại</span>
@@ -124,30 +126,26 @@ export default function NotFound() {
           </div>
 
           {/* Popular Services */}
-          <div className="max-w-5xl mx-auto mb-16">
-            <h2 className="text-2xl font-bold text-slate-900 mb-8">
-              Có thể bạn đang tìm kiếm?
-            </h2>
-            
-            <div className="grid md:grid-cols-3 gap-6">
+          <div className="mx-auto mb-16 max-w-5xl">
+            <h2 className="mb-8 text-2xl font-bold text-slate-900">Có thể bạn đang tìm kiếm?</h2>
+
+            <div className="grid gap-6 md:grid-cols-3">
               {popularServices.map((service, index) => (
                 <Link
                   key={index}
-                  href={service.href}
                   className="card hover-lift group text-left"
+                  href={service.href}
                   onClick={stopCountdown}
                 >
                   <div className="flex items-start gap-4">
-                    <div className="bg-amber-100 group-hover:bg-amber-200 p-3 rounded-xl transition-colors">
+                    <div className="rounded-xl bg-amber-100 p-3 transition-colors group-hover:bg-amber-200">
                       <service.icon className="h-6 w-6 text-amber-600" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-900 mb-2 group-hover:text-amber-600 transition-colors">
+                      <h3 className="mb-2 font-bold text-slate-900 transition-colors group-hover:text-amber-600">
                         {service.name}
                       </h3>
-                      <p className="text-slate-600 text-sm">
-                        {service.description}
-                      </p>
+                      <p className="text-sm text-slate-600">{service.description}</p>
                     </div>
                   </div>
                 </Link>
@@ -156,21 +154,19 @@ export default function NotFound() {
           </div>
 
           {/* Quick Navigation */}
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">
-              Điều hướng nhanh
-            </h2>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="mb-6 text-xl font-bold text-slate-900">Điều hướng nhanh</h2>
+
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {quickLinks.map((link, index) => (
                 <Link
                   key={index}
+                  className="group rounded-xl bg-white/60 p-4 backdrop-blur transition-all duration-300 hover:scale-105 hover:bg-white/80 hover:shadow-lg"
                   href={link.href}
-                  className="bg-white/60 backdrop-blur hover:bg-white/80 rounded-xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg group"
                   onClick={stopCountdown}
                 >
-                  <link.icon className="h-6 w-6 text-slate-600 group-hover:text-amber-600 mx-auto mb-2 transition-colors" />
-                  <div className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">
+                  <link.icon className="mx-auto mb-2 h-6 w-6 text-slate-600 transition-colors group-hover:text-amber-600" />
+                  <div className="text-sm font-medium text-slate-700 transition-colors group-hover:text-slate-900">
                     {link.name}
                   </div>
                 </Link>
@@ -179,28 +175,26 @@ export default function NotFound() {
           </div>
 
           {/* Help Section */}
-          <div className="max-w-2xl mx-auto mt-16">
-            <div className="card bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center">
-              <h3 className="text-xl font-bold mb-4">
-                🤔 Vẫn không tìm thấy những gì bạn cần?
-              </h3>
+          <div className="mx-auto mt-16 max-w-2xl">
+            <div className="card bg-gradient-to-r from-blue-500 to-purple-600 text-center text-white">
+              <h3 className="mb-4 text-xl font-bold">🤔 Vẫn không tìm thấy những gì bạn cần?</h3>
               <p className="mb-6 opacity-90">
                 Đội ngũ hỗ trợ 24/7 của chúng tôi luôn sẵn sàng giúp đỡ bạn!
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col justify-center gap-4 sm:flex-row">
                 <Link
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/20 px-6 py-3 font-medium text-white transition-colors hover:bg-white/30"
                   href="/contact"
-                  className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center justify-center gap-2"
                   onClick={stopCountdown}
                 >
                   <Search className="h-4 w-4" />
                   <span>Liên hệ hỗ trợ</span>
                 </Link>
                 <a
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/20 px-6 py-3 font-medium text-white transition-colors hover:bg-white/30"
                   href="https://discord.gg/rokservices"
-                  target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center justify-center gap-2"
+                  target="_blank"
                 >
                   <span>💬</span>
                   <span>Chat Discord</span>
@@ -211,14 +205,17 @@ export default function NotFound() {
 
           {/* Easter Egg */}
           <div className="mt-12 text-center">
-            <p className="text-slate-400 text-sm">
-              💡 <strong>Pro tip:</strong> Bookmark trang chủ để không bị lạc lần sau nhé! 
-              <Link href="/" className="text-amber-600 hover:text-amber-700 ml-1" onClick={stopCountdown}>
+            <p className="text-sm text-slate-400">
+              💡 <strong>Pro tip:</strong> Bookmark trang chủ để không bị lạc lần sau nhé!
+              <Link
+                className="ml-1 text-amber-600 hover:text-amber-700"
+                href="/"
+                onClick={stopCountdown}
+              >
                 rokdbot.com
               </Link>
             </p>
           </div>
-
         </div>
       </main>
       <Footer />

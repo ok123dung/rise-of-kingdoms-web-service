@@ -39,7 +39,6 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 
     // For now, return true to avoid blocking signup
     return true
-    
   } catch (error) {
     console.error('Email sending failed:', error)
     return false
@@ -217,7 +216,7 @@ Trân trọng,
 // Password reset email
 export async function sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
   const resetUrl = `${process.env.NEXTAUTH_URL || 'https://rokdbot.com'}/auth/reset-password?token=${resetToken}`
-  
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -338,13 +337,13 @@ Trân trọng,
 
 // Order confirmation email
 export async function sendOrderConfirmationEmail(
-  email: string, 
-  fullName: string, 
+  email: string,
+  fullName: string,
   orderDetails: any
 ): Promise<boolean> {
   // Implementation for order confirmation email
   // This would be used when users book services
-  
+
   return await sendEmail({
     to: email,
     subject: '✅ Xác nhận đơn hàng - RoK Services',

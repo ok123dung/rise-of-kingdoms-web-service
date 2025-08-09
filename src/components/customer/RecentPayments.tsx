@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
+
 import { CreditCard, CheckCircle, XCircle, Clock, AlertCircle, Eye } from 'lucide-react'
 import Link from 'next/link'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface RecentPayment {
   id: string
@@ -36,7 +38,7 @@ export default function RecentPayments({ userId }: RecentPaymentsProps) {
       setLoading(true)
       // Simulate API call - replace with real endpoint
       await new Promise(resolve => setTimeout(resolve, 800))
-      
+
       // Mock recent payments data
       const mockPayments: RecentPayment[] = [
         {
@@ -72,7 +74,7 @@ export default function RecentPayments({ userId }: RecentPaymentsProps) {
           createdAt: '2024-07-15T10:20:00'
         }
       ]
-      
+
       setPayments(mockPayments)
     } catch (err) {
       setError('Không thể tải lịch sử thanh toán')
@@ -153,7 +155,7 @@ export default function RecentPayments({ userId }: RecentPaymentsProps) {
         <CardHeader>
           <CardTitle>Thanh toán gần đây</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-[200px]">
+        <CardContent className="flex h-[200px] items-center justify-center">
           <LoadingSpinner text="Đang tải..." />
         </CardContent>
       </Card>
@@ -166,12 +168,12 @@ export default function RecentPayments({ userId }: RecentPaymentsProps) {
         <CardHeader>
           <CardTitle>Thanh toán gần đây</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-[200px]">
+        <CardContent className="flex h-[200px] items-center justify-center">
           <div className="text-center text-red-600">
             <p>{error}</p>
-            <button 
+            <button
+              className="mt-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
               onClick={fetchRecentPayments}
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Thử lại
             </button>
@@ -187,9 +189,9 @@ export default function RecentPayments({ userId }: RecentPaymentsProps) {
         <CardHeader>
           <CardTitle>Thanh toán gần đây</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-[200px]">
+        <CardContent className="flex h-[200px] items-center justify-center">
           <div className="text-center text-gray-500">
-            <CreditCard className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+            <CreditCard className="mx-auto mb-2 h-12 w-12 text-gray-300" />
             <p className="text-sm">Bạn chưa có giao dịch thanh toán nào</p>
           </div>
         </CardContent>
@@ -204,55 +206,59 @@ export default function RecentPayments({ userId }: RecentPaymentsProps) {
           <CreditCard className="h-5 w-5" />
           Thanh toán gần đây
         </CardTitle>
-        <p className="text-sm text-gray-600">
-          {payments.length} giao dịch gần nhất
-        </p>
+        <p className="text-sm text-gray-600">{payments.length} giao dịch gần nhất</p>
       </CardHeader>
-      
+
       <CardContent className="p-0">
         <div className="divide-y">
-          {payments.map((payment) => (
-            <Link 
+          {payments.map(payment => (
+            <Link
               key={payment.id}
+              className="block transition-colors hover:bg-gray-50"
               href={`/dashboard/payments/${payment.id}`}
-              className="block hover:bg-gray-50 transition-colors"
             >
               <div className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(payment.status)}`}>
+                    <div className="mb-1 flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium ${getStatusColor(payment.status)}`}
+                      >
                         {getStatusIcon(payment.status)}
                         {getStatusText(payment.status)}
                       </span>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">
                         {getMethodText(payment.method)}
                       </span>
                     </div>
-                    
-                    <h4 className="font-medium text-gray-900 mb-1">
-                      {payment.serviceName}
-                    </h4>
-                    
+
+                    <h4 className="mb-1 font-medium text-gray-900">{payment.serviceName}</h4>
+
                     <div className="flex items-center justify-between text-sm text-gray-600">
                       <div className="space-y-1">
                         <p>#{payment.paymentNumber}</p>
                         <p className="text-xs">
-                          {payment.paidAt ? `Thanh toán: ${formatDateTime(payment.paidAt)}` : `Tạo: ${formatDateTime(payment.createdAt)}`}
+                          {payment.paidAt
+                            ? `Thanh toán: ${formatDateTime(payment.paidAt)}`
+                            : `Tạo: ${formatDateTime(payment.createdAt)}`}
                         </p>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="text-right ml-4">
-                    <div className={`font-bold ${
-                      payment.status === 'completed' ? 'text-green-600' :
-                      payment.status === 'failed' ? 'text-red-600' :
-                      'text-gray-600'
-                    }`}>
+
+                  <div className="ml-4 text-right">
+                    <div
+                      className={`font-bold ${
+                        payment.status === 'completed'
+                          ? 'text-green-600'
+                          : payment.status === 'failed'
+                            ? 'text-red-600'
+                            : 'text-gray-600'
+                      }`}
+                    >
                       {formatVND(payment.amount)}
                     </div>
-                    <div className="flex items-center gap-1 mt-1">
+                    <div className="mt-1 flex items-center gap-1">
                       <Eye className="h-3 w-3 text-gray-400" />
                       <span className="text-xs text-gray-500">Chi tiết</span>
                     </div>
@@ -264,10 +270,10 @@ export default function RecentPayments({ userId }: RecentPaymentsProps) {
         </div>
 
         {/* View all payments link */}
-        <div className="p-4 border-t bg-gray-50">
-          <Link 
+        <div className="border-t bg-gray-50 p-4">
+          <Link
+            className="block text-center text-sm font-medium text-blue-600 hover:text-blue-800"
             href="/dashboard/payments"
-            className="block text-center text-blue-600 hover:text-blue-800 font-medium text-sm"
           >
             Xem tất cả giao dịch →
           </Link>

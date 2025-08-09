@@ -9,7 +9,12 @@ interface ZaloPayPaymentProps {
   onError?: (error: any) => void
 }
 
-export default function ZaloPayPayment({ amount, bookingId, onSuccess, onError }: ZaloPayPaymentProps) {
+export default function ZaloPayPayment({
+  amount,
+  bookingId,
+  onSuccess,
+  onError
+}: ZaloPayPaymentProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [qrCode, setQrCode] = useState<string | null>(null)
 
@@ -18,10 +23,12 @@ export default function ZaloPayPayment({ amount, bookingId, onSuccess, onError }
     try {
       // Mock ZaloPay payment processing
       await new Promise(resolve => setTimeout(resolve, 1800))
-      
+
       // Generate mock QR code
-      setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=zalopay://pay?amount=${amount}&booking=${bookingId}`)
-      
+      setQrCode(
+        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=zalopay://pay?amount=${amount}&booking=${bookingId}`
+      )
+
       // Simulate payment completion after QR scan
       setTimeout(() => {
         onSuccess?.({
@@ -40,10 +47,10 @@ export default function ZaloPayPayment({ amount, bookingId, onSuccess, onError }
   }
 
   return (
-    <div className="bg-white border-2 border-blue-300 rounded-lg p-6">
-      <div className="flex items-center space-x-4 mb-4">
-        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-          <span className="text-white font-bold text-lg">Z</span>
+    <div className="rounded-lg border-2 border-blue-300 bg-white p-6">
+      <div className="mb-4 flex items-center space-x-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600">
+          <span className="text-lg font-bold text-white">Z</span>
         </div>
         <div>
           <h3 className="font-semibold text-gray-900">ZaloPay</h3>
@@ -53,13 +60,13 @@ export default function ZaloPayPayment({ amount, bookingId, onSuccess, onError }
 
       {!qrCode ? (
         <div className="text-center">
-          <p className="text-gray-600 mb-4">
+          <p className="mb-4 text-gray-600">
             Thanh toán {amount.toLocaleString('vi-VN')} VNĐ qua ZaloPay
           </p>
           <button
-            onClick={handlePayment}
+            className="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
             disabled={isProcessing}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            onClick={handlePayment}
           >
             {isProcessing ? 'Đang tạo QR...' : 'Tạo mã QR ZaloPay'}
           </button>
@@ -67,13 +74,13 @@ export default function ZaloPayPayment({ amount, bookingId, onSuccess, onError }
       ) : (
         <div className="text-center">
           <div className="mb-4">
-            <img src={qrCode} alt="ZaloPay QR Code" className="mx-auto rounded-lg shadow" />
+            <img alt="ZaloPay QR Code" className="mx-auto rounded-lg shadow" src={qrCode} />
           </div>
-          <p className="text-sm text-gray-600 mb-2">
+          <p className="mb-2 text-sm text-gray-600">
             Mở ứng dụng ZaloPay và quét mã QR để thanh toán
           </p>
           <div className="flex items-center justify-center space-x-2 text-green-600">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <div className="h-3 w-3 animate-pulse rounded-full bg-green-500" />
             <span className="text-sm">Đang chờ thanh toán...</span>
           </div>
         </div>

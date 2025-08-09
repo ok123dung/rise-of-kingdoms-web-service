@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
+
+import { AlertTriangle, RefreshCw, Home, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
-import { AlertTriangle, RefreshCw, Home, ArrowLeft, MessageCircle } from 'lucide-react'
 
 interface ErrorProps {
   error: Error & { digest?: string }
@@ -22,7 +23,7 @@ export default function Error({ error, reset }: ErrorProps) {
 
     // Send to error tracking service (e.g., Sentry)
     if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
+      ;(window as any).Sentry.captureException(error, {
         tags: {
           component: 'ErrorBoundary',
           digest: error.digest
@@ -34,34 +35,28 @@ export default function Error({ error, reset }: ErrorProps) {
   const isDevelopment = process.env.NODE_ENV === 'development'
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center bg-white p-8 rounded-xl shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-orange-100 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <div className="rounded-xl bg-white p-8 text-center shadow-lg">
           {/* Error Icon */}
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
             <AlertTriangle className="h-8 w-8 text-red-600" />
           </div>
 
           {/* Error Details */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Có lỗi xảy ra
-            </h2>
-            <p className="text-gray-600 mb-3">
+            <h2 className="mb-2 text-2xl font-bold text-gray-900">Có lỗi xảy ra</h2>
+            <p className="mb-3 text-gray-600">
               Một lỗi không mong muốn đã xảy ra. Chúng tôi đã ghi nhận vấn đề này.
             </p>
-            
+
             {/* Development Error Details */}
             {isDevelopment && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg text-left">
-                <p className="text-xs text-gray-500 mb-1">Thông tin lỗi (development):</p>
-                <p className="text-sm font-mono text-gray-700 break-words">
-                  {error.message}
-                </p>
+              <div className="mt-4 rounded-lg bg-gray-50 p-3 text-left">
+                <p className="mb-1 text-xs text-gray-500">Thông tin lỗi (development):</p>
+                <p className="break-words font-mono text-sm text-gray-700">{error.message}</p>
                 {error.digest && (
-                  <p className="text-xs text-gray-500 mt-2">
-                    Error ID: {error.digest}
-                  </p>
+                  <p className="mt-2 text-xs text-gray-500">Error ID: {error.digest}</p>
                 )}
               </div>
             )}
@@ -69,9 +64,9 @@ export default function Error({ error, reset }: ErrorProps) {
 
           {/* Error ID for Production */}
           {!isDevelopment && error.digest && (
-            <div className="bg-gray-50 rounded-lg p-3 mb-6">
+            <div className="mb-6 rounded-lg bg-gray-50 p-3">
               <p className="text-xs text-gray-500">Mã lỗi:</p>
-              <p className="text-sm font-mono text-gray-700">{error.digest}</p>
+              <p className="font-mono text-sm text-gray-700">{error.digest}</p>
             </div>
           )}
 
@@ -79,8 +74,8 @@ export default function Error({ error, reset }: ErrorProps) {
           <div className="space-y-3">
             {/* Primary Action - Try Again */}
             <button
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-transparent bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               onClick={reset}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               <RefreshCw className="h-4 w-4" />
               Thử lại
@@ -89,16 +84,16 @@ export default function Error({ error, reset }: ErrorProps) {
             {/* Secondary Actions */}
             <div className="flex space-x-3">
               <button
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 onClick={() => window.location.reload()}
-                className="flex-1 flex justify-center items-center gap-2 py-2 px-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 <RefreshCw className="h-4 w-4" />
                 Tải lại trang
               </button>
-              
+
               <Link
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 href="/"
-                className="flex-1 flex justify-center items-center gap-2 py-2 px-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 <Home className="h-4 w-4" />
                 Trang chủ
@@ -107,23 +102,18 @@ export default function Error({ error, reset }: ErrorProps) {
           </div>
 
           {/* Help Section */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-500 mb-2">
-              Vấn đề vẫn tiếp diễn?
-            </p>
+          <div className="mt-6 border-t border-gray-200 pt-6">
+            <p className="mb-2 text-sm text-gray-500">Vấn đề vẫn tiếp diễn?</p>
             <div className="flex justify-center space-x-4 text-sm">
-              <a 
+              <a
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-500"
                 href={`mailto:support@rokdbot.com?subject=Error Report&body=Error ID: ${error.digest || 'N/A'}%0AError Message: ${encodeURIComponent(error.message)}%0ATime: ${new Date().toISOString()}`}
-                className="text-blue-600 hover:text-blue-500 flex items-center gap-1"
               >
                 <MessageCircle className="h-3 w-3" />
                 Báo lỗi
               </a>
               <span className="text-gray-300">|</span>
-              <Link 
-                href="/help" 
-                className="text-blue-600 hover:text-blue-500"
-              >
+              <Link className="text-blue-600 hover:text-blue-500" href="/help">
                 Trung tâm hỗ trợ
               </Link>
             </div>

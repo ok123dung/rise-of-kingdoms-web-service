@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
     const uptime = process.uptime()
-    
+
     // Simple health check without database
     const healthResult = {
       status: 'healthy',
@@ -15,13 +15,13 @@ export async function GET(request: NextRequest) {
           lastChecked: new Date().toISOString()
         },
         services: {
-          status: 'pass', 
+          status: 'pass',
           message: 'All services available',
           lastChecked: new Date().toISOString()
         },
         api: {
           status: 'pass',
-          message: 'API endpoints responsive', 
+          message: 'API endpoints responsive',
           lastChecked: new Date().toISOString()
         }
       },
@@ -31,13 +31,16 @@ export async function GET(request: NextRequest) {
         environment: process.env.NODE_ENV || 'development'
       }
     }
-    
+
     return NextResponse.json(healthResult, { status: 200 })
   } catch (error) {
-    return NextResponse.json({
-      status: 'unhealthy',
-      error: error instanceof Error ? error.message : 'Health check failed',
-      timestamp: new Date().toISOString()
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Health check failed',
+        timestamp: new Date().toISOString()
+      },
+      { status: 500 }
+    )
   }
 }

@@ -5,13 +5,20 @@ interface ExpressRequest {
   user?: { id: string }
   method?: string
   url?: string
+  path?: string
   headers?: Record<string, string>
   body?: unknown
+  ip?: string
+  connection?: {
+    remoteAddress?: string
+  }
 }
 
 interface ExpressResponse {
   statusCode?: number
   locals?: Record<string, unknown>
+  setHeader: (name: string, value: string) => void
+  end: (chunk?: any, encoding?: string) => void
 }
 
 interface ExpressNextFunction {
@@ -77,24 +84,32 @@ class Logger {
     const timestamp = entry.timestamp.toISOString()
     const level = entry.level.toUpperCase().padEnd(5)
     const contextStr = entry.context ? JSON.stringify(entry.context) : ''
-    const errorStr = entry.error ? `\nError: ${entry.error.message}\nStack: ${entry.error.stack}` : ''
-    
+    const errorStr = entry.error
+      ? `\nError: ${entry.error.message}\nStack: ${entry.error.stack}`
+      : ''
+
     return `[${timestamp}] ${level} ${entry.message} ${contextStr}${errorStr}`
   }
 
   private shouldLog(level: LogLevel): boolean {
     const logLevels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL]
-    const currentLevelIndex = logLevels.indexOf(process.env.LOG_LEVEL as LogLevel || LogLevel.INFO)
+    const currentLevelIndex = logLevels.indexOf(
+      (process.env.LOG_LEVEL as LogLevel) || LogLevel.INFO
+    )
     const messageLevelIndex = logLevels.indexOf(level)
-    
+
     return messageLevelIndex >= currentLevelIndex
   }
 
   private async persistLog(entry: LogEntry): Promise<void> {
     try {
       // Only persist important logs to database in production
-      if (this.environment === 'production' && 
-          (entry.level === LogLevel.ERROR || entry.level === LogLevel.FATAL || entry.level === LogLevel.WARN)) {
+      if (
+        this.environment === 'production' &&
+        (entry.level === LogLevel.ERROR ||
+          entry.level === LogLevel.FATAL ||
+          entry.level === LogLevel.WARN)
+      ) {
         const { prisma } = await import('@/lib/db')
         await prisma.systemLog.create({
           data: {
@@ -103,11 +118,13 @@ class Logger {
             service: entry.service,
             environment: entry.environment,
             context: entry.context as any,
-            error: entry.error ? {
-              message: entry.error.message,
-              stack: entry.error.stack,
-              name: entry.error.name
-            } : undefined,
+            error: entry.error
+              ? {
+                  message: entry.error.message,
+                  stack: entry.error.stack,
+                  name: entry.error.name
+                }
+              : undefined,
             timestamp: entry.timestamp
           }
         })
@@ -120,17 +137,17 @@ class Logger {
 
   debug(message: string, context?: LogContext): void {
     if (!this.shouldLog(LogLevel.DEBUG)) return
-    
+
     const entry = this.createLogEntry(LogLevel.DEBUG, message, context)
     console.debug(this.formatLogEntry(entry))
   }
 
   info(message: string, context?: LogContext): void {
     if (!this.shouldLog(LogLevel.INFO)) return
-    
+
     const entry = this.createLogEntry(LogLevel.INFO, message, context)
     console.info(this.formatLogEntry(entry))
-    
+
     // Send to Sentry as breadcrumb
     Sentry.addBreadcrumb({
       message,
@@ -141,13 +158,13 @@ class Logger {
 
   warn(message: string, context?: LogContext): void {
     if (!this.shouldLog(LogLevel.WARN)) return
-    
+
     const entry = this.createLogEntry(LogLevel.WARN, message, context)
     console.warn(this.formatLogEntry(entry))
-    
+
     // Persist to database
     this.persistLog(entry)
-    
+
     // Send to Sentry
     Sentry.captureMessage(message, 'warning')
     if (context) {
@@ -157,13 +174,13 @@ class Logger {
 
   error(message: string, error?: Error, context?: LogContext): void {
     if (!this.shouldLog(LogLevel.ERROR)) return
-    
+
     const entry = this.createLogEntry(LogLevel.ERROR, message, context, error)
     console.error(this.formatLogEntry(entry))
-    
+
     // Persist to database
     this.persistLog(entry)
-    
+
     // Send to Sentry
     if (error) {
       Sentry.captureException(error, {
@@ -183,10 +200,10 @@ class Logger {
   fatal(message: string, error?: Error, context?: LogContext): void {
     const entry = this.createLogEntry(LogLevel.FATAL, message, context, error)
     console.error(this.formatLogEntry(entry))
-    
+
     // Persist to database immediately
     this.persistLog(entry)
-    
+
     // Send to Sentry with high priority
     if (error) {
       Sentry.captureException(error, {
@@ -249,8 +266,9 @@ class Logger {
     duration: number,
     context?: LogContext
   ): void {
-    const level = statusCode >= 500 ? LogLevel.ERROR : statusCode >= 400 ? LogLevel.WARN : LogLevel.INFO
-    
+    const level =
+      statusCode >= 500 ? LogLevel.ERROR : statusCode >= 400 ? LogLevel.WARN : LogLevel.INFO
+
     const logContext: LogContext = {
       ...context,
       method,
@@ -259,7 +277,7 @@ class Logger {
       duration,
       event: 'api_request'
     }
-    
+
     if (level === LogLevel.ERROR) {
       this.error(`API ${method} ${path} - ${statusCode} (${duration}ms)`, undefined, logContext)
     } else if (level === LogLevel.WARN) {
@@ -280,12 +298,7 @@ class Logger {
     })
   }
 
-  logPerformanceMetric(
-    metric: string,
-    value: number,
-    unit: string,
-    context?: LogContext
-  ): void {
+  logPerformanceMetric(metric: string, value: number, unit: string, context?: LogContext): void {
     this.info(`Performance metric: ${metric} = ${value}${unit}`, {
       ...context,
       metric,
@@ -323,16 +336,12 @@ export class PerformanceMonitor {
 
     const duration = Date.now() - startTime
     this.timers.delete(name)
-    
+
     getLogger().logPerformanceMetric(name, duration, 'ms', context)
     return duration
   }
 
-  static measureAsync<T>(
-    name: string,
-    fn: () => Promise<T>,
-    context?: LogContext
-  ): Promise<T> {
+  static measureAsync<T>(name: string, fn: () => Promise<T>, context?: LogContext): Promise<T> {
     return new Promise(async (resolve, reject) => {
       this.startTimer(name)
       try {
@@ -346,11 +355,7 @@ export class PerformanceMonitor {
     })
   }
 
-  static measure<T>(
-    name: string,
-    fn: () => T,
-    context?: LogContext
-  ): T {
+  static measure<T>(name: string, fn: () => T, context?: LogContext): T {
     this.startTimer(name)
     try {
       const result = fn()
@@ -374,44 +379,48 @@ export function logError(error: Error, errorInfo?: { componentStack?: string }):
 
 // API middleware for automatic logging
 export function createAPILogger() {
-  return (req: ExpressRequest & { user?: { id: string } }, res: ExpressResponse, next: ExpressNextFunction) => {
+  return (
+    req: ExpressRequest & { user?: { id: string } },
+    res: ExpressResponse,
+    next: ExpressNextFunction
+  ) => {
     const startTime = Date.now()
     const requestId = Math.random().toString(36).substring(7)
-    
+
     // Add request ID to headers
     res.setHeader('X-Request-ID', requestId)
-    
+
     // Log request
     getLogger().debug(`API Request: ${req.method} ${req.path}`, {
       requestId,
       method: req.method,
       path: req.path,
-      userAgent: req.headers['user-agent'],
-      ip: req.ip || req.connection.remoteAddress,
+      userAgent: req.headers?.['user-agent'],
+      ip: req.ip || req.connection?.remoteAddress,
       userId: req.user?.id
     })
 
     // Override res.end to log response
     const originalEnd = res.end
-    res.end = function(...args: Parameters<typeof originalEnd>) {
+    res.end = function (...args: Parameters<typeof originalEnd>) {
       const duration = Date.now() - startTime
-      
+
       getLogger().logAPIRequest(
-        req.method,
-        req.path,
-        res.statusCode,
+        req.method || 'UNKNOWN',
+        req.path || req.url || 'UNKNOWN',
+        res.statusCode || 0,
         duration,
         {
           requestId,
           userId: req.user?.id,
-          userAgent: req.headers['user-agent'],
-          ip: req.ip || req.connection.remoteAddress
+          userAgent: req.headers?.['user-agent'],
+          ip: req.ip || req.connection?.remoteAddress
         }
       )
-      
+
       originalEnd.apply(this, args)
     }
-    
+
     next()
   }
 }
@@ -422,15 +431,16 @@ export function logHealthCheck(
   status: 'healthy' | 'unhealthy' | 'degraded',
   details?: Record<string, unknown>
 ): void {
-  const level = status === 'healthy' ? LogLevel.INFO : status === 'degraded' ? LogLevel.WARN : LogLevel.ERROR
-  
+  const level =
+    status === 'healthy' ? LogLevel.INFO : status === 'degraded' ? LogLevel.WARN : LogLevel.ERROR
+
   const logContext: LogContext = {
     service,
     status,
     event: 'health_check',
     ...(details ? { detailsJson: JSON.stringify(details) } : {})
   }
-  
+
   const logger = getLogger()
   if (level === LogLevel.ERROR) {
     logger.error(`Health check: ${service} is ${status}`, undefined, logContext)
@@ -454,7 +464,8 @@ export function logDatabaseQuery(
       duration,
       event: 'database_error'
     })
-  } else if (duration > 1000) { // Log slow queries
+  } else if (duration > 1000) {
+    // Log slow queries
     getLogger().warn(`Slow database query: ${query} (${duration}ms)`, {
       query,
       duration,
@@ -475,27 +486,30 @@ export function logDatabaseQuery(
 export class ApplicationMonitor {
   private static instance: ApplicationMonitor
   private logger: Logger
-  private healthChecks: Map<string, { status: string; lastCheck: number; details?: Record<string, unknown> }> = new Map()
-  
+  private healthChecks: Map<
+    string,
+    { status: string; lastCheck: number; details?: Record<string, unknown> }
+  > = new Map()
+
   private constructor() {
     this.logger = getLogger()
     this.startHealthCheckInterval()
   }
-  
+
   static getInstance(): ApplicationMonitor {
     if (!ApplicationMonitor.instance) {
       ApplicationMonitor.instance = new ApplicationMonitor()
     }
     return ApplicationMonitor.instance
   }
-  
+
   private startHealthCheckInterval(): void {
     // Run health checks every 30 seconds
     setInterval(() => {
       this.runHealthChecks()
     }, 30000)
   }
-  
+
   private async runHealthChecks(): Promise<void> {
     const checks = [
       { name: 'database', check: this.checkDatabase },
@@ -504,7 +518,7 @@ export class ApplicationMonitor {
       { name: 'disk_space', check: this.checkDiskSpace },
       { name: 'memory', check: this.checkMemory }
     ]
-    
+
     for (const check of checks) {
       try {
         const result = await check.check.call(this)
@@ -513,29 +527,39 @@ export class ApplicationMonitor {
           lastCheck: Date.now(),
           details: result.details
         })
-        
-        logHealthCheck(check.name, result.status as 'healthy' | 'unhealthy' | 'degraded', result.details)
+
+        logHealthCheck(
+          check.name,
+          result.status as 'healthy' | 'unhealthy' | 'degraded',
+          result.details
+        )
       } catch (error) {
         this.healthChecks.set(check.name, {
           status: 'unhealthy',
           lastCheck: Date.now(),
           details: { error: error instanceof Error ? error.message : String(error) }
         })
-        
-        this.logger.error(`Health check failed for ${check.name}`, error instanceof Error ? error : new Error(String(error)))
+
+        this.logger.error(
+          `Health check failed for ${check.name}`,
+          error instanceof Error ? error : new Error(String(error))
+        )
       }
     }
   }
-  
+
   private async checkDatabase(): Promise<{ status: string; details?: Record<string, unknown> }> {
     try {
       // Skip database health check for now
       return { status: 'healthy', details: { message: 'Database check skipped' } }
     } catch (error) {
-      return { status: 'unhealthy', details: { error: error instanceof Error ? error.message : String(error) } }
+      return {
+        status: 'unhealthy',
+        details: { error: error instanceof Error ? error.message : String(error) }
+      }
     }
   }
-  
+
   private async checkRedis(): Promise<{ status: string; details?: Record<string, unknown> }> {
     // If Redis is configured
     if (process.env.REDIS_URL) {
@@ -543,34 +567,47 @@ export class ApplicationMonitor {
         // Add Redis health check here
         return { status: 'healthy' }
       } catch (error) {
-        return { status: 'unhealthy', details: { error: error instanceof Error ? error.message : String(error) } }
+        return {
+          status: 'unhealthy',
+          details: { error: error instanceof Error ? error.message : String(error) }
+        }
       }
     }
     return { status: 'healthy', details: { message: 'Redis not configured' } }
   }
-  
-  private async checkExternalAPIs(): Promise<{ status: string; details?: Record<string, unknown> }> {
+
+  private async checkExternalAPIs(): Promise<{
+    status: string
+    details?: Record<string, unknown>
+  }> {
     const apis = [
       { name: 'momo', url: 'https://test-payment.momo.vn' },
       { name: 'vnpay', url: 'https://sandbox.vnpayment.vn' },
       { name: 'zalopay', url: 'https://sb-openapi.zalopay.vn' }
     ]
-    
+
     const results = await Promise.allSettled(
-      apis.map(async (api) => {
+      apis.map(async api => {
         const response = await fetch(api.url, { method: 'HEAD' })
         return { name: api.name, status: response.ok ? 'healthy' : 'unhealthy' }
       })
     )
-    
-    const unhealthy = results.filter(r => r.status === 'rejected' || r.value?.status === 'unhealthy')
-    
+
+    const unhealthy = results.filter(
+      r => r.status === 'rejected' || r.value?.status === 'unhealthy'
+    )
+
     return {
-      status: unhealthy.length === 0 ? 'healthy' : unhealthy.length < apis.length ? 'degraded' : 'unhealthy',
+      status:
+        unhealthy.length === 0
+          ? 'healthy'
+          : unhealthy.length < apis.length
+            ? 'degraded'
+            : 'unhealthy',
       details: { total: apis.length, unhealthy: unhealthy.length }
     }
   }
-  
+
   private async checkDiskSpace(): Promise<{ status: string; details?: Record<string, unknown> }> {
     try {
       // Only check disk space in Node.js environment
@@ -578,20 +615,26 @@ export class ApplicationMonitor {
         // Simplified disk check - in production use proper disk usage tools
         const used = process.memoryUsage()
         const rss = used.rss / 1024 / 1024 // MB
-        return { status: 'healthy', details: { message: 'Disk space check simplified', memoryRSS: Math.round(rss) } }
+        return {
+          status: 'healthy',
+          details: { message: 'Disk space check simplified', memoryRSS: Math.round(rss) }
+        }
       }
       return { status: 'healthy', details: { message: 'Disk space check skipped in browser' } }
     } catch (error) {
-      return { status: 'unhealthy', details: { error: error instanceof Error ? error.message : String(error) } }
+      return {
+        status: 'unhealthy',
+        details: { error: error instanceof Error ? error.message : String(error) }
+      }
     }
   }
-  
+
   private async checkMemory(): Promise<{ status: string; details?: Record<string, unknown> }> {
     const used = process.memoryUsage()
     const totalHeap = used.heapTotal / 1024 / 1024 // MB
     const usedHeap = used.heapUsed / 1024 / 1024 // MB
     const usage = (usedHeap / totalHeap) * 100
-    
+
     return {
       status: usage > 90 ? 'unhealthy' : usage > 70 ? 'degraded' : 'healthy',
       details: {
@@ -601,18 +644,26 @@ export class ApplicationMonitor {
       }
     }
   }
-  
-  getHealthStatus(): { overall: string; services: Record<string, { status: string; lastCheck: number; details?: Record<string, unknown> }> } {
+
+  getHealthStatus(): {
+    overall: string
+    services: Record<
+      string,
+      { status: string; lastCheck: number; details?: Record<string, unknown> }
+    >
+  } {
     const services = Object.fromEntries(this.healthChecks)
-    const unhealthyCount = Array.from(this.healthChecks.values())
-      .filter(check => check.status === 'unhealthy').length
-    const degradedCount = Array.from(this.healthChecks.values())
-      .filter(check => check.status === 'degraded').length
-    
+    const unhealthyCount = Array.from(this.healthChecks.values()).filter(
+      check => check.status === 'unhealthy'
+    ).length
+    const degradedCount = Array.from(this.healthChecks.values()).filter(
+      check => check.status === 'degraded'
+    ).length
+
     let overall = 'healthy'
     if (unhealthyCount > 0) overall = 'unhealthy'
     else if (degradedCount > 0) overall = 'degraded'
-    
+
     return { overall, services }
   }
 }

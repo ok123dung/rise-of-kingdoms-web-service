@@ -1,7 +1,8 @@
 // Centralized error handling system for RoK Services
 
-import { getLogger, type LogContext } from '@/lib/monitoring/logger'
 import { NextResponse } from 'next/server'
+
+import { getLogger, type LogContext } from '@/lib/monitoring/logger'
 
 // Base error class with proper typing
 export class AppError extends Error {
@@ -11,8 +12,8 @@ export class AppError extends Error {
 
   constructor(
     message: string,
-    statusCode: number = 500,
-    isOperational: boolean = true,
+    statusCode = 500,
+    isOperational = true,
     context?: Record<string, unknown>
   ) {
     super(message)
@@ -33,13 +34,13 @@ export class ValidationError extends AppError {
 }
 
 export class AuthenticationError extends AppError {
-  constructor(message: string = 'Authentication failed', context?: Record<string, unknown>) {
+  constructor(message = 'Authentication failed', context?: Record<string, unknown>) {
     super(message, 401, true, context)
   }
 }
 
 export class AuthorizationError extends AppError {
-  constructor(message: string = 'Access denied', context?: Record<string, unknown>) {
+  constructor(message = 'Access denied', context?: Record<string, unknown>) {
     super(message, 403, true, context)
   }
 }
@@ -69,7 +70,7 @@ export class ExternalServiceError extends AppError {
 }
 
 export class RateLimitError extends AppError {
-  constructor(message: string = 'Too many requests', context?: Record<string, unknown>) {
+  constructor(message = 'Too many requests', context?: Record<string, unknown>) {
     super(message, 429, true, context)
   }
 }
@@ -91,31 +92,33 @@ function getSafeErrorMessage(error: unknown): string {
   if (error instanceof AppError && error.isOperational) {
     return error.message
   }
-  
+
   if (error instanceof Error) {
     // Don't expose system errors to client
-    if (error.message.includes('ECONNREFUSED') || 
-        error.message.includes('ETIMEDOUT') ||
-        error.message.includes('ENOTFOUND')) {
+    if (
+      error.message.includes('ECONNREFUSED') ||
+      error.message.includes('ETIMEDOUT') ||
+      error.message.includes('ENOTFOUND')
+    ) {
       return 'Service temporarily unavailable'
     }
-    
+
     if (error.message.includes('Unique constraint failed')) {
       return 'This record already exists'
     }
-    
+
     if (error.message.includes('Foreign key constraint failed')) {
       return 'Related record not found'
     }
   }
-  
+
   return 'An unexpected error occurred'
 }
 
 // Log error with context
 export function logError(error: unknown, context?: Record<string, unknown>): void {
   const logger = getLogger()
-  
+
   if (error instanceof AppError) {
     if (error.statusCode >= 500) {
       logger.error('Application error', error, {
@@ -142,10 +145,10 @@ export function logError(error: unknown, context?: Record<string, unknown>): voi
 // API error response handler
 export function handleApiError(error: unknown, requestId?: string): NextResponse<ErrorResponse> {
   logError(error, { requestId })
-  
+
   const statusCode = error instanceof AppError ? error.statusCode : 500
   const message = getSafeErrorMessage(error)
-  
+
   return NextResponse.json<ErrorResponse>(
     {
       success: false,
@@ -161,9 +164,7 @@ export function handleApiError(error: unknown, requestId?: string): NextResponse
 }
 
 // Async error wrapper for API routes
-export function asyncHandler<T extends (...args: any[]) => Promise<any>>(
-  handler: T
-): T {
+export function asyncHandler<T extends (...args: any[]) => Promise<any>>(handler: T): T {
   return (async (...args: Parameters<T>) => {
     try {
       return await handler(...args)
@@ -182,19 +183,18 @@ export function validateRequired<T extends Record<string, any>>(
   fieldNames?: Record<keyof T, string>
 ): void {
   const missing: string[] = []
-  
+
   for (const field of fields) {
     if (!data[field]) {
       const fieldName = fieldNames?.[field] || String(field)
       missing.push(fieldName)
     }
   }
-  
+
   if (missing.length > 0) {
-    throw new ValidationError(
-      `Missing required fields: ${missing.join(', ')}`,
-      { missingFields: missing }
-    )
+    throw new ValidationError(`Missing required fields: ${missing.join(', ')}`, {
+      missingFields: missing
+    })
   }
 }
 
@@ -211,21 +211,18 @@ export function handleDatabaseError(error: unknown): never {
       throw new NotFoundError('Record')
     }
   }
-  
+
   throw error
 }
 
 // External service error handler
-export function handleExternalServiceError(
-  service: string,
-  error: unknown
-): never {
+export function handleExternalServiceError(service: string, error: unknown): never {
   if (error instanceof Error) {
     throw new ExternalServiceError(service, error.message, {
       originalError: error.message
     })
   }
-  
+
   throw new ExternalServiceError(service, 'Service unavailable')
 }
 
@@ -240,34 +237,28 @@ export async function retryWithBackoff<T>(
     onRetry?: (error: unknown, attempt: number) => void
   } = {}
 ): Promise<T> {
-  const {
-    maxRetries = 3,
-    initialDelay = 1000,
-    maxDelay = 10000,
-    factor = 2,
-    onRetry
-  } = options
-  
+  const { maxRetries = 3, initialDelay = 1000, maxDelay = 10000, factor = 2, onRetry } = options
+
   let lastError: unknown
-  
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await operation()
     } catch (error) {
       lastError = error
-      
+
       if (attempt < maxRetries - 1) {
         const delay = Math.min(initialDelay * Math.pow(factor, attempt), maxDelay)
-        
+
         if (onRetry) {
           onRetry(error, attempt + 1)
         }
-        
+
         await new Promise(resolve => setTimeout(resolve, delay))
       }
     }
   }
-  
+
   throw lastError
 }
 
@@ -287,23 +278,23 @@ export const ErrorMessages = {
   SESSION_EXPIRED: 'Phiên đăng nhập đã hết hạn',
   UNAUTHORIZED: 'Bạn cần đăng nhập để thực hiện thao tác này',
   FORBIDDEN: 'Bạn không có quyền thực hiện thao tác này',
-  
+
   // Validation
   INVALID_EMAIL: 'Email không hợp lệ',
   INVALID_PHONE: 'Số điện thoại không hợp lệ',
   INVALID_INPUT: 'Thông tin nhập vào không hợp lệ',
-  
+
   // Resources
   USER_NOT_FOUND: 'Không tìm thấy người dùng',
   SERVICE_NOT_FOUND: 'Không tìm thấy dịch vụ',
   BOOKING_NOT_FOUND: 'Không tìm thấy booking',
   PAYMENT_NOT_FOUND: 'Không tìm thấy thông tin thanh toán',
-  
+
   // Operations
   BOOKING_FAILED: 'Không thể tạo booking. Vui lòng thử lại',
   PAYMENT_FAILED: 'Thanh toán thất bại. Vui lòng thử lại',
   EMAIL_FAILED: 'Không thể gửi email. Vui lòng thử lại',
-  
+
   // System
   INTERNAL_ERROR: 'Có lỗi xảy ra. Vui lòng thử lại sau',
   SERVICE_UNAVAILABLE: 'Dịch vụ tạm thời không khả dụng',

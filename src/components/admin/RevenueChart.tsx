@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
+import { TrendingUp, TrendingDown } from 'lucide-react'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import { TrendingUp, TrendingDown } from 'lucide-react'
 
 interface RevenueData {
   month: string
@@ -25,7 +27,7 @@ export default function RevenueChart() {
       setLoading(true)
       // Simulate API call - replace with real endpoint
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       // Mock data for the last 6 months
       const mockData: RevenueData[] = [
         { month: 'T7/2024', revenue: 45000000, bookings: 89 },
@@ -35,7 +37,7 @@ export default function RevenueChart() {
         { month: 'T11/2024', revenue: 73000000, bookings: 145 },
         { month: 'T12/2024', revenue: 89000000, bookings: 178 }
       ]
-      
+
       setData(mockData)
     } catch (err) {
       setError('Không thể tải dữ liệu doanh thu')
@@ -57,7 +59,7 @@ export default function RevenueChart() {
         <CardHeader>
           <CardTitle>Biểu đồ doanh thu</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-[300px]">
+        <CardContent className="flex h-[300px] items-center justify-center">
           <LoadingSpinner text="Đang tải dữ liệu..." />
         </CardContent>
       </Card>
@@ -70,12 +72,12 @@ export default function RevenueChart() {
         <CardHeader>
           <CardTitle>Biểu đồ doanh thu</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-[300px]">
+        <CardContent className="flex h-[300px] items-center justify-center">
           <div className="text-center text-red-600">
             <p>{error}</p>
-            <button 
+            <button
+              className="mt-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
               onClick={fetchRevenueData}
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Thử lại
             </button>
@@ -99,9 +101,11 @@ export default function RevenueChart() {
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Biểu đồ doanh thu</CardTitle>
-          <div className={`flex items-center gap-1 text-sm font-medium ${
-            isPositiveGrowth ? 'text-green-600' : 'text-red-600'
-          }`}>
+          <div
+            className={`flex items-center gap-1 text-sm font-medium ${
+              isPositiveGrowth ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
             {isPositiveGrowth ? (
               <TrendingUp className="h-4 w-4" />
             ) : (
@@ -110,44 +114,36 @@ export default function RevenueChart() {
             {Math.abs(growth).toFixed(1)}%
           </div>
         </div>
-        <p className="text-sm text-gray-600">
-          Doanh thu 6 tháng gần nhất
-        </p>
+        <p className="text-sm text-gray-600">Doanh thu 6 tháng gần nhất</p>
       </CardHeader>
-      
+
       <CardContent>
         <div className="space-y-4">
           {/* Simple bar chart */}
-          <div className="flex items-end justify-between h-[200px] gap-2">
+          <div className="flex h-[200px] items-end justify-between gap-2">
             {data.map((item, index) => (
-              <div key={index} className="flex flex-col items-center flex-1 group">
-                <div className="flex flex-col items-center mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
+              <div key={index} className="group flex flex-1 flex-col items-center">
+                <div className="mb-2 flex flex-col items-center opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white">
                     {formatVND(item.revenue)}
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">
-                    {item.bookings} đơn
-                  </div>
+                  <div className="mt-1 text-xs text-gray-600">{item.bookings} đơn</div>
                 </div>
                 <div
-                  className="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t hover:from-blue-700 hover:to-blue-500 transition-all duration-200 min-h-[20px]"
+                  className="min-h-[20px] w-full rounded-t bg-gradient-to-t from-blue-600 to-blue-400 transition-all duration-200 hover:from-blue-700 hover:to-blue-500"
                   style={{
                     height: `${(item.revenue / maxRevenue) * 160}px`
                   }}
                 />
-                <div className="text-xs text-gray-600 mt-2 text-center">
-                  {item.month}
-                </div>
+                <div className="mt-2 text-center text-xs text-gray-600">{item.month}</div>
               </div>
             ))}
           </div>
 
           {/* Summary stats */}
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+          <div className="grid grid-cols-3 gap-4 border-t pt-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900">
-                {formatVND(currentMonth)}
-              </p>
+              <p className="text-2xl font-bold text-gray-900">{formatVND(currentMonth)}</p>
               <p className="text-sm text-gray-600">Tháng này</p>
             </div>
             <div className="text-center">

@@ -1,16 +1,7 @@
 'use client'
 
+import { Plus, UserPlus, MessageSquare, FileText, Send, Calendar } from 'lucide-react'
 import Link from 'next/link'
-import { 
-  Plus, 
-  UserPlus, 
-  MessageSquare, 
-  FileText, 
-  Download,
-  RefreshCw,
-  Send,
-  Calendar
-} from 'lucide-react'
 
 const quickActions = [
   {
@@ -59,26 +50,24 @@ const quickActions = [
 
 export default function QuickActions() {
   return (
-    <div className="bg-white shadow rounded-lg">
+    <div className="rounded-lg bg-white shadow">
       <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-          Thao tác nhanh
-        </h3>
+        <h3 className="mb-4 text-lg font-medium leading-6 text-gray-900">Thao tác nhanh</h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {quickActions.map((action) => (
+          {quickActions.map(action => (
             <Link
               key={action.name}
+              className="group relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400 hover:shadow-md"
               href={action.href}
-              className="group relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
             >
               <div>
-                <span className={`rounded-lg inline-flex p-3 ring-4 ring-white ${action.color}`}>
-                  <action.icon className="h-6 w-6 text-white" aria-hidden="true" />
+                <span className={`inline-flex rounded-lg p-3 ring-4 ring-white ${action.color}`}>
+                  <action.icon aria-hidden="true" className="h-6 w-6 text-white" />
                 </span>
               </div>
               <div className="mt-4">
                 <h3 className="text-sm font-medium text-gray-900">
-                  <span className="absolute inset-0" aria-hidden="true" />
+                  <span aria-hidden="true" className="absolute inset-0" />
                   {action.name}
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">{action.description}</p>

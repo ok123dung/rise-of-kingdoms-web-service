@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 // Static services data for now since Railway DB has issues
 const staticServices = [
@@ -21,11 +21,7 @@ const staticServices = [
         'Lên kế hoạch phát triển',
         'Hỗ trợ 24/7'
       ],
-      requirements: [
-        'Tài khoản RoK active',
-        'Power tối thiểu 1M',
-        'Discord để liên lạc'
-      ]
+      requirements: ['Tài khoản RoK active', 'Power tối thiểu 1M', 'Discord để liên lạc']
     }
   },
   {
@@ -62,12 +58,7 @@ const staticServices = [
     isFeatured: true,
     sortOrder: 3,
     metadata: {
-      features: [
-        'Chiến thuật KvK',
-        'Coordination team',
-        'Map control',
-        'Migration support'
-      ]
+      features: ['Chiến thuật KvK', 'Coordination team', 'Map control', 'Migration support']
     }
   },
   {
@@ -83,12 +74,7 @@ const staticServices = [
     isFeatured: true,
     sortOrder: 4,
     metadata: {
-      features: [
-        'Hỗ trợ 24/7',
-        'Priority response',
-        'All services included',
-        'Dedicated manager'
-      ]
+      features: ['Hỗ trợ 24/7', 'Priority response', 'All services included', 'Dedicated manager']
     }
   },
   {
@@ -104,12 +90,7 @@ const staticServices = [
     isFeatured: false,
     sortOrder: 5,
     metadata: {
-      features: [
-        'Tư vấn talent build',
-        'Equipment tối ưu',
-        'Pairing commander',
-        'Session 1-on-1'
-      ]
+      features: ['Tư vấn talent build', 'Equipment tối ưu', 'Pairing commander', 'Session 1-on-1']
     }
   },
   {
@@ -155,8 +136,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Services API error:', error)
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to fetch services',
         message: error instanceof Error ? error.message : 'Unknown error'
       },
@@ -168,8 +149,8 @@ export async function GET(request: NextRequest) {
 // POST /api/services - Create new service (admin only)
 export async function POST(request: NextRequest) {
   return NextResponse.json(
-    { 
-      success: false, 
+    {
+      success: false,
       error: 'Database temporarily unavailable',
       message: 'Service creation is temporarily disabled due to database maintenance'
     },

@@ -25,22 +25,18 @@ async function main() {
           'Lên kế hoạch phát triển',
           'Hỗ trợ 24/7'
         ],
-        requirements: [
-          'Tài khoản RoK active',
-          'Power tối thiểu 1M',
-          'Discord để liên lạc'
-        ],
+        requirements: ['Tài khoản RoK active', 'Power tối thiểu 1M', 'Discord để liên lạc'],
         duration: 30
       }
     },
     {
-      id: 'alliance-management', 
+      id: 'alliance-management',
       slug: 'alliance-management',
       name: 'Quản lý liên minh',
       description: 'Hỗ trợ quản lý, tuyển dụng và phát triển liên minh mạnh mẽ',
       shortDescription: 'Quản lý liên minh chuyên nghiệp',
       basePrice: 1000000,
-      currency: 'VND', 
+      currency: 'VND',
       isActive: true,
       isFeatured: true,
       category: 'MANAGEMENT',
@@ -51,17 +47,13 @@ async function main() {
           'Quản lý sự kiện',
           'Phát triển thành viên'
         ],
-        requirements: [
-          'R4/R5 trong alliance',
-          'Alliance 30+ thành viên',
-          'Commit 3 tháng'
-        ],
+        requirements: ['R4/R5 trong alliance', 'Alliance 30+ thành viên', 'Commit 3 tháng'],
         duration: 30
       }
     },
     {
       id: 'commander-training',
-      slug: 'commander-training', 
+      slug: 'commander-training',
       name: 'Training Commander',
       description: 'Hướng dẫn build và phát triển commander hiệu quả nhất',
       shortDescription: 'Training commander chuyên nghiệp',
@@ -77,18 +69,14 @@ async function main() {
           'Pairing commander',
           'Session 1-on-1'
         ],
-        requirements: [
-          'Commander level 30+',
-          'Có sculpture đầu tư',
-          'Active player'
-        ],
+        requirements: ['Commander level 30+', 'Có sculpture đầu tư', 'Active player'],
         duration: 60
       }
     },
     {
       id: 'kvk-support',
       slug: 'kvk-support',
-      name: 'Hỗ trợ KvK', 
+      name: 'Hỗ trợ KvK',
       description: 'Chiến thuật và coordination chuyên nghiệp cho Kingdom vs Kingdom',
       shortDescription: 'Hỗ trợ KvK chuyên nghiệp',
       basePrice: 2000000,
@@ -97,17 +85,8 @@ async function main() {
       isFeatured: true,
       category: 'STRATEGY',
       metadata: {
-        features: [
-          'Chiến thuật KvK',
-          'Coordination team',
-          'Map control',
-          'Migration support'
-        ],
-        requirements: [
-          'T4+ troops',
-          'KvK experience',
-          'Alliance participation'
-        ],
+        features: ['Chiến thuật KvK', 'Coordination team', 'Map control', 'Migration support'],
+        requirements: ['T4+ troops', 'KvK experience', 'Alliance participation'],
         duration: 90
       }
     },
@@ -129,11 +108,7 @@ async function main() {
           'Top player guidance',
           'Follow-up support'
         ],
-        requirements: [
-          'Serious learner',
-          'Basic game knowledge',
-          'Regular availability'
-        ],
+        requirements: ['Serious learner', 'Basic game knowledge', 'Regular availability'],
         duration: 60
       }
     },
@@ -141,7 +116,7 @@ async function main() {
       id: 'vip-support',
       slug: 'vip-support',
       name: 'VIP Support 24/7',
-      description: 'Hỗ trợ ưu tiên và tư vấn chuyên nghiệp mọi lúc mọi nơi', 
+      description: 'Hỗ trợ ưu tiên và tư vấn chuyên nghiệp mọi lúc mọi nơi',
       shortDescription: 'VIP Support 24/7',
       basePrice: 3000000,
       currency: 'VND',
@@ -155,11 +130,7 @@ async function main() {
           'All services included',
           'Dedicated manager'
         ],
-        requirements: [
-          'VIP commitment',
-          'High-end account',
-          'Long-term partnership'
-        ],
+        requirements: ['VIP commitment', 'High-end account', 'Long-term partnership'],
         duration: 30
       }
     }
@@ -194,7 +165,7 @@ async function main() {
     update: {},
     create: {
       userId: adminUser.id,
-      role: 'ADMIN', 
+      role: 'ADMIN',
       isActive: true,
       hireDate: new Date()
     }
@@ -205,7 +176,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Seed failed:', e)
     process.exit(1)
   })

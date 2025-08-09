@@ -1,6 +1,6 @@
 // Monitoring and Health Check System for Rise of Kingdoms Services
 
-import { NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy'
@@ -54,19 +54,14 @@ export class HealthMonitor {
 
     try {
       // Run all health checks in parallel
-      const [
-        databaseCheck,
-        redisCheck,
-        externalApiCheck,
-        diskSpaceCheck,
-        memoryCheck
-      ] = await Promise.allSettled([
-        this.checkDatabase(),
-        this.checkRedis(),
-        this.checkExternalApis(),
-        this.checkDiskSpace(),
-        this.checkMemory()
-      ])
+      const [databaseCheck, redisCheck, externalApiCheck, diskSpaceCheck, memoryCheck] =
+        await Promise.allSettled([
+          this.checkDatabase(),
+          this.checkRedis(),
+          this.checkExternalApis(),
+          this.checkDiskSpace(),
+          this.checkMemory()
+        ])
 
       // Process results
       const checks = {
@@ -101,18 +96,29 @@ export class HealthMonitor {
       }
 
       return result
-
     } catch (error) {
       console.error('Health check failed:', error)
-      
+
       const failedResult: HealthCheckResult = {
         status: 'unhealthy',
         timestamp,
         checks: {
-          database: { status: 'fail', message: 'Health check system failed', lastChecked: timestamp },
+          database: {
+            status: 'fail',
+            message: 'Health check system failed',
+            lastChecked: timestamp
+          },
           redis: { status: 'fail', message: 'Health check system failed', lastChecked: timestamp },
-          external_apis: { status: 'fail', message: 'Health check system failed', lastChecked: timestamp },
-          disk_space: { status: 'fail', message: 'Health check system failed', lastChecked: timestamp },
+          external_apis: {
+            status: 'fail',
+            message: 'Health check system failed',
+            lastChecked: timestamp
+          },
+          disk_space: {
+            status: 'fail',
+            message: 'Health check system failed',
+            lastChecked: timestamp
+          },
           memory: { status: 'fail', message: 'Health check system failed', lastChecked: timestamp }
         },
         metadata: {
@@ -130,15 +136,15 @@ export class HealthMonitor {
   // Database health check
   private async checkDatabase(): Promise<HealthCheck> {
     const startTime = Date.now()
-    
+
     try {
       const { prisma } = await import('@/lib/db')
-      
+
       // Simple query to test connection
       await prisma.$queryRaw`SELECT 1`
-      
+
       const responseTime = Date.now() - startTime
-      
+
       return {
         status: responseTime < 1000 ? 'pass' : 'warn',
         responseTime,
@@ -158,7 +164,7 @@ export class HealthMonitor {
   // Redis health check
   private async checkRedis(): Promise<HealthCheck> {
     const startTime = Date.now()
-    
+
     try {
       if (!process.env.REDIS_URL) {
         return {
@@ -171,7 +177,7 @@ export class HealthMonitor {
       // Redis health check would go here
       // For now, return a mock response
       const responseTime = Date.now() - startTime
-      
+
       return {
         status: 'pass',
         responseTime,
@@ -191,20 +197,20 @@ export class HealthMonitor {
   // External APIs health check
   private async checkExternalApis(): Promise<HealthCheck> {
     const checks = []
-    
+
     try {
       // Check payment gateways
       if (process.env.MOMO_PARTNER_CODE) {
         checks.push(this.checkMoMoApi())
       }
-      
+
       if (process.env.ZALOPAY_APP_ID) {
         checks.push(this.checkZaloPayApi())
       }
 
       const results = await Promise.allSettled(checks)
       const failedChecks = results.filter(r => r.status === 'rejected').length
-      
+
       if (failedChecks === 0) {
         return {
           status: 'pass',
@@ -235,26 +241,16 @@ export class HealthMonitor {
 
   // Check MoMo API availability
   private async checkMoMoApi(): Promise<void> {
-    const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 5000)
-    )
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
 
-    await Promise.race([
-      fetch('https://payment.momo.vn', { method: 'HEAD' }),
-      timeout
-    ])
+    await Promise.race([fetch('https://payment.momo.vn', { method: 'HEAD' }), timeout])
   }
 
-  // Check ZaloPay API availability  
+  // Check ZaloPay API availability
   private async checkZaloPayApi(): Promise<void> {
-    const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 5000)
-    )
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
 
-    await Promise.race([
-      fetch('https://openapi.zalopay.vn', { method: 'HEAD' }),
-      timeout
-    ])
+    await Promise.race([fetch('https://openapi.zalopay.vn', { method: 'HEAD' }), timeout])
   }
 
   // Disk space check
@@ -282,10 +278,10 @@ export class HealthMonitor {
     try {
       const memoryUsage = process.memoryUsage()
       const memoryUsageMB = memoryUsage.heapUsed / 1024 / 1024
-      
+
       // Warn if using more than 100MB
       const status = memoryUsageMB > 100 ? 'warn' : 'pass'
-      
+
       return {
         status,
         message: `Memory usage: ${memoryUsageMB.toFixed(2)}MB`,
@@ -315,20 +311,22 @@ export class HealthMonitor {
   }
 
   // Determine overall status based on individual checks
-  private determineOverallStatus(checks: HealthCheckResult['checks']): 'healthy' | 'degraded' | 'unhealthy' {
+  private determineOverallStatus(
+    checks: HealthCheckResult['checks']
+  ): 'healthy' | 'degraded' | 'unhealthy' {
     const checkValues = Object.values(checks)
-    
+
     const failedCount = checkValues.filter(c => c.status === 'fail').length
     const warnCount = checkValues.filter(c => c.status === 'warn').length
-    
+
     if (failedCount > 0) {
       return failedCount > 1 ? 'unhealthy' : 'degraded'
     }
-    
+
     if (warnCount > 1) {
       return 'degraded'
     }
-    
+
     return 'healthy'
   }
 
@@ -349,14 +347,19 @@ export class HealthMonitor {
       // 2. Send Discord notification
       // 3. Send email alert
       // 4. Update monitoring dashboard
-      
+
       // Example: Send to Discord webhook
       if (process.env.DISCORD_WEBHOOK_URL && process.env.NODE_ENV === 'production') {
         await fetch(process.env.DISCORD_WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🚨 **RoK Services System Alert**\n\`\`\`\nStatus: ${result.status}\nTime: ${result.timestamp}\nFailed Checks: ${Object.entries(result.checks).filter(([_, c]) => c.status === 'fail').map(([n]) => n).join(', ')}\n\`\`\``
+            content: `🚨 **RoK Services System Alert**\n\`\`\`\nStatus: ${result.status}\nTime: ${result.timestamp}\nFailed Checks: ${Object.entries(
+              result.checks
+            )
+              .filter(([_, c]) => c.status === 'fail')
+              .map(([n]) => n)
+              .join(', ')}\n\`\`\``
           })
         })
       }
@@ -368,8 +371,8 @@ export class HealthMonitor {
   // Start periodic health checks
   private startPeriodicHealthChecks(): void {
     // Check every 5 minutes in production
-    const interval = process.env.HEALTH_CHECK_INTERVAL 
-      ? parseInt(process.env.HEALTH_CHECK_INTERVAL) 
+    const interval = process.env.HEALTH_CHECK_INTERVAL
+      ? parseInt(process.env.HEALTH_CHECK_INTERVAL)
       : 5 * 60 * 1000
 
     this.healthCheckInterval = setInterval(() => {
@@ -404,13 +407,13 @@ export class PerformanceMonitor {
   public static recordResponseTime(endpoint: string, responseTime: number): void {
     const key = `response_time_${endpoint}`
     const metrics = this.metrics.get(key) || []
-    
+
     // Keep only last 100 measurements
     metrics.push(responseTime)
     if (metrics.length > 100) {
       metrics.shift()
     }
-    
+
     this.metrics.set(key, metrics)
   }
 
@@ -418,9 +421,9 @@ export class PerformanceMonitor {
   public static getAverageResponseTime(endpoint: string): number {
     const key = `response_time_${endpoint}`
     const metrics = this.metrics.get(key) || []
-    
+
     if (metrics.length === 0) return 0
-    
+
     return metrics.reduce((sum, time) => sum + time, 0) / metrics.length
   }
 
@@ -428,25 +431,25 @@ export class PerformanceMonitor {
   public static recordDatabaseQuery(queryType: string, duration: number): void {
     const key = `db_query_${queryType}`
     const metrics = this.metrics.get(key) || []
-    
+
     metrics.push(duration)
     if (metrics.length > 50) {
       metrics.shift()
     }
-    
+
     this.metrics.set(key, metrics)
   }
 
   // Get performance summary
   public static getPerformanceSummary(): Record<string, unknown> {
     const summary: Record<string, unknown> = {}
-    
+
     for (const [key, values] of Array.from(this.metrics.entries())) {
       if (values.length > 0) {
         const avg = values.reduce((sum, val) => sum + val, 0) / values.length
         const max = Math.max(...values)
         const min = Math.min(...values)
-        
+
         summary[key] = {
           average: Math.round(avg * 100) / 100,
           maximum: max,
@@ -455,7 +458,7 @@ export class PerformanceMonitor {
         }
       }
     }
-    
+
     return summary
   }
 }
@@ -465,13 +468,13 @@ export function trackRequest(endpoint: string) {
   return (handler: Function) => {
     return async (req: NextRequest, ...args: unknown[]) => {
       const startTime = Date.now()
-      
+
       try {
         const result = await handler(req, ...args)
         const responseTime = Date.now() - startTime
-        
+
         PerformanceMonitor.recordResponseTime(endpoint, responseTime)
-        
+
         return result
       } catch (error) {
         const responseTime = Date.now() - startTime

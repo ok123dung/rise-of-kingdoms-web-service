@@ -109,7 +109,10 @@ export class BankingTransfer {
   }
 
   // Confirm manual transfer (Admin only)
-  async confirmTransfer(transferCode: string, adminNotes?: string): Promise<{
+  async confirmTransfer(
+    transferCode: string,
+    adminNotes?: string
+  ): Promise<{
     success: boolean
     message: string
   }> {
@@ -171,7 +174,7 @@ export class BankingTransfer {
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
           }
         })
-        
+
         await prisma.booking.update({
           where: { id: payment.bookingId },
           data: {
@@ -192,7 +195,10 @@ export class BankingTransfer {
   }
 
   // Reject transfer (Admin only)
-  async rejectTransfer(transferCode: string, reason: string): Promise<{
+  async rejectTransfer(
+    transferCode: string,
+    reason: string
+  ): Promise<{
     success: boolean
     message: string
   }> {
@@ -282,15 +288,19 @@ export class BankingTransfer {
     booking: any
   }) {
     const emailService = getEmailService()
-    
-    const bankAccountsHtml = params.bankAccounts.map(account => `
+
+    const bankAccountsHtml = params.bankAccounts
+      .map(
+        account => `
       <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
         <h4 style="margin: 0 0 8px 0; color: #1f2937; font-size: 16px;">${account.bankName}</h4>
         <p style="margin: 4px 0; color: #374151;"><strong>Số tài khoản:</strong> ${account.accountNumber}</p>
         <p style="margin: 4px 0; color: #374151;"><strong>Chủ tài khoản:</strong> ${account.accountName}</p>
         ${account.branch ? `<p style="margin: 4px 0; color: #6b7280;"><strong>Chi nhánh:</strong> ${account.branch}</p>` : ''}
       </div>
-    `).join('')
+    `
+      )
+      .join('')
 
     const html = `
       <!DOCTYPE html>
@@ -368,7 +378,7 @@ export class BankingTransfer {
     booking: any
   }) {
     const emailService = getEmailService()
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
