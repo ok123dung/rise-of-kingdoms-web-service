@@ -2,7 +2,20 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
 export async function GET() {
-  const diagnostics = {
+  const diagnostics: {
+    timestamp: string
+    environment: string | undefined
+    database: {
+      configured: boolean
+      urlPrefix: string
+      status?: string
+      message?: string
+    }
+    nextAuth: {
+      urlConfigured: boolean
+      secretConfigured: boolean
+    }
+  } = {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
     database: {
