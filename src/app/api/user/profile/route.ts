@@ -45,7 +45,7 @@ export async function PUT(request: NextRequest) {
 
     getLogger().info('User profile updated', {
       userId: session.user.id,
-      updatedFields: Object.keys(validatedData)
+      updatedFields: Object.keys(validatedData).join(', ')
     })
 
     return NextResponse.json({

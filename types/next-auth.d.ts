@@ -5,11 +5,22 @@ declare module 'next-auth' {
     user: {
       id: string
       role: string
+      fullName?: string
+      phone?: string | null
+      discordUsername?: string | null
+      rokPlayerId?: string | null
+      rokKingdom?: string | null
+      createdAt?: string
     } & DefaultSession['user']
   }
 
   interface User extends DefaultUser {
     role: string
+    fullName?: string
+    phone?: string | null
+    discordUsername?: string | null
+    rokPlayerId?: string | null
+    rokKingdom?: string | null
   }
 }
 
