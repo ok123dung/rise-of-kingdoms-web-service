@@ -12,25 +12,25 @@ class ClientLogger {
   private isDevelopment = process.env.NODE_ENV === 'development'
   private logLevel: LogLevel = this.isDevelopment ? LogLevel.DEBUG : LogLevel.WARN
 
-  debug(...args: any[]): void {
+  debug(...args: unknown[]): void {
     if (this.logLevel <= LogLevel.DEBUG) {
       console.log(...args)
     }
   }
 
-  info(...args: any[]): void {
+  info(...args: unknown[]): void {
     if (this.logLevel <= LogLevel.INFO) {
       console.info(...args)
     }
   }
 
-  warn(...args: any[]): void {
+  warn(...args: unknown[]): void {
     if (this.logLevel <= LogLevel.WARN) {
       console.warn(...args)
     }
   }
 
-  error(...args: any[]): void {
+  error(...args: unknown[]): void {
     if (this.logLevel <= LogLevel.ERROR) {
       console.error(...args)
     }

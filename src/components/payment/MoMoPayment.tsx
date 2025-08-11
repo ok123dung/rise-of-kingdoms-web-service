@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import type { PaymentResponse, PaymentError } from '@/types/payment'
 
 interface MoMoPaymentProps {
   amount: number
   bookingId: string
-  onSuccess?: (data: any) => void
-  onError?: (error: any) => void
+  onSuccess?: (data: PaymentResponse) => void
+  onError?: (error: PaymentError) => void
 }
 
 export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: MoMoPaymentProps) {
@@ -35,7 +36,7 @@ export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: M
         })
       }, 5000)
     } catch (error) {
-      onError?.(error)
+      onError?.(error as PaymentError)
     } finally {
       setIsProcessing(false)
     }

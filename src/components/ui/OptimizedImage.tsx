@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 
 import Image from 'next/image'
 
@@ -23,7 +23,7 @@ interface OptimizedImageProps {
   lazy?: boolean
 }
 
-export default function OptimizedImage({
+const OptimizedImage = memo(function OptimizedImage({
   src,
   alt,
   width,
@@ -43,24 +43,24 @@ export default function OptimizedImage({
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
-  const handleLoad = () => {
+  const handleLoad = useCallback(() => {
     setIsLoading(false)
     onLoad?.()
-  }
+  }, [onLoad])
 
-  const handleError = () => {
+  const handleError = useCallback(() => {
     setIsLoading(false)
     setHasError(true)
     onError?.()
-  }
+  }, [onError])
 
   // Generate optimized sizes for Vietnamese mobile users
-  const generateSizes = () => {
+  const generateSizes = useCallback(() => {
     if (sizes) return sizes
 
     // Default responsive sizes for Vietnamese market (mobile-first)
     return '(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw'
-  }
+  }, [sizes])
 
   // Fallback image for errors
   const fallbackSrc = '/images/placeholder.jpg'
@@ -108,10 +108,14 @@ export default function OptimizedImage({
       />
     </div>
   )
-}
+})
+
+OptimizedImage.displayName = 'OptimizedImage'
+
+export default OptimizedImage
 
 // Specialized component for hero images
-export function HeroImage({
+export const HeroImage = memo(function HeroImage({
   src,
   alt,
   className,
@@ -129,10 +133,12 @@ export function HeroImage({
       {...props}
     />
   )
-}
+})
+
+HeroImage.displayName = 'HeroImage'
 
 // Specialized component for thumbnails
-export function ThumbnailImage({
+export const ThumbnailImage = memo(function ThumbnailImage({
   src,
   alt,
   size = 200,
@@ -151,10 +157,12 @@ export function ThumbnailImage({
       {...props}
     />
   )
-}
+})
+
+ThumbnailImage.displayName = 'ThumbnailImage'
 
 // Specialized component for avatars
-export function AvatarImage({
+export const AvatarImage = memo(function AvatarImage({
   src,
   alt = 'Avatar',
   size = 40,
@@ -173,7 +181,9 @@ export function AvatarImage({
       {...props}
     />
   )
-}
+})
+
+AvatarImage.displayName = 'AvatarImage'
 
 // Utility function to generate blur data URL
 export function generateBlurDataURL(width = 10, height = 10): string {

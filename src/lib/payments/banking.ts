@@ -1,6 +1,7 @@
 import { db, prisma } from '@/lib/db'
 import { getEmailService } from '@/lib/email/service'
 import { getLogger } from '@/lib/monitoring/logger'
+import type { Booking, Payment, PaymentWithBooking } from '@/types/database'
 
 interface BankingTransferRequest {
   bookingId: string
@@ -100,7 +101,7 @@ export class BankingTransfer {
         }
       }
     } catch (error) {
-      console.error('Banking transfer creation error:', error)
+      getLogger().error('Banking transfer creation error', error instanceof Error ? error : new Error(String(error)))
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -139,26 +140,42 @@ export class BankingTransfer {
       await db.booking.updateStatus(payment.bookingId, 'confirmed')
 
       // Send confirmation email
-      const booking = await db.booking.findById(payment.bookingId)
-      if (booking) {
+      const paymentWithRelations = await prisma.payment.findUnique({
+        where: { id: payment.id },
+        include: {
+          booking: {
+            include: {
+              user: true,
+              serviceTier: {
+                include: {
+                  service: true
+                }
+              }
+            }
+          }
+        }
+      })
+      if (paymentWithRelations?.booking) {
         const emailService = getEmailService()
-        await emailService.sendPaymentConfirmation(payment as any)
+        await emailService.sendPaymentConfirmation(paymentWithRelations)
       }
 
       // Send Discord notification
       try {
-        const { discordNotifier } = await import('@/lib/discord')
-        await discordNotifier.sendPaymentNotification({
-          bookingId: booking.id,
-          amount: payment.amount.toNumber(),
-          paymentMethod: 'banking',
-          status: 'completed',
-          customerEmail: booking.user.email,
-          customerName: booking.user.fullName,
-          transactionId: transferCode
-        })
+        if (paymentWithRelations?.booking) {
+          const { discordNotifier } = await import('@/lib/discord')
+          await discordNotifier.sendPaymentNotification({
+            bookingId: paymentWithRelations.booking.id,
+            amount: payment.amount.toNumber(),
+            paymentMethod: 'banking',
+            status: 'completed',
+            customerEmail: paymentWithRelations.booking.user.email,
+            customerName: paymentWithRelations.booking.user.fullName,
+            transactionId: transferCode
+          })
+        }
       } catch (error) {
-        console.error('Failed to send Discord notification:', error)
+        getLogger().warn(`Failed to send Discord notification: ${error instanceof Error ? error.message : String(error)}`)
       }
 
       // Trigger service delivery workflow
@@ -167,8 +184,8 @@ export class BankingTransfer {
           data: {
             bookingId: payment.bookingId,
             type: 'delivery',
-            title: `Deliver ${booking.serviceTier.service.name}`,
-            description: `Process service delivery for booking ${booking.bookingNumber}`,
+            title: `Deliver ${paymentWithRelations?.booking?.serviceTier.service.name || 'Service'}`,
+            description: `Process service delivery for booking ${paymentWithRelations?.booking?.bookingNumber || payment.bookingId}`,
             priority: 'high',
             status: 'pending',
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
@@ -183,13 +200,13 @@ export class BankingTransfer {
           }
         })
       } catch (error) {
-        console.error('Failed to trigger service delivery:', error)
+        getLogger().warn(`Failed to trigger service delivery: ${error instanceof Error ? error.message : String(error)}`)
       }
 
       getLogger().info('Banking transfer confirmed', { transferCode, adminNotes })
       return { success: true, message: 'Transfer confirmed successfully' }
     } catch (error) {
-      console.error('Banking transfer confirmation error:', error)
+      getLogger().error('Banking transfer confirmation error', error instanceof Error ? error : new Error(String(error)))
       return { success: false, message: 'Confirmation failed' }
     }
   }
@@ -234,7 +251,7 @@ export class BankingTransfer {
       getLogger().info('Banking transfer rejected', { transferCode, reason })
       return { success: true, message: 'Transfer rejected' }
     } catch (error) {
-      console.error('Banking transfer rejection error:', error)
+      getLogger().error('Banking transfer rejection error', error instanceof Error ? error : new Error(String(error)))
       return { success: false, message: 'Rejection failed' }
     }
   }
@@ -242,7 +259,7 @@ export class BankingTransfer {
   // Get pending transfers (Admin only)
   async getPendingTransfers(): Promise<{
     success: boolean
-    data?: any[]
+    data?: PaymentWithBooking[]
     error?: string
   }> {
     try {
@@ -268,7 +285,7 @@ export class BankingTransfer {
 
       return { success: true, data: pendingPayments }
     } catch (error) {
-      console.error('Get pending transfers error:', error)
+      getLogger().error('Get pending transfers error', error instanceof Error ? error : new Error(String(error)))
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get pending transfers'
@@ -285,7 +302,7 @@ export class BankingTransfer {
     transferContent: string
     expireTime: Date
     bankAccounts: BankAccount[]
-    booking: any
+    booking: Booking
   }) {
     const emailService = getEmailService()
 
@@ -375,7 +392,7 @@ export class BankingTransfer {
     customerName: string
     transferCode: string
     reason: string
-    booking: any
+    booking: Booking
   }) {
     const emailService = getEmailService()
 

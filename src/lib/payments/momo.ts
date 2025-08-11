@@ -207,14 +207,14 @@ export class MoMoPayment {
           data: responseData
         }
       } else {
-        console.error('MoMo payment creation failed:', responseData)
+        getLogger().error('MoMo payment creation failed', new Error(responseData.message || 'Payment creation failed'))
         return {
           success: false,
           error: responseData.message || 'Payment creation failed'
         }
       }
     } catch (error) {
-      console.error('MoMo payment error:', error)
+      getLogger().error('MoMo payment error', error instanceof Error ? error : new Error(String(error)))
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -227,6 +227,7 @@ export class MoMoPayment {
     success: boolean
     message: string
   }> {
+    const { orderId = '', requestId = '' } = webhookData
     try {
       const {
         partnerCode,
@@ -253,14 +254,14 @@ export class MoMoPayment {
         .digest('hex')
 
       if (signature !== expectedSignature) {
-        console.error('MoMo webhook signature verification failed')
+        getLogger().error('MoMo webhook signature verification failed', new Error('Invalid signature'))
         return { success: false, message: 'Invalid signature' }
       }
 
       // Tìm payment record
       const payment = await db.payment.findByGatewayTransactionId(orderId)
       if (!payment) {
-        console.error('Payment not found for orderId:', orderId)
+        getLogger().error('Payment not found for orderId', new Error('Payment not found'))
         return { success: false, message: 'Payment not found' }
       }
 
@@ -305,7 +306,7 @@ export class MoMoPayment {
         return { success: true, message: 'Payment failure processed' }
       }
     } catch (error) {
-      console.error('MoMo webhook processing error:', error)
+      getLogger().error('MoMo webhook processing error', error instanceof Error ? error : new Error(String(error)))
       return { success: false, message: 'Webhook processing failed' }
     }
   }
@@ -349,7 +350,7 @@ export class MoMoPayment {
         return { success: false, error: responseData.message }
       }
     } catch (error) {
-      console.error('MoMo query error:', error)
+      getLogger().error('MoMo query error', error instanceof Error ? error : new Error(String(error)))
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Query failed'
@@ -416,7 +417,7 @@ export class MoMoPayment {
         return { success: false, error: responseData.message }
       }
     } catch (error) {
-      console.error('MoMo refund error:', error)
+      getLogger().error('MoMo refund error', error instanceof Error ? error : new Error(String(error)))
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Refund failed'
@@ -457,7 +458,7 @@ export class MoMoPayment {
         })
       }
     } catch (error) {
-      console.error('Failed to send confirmation email:', error)
+      getLogger().warn(`Failed to send confirmation email: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -489,7 +490,7 @@ export class MoMoPayment {
         })
       }
     } catch (error) {
-      console.error('Failed to send Discord notification:', error)
+      getLogger().warn(`Failed to send Discord notification: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -533,7 +534,7 @@ export class MoMoPayment {
         })
       }
     } catch (error) {
-      console.error('Failed to trigger service delivery:', error)
+      getLogger().warn(`Failed to trigger service delivery: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 }

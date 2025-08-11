@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import type { PaymentResponse, PaymentError } from '@/types/payment'
 
 interface ZaloPayPaymentProps {
   amount: number
   bookingId: string
-  onSuccess?: (data: any) => void
-  onError?: (error: any) => void
+  onSuccess?: (data: PaymentResponse) => void
+  onError?: (error: PaymentError) => void
 }
 
 export default function ZaloPayPayment({
@@ -40,7 +41,7 @@ export default function ZaloPayPayment({
         })
       }, 4000)
     } catch (error) {
-      onError?.(error)
+      onError?.(error as PaymentError)
     } finally {
       setIsProcessing(false)
     }

@@ -40,7 +40,10 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     // For now, return true to avoid blocking signup
     return true
   } catch (error) {
-    console.error('Email sending failed:', error)
+    getLogger().error('Email sending failed', error instanceof Error ? error : new Error(String(error)), { 
+      to: options.to,
+      subject: options.subject 
+    })
     return false
   }
 }
@@ -339,7 +342,13 @@ Trân trọng,
 export async function sendOrderConfirmationEmail(
   email: string,
   fullName: string,
-  orderDetails: any
+  orderDetails: {
+    orderNumber: string;
+    serviceName: string;
+    amount: number;
+    currency: string;
+    paymentMethod?: string;
+  }
 ): Promise<boolean> {
   // Implementation for order confirmation email
   // This would be used when users book services

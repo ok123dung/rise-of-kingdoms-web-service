@@ -78,9 +78,4 @@ export const trackCTAClick = (ctaText: string, location: string) => {
   })
 }
 
-// Declare gtag for TypeScript
-declare global {
-  interface Window {
-    gtag: (command: string, targetId: string, config?: Record<string, any>) => void
-  }
-}
+// gtag is already declared in src/types/performance.d.ts

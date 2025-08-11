@@ -1,177 +1,23 @@
+'use client'
+
 import {
-  Target,
-  Users,
-  Sword,
-  Crown,
-  MessageCircle,
-  BarChart3,
-  Calendar,
-  Headphones,
   Check,
   Star,
   ArrowRight,
   Clock,
   Award,
   UserCheck,
-  Phone
+  Phone,
+  MessageCircle
 } from 'lucide-react'
 import Link from 'next/link'
 
 import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
 import { VietnameseGamingSchema } from '@/components/seo/VietnameseGamingSEO'
+import { servicesData } from '@/data/services'
 
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Dịch vụ Rise of Kingdoms - Bảng giá và gói dịch vụ chi tiết',
-  description:
-    'Khám phá các gói dịch vụ Rise of Kingdoms chuyên nghiệp: Tư vấn chiến thuật, quản lý liên minh, training commander với giá cả hợp lý.',
-  keywords: [
-    'Rise of Kingdoms services',
-    'RoK pricing',
-    'gaming services Vietnam',
-    'alliance management',
-    'KvK support'
-  ]
-}
-
-interface ServicePlan {
-  id: string
-  name: string
-  description: string
-  price: string
-  originalPrice?: string
-  features: string[]
-  popular?: boolean
-  icon: React.ComponentType<{ className?: string }>
-  href: string
-}
-
-const servicePlans: ServicePlan[] = [
-  {
-    id: 'strategy-basic',
-    name: 'Tư vấn chiến thuật',
-    description: 'Phân tích và tối ưu chiến thuật cá nhân',
-    price: '500.000 VNĐ/tháng',
-    features: [
-      'Phân tích tài khoản chi tiết',
-      'Tư vấn build commander',
-      'Chiến thuật farm gem 4-15k/ngày',
-      'Hỗ trợ qua chat 24/7',
-      'Guide mua đồ thường nhân'
-    ],
-    icon: Target,
-    href: '/services/strategy'
-  },
-  {
-    id: 'alliance-pro',
-    name: 'Quản lý liên minh',
-    description: 'Hỗ trợ toàn diện cho liên minh',
-    price: '1.000.000 VNĐ/tháng',
-    popular: true,
-    features: [
-      'Quản lý và tuyển dụng thành viên',
-      'Lên kế hoạch chiến thuật liên minh',
-      'Hỗ trợ điều phối KvK',
-      'Training cho officers',
-      'Báo cáo hiệu suất hàng tuần'
-    ],
-    icon: Users,
-    href: '/services/alliance'
-  },
-  {
-    id: 'commander-training',
-    name: 'Training Commander',
-    description: 'Hướng dẫn build commander tối ưu',
-    price: '300.000 VNĐ/session',
-    features: [
-      'Phân tích commander hiện tại',
-      'Lộ trình phát triển chi tiết',
-      'Tư vấn talent tree',
-      'Hướng dẫn equipment',
-      'Follow-up sau 1 tuần'
-    ],
-    icon: Sword,
-    href: '/services/commander'
-  },
-  {
-    id: 'kvk-support',
-    name: 'Hỗ trợ KvK',
-    description: 'Chiến thuật chuyên nghiệp cho KvK',
-    price: '2.000.000 VNĐ/KvK',
-    popular: true,
-    features: [
-      'Phân tích đối thủ và địa hình',
-      'Lập kế hoạch chiến thuật tổng thể',
-      'Điều phối real-time trong trận',
-      'Hỗ trợ rally và garrison',
-      'Báo cáo sau KvK'
-    ],
-    icon: Crown,
-    href: '/services/kvk'
-  },
-  {
-    id: 'personal-coaching',
-    name: 'Coaching 1-on-1',
-    description: 'Hướng dẫn cá nhân từ chuyên gia',
-    price: '200.000 VNĐ/giờ',
-    features: [
-      'Session 1-on-1 với expert',
-      'Phân tích gameplay chi tiết',
-      'Lộ trình phát triển cá nhân',
-      'Tư vấn investment hiệu quả',
-      'Recording session để review'
-    ],
-    icon: MessageCircle,
-    href: '/services/coaching'
-  },
-  {
-    id: 'account-analysis',
-    name: 'Phân tích tài khoản',
-    description: 'Đánh giá toàn diện tài khoản',
-    price: '150.000 VNĐ/lần',
-    features: [
-      'Báo cáo chi tiết 20+ trang',
-      'Phân tích điểm mạnh/yếu',
-      'Đề xuất cải thiện cụ thể',
-      'So sánh với benchmark',
-      'Lộ trình 3-6 tháng'
-    ],
-    icon: BarChart3,
-    href: '/services/analysis'
-  },
-  {
-    id: 'event-support',
-    name: 'Hỗ trợ Event',
-    description: 'Tối ưu cho sự kiện đặc biệt',
-    price: '400.000 VNĐ/event',
-    features: [
-      'Chiến thuật cho từng event',
-      'Lịch trình tối ưu',
-      'Tính toán ROI chi tiết',
-      'Hỗ trợ real-time',
-      'Báo cáo kết quả'
-    ],
-    icon: Calendar,
-    href: '/services/events'
-  },
-  {
-    id: 'vip-support',
-    name: 'VIP Support 24/7',
-    description: 'Hỗ trợ ưu tiên cao cấp',
-    price: '3.000.000 VNĐ/tháng',
-    features: [
-      'Hotline riêng 24/7',
-      'Phản hồi trong 5 phút',
-      'Dedicated account manager',
-      'Tất cả dịch vụ included',
-      'Priority support'
-    ],
-    icon: Headphones,
-    href: '/services/vip'
-  }
-]
+const services = Object.values(servicesData)
 
 const testimonials = [
   {
@@ -313,7 +159,7 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* Pricing Section */}
+        {/* Services Grid */}
         <section className="section-padding bg-white">
           <div className="container-max">
             <div className="mb-16 text-center">
@@ -323,10 +169,69 @@ export default function ServicesPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-              {servicePlans.map(plan => (
-                <PricingCard key={plan.id} plan={plan} />
-              ))}
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {services.map(service => {
+                const IconComponent = service.icon
+                const lowestPrice = Math.min(...service.pricing.map(p => p.price))
+                const popularTier = service.pricing.find((_, index) => index === 1) // Middle tier is popular
+                
+                return (
+                  <div
+                    key={service.slug}
+                    className="card group relative transition-all duration-300 hover:shadow-xl"
+                  >
+                    {service.slug === 'strategy-consulting' && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 transform">
+                        <span className="rounded-full bg-primary-600 px-4 py-1 text-sm font-semibold text-white">
+                          Phổ biến nhất
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="mb-6 text-center">
+                      <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
+                        <IconComponent className="h-6 w-6 text-primary-600" />
+                      </div>
+                      <h3 className="mb-2 text-xl font-semibold text-gray-900">{service.name}</h3>
+                      <p className="text-sm text-gray-600">{service.shortDescription}</p>
+                    </div>
+
+                    <div className="mb-6 text-center">
+                      <div className="text-sm text-gray-500">Từ</div>
+                      <div className="text-3xl font-bold text-primary-600">
+                        {lowestPrice.toLocaleString('vi-VN')}đ
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {service.pricing[0].duration}
+                      </div>
+                    </div>
+
+                    <ul className="mb-8 space-y-3">
+                      {service.features.slice(0, 5).map((feature, index) => (
+                        <li key={index} className="flex items-start space-x-3">
+                          <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                          <span className="text-sm text-gray-600">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="space-y-3">
+                      <Link
+                        className="block w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
+                        href="/contact"
+                      >
+                        Đặt lịch tư vấn miễn phí
+                      </Link>
+                      <Link 
+                        className="btn-secondary block w-full text-center text-sm" 
+                        href={`/services/${service.slug}`}
+                      >
+                        Xem chi tiết dịch vụ
+                      </Link>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </section>
@@ -476,67 +381,6 @@ export default function ServicesPage() {
 
       <Footer />
     </>
-  )
-}
-
-interface PricingCardProps {
-  plan: ServicePlan
-}
-
-function PricingCard({ plan }: PricingCardProps) {
-  const Icon = plan.icon
-
-  return (
-    <div
-      className={`
-      card group relative transition-all duration-300 hover:shadow-xl
-      ${plan.popular ? 'scale-105 shadow-lg ring-2 ring-primary-500' : ''}
-    `}
-    >
-      {plan.popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 transform">
-          <span className="rounded-full bg-primary-600 px-4 py-1 text-sm font-semibold text-white">
-            Phổ biến nhất
-          </span>
-        </div>
-      )}
-
-      <div className="mb-6 text-center">
-        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
-          <Icon className="h-6 w-6 text-primary-600" />
-        </div>
-        <h3 className="mb-2 text-xl font-semibold text-gray-900">{plan.name}</h3>
-        <p className="text-sm text-gray-600">{plan.description}</p>
-      </div>
-
-      <div className="mb-6 text-center">
-        <div className="text-3xl font-bold text-primary-600">{plan.price}</div>
-        {plan.originalPrice && (
-          <div className="text-sm text-gray-500 line-through">{plan.originalPrice}</div>
-        )}
-      </div>
-
-      <ul className="mb-8 space-y-3">
-        {plan.features.map((feature, index) => (
-          <li key={index} className="flex items-start space-x-3">
-            <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-            <span className="text-sm text-gray-600">{feature}</span>
-          </li>
-        ))}
-      </ul>
-
-      <div className="space-y-3">
-        <Link
-          className="block w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
-          href="/contact"
-        >
-          Đặt lịch tư vấn miễn phí
-        </Link>
-        <Link className="btn-secondary block w-full text-center text-sm" href={plan.href}>
-          Xem chi tiết dịch vụ
-        </Link>
-      </div>
-    </div>
   )
 }
 

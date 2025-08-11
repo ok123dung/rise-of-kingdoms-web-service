@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 import type { NextRequest } from 'next/server'
+import { getLogger } from '@/lib/monitoring/logger'
 
 // Protected routes that require authentication
 const protectedRoutes = [
@@ -81,7 +82,10 @@ export async function authMiddleware(req: NextRequest) {
         })
       }
     } catch (error) {
-      console.error('Auth middleware error:', error)
+      getLogger().error('Auth middleware error', error instanceof Error ? error : new Error(String(error)), { 
+        path: pathname,
+        method: req.method 
+      })
       return NextResponse.json({ error: 'Authentication error' }, { status: 500 })
     }
   }

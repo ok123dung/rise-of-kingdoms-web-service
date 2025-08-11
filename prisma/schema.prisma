@@ -38,6 +38,7 @@ model User {
   sessions       Session[]  // NextAuth sessions
   auditLogs      AuditLog[]
   serviceTasks   ServiceTask[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
 }
@@ -121,6 +122,10 @@ model Booking {
   convertedLead Lead?
   serviceTasks ServiceTask[]
 
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@index([paymentStatus])
+  @@index([assignedStaffId, status])
   @@map("bookings")
 }
 
@@ -147,6 +152,10 @@ model Payment {
   // Relations
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
 
+  @@index([bookingId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([paymentGateway, status])
   @@map("payments")
 }
 
@@ -197,6 +206,10 @@ model Lead {
   assignedUser     User?    @relation(fields: [assignedTo], references: [id])
   convertedBooking Booking? @relation(fields: [convertedBookingId], references: [id])
 
+  @@index([status, createdAt])
+  @@index([assignedTo, status])
+  @@index([source])
+  @@index([email])
   @@map("leads")
 }
 
@@ -331,4 +344,16 @@ model ServiceTask {
   @@index([bookingId, status])
   @@index([assignedTo, status])
   @@map("service_tasks")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("password_reset_tokens")
 }

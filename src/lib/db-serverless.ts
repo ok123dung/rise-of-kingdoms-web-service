@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { getLogger } from '@/lib/monitoring/logger'
 
 // Serverless-optimized Prisma configuration
 const globalForPrisma = globalThis as unknown as {
@@ -30,7 +31,7 @@ export async function ensureDbConnected(): Promise<void> {
   try {
     await prisma.$connect()
   } catch (error) {
-    console.error('Failed to connect to database:', error)
+    getLogger().error('Failed to connect to database', error instanceof Error ? error : new Error(String(error)))
     throw new Error('Database connection failed')
   }
 }
@@ -40,7 +41,7 @@ export async function disconnectDb(): Promise<void> {
   try {
     await prisma.$disconnect()
   } catch (error) {
-    console.error('Failed to disconnect from database:', error)
+    getLogger().error('Failed to disconnect from database', error instanceof Error ? error : new Error(String(error)))
   }
 }
 
@@ -57,7 +58,10 @@ export async function queryWithRetry<T>(
       return await operation()
     } catch (error) {
       lastError = error as Error
-      console.error(`Database operation failed (attempt ${i + 1}/${maxRetries}):`, error)
+      getLogger().error('Database operation failed', error instanceof Error ? error : new Error(String(error)), { 
+        attempt: i + 1,
+        maxRetries 
+      })
       
       // Check if it's a connection error
       if (error instanceof Error && error.message.includes('P1001')) {

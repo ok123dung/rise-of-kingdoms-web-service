@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import type { PaymentResponse, PaymentError } from '@/types/payment'
 
 interface VNPayPaymentProps {
   amount: number
   bookingId: string
-  onSuccess?: (data: any) => void
-  onError?: (error: any) => void
+  onSuccess?: (data: PaymentResponse) => void
+  onError?: (error: PaymentError) => void
 }
 
 export default function VNPayPayment({ amount, bookingId, onSuccess, onError }: VNPayPaymentProps) {
@@ -35,7 +36,7 @@ export default function VNPayPayment({ amount, bookingId, onSuccess, onError }: 
         })
       }, 3000)
     } catch (error) {
-      onError?.(error)
+      onError?.(error as PaymentError)
     } finally {
       setIsProcessing(false)
     }

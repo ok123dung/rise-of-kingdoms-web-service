@@ -122,7 +122,7 @@ export const bookingValidationSchema = z.object({
     .min(10, 'Requirements must be at least 10 characters')
     .max(2000, 'Requirements must be less than 2000 characters')
     .optional(),
-  bookingDetails: z.record(z.any()).optional()
+  bookingDetails: z.record(z.unknown()).optional()
 })
 
 // Payment validation schema

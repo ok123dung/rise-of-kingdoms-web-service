@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, memo, useMemo } from 'react'
 
 import { X, Calendar, Clock, User, MessageSquare } from 'lucide-react'
+import { clientLogger } from '@/lib/client-logger'
 
 interface BookingModalProps {
   isOpen: boolean
@@ -19,7 +20,7 @@ const services = [
   { id: 'alliance-management', name: 'Quản lý liên minh', price: 3000000, duration: '1 tháng' }
 ]
 
-export default function BookingModal({
+const BookingModal = memo(function BookingModal({
   isOpen,
   onClose,
   serviceId,
@@ -37,9 +38,12 @@ export default function BookingModal({
 
   if (!isOpen) return null
 
-  const selectedServiceData = services.find(s => s.id === selectedService)
+  const selectedServiceData = useMemo(() => 
+    services.find(s => s.id === selectedService),
+    [selectedService]
+  )
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
@@ -65,11 +69,11 @@ export default function BookingModal({
       onBookingSuccess?.(bookingData)
       onClose()
     } catch (error) {
-      console.error('Booking failed:', error)
+      clientLogger.error('Booking failed:', error)
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [selectedService, selectedServiceData, customerName, customerEmail, customerPhone, selectedDate, selectedTime, notes, onBookingSuccess, onClose])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -257,4 +261,8 @@ export default function BookingModal({
       </div>
     </div>
   )
-}
+})
+
+BookingModal.displayName = 'BookingModal'
+
+export default BookingModal

@@ -164,20 +164,20 @@ export function handleApiError(error: unknown, requestId?: string): NextResponse
 }
 
 // Async error wrapper for API routes
-export function asyncHandler<T extends (...args: any[]) => Promise<any>>(handler: T): T {
+export function asyncHandler<T extends (...args: unknown[]) => Promise<unknown>>(handler: T): T {
   return (async (...args: Parameters<T>) => {
     try {
       return await handler(...args)
     } catch (error) {
-      const [request] = args
-      const requestId = request?.headers?.get('x-request-id')
+      const [request] = args as unknown as [Request]
+      const requestId = request?.headers?.get('x-request-id') || undefined
       return handleApiError(error, requestId)
     }
   }) as T
 }
 
 // Validation helper
-export function validateRequired<T extends Record<string, any>>(
+export function validateRequired<T extends Record<string, unknown>>(
   data: T,
   fields: (keyof T)[],
   fieldNames?: Record<keyof T, string>
