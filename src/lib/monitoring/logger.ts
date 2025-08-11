@@ -610,8 +610,8 @@ export class ApplicationMonitor {
 
   private async checkDiskSpace(): Promise<{ status: string; details?: Record<string, unknown> }> {
     try {
-      // Only check disk space in Node.js environment
-      if (typeof window === 'undefined') {
+      // Only check disk space in Node.js environment and not in Edge Runtime
+      if (typeof window === 'undefined' && typeof process !== 'undefined' && process.memoryUsage) {
         // Simplified disk check - in production use proper disk usage tools
         const used = process.memoryUsage()
         const rss = used.rss / 1024 / 1024 // MB
@@ -620,7 +620,7 @@ export class ApplicationMonitor {
           details: { message: 'Disk space check simplified', memoryRSS: Math.round(rss) }
         }
       }
-      return { status: 'healthy', details: { message: 'Disk space check skipped in browser' } }
+      return { status: 'healthy', details: { message: 'Disk space check skipped in browser/edge runtime' } }
     } catch (error) {
       return {
         status: 'unhealthy',
@@ -630,6 +630,14 @@ export class ApplicationMonitor {
   }
 
   private async checkMemory(): Promise<{ status: string; details?: Record<string, unknown> }> {
+    // Check if we're in Node.js environment with process.memoryUsage available
+    if (typeof process === 'undefined' || !process.memoryUsage) {
+      return {
+        status: 'healthy',
+        details: { message: 'Memory check skipped in edge runtime' }
+      }
+    }
+    
     const used = process.memoryUsage()
     const totalHeap = used.heapTotal / 1024 / 1024 // MB
     const usedHeap = used.heapUsed / 1024 / 1024 // MB
