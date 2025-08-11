@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import { NotFoundError, ValidationError, PaymentError } from '@/lib/errors'
+import { NotFoundError, ValidationError, PaymentError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
 import { MoMoPayment } from '@/lib/payments/momo'
 import { VNPayPayment } from '@/lib/payments/vnpay'
@@ -40,7 +40,7 @@ export class PaymentService {
       data: {
         bookingId: data.bookingId,
         paymentNumber,
-        amount: booking.totalAmount,
+        amount: booking.finalAmount,
         currency: booking.currency,
         paymentMethod: data.paymentMethod,
         paymentGateway: data.paymentMethod,
@@ -82,11 +82,11 @@ export class PaymentService {
   ) {
     switch (paymentMethod) {
       case 'momo':
-        return await this.momoPayment.handleWebhook(callbackData)
+        return await this.momoPayment.handleWebhook(callbackData as any)
       case 'vnpay':
-        return await this.vnpayPayment.verifyCallback(callbackData)
+        return await this.vnpayPayment.verifyReturn(callbackData)
       case 'zalopay':
-        return await this.zalopayPayment.handleCallback(callbackData)
+        return await this.zalopayPayment.handleCallback(callbackData as any)
       default:
         throw new ValidationError('Invalid payment method')
     }
@@ -178,7 +178,7 @@ export class PaymentService {
       throw new ValidationError('Only completed payments can be refunded')
     }
 
-    if (payment.refundedAmount && payment.refundedAmount.toNumber() > 0) {
+    if (payment.refundAmount && Number(payment.refundAmount) > 0) {
       throw new ValidationError('Payment already has refunds')
     }
 
@@ -189,13 +189,14 @@ export class PaymentService {
         refundResult = await this.momoPayment.refundPayment(
           payment.gatewayTransactionId!,
           payment.id,
-          data.amount
+          Number(data.amount)
         )
         break
       case 'vnpay':
         refundResult = await this.vnpayPayment.refundPayment(
           payment.gatewayTransactionId!,
-          data.amount,
+          payment.id,
+          Number(data.amount),
           data.reason
         )
         break
@@ -211,7 +212,7 @@ export class PaymentService {
     const updated = await prisma.payment.update({
       where: { id: paymentId },
       data: {
-        refundedAmount: data.amount,
+        refundAmount: data.amount,
         refundedAt: new Date(),
         refundReason: data.reason,
         status: 'refunded'
@@ -290,7 +291,7 @@ export class PaymentService {
       case 'momo':
         return await this.momoPayment.createPayment({
           bookingId: booking.id,
-          amount: payment.amount.toNumber(),
+          amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
           orderInfo: `Payment for ${booking.bookingNumber}`,
           redirectUrl: returnUrl
         })
@@ -298,7 +299,7 @@ export class PaymentService {
       case 'vnpay':
         return await this.vnpayPayment.createPaymentUrl({
           bookingId: booking.id,
-          amount: payment.amount.toNumber(),
+          amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
           orderInfo: `Payment for booking ${booking.bookingNumber}`,
           returnUrl: returnUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/payment/callback`
         })
@@ -306,7 +307,7 @@ export class PaymentService {
       case 'zalopay':
         return await this.zalopayPayment.createOrder({
           bookingId: booking.id,
-          amount: payment.amount.toNumber(),
+          amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
           description: `Payment for ${booking.bookingNumber}`,
           callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
         })
@@ -314,10 +315,10 @@ export class PaymentService {
       case 'banking':
         return await this.bankingTransfer.createTransferOrder({
           bookingId: booking.id,
-          amount: payment.amount.toNumber(),
+          amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
           customerName: booking.user.fullName,
           customerEmail: booking.user.email,
-          customerPhone: booking.user.phone
+          customerPhone: booking.user.phone || undefined
         })
 
       default:

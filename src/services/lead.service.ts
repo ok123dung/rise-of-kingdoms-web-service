@@ -31,10 +31,10 @@ export class LeadService {
     if (existingLead) {
       // Update existing lead instead of creating duplicate
       return await this.updateLead(existingLead.id, {
-        serviceInterest: data.serviceInterest || existingLead.serviceInterest,
+        serviceInterest: data.serviceInterest || existingLead.serviceInterest || undefined,
         notes: data.notes 
           ? `${existingLead.notes || ''}\n[${new Date().toISOString()}] ${data.notes}`
-          : existingLead.notes
+          : existingLead.notes || undefined
       })
     }
 
@@ -103,13 +103,13 @@ export class LeadService {
       where: { id: leadId },
       data: {
         ...data,
-        lastContactedAt: new Date()
+        updatedAt: new Date()
       }
     })
 
     this.logger.info('Lead updated', {
       leadId,
-      updatedFields: Object.keys(data)
+      updatedFields: Object.keys(data).join(', ')
     })
 
     return updated
@@ -137,7 +137,6 @@ export class LeadService {
       data: {
         status: 'converted',
         convertedAt: new Date(),
-        convertedUserId: data.userId,
         convertedBookingId: data.bookingId
       }
     })
@@ -254,7 +253,7 @@ export class LeadService {
       }), {}),
       bySource: bySource.reduce((acc, item) => ({
         ...acc,
-        [item.source]: item._count
+        [item.source || 'unknown']: item._count
       }), {}),
       conversionRate: total > 0 ? (conversionRate / total) * 100 : 0
     }
