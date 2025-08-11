@@ -46,7 +46,7 @@ test.describe('Booking Flow Tests', () => {
     await page.click('button[type="submit"]')
 
     // Should show validation errors
-    await expect(page.locator('.error-message, .text-red-500')).toHaveCount({ min: 2 })
+    await expect(page.locator('.error-message, .text-red-500').count()).resolves.toBeGreaterThanOrEqual(2)
 
     // Check specific field errors
     await expect(page.locator('text=/Game ID is required|Game ID là bắt buộc/i')).toBeVisible()
@@ -78,7 +78,7 @@ test.describe('Booking Flow Tests', () => {
 
     // Should have multiple options
     const options = urgencySelect.locator('option')
-    await expect(options).toHaveCount({ min: 2 })
+    await expect(options.count()).resolves.toBeGreaterThanOrEqual(2)
 
     // Select urgent option (should increase price)
     await urgencySelect.selectOption('urgent')
@@ -96,7 +96,7 @@ test.describe('Booking Flow Tests', () => {
     await expect(page.locator('[data-testid="tier-premium"]')).toBeVisible()
 
     // Each tier should show features
-    await expect(page.locator('[data-testid="tier-features"]')).toHaveCount({ min: 2 })
+    await expect(page.locator('[data-testid="tier-features"]').count()).resolves.toBeGreaterThanOrEqual(2)
   })
 
   test('should allow editing booking before payment', async ({ page }) => {
@@ -123,7 +123,7 @@ test.describe('Booking Flow Tests', () => {
 
     // Should show multiple services
     const serviceCards = page.locator('[data-testid="service-card"]')
-    await expect(serviceCards).toHaveCount({ min: 1 })
+    await expect(serviceCards.count()).resolves.toBeGreaterThanOrEqual(1)
 
     // Each service should have required information
     const firstService = serviceCards.first()

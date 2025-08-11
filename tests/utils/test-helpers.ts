@@ -214,12 +214,16 @@ export const TestData = {
     serviceName: 'Tăng Power Rise of Kingdoms',
     gameId: 'Player123456',
     server: 'Server 1234',
+    requirements: 'Tăng power lên 100M',
     notes: 'Yêu cầu tăng power trong 24h'
   },
 
   payment: {
     amount: 500000, // 500,000 VND
-    method: 'momo'
+    method: 'momo',
+    momo: {
+      phoneNumber: '0912345678'
+    }
   }
 }
 

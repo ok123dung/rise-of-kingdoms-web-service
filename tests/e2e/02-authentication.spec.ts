@@ -31,7 +31,7 @@ test.describe('Authentication Tests', () => {
       await page.click('button[type="submit"]')
 
       // Check for validation errors
-      await expect(page.locator('.error-message, .text-red-500')).toHaveCount({ min: 1 })
+      await expect(page.locator('.error-message, .text-red-500').count()).resolves.toBeGreaterThanOrEqual(1)
     })
 
     test('should show error for invalid credentials', async ({ page }) => {

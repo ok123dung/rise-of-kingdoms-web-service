@@ -82,7 +82,7 @@ test.describe('Homepage Tests', () => {
 
     // Check service cards
     const serviceCards = page.locator('[data-testid="service-card"]')
-    await expect(serviceCards).toHaveCount({ min: 1 })
+    await expect(serviceCards.count()).resolves.toBeGreaterThanOrEqual(1)
 
     // Check each service card has required elements
     const firstCard = serviceCards.first()
@@ -95,7 +95,7 @@ test.describe('Homepage Tests', () => {
 
     // Check feature items
     const features = page.locator('[data-testid="feature-item"]')
-    await expect(features).toHaveCount({ min: 3 })
+    await expect(features.count()).resolves.toBeGreaterThanOrEqual(3)
   })
 
   test('should have working CTA buttons', async ({ page }) => {

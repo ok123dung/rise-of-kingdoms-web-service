@@ -198,7 +198,7 @@ test.describe('Payment Flow Tests', () => {
         body: JSON.stringify({
           success: true,
           transactionId: 'TEST_' + Date.now(),
-          amount: TestData.payment.momo.amount
+          amount: TestData.payment.amount
         })
       })
     })
@@ -259,7 +259,7 @@ test.describe('Payment Flow Tests', () => {
     await expect(page.locator('[data-testid="payment-history"]')).toBeVisible()
 
     // Should show recent payment
-    await expect(page.locator('[data-testid="payment-item"]')).toHaveCount({ min: 1 })
+    await expect(page.locator('[data-testid="payment-item"]').count()).resolves.toBeGreaterThanOrEqual(1)
   })
 
   test('should show Vietnamese payment terms', async ({ page }) => {

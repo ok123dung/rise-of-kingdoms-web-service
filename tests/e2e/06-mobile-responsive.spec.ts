@@ -220,8 +220,8 @@ test.describe('Mobile Responsive Tests', () => {
 
             resolve({
               lcp: lcp?.startTime || 0,
-              fid: fid?.processingStart - fid?.startTime || 0,
-              cls: cls?.value || 0
+              fid: (fid as any)?.processingStart - (fid as any)?.startTime || 0,
+              cls: (cls as any)?.value || 0
             })
           }).observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] })
 
@@ -231,9 +231,10 @@ test.describe('Mobile Responsive Tests', () => {
       })
 
       // Core Web Vitals thresholds
-      if (metrics.lcp > 0) expect(metrics.lcp).toBeLessThan(2500) // 2.5s
-      if (metrics.fid > 0) expect(metrics.fid).toBeLessThan(100) // 100ms
-      if (metrics.cls > 0) expect(metrics.cls).toBeLessThan(0.1) // 0.1
+      const typedMetrics = metrics as any
+      if (typedMetrics.lcp > 0) expect(typedMetrics.lcp).toBeLessThan(2500) // 2.5s
+      if (typedMetrics.fid > 0) expect(typedMetrics.fid).toBeLessThan(100) // 100ms
+      if (typedMetrics.cls > 0) expect(typedMetrics.cls).toBeLessThan(0.1) // 0.1
     })
   })
 
@@ -392,7 +393,7 @@ test.describe('Mobile Responsive Tests', () => {
       await page.goto('/')
 
       // Simulate offline condition
-      await page.setOfflineMode(true)
+      await page.context().setOffline(true)
 
       // Trigger a network request
       await page.click('a[href="/services"]')
@@ -410,7 +411,7 @@ test.describe('Mobile Responsive Tests', () => {
       expect(hasOfflineIndicator || hasCachedContent).toBeTruthy()
 
       // Restore online mode
-      await page.setOfflineMode(false)
+      await page.context().setOffline(false)
     })
   })
 })

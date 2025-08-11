@@ -45,11 +45,22 @@ export interface Booking {
   userId: string;
   serviceTierId: string;
   status: string;
+  paymentStatus: string;
+  totalAmount: number | { toNumber: () => number };
+  discountAmount: number | { toNumber: () => number };
+  finalAmount: number | { toNumber: () => number };
+  currency: string;
+  bookingDetails?: any | null;
+  customerRequirements?: string | null;
   startDate?: Date | null;
   endDate?: Date | null;
-  customerRequirements?: string | null;
+  assignedStaffId?: string | null;
+  completionPercentage: number;
+  customerRating?: number | null;
+  customerFeedback?: string | null;
   internalNotes?: string | null;
-  completionProof?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
   user: User;
   serviceTier: ServiceTier;
 }
@@ -57,6 +68,7 @@ export interface Booking {
 export interface Payment {
   id: string;
   bookingId: string;
+  paymentNumber: string;
   amount: number | { toNumber: () => number };
   currency: string;
   paymentMethod: string;
@@ -64,12 +76,12 @@ export interface Payment {
   gatewayTransactionId?: string | null;
   gatewayOrderId?: string | null;
   status: string;
-  confirmedAt?: Date | null;
-  adminNotes?: string | null;
-  confirmationMethod?: string | null;
   failureReason?: string | null;
-  rejectedAt?: Date | null;
-  rejectionReason?: string | null;
+  gatewayResponse?: any | null;
+  paidAt?: Date | null;
+  refundedAt?: Date | null;
+  refundAmount: number | { toNumber: () => number };
+  refundReason?: string | null;
   createdAt: Date;
   updatedAt: Date;
   booking?: Booking;
@@ -81,11 +93,12 @@ export interface ServiceTask {
   type: string;
   title: string;
   description?: string | null;
-  priority: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   status: string;
+  assignedTo?: string | null;
   dueDate?: Date | null;
-  assignedToId?: string | null;
   completedAt?: Date | null;
+  metadata?: any | null;
   createdAt: Date;
   updatedAt: Date;
 }

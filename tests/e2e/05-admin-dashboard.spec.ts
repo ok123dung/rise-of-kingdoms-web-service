@@ -32,7 +32,7 @@ test.describe('Admin Dashboard Tests', () => {
 
     // Should show booking items
     const bookingItems = page.locator('[data-testid="booking-item"]')
-    await expect(bookingItems).toHaveCount({ min: 0 }) // May be empty in test env
+    await expect(bookingItems.count()).resolves.toBeGreaterThanOrEqual(0) // May be empty in test env
 
     // If bookings exist, check their structure
     const firstBooking = bookingItems.first()

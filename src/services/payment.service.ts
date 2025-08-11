@@ -40,7 +40,7 @@ export class PaymentService {
       data: {
         bookingId: data.bookingId,
         paymentNumber,
-        amount: booking.finalAmount,
+        amount: typeof booking.finalAmount === 'number' ? booking.finalAmount : booking.finalAmount.toNumber(),
         currency: booking.currency,
         paymentMethod: data.paymentMethod,
         paymentGateway: data.paymentMethod,
@@ -84,7 +84,7 @@ export class PaymentService {
       case 'momo':
         return await this.momoPayment.handleWebhook(callbackData as any)
       case 'vnpay':
-        return await this.vnpayPayment.verifyReturn(callbackData)
+        return await this.vnpayPayment.verifyReturnUrl(callbackData)
       case 'zalopay':
         return await this.zalopayPayment.handleCallback(callbackData as any)
       default:
@@ -189,14 +189,14 @@ export class PaymentService {
         refundResult = await this.momoPayment.refundPayment(
           payment.gatewayTransactionId!,
           payment.id,
-          Number(data.amount)
+          data.amount
         )
         break
       case 'vnpay':
         refundResult = await this.vnpayPayment.refundPayment(
           payment.gatewayTransactionId!,
           payment.id,
-          Number(data.amount),
+          data.amount,
           data.reason
         )
         break
