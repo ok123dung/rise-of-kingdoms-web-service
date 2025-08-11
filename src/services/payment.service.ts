@@ -195,9 +195,9 @@ export class PaymentService {
       case 'vnpay':
         refundResult = await this.vnpayPayment.refundPayment(
           payment.gatewayTransactionId!,
-          payment.id,
           data.amount,
-          data.reason
+          new Date().toISOString().slice(0, 8).replace(/-/g, ''),
+          data.reason || 'Customer refund request'
         )
         break
       default:
