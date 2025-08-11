@@ -188,8 +188,8 @@ export class PaymentService {
       case 'momo':
         refundResult = await this.momoPayment.refundPayment(
           payment.gatewayTransactionId!,
-          payment.id,
-          data.amount
+          data.amount,
+          data.reason || 'Customer refund request'
         )
         break
       case 'vnpay':
