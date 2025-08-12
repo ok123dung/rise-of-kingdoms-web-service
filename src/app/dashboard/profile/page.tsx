@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const { data: session, update } = useSession()
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [profileData, setProfileData] = useState<any>(null)
 
   const {
     register,
@@ -31,15 +32,26 @@ export default function ProfilePage() {
     resolver: zodResolver(profileSchema)
   })
 
+  // Fetch user profile data
   useEffect(() => {
     if (session?.user) {
-      reset({
-        fullName: session.user.fullName || '',
-        phone: session.user.phone || '',
-        discordUsername: session.user.discordUsername || '',
-        rokPlayerId: session.user.rokPlayerId || '',
-        rokKingdom: session.user.rokKingdom || ''
-      })
+      fetch('/api/user/profile')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data) {
+            setProfileData(data.data)
+            reset({
+              fullName: data.data.fullName || '',
+              phone: data.data.phone || '',
+              discordUsername: data.data.discordUsername || '',
+              rokPlayerId: data.data.rokPlayerId || '',
+              rokKingdom: data.data.rokKingdom || ''
+            })
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch profile:', err)
+        })
     }
   }, [session, reset])
 

@@ -1,37 +1,37 @@
-import { PrismaClient, type Prisma } from '@prisma/client'
+import { type Prisma } from '@prisma/client'
 
 import { handleDatabaseError, NotFoundError, retryWithBackoff } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
+import { prisma, checkDatabaseHealth } from '@/lib/db-enhanced'
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+// Re-export enhanced prisma client
+export { prisma }
 
-// Create Prisma client with proper error handling
-function createPrismaClient() {
-  try {
-    return new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-      errorFormat: 'pretty'
-    })
-  } catch (error) {
-    getLogger().error('Failed to create Prisma client', error as Error)
-    throw error
-  }
-}
-
-export const prisma = globalForPrisma.prisma ?? createPrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-
-// Database connection health check
+// Enhanced database connection health check
 export async function checkDatabaseConnection() {
   try {
-    await prisma.$queryRaw`SELECT 1`
-    return { status: 'healthy', message: 'Database connection successful' }
+    const health = await checkDatabaseHealth()
+    
+    if (health.isHealthy) {
+      return { 
+        status: 'healthy', 
+        message: 'Database connection successful',
+        details: health
+      }
+    } else {
+      return { 
+        status: 'unhealthy', 
+        message: 'Database connection unhealthy',
+        details: health
+      }
+    }
   } catch (error) {
-    getLogger().error('Database connection failed', error as Error)
-    return { status: 'unhealthy', message: 'Database connection failed', error }
+    getLogger().error('Database connection check failed', error as Error)
+    return { 
+      status: 'unhealthy', 
+      message: 'Database connection failed', 
+      error 
+    }
   }
 }
 

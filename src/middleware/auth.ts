@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 import type { NextRequest } from 'next/server'
-import { getLogger } from '@/lib/monitoring/logger'
+import { getEdgeLogger } from '@/lib/monitoring/edge-logger'
+import { createEdgeRateLimiter, type EdgeRateLimiter } from '@/lib/rate-limit-edge'
 
 // Protected routes that require authentication
 const protectedRoutes = [
@@ -19,17 +20,13 @@ const adminRoutes = ['/api/admin', '/admin']
 // API routes that need rate limiting
 const rateLimitedRoutes = ['/api/auth', '/api/leads', '/api/payments']
 
-// Rate limiting store (in production, use Redis)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
-
-// Rate limit configuration
-const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = {
-  '/api/auth': 5, // 5 login attempts per minute
-  '/api/leads': 10, // 10 lead submissions per minute
-  '/api/payments': 20, // 20 payment requests per minute
-  default: 60 // 60 requests per minute for other routes
-}
+// Create rate limiters for different endpoints
+const rateLimiters = new Map<string, EdgeRateLimiter>([
+  ['/api/auth', createEdgeRateLimiter({ window: 60000, max: 5, prefix: 'auth' })],
+  ['/api/leads', createEdgeRateLimiter({ window: 60000, max: 10, prefix: 'leads' })],
+  ['/api/payments', createEdgeRateLimiter({ window: 60000, max: 20, prefix: 'payments' })],
+  ['default', createEdgeRateLimiter({ window: 60000, max: 60, prefix: 'api' })]
+])
 
 export async function authMiddleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -82,7 +79,7 @@ export async function authMiddleware(req: NextRequest) {
         })
       }
     } catch (error) {
-      getLogger().error('Auth middleware error', error instanceof Error ? error : new Error(String(error)), { 
+      getEdgeLogger().error('Auth middleware error', error instanceof Error ? error : new Error(String(error)), { 
         path: pathname,
         method: req.method 
       })
@@ -101,55 +98,36 @@ async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
   const limitKey = rateLimitedRoutes.find(route => pathname.startsWith(route))
   if (!limitKey) return null
 
-  const key = `${ip}:${limitKey}`
-  const now = Date.now()
+  // Get the appropriate rate limiter
+  const rateLimiter = rateLimiters.get(limitKey) || rateLimiters.get('default')!
+  
+  // Create identifier with IP and user agent for better fingerprinting
+  const userAgent = req.headers.get('user-agent') || 'unknown'
+  const identifier = `${ip}:${userAgent.substring(0, 50)}`
+  
+  const result = await rateLimiter.checkLimit(identifier)
 
-  // Get or create rate limit entry
-  let rateLimit = rateLimitStore.get(key)
-
-  if (!rateLimit || now > rateLimit.resetTime) {
-    rateLimit = {
-      count: 0,
-      resetTime: now + RATE_LIMIT_WINDOW
-    }
-  }
-
-  rateLimit.count++
-  rateLimitStore.set(key, rateLimit)
-
-  // Get max requests for this route
-  const maxRequests =
-    RATE_LIMIT_MAX_REQUESTS[limitKey as keyof typeof RATE_LIMIT_MAX_REQUESTS] ||
-    RATE_LIMIT_MAX_REQUESTS.default
-
-  // Check if rate limit exceeded
-  if (rateLimit.count > maxRequests) {
+  if (!result.success) {
     return NextResponse.json(
       {
         error: 'Too many requests',
-        retryAfter: Math.ceil((rateLimit.resetTime - now) / 1000)
+        retryAfter: result.retryAfter
       },
       {
         status: 429,
         headers: {
-          'Retry-After': String(Math.ceil((rateLimit.resetTime - now) / 1000)),
-          'X-RateLimit-Limit': String(maxRequests),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': String(rateLimit.resetTime)
+          'Retry-After': String(result.retryAfter || 60),
+          'X-RateLimit-Limit': String(
+            limitKey === '/api/auth' ? 5 : 
+            limitKey === '/api/leads' ? 10 : 
+            limitKey === '/api/payments' ? 20 : 
+            60
+          ),
+          'X-RateLimit-Remaining': String(result.remaining),
+          'X-RateLimit-Reset': String(result.reset)
         }
       }
     )
-  }
-
-  // Clean up old entries periodically
-  if (Math.random() < 0.01) {
-    // 1% chance
-    const cutoff = now - RATE_LIMIT_WINDOW * 2
-    for (const [k, v] of Array.from(rateLimitStore.entries())) {
-      if (v.resetTime < cutoff) {
-        rateLimitStore.delete(k)
-      }
-    }
   }
 
   return null

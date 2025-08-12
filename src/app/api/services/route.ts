@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { withCache, withETag, CacheConfigs } from '@/lib/api-cache'
 
 // Static services data for now since Railway DB has issues
 const staticServices = [
@@ -117,34 +118,39 @@ const staticServices = [
 ]
 
 // GET /api/services - Lấy danh sách tất cả services
-export async function GET(request: NextRequest) {
-  try {
-    // Sort services by featured first, then sort order
-    const sortedServices = staticServices
-      .filter(service => service.isActive)
-      .sort((a, b) => {
-        if (a.isFeatured && !b.isFeatured) return -1
-        if (!a.isFeatured && b.isFeatured) return 1
-        return a.sortOrder - b.sortOrder
-      })
+export const GET = withETag(
+  withCache(
+    async function handler(request: NextRequest) {
+      try {
+        // Sort services by featured first, then sort order
+        const sortedServices = staticServices
+          .filter(service => service.isActive)
+          .sort((a, b) => {
+            if (a.isFeatured && !b.isFeatured) return -1
+            if (!a.isFeatured && b.isFeatured) return 1
+            return a.sortOrder - b.sortOrder
+          })
 
-    return NextResponse.json({
-      success: true,
-      data: sortedServices,
-      count: sortedServices.length
-    })
-  } catch (error) {
-    console.error('Services API error:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch services',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    )
-  }
-}
+        return NextResponse.json({
+          success: true,
+          data: sortedServices,
+          count: sortedServices.length
+        })
+      } catch (error) {
+        console.error('Services API error:', error)
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Failed to fetch services',
+            message: error instanceof Error ? error.message : 'Unknown error'
+          },
+          { status: 500 }
+        )
+      }
+    },
+    CacheConfigs.PUBLIC_STATIC // Cache for 1 hour since data is static
+  )
+)
 
 // POST /api/services - Create new service (admin only)
 export async function POST(request: NextRequest) {
