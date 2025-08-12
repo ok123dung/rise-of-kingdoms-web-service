@@ -1,72 +1,52 @@
 #!/bin/bash
 
-echo "🎨 Generating PWA icons from logo.png..."
+# Generate PWA icons from a source image
+# Usage: ./generate-icons.sh source-image.png
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 source-image.png"
+    echo "Please provide a source image (preferably 512x512 or larger)"
+    exit 1
+fi
+
+SOURCE=$1
+OUTPUT_DIR="../public/images"
 
 # Check if ImageMagick is installed
 if ! command -v convert &> /dev/null; then
-    echo "⚠️  ImageMagick is not installed. Installing..."
-    if command -v apt-get &> /dev/null; then
-        sudo apt-get update && sudo apt-get install -y imagemagick
-    elif command -v brew &> /dev/null; then
-        brew install imagemagick
-    else
-        echo "❌ Please install ImageMagick manually"
-        exit 1
-    fi
+    echo "ImageMagick is required but not installed."
+    echo "Install it with: sudo apt-get install imagemagick (Ubuntu/Debian)"
+    echo "or: brew install imagemagick (macOS)"
+    exit 1
 fi
 
-# Source logo
-SOURCE="public/logo.png"
+# Create output directory if it doesn't exist
+mkdir -p "$OUTPUT_DIR"
 
-# Check if source exists
-if [ ! -f "$SOURCE" ]; then
-    echo "❌ Source logo not found at $SOURCE"
-    echo "Using favicon.ico as fallback..."
-    
-    # Convert favicon to PNG first
-    convert public/favicon.ico[0] public/logo-temp.png
-    SOURCE="public/logo-temp.png"
-fi
+# Generate icons
+echo "Generating PWA icons..."
 
-# Create all required sizes
-sizes=(72 96 128 144 152 192 384 512)
+# Standard icon sizes
+convert "$SOURCE" -resize 72x72 "$OUTPUT_DIR/logo-72.png"
+convert "$SOURCE" -resize 96x96 "$OUTPUT_DIR/logo-96.png"
+convert "$SOURCE" -resize 128x128 "$OUTPUT_DIR/logo-128.png"
+convert "$SOURCE" -resize 144x144 "$OUTPUT_DIR/logo-144.png"
+convert "$SOURCE" -resize 152x152 "$OUTPUT_DIR/logo-152.png"
+convert "$SOURCE" -resize 192x192 "$OUTPUT_DIR/logo-192.png"
+convert "$SOURCE" -resize 384x384 "$OUTPUT_DIR/logo-384.png"
+convert "$SOURCE" -resize 512x512 "$OUTPUT_DIR/logo-512.png"
 
-for size in "${sizes[@]}"; do
-    output="public/images/logo-${size}.png"
-    echo "📐 Creating ${size}x${size} icon..."
-    
-    # Use ImageMagick to resize
-    if command -v convert &> /dev/null; then
-        convert "$SOURCE" -resize ${size}x${size} -background transparent -gravity center -extent ${size}x${size} "$output"
-    else
-        # Fallback: just copy the original
-        cp "$SOURCE" "$output"
-    fi
-done
+# Apple touch icons
+convert "$SOURCE" -resize 180x180 "$OUTPUT_DIR/apple-touch-icon.png"
 
-# Create shortcut icons
-echo "🔗 Creating shortcut icons..."
-shortcuts=("services" "book" "contact" "account")
+# Favicon
+convert "$SOURCE" -resize 32x32 "$OUTPUT_DIR/favicon-32x32.png"
+convert "$SOURCE" -resize 16x16 "$OUTPUT_DIR/favicon-16x16.png"
 
-for shortcut in "${shortcuts[@]}"; do
-    output="public/images/shortcut-${shortcut}.png"
-    # For now, use the 96x96 logo
-    cp "public/images/logo-96.png" "$output"
-done
+# Create ICO file with multiple sizes
+convert "$SOURCE" -resize 16x16 -resize 32x32 -resize 48x48 "$OUTPUT_DIR/favicon.ico"
 
-# Create screenshot placeholders
-echo "📸 Creating screenshot placeholders..."
-# Desktop screenshot
-convert -size 1280x720 xc:'#3B82F6' -gravity center -fill white -pointsize 60 -annotate +0+0 'RoK Services' public/images/screenshot-1.png
-
-# Mobile screenshots
-convert -size 360x640 xc:'#3B82F6' -gravity center -fill white -pointsize 30 -annotate +0+0 'RoK Services\nMobile' public/images/screenshot-mobile-1.png
-convert -size 360x640 xc:'#3B82F6' -gravity center -fill white -pointsize 30 -annotate +0+0 'RoK Services\nBooking' public/images/screenshot-mobile-2.png
-
-# Clean up temp file if created
-[ -f "public/logo-temp.png" ] && rm "public/logo-temp.png"
-
-echo "✅ Icon generation complete!"
+echo "Icons generated successfully in $OUTPUT_DIR"
 echo ""
-echo "📁 Generated files:"
-ls -la public/images/
+echo "Generated files:"
+ls -la "$OUTPUT_DIR"/logo-*.png "$OUTPUT_DIR"/favicon* "$OUTPUT_DIR"/apple-touch-icon.png 2>/dev/null | awk '{print "  " $9 " (" $5 " bytes)"}'
