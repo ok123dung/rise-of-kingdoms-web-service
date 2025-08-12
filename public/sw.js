@@ -7,13 +7,7 @@ const RUNTIME_CACHE = 'runtime-cache-v1'
 // Critical assets to cache immediately
 const CRITICAL_ASSETS = [
   '/',
-  '/services',
-  '/contact',
-  '/about',
-  '/offline',
   '/manifest.json',
-  '/_next/static/css/app.css', // Main CSS
-  '/_next/static/chunks/main.js', // Main JS
   '/images/logo-192.png',
   '/images/logo-512.png'
 ]
@@ -39,7 +33,15 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('SW: Caching critical assets')
-        return cache.addAll(CRITICAL_ASSETS)
+        // Cache assets individually to handle failures gracefully
+        return Promise.all(
+          CRITICAL_ASSETS.map(url => {
+            return cache.add(url).catch(error => {
+              console.warn(`SW: Failed to cache ${url}:`, error)
+              // Continue with other assets even if one fails
+            })
+          })
+        )
       })
       .then(() => {
         console.log('SW: Critical assets cached')
@@ -47,6 +49,8 @@ self.addEventListener('install', event => {
       })
       .catch(error => {
         console.error('SW: Failed to cache critical assets:', error)
+        // Still activate even if caching fails
+        return self.skipWaiting()
       })
   )
 })

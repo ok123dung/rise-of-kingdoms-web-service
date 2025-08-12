@@ -24,7 +24,7 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
           success: false,
           message: 'Database not configured. Please set DATABASE_URL environment variable in Vercel Dashboard.',
           error_code: 'DB_NOT_CONFIGURED',
-          help_url: 'https://github.com/yourusername/yourrepo/blob/main/VERCEL-DEPLOYMENT-FIX.md'
+          help_url: 'https://github.com/ok123dung/rok-services/blob/main/docs/VERCEL_DATABASE_SETUP.md'
         },
         { status: 503 }
       )
