@@ -52,7 +52,51 @@ type RouteHandler = (req: NextRequest, ...args: unknown[]) => Promise<Response> 
 
 // Utility functions
 export const hashPassword = async (password: string) => {
-  return await bcrypt.hash(password, 12)
+  // Use 14 rounds for better security (OWASP recommendation for 2024)
+  return await bcrypt.hash(password, 14)
+}
+
+// Check password history to prevent reuse
+export const checkPasswordHistory = async (userId: string, newPassword: string, historyLimit: number = 5): Promise<boolean> => {
+  const passwordHistory = await prisma.passwordHistory.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    take: historyLimit
+  })
+
+  for (const history of passwordHistory) {
+    const isMatch = await bcrypt.compare(newPassword, history.passwordHash)
+    if (isMatch) {
+      return false // Password was used before
+    }
+  }
+
+  return true // Password is new
+}
+
+// Save password to history
+export const savePasswordToHistory = async (userId: string, passwordHash: string) => {
+  await prisma.passwordHistory.create({
+    data: {
+      userId,
+      passwordHash
+    }
+  })
+
+  // Clean up old password history (keep last 10)
+  const oldPasswords = await prisma.passwordHistory.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    skip: 10
+  })
+
+  if (oldPasswords.length > 0) {
+    await prisma.passwordHistory.deleteMany({
+      where: {
+        id: { in: oldPasswords.map(p => p.id) }
+      }
+    })
+  }
 }
 
 export const getCurrentSession = async () => {
@@ -152,7 +196,8 @@ export const authOptions: NextAuthOptions = {
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
+        totpCode: { label: '2FA Code', type: 'text' }
       },
       async authorize(credentials) {
         try {
@@ -177,6 +222,30 @@ export const authOptions: NextAuthOptions = {
 
           if (!isValidPassword) {
             return null
+          }
+
+          // Check 2FA if enabled
+          const { TwoFactorAuthService } = await import('@/lib/auth/two-factor')
+          const is2FAEnabled = await TwoFactorAuthService.isEnabled(user.id)
+          
+          if (is2FAEnabled) {
+            // Require 2FA code
+            if (!credentials.totpCode) {
+              // Return null with a way to indicate 2FA is required
+              // NextAuth doesn't support custom error codes in authorize
+              // We'll handle this differently
+              return null
+            }
+            
+            // Verify 2FA code
+            const verifyResult = await TwoFactorAuthService.verifyToken(
+              user.id,
+              credentials.totpCode
+            )
+            
+            if (!verifyResult.verified) {
+              return null
+            }
           }
 
           await prisma.user.update({

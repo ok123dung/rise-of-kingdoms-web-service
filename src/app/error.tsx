@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-
+import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, RefreshCw, Home, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
@@ -21,15 +21,24 @@ export default function Error({ error, reset }: ErrorProps) {
       userAgent: navigator.userAgent
     })
 
-    // Send to error tracking service (e.g., Sentry)
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      ;(window as any).Sentry.captureException(error, {
-        tags: {
-          component: 'ErrorBoundary',
-          digest: error.digest
+    // Send to Sentry with enhanced context
+    Sentry.captureException(error, {
+      tags: {
+        component: 'app-error-boundary',
+        digest: error.digest || 'no-digest',
+        type: 'unhandled_error'
+      },
+      contexts: {
+        error: {
+          message: error.message,
+          stack: error.stack,
+          digest: error.digest,
+          url: window.location.href,
+          timestamp: new Date().toISOString()
         }
-      })
-    }
+      },
+      level: 'error'
+    })
   }, [error])
 
   const isDevelopment = process.env.NODE_ENV === 'development'

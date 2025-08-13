@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Disable ESLint during production builds
@@ -13,6 +15,7 @@ const nextConfig = {
   generateEtags: false,
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client'],
+    instrumentationHook: true,
   },
   env: {
     SITE_URL: process.env.NODE_ENV === 'production' ? 'https://rokdbot.com' : 'http://localhost:3000',
@@ -47,13 +50,11 @@ const nextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
           },
-          // CSP is now handled by middleware with nonces
-          // Keeping a basic CSP as fallback
+          // CSP is handled by middleware with nonces for better security
+          // This is a fallback CSP without unsafe-inline or unsafe-eval
           {
             key: 'Content-Security-Policy',
-            value: process.env.NODE_ENV === 'production' 
-              ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.resend.com https://www.google-analytics.com https: wss:; frame-ancestors 'none'; worker-src 'self' blob:;"
-              : "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.resend.com https://www.google-analytics.com https: ws: wss:; frame-ancestors 'none'; worker-src 'self' blob:;",
+            value: "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.resend.com https://www.google-analytics.com https://*.sentry.io wss://rokdbot.com wss://www.rokdbot.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'; worker-src 'self' blob:;",
           },
         ],
       },
@@ -61,4 +62,22 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// Wrap with Sentry config
+module.exports = withSentryConfig(
+  nextConfig,
+  {
+    // Sentry webpack plugin options
+    silent: true, // Suppresses source map uploading logs during build
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+  },
+  {
+    // Additional config options
+    widenClientFileUpload: true,
+    transpileClientSDK: true,
+    tunnelRoute: '/monitoring',
+    hideSourceMaps: true,
+    disableLogger: true,
+    automaticVercelMonitors: true,
+  }
+)

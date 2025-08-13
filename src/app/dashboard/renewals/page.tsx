@@ -1,12 +1,10 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { format, addDays, isAfter } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { ArrowPathIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-
 interface Renewal {
   id: string
   booking: {
@@ -25,18 +23,15 @@ interface Renewal {
   daysRemaining: number
   status: 'active' | 'expiring' | 'expired'
 }
-
 export default function RenewalsPage() {
   const { data: session } = useSession()
   const [renewals, setRenewals] = useState<Renewal[]>([])
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     if (session?.user) {
       fetchRenewals()
     }
   }, [session])
-
   const fetchRenewals = async () => {
     try {
       // Simulate API call - in real app, fetch from backend
@@ -67,7 +62,6 @@ export default function RenewalsPage() {
       setLoading(false)
     }
   }
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -80,7 +74,6 @@ export default function RenewalsPage() {
         return 'bg-gray-100 text-gray-800'
     }
   }
-
   const getStatusText = (status: string) => {
     switch (status) {
       case 'active':
@@ -93,7 +86,6 @@ export default function RenewalsPage() {
         return status
     }
   }
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -101,7 +93,6 @@ export default function RenewalsPage() {
       </div>
     )
   }
-
   return (
     <div className="space-y-6">
       <div>
@@ -110,7 +101,6 @@ export default function RenewalsPage() {
           Quản lý và gia hạn các dịch vụ đang sử dụng
         </p>
       </div>
-
       {renewals.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-6 text-center">
           <ArrowPathIcon className="mx-auto h-12 w-12 text-gray-400" />
@@ -136,7 +126,6 @@ export default function RenewalsPage() {
               </div>
             </div>
           )}
-
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {renewals.map((renewal) => (

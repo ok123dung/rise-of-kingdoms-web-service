@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useParams, useRouter } from 'next/navigation'
@@ -14,7 +13,6 @@ import {
   ArrowPathIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-
 interface PaymentDetail {
   id: string
   paymentNumber: string
@@ -45,7 +43,6 @@ interface PaymentDetail {
     }
   }
 }
-
 const statusConfig = {
   pending: {
     icon: ClockIcon,
@@ -68,7 +65,6 @@ const statusConfig = {
     text: 'Đã hủy'
   }
 }
-
 const paymentMethodNames: Record<string, string> = {
   momo: 'MoMo',
   vnpay: 'VNPay',
@@ -76,7 +72,6 @@ const paymentMethodNames: Record<string, string> = {
   bank_transfer: 'Chuyển khoản ngân hàng',
   cash: 'Tiền mặt'
 }
-
 export default function PaymentDetailPage() {
   const { data: session } = useSession()
   const params = useParams()
@@ -84,13 +79,11 @@ export default function PaymentDetailPage() {
   const [payment, setPayment] = useState<PaymentDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
-
   useEffect(() => {
     if (session?.user && params.id) {
       fetchPaymentDetail()
     }
   }, [session, params.id])
-
   const fetchPaymentDetail = async () => {
     try {
       const response = await fetch(`/api/user/payments/${params.id}`)
@@ -106,19 +99,16 @@ export default function PaymentDetailPage() {
       setLoading(false)
     }
   }
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-
   const retryPayment = () => {
     if (payment) {
       router.push(`/dashboard/payments/new?booking=${payment.booking.id}`)
     }
   }
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -126,14 +116,11 @@ export default function PaymentDetailPage() {
       </div>
     )
   }
-
   if (!payment) {
     return null
   }
-
   const config = statusConfig[payment.status as keyof typeof statusConfig]
   const StatusIcon = config.icon
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -160,7 +147,6 @@ export default function PaymentDetailPage() {
           <span className="text-sm font-medium">{config.text}</span>
         </div>
       </div>
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
@@ -222,7 +208,6 @@ export default function PaymentDetailPage() {
               )}
             </dl>
           </div>
-
           {/* Related Booking */}
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Đơn hàng liên quan</h2>
@@ -257,7 +242,6 @@ export default function PaymentDetailPage() {
               </div>
             </Link>
           </div>
-
           {/* Gateway Response (for debugging, only show in development) */}
           {process.env.NODE_ENV === 'development' && payment.gatewayResponse && (
             <div className="bg-white shadow rounded-lg p-6">
@@ -268,7 +252,6 @@ export default function PaymentDetailPage() {
             </div>
           )}
         </div>
-
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Actions */}
@@ -296,7 +279,6 @@ export default function PaymentDetailPage() {
               </Link>
             </div>
           </div>
-
           {/* Customer Info */}
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Thông tin khách hàng</h2>

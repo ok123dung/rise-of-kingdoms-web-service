@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
@@ -10,13 +9,11 @@ import {
   ClockIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline'
-
 interface SupportForm {
   subject: string
   category: string
   message: string
 }
-
 const categories = [
   { value: 'payment', label: 'Vấn đề thanh toán' },
   { value: 'service', label: 'Vấn đề dịch vụ' },
@@ -24,19 +21,16 @@ const categories = [
   { value: 'technical', label: 'Lỗi kỹ thuật' },
   { value: 'other', label: 'Khác' }
 ]
-
 export default function SupportPage() {
   const { data: session } = useSession()
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
-  
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset
   } = useForm<SupportForm>()
-
   const onSubmit = async (data: SupportForm) => {
     setLoading(true)
     try {
@@ -50,7 +44,6 @@ export default function SupportPage() {
       setLoading(false)
     }
   }
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
@@ -59,7 +52,6 @@ export default function SupportPage() {
           Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
         </p>
       </div>
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Contact Info */}
         <div className="lg:col-span-1 space-y-4">
@@ -96,7 +88,6 @@ export default function SupportPage() {
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-900 mb-3">Câu hỏi thường gặp</h3>
             <ul className="space-y-2">
@@ -123,7 +114,6 @@ export default function SupportPage() {
             </ul>
           </div>
         </div>
-
         {/* Support Form */}
         <div className="lg:col-span-2">
           {submitted ? (
@@ -168,7 +158,6 @@ export default function SupportPage() {
                     <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
                   )}
                 </div>
-
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
                     Tiêu đề
@@ -184,7 +173,6 @@ export default function SupportPage() {
                     <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
                   )}
                 </div>
-
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium text-gray-700">
                     Nội dung chi tiết
@@ -200,7 +188,6 @@ export default function SupportPage() {
                     <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
                   )}
                 </div>
-
                 <div className="bg-gray-50 p-4 rounded-md">
                   <p className="text-sm text-gray-600">
                     <strong>Thông tin liên hệ:</strong>
@@ -212,7 +199,6 @@ export default function SupportPage() {
                     Họ tên: {session?.user?.fullName}
                   </p>
                 </div>
-
                 <div className="flex justify-end">
                   <button
                     type="submit"

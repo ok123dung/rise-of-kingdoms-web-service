@@ -1,9 +1,6 @@
 'use client'
-
 import { useState } from 'react'
-
 import { X } from 'lucide-react'
-
 interface PaymentModalProps {
   isOpen: boolean
   onClose: () => void
@@ -11,7 +8,6 @@ interface PaymentModalProps {
   bookingId: string
   onPaymentSuccess?: (paymentData: any) => void
 }
-
 export default function PaymentModal({
   isOpen,
   onClose,
@@ -21,17 +17,13 @@ export default function PaymentModal({
 }: PaymentModalProps) {
   const [selectedMethod, setSelectedMethod] = useState<'momo' | 'vnpay' | 'zalopay' | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
-
   if (!isOpen) return null
-
   const handlePayment = async () => {
     if (!selectedMethod) return
-
     setIsProcessing(true)
     try {
       // Mock payment processing
       await new Promise(resolve => setTimeout(resolve, 2000))
-
       const paymentData = {
         bookingId,
         amount,
@@ -39,7 +31,6 @@ export default function PaymentModal({
         transactionId: `TX_${Date.now()}`,
         status: 'completed'
       }
-
       onPaymentSuccess?.(paymentData)
       onClose()
     } catch (error) {
@@ -48,7 +39,6 @@ export default function PaymentModal({
       setIsProcessing(false)
     }
   }
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6">
@@ -59,7 +49,6 @@ export default function PaymentModal({
             <X className="h-6 w-6" />
           </button>
         </div>
-
         {/* Amount */}
         <div className="mb-6 rounded-lg bg-blue-50 p-4">
           <div className="mb-1 text-sm text-blue-600">Tổng thanh toán</div>
@@ -68,7 +57,6 @@ export default function PaymentModal({
           </div>
           <div className="mt-1 text-sm text-blue-600">Booking ID: {bookingId}</div>
         </div>
-
         {/* Payment Methods */}
         <div className="mb-6">
           <label className="mb-3 block text-sm font-medium text-gray-700">
@@ -93,7 +81,6 @@ export default function PaymentModal({
               </div>
               {selectedMethod === 'momo' && <div className="h-4 w-4 rounded-full bg-pink-500" />}
             </button>
-
             {/* VNPay */}
             <button
               className={`flex w-full items-center space-x-3 rounded-lg border p-4 transition-colors ${
@@ -112,7 +99,6 @@ export default function PaymentModal({
               </div>
               {selectedMethod === 'vnpay' && <div className="h-4 w-4 rounded-full bg-blue-500" />}
             </button>
-
             {/* ZaloPay */}
             <button
               className={`flex w-full items-center space-x-3 rounded-lg border p-4 transition-colors ${
@@ -133,7 +119,6 @@ export default function PaymentModal({
             </button>
           </div>
         </div>
-
         {/* Actions */}
         <div className="flex space-x-3">
           <button
@@ -151,7 +136,6 @@ export default function PaymentModal({
             {isProcessing ? 'Đang xử lý...' : 'Thanh toán'}
           </button>
         </div>
-
         {/* Security Note */}
         <div className="mt-4 rounded-lg bg-gray-50 p-3">
           <div className="flex items-center space-x-2">

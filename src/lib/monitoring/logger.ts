@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
+import { generateShortId } from '@/lib/crypto-utils'
 
 // Express-like types for compatibility
 interface ExpressRequest {
@@ -385,7 +386,7 @@ export function createAPILogger() {
     next: ExpressNextFunction
   ) => {
     const startTime = Date.now()
-    const requestId = Math.random().toString(36).substring(7)
+    const requestId = generateShortId(8)
 
     // Add request ID to headers
     res.setHeader('X-Request-ID', requestId)

@@ -1,0 +1,93 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getLogger } from '@/lib/monitoring/logger'
+
+// Request size limits for different endpoints
+const SIZE_LIMITS: Record<string, number> = {
+  '/api/upload/avatar': 5 * 1024 * 1024,        // 5MB for avatars
+  '/api/upload/image': 20 * 1024 * 1024,        // 20MB for images
+  '/api/upload': 50 * 1024 * 1024,              // 50MB for general files
+  '/api/upload/document': 10 * 1024 * 1024,     // 10MB for documents
+  '/api/': 1 * 1024 * 1024,                     // 1MB for other API routes
+  default: 10 * 1024 * 1024                     // 10MB default
+}
+
+export async function uploadProtectionMiddleware(request: NextRequest): Promise<NextResponse | null> {
+  // Only check POST/PUT/PATCH requests
+  if (!['POST', 'PUT', 'PATCH'].includes(request.method)) {
+    return null
+  }
+
+  const pathname = request.nextUrl.pathname
+  
+  // Find appropriate size limit
+  let sizeLimit = SIZE_LIMITS.default
+  for (const [path, limit] of Object.entries(SIZE_LIMITS)) {
+    if (pathname.startsWith(path)) {
+      sizeLimit = limit
+      break
+    }
+  }
+
+  // Check Content-Length header
+  const contentLength = request.headers.get('content-length')
+  if (contentLength) {
+    const size = parseInt(contentLength, 10)
+    if (size > sizeLimit) {
+      getLogger().warn('Request rejected due to size limit', {
+        path: pathname,
+        size,
+        limit: sizeLimit,
+        ip: request.ip || request.headers.get('x-forwarded-for') || 'unknown'
+      })
+
+      return NextResponse.json(
+        {
+          error: 'Request entity too large',
+          message: `Request size ${Math.round(size / 1024 / 1024)}MB exceeds limit of ${Math.round(sizeLimit / 1024 / 1024)}MB`
+        },
+        { status: 413 }
+      )
+    }
+  }
+
+  // For multipart/form-data, we need additional checks
+  const contentType = request.headers.get('content-type') || ''
+  if (contentType.includes('multipart/form-data')) {
+    // The actual file size check happens in the route handlers
+    // This is just a pre-check based on Content-Length
+    return null
+  }
+
+  return null
+}
+
+// Helper to check if request has file uploads
+export function hasFileUpload(request: NextRequest): boolean {
+  const contentType = request.headers.get('content-type') || ''
+  return contentType.includes('multipart/form-data')
+}
+
+// Stream-based size checker for large uploads
+export async function* limitedStream(
+  stream: ReadableStream<Uint8Array>,
+  maxSize: number
+): AsyncGenerator<Uint8Array, void, unknown> {
+  const reader = stream.getReader()
+  let totalSize = 0
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      totalSize += value.length
+      if (totalSize > maxSize) {
+        throw new Error(`Stream size exceeds limit of ${maxSize} bytes`)
+      }
+
+      yield value
+    }
+  } finally {
+    reader.releaseLock()
+  }
+}

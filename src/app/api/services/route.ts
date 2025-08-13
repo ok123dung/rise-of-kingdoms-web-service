@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { withCache, withETag, CacheConfigs } from '@/lib/api-cache'
-
 // Static services data for now since Railway DB has issues
 const staticServices = [
   {
@@ -116,7 +115,6 @@ const staticServices = [
     }
   }
 ]
-
 // GET /api/services - Lấy danh sách tất cả services
 export const GET = withETag(
   withCache(
@@ -130,7 +128,6 @@ export const GET = withETag(
             if (!a.isFeatured && b.isFeatured) return 1
             return a.sortOrder - b.sortOrder
           })
-
         return NextResponse.json({
           success: true,
           data: sortedServices,
@@ -151,7 +148,6 @@ export const GET = withETag(
     CacheConfigs.PUBLIC_STATIC // Cache for 1 hour since data is static
   )
 )
-
 // POST /api/services - Create new service (admin only)
 export async function POST(request: NextRequest) {
   return NextResponse.json(

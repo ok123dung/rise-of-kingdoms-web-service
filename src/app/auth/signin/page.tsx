@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 
-import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn, getSession } from 'next-auth/react'
@@ -13,6 +13,8 @@ function SignInContent() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [requires2FA, setRequires2FA] = useState(false)
+  const [totpCode, setTotpCode] = useState('')
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -33,14 +35,40 @@ function SignInContent() {
     setError('')
 
     try {
+      // If not yet checked for 2FA, check first
+      if (!requires2FA && !totpCode) {
+        const checkResponse = await fetch('/api/auth/check-2fa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        })
+
+        const checkData = await checkResponse.json()
+
+        if (checkData.error) {
+          setError('Email hoặc mật khẩu không đúng')
+          setIsLoading(false)
+          return
+        }
+
+        if (checkData.requires2FA) {
+          setRequires2FA(true)
+          setError('')
+          setIsLoading(false)
+          return
+        }
+      }
+
+      // Proceed with signin
       const result = await signIn('credentials', {
         email,
         password,
+        totpCode: totpCode || undefined,
         redirect: false
       })
 
       if (result?.error) {
-        setError('Email hoặc mật khẩu không đúng')
+        setError('Email, mật khẩu hoặc mã xác thực không đúng')
       } else {
         router.push(callbackUrl)
       }
@@ -125,6 +153,33 @@ function SignInContent() {
                 </button>
               </div>
             </div>
+
+            {/* 2FA Code Input */}
+            {requires2FA && (
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="totpCode">
+                  Mã xác thực 2FA
+                </label>
+                <div className="relative">
+                  <ShieldCheck className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+                  <input
+                    required={requires2FA}
+                    autoComplete="one-time-code"
+                    className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                    id="totpCode"
+                    name="totpCode"
+                    placeholder="123456"
+                    type="text"
+                    maxLength={9}
+                    value={totpCode}
+                    onChange={e => setTotpCode(e.target.value)}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Nhập mã 6 chữ số từ ứng dụng xác thực hoặc mã dự phòng
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between">

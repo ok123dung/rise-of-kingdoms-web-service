@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from 'next/server'
-
 // Static services data for now since Railway DB has issues
 const staticServices = [
   {
@@ -173,21 +172,17 @@ const staticServices = [
     }
   }
 ]
-
 interface RouteParams {
   params: {
     slug: string
   }
 }
-
 // GET /api/services/[slug] - Lấy thông tin service theo slug
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { slug } = params
-
     // Find service by slug from static data
     const service = staticServices.find(s => s.slug === slug && s.isActive)
-
     if (!service) {
       return NextResponse.json(
         {
@@ -198,14 +193,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         { status: 404 }
       )
     }
-
     return NextResponse.json({
       success: true,
       data: service
     })
   } catch (error) {
     console.error('Service detail API error:', error)
-
     return NextResponse.json(
       {
         success: false,

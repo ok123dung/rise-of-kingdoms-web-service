@@ -1,8 +1,6 @@
 import crypto from 'crypto'
-
 import { db, prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
-
 interface VNPayRequest {
   bookingId: string
   amount: number
@@ -11,13 +9,11 @@ interface VNPayRequest {
   ipnUrl?: string
   locale?: string
 }
-
 interface VNPayResponse {
   vnp_Url?: string
   vnp_ResponseCode?: string
   vnp_Message?: string
 }
-
 interface VNPayReturnData {
   vnp_Amount: string
   vnp_BankCode: string
@@ -31,7 +27,6 @@ interface VNPayReturnData {
   vnp_TransactionStatus: string
   vnp_TxnRef: string
 }
-
 interface VNPayQueryResponse {
   vnp_ResponseCode: string
   vnp_Message: string
@@ -45,7 +40,6 @@ interface VNPayQueryResponse {
   vnp_TransactionStatus?: string
   vnp_SecureHash: string
 }
-
 interface VNPayRefundResponse {
   vnp_ResponseCode: string
   vnp_Message: string
@@ -60,29 +54,24 @@ interface VNPayRefundResponse {
   vnp_IpAddr?: string
   vnp_SecureHash: string
 }
-
 export class VNPayPayment {
   private tmnCode: string
   private hashSecret: string
   private url: string
   private returnUrl: string
   private ipnUrl: string
-
   constructor() {
     const tmnCode = process.env.VNPAY_TMN_CODE
     const hashSecret = process.env.VNPAY_HASH_SECRET
-
     if (!tmnCode || !hashSecret) {
       throw new Error('VNPay payment configuration missing: VNPAY_TMN_CODE or VNPAY_HASH_SECRET')
     }
-
     this.tmnCode = tmnCode
     this.hashSecret = hashSecret
     this.url = process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'
     this.returnUrl = process.env.NEXT_PUBLIC_SITE_URL + '/payment/vnpay/return'
     this.ipnUrl = process.env.NEXT_PUBLIC_SITE_URL + '/api/payments/vnpay/ipn'
   }
-
   // Tạo payment URL
   async createPaymentUrl(request: VNPayRequest): Promise<{
     success: boolean
@@ -96,14 +85,12 @@ export class VNPayPayment {
       if (!booking) {
         return { success: false, error: 'Booking not found' }
       }
-
       const orderId = `VNPAY_${booking.bookingNumber}_${Date.now()}`
       const createDate = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '')
       const expireDate = new Date(Date.now() + 15 * 60 * 1000)
         .toISOString()
         .replace(/[-:]/g, '')
         .replace(/\..+/, '') // 15 minutes
-
       // Build VNPay parameters
       const vnpParams: { [key: string]: string } = {
         vnp_Version: '2.1.0',
@@ -120,21 +107,16 @@ export class VNPayPayment {
         vnp_CreateDate: createDate,
         vnp_ExpireDate: expireDate
       }
-
       // Sort parameters
       const sortedParams = Object.keys(vnpParams).sort()
-
       // Create query string for signature
       const signData = sortedParams
         .map(key => `${key}=${encodeURIComponent(vnpParams[key])}`)
         .join('&')
-
       // Create signature
       const signature = crypto.createHmac('sha512', this.hashSecret).update(signData).digest('hex')
-
       // Add signature to parameters
       vnpParams.vnp_SecureHash = signature
-
       // Build final URL
       const paymentUrl =
         this.url +
@@ -142,7 +124,6 @@ export class VNPayPayment {
         Object.keys(vnpParams)
           .map(key => `${key}=${encodeURIComponent(vnpParams[key])}`)
           .join('&')
-
       // Create payment record
       await db.payment.create({
         bookingId: request.bookingId,
@@ -152,9 +133,7 @@ export class VNPayPayment {
         gatewayTransactionId: orderId,
         gatewayOrderId: orderId
       })
-
       getLogger().info('VNPay payment URL created', { orderId, amount: request.amount })
-
       return {
         success: true,
         data: {
@@ -170,7 +149,6 @@ export class VNPayPayment {
       }
     }
   }
-
   // Verify return URL
   verifyReturnUrl(query: { [key: string]: string }): {
     success: boolean
@@ -181,20 +159,15 @@ export class VNPayPayment {
       const { vnp_SecureHash } = query
       delete query.vnp_SecureHash
       delete query.vnp_SecureHashType
-
       // Sort parameters
       const sortedParams = Object.keys(query).sort()
-
       // Create signature data
       const signData = sortedParams.map(key => `${key}=${query[key]}`).join('&')
-
       // Verify signature
       const signature = crypto.createHmac('sha512', this.hashSecret).update(signData).digest('hex')
-
       if (signature !== vnp_SecureHash) {
         return { success: false, error: 'Invalid signature' }
       }
-
       return {
         success: true,
         data: {
@@ -217,7 +190,6 @@ export class VNPayPayment {
       }
     }
   }
-
   // Handle IPN (Instant Payment Notification)
   async handleIPN(query: { [key: string]: string }): Promise<{
     success: boolean
@@ -230,14 +202,12 @@ export class VNPayPayment {
       if (!verifyResult.success) {
         return { success: false, message: 'Invalid signature', responseCode: '97' }
       }
-
       const orderId = verifyResult.data?.vnp_TxnRef
       const amount = verifyResult.data ? parseInt(verifyResult.data.vnp_Amount) / 100 : 0
       const responseCode = verifyResult.data?.vnp_ResponseCode
       const transactionNo = verifyResult.data?.vnp_TransactionNo
       const bankCode = verifyResult.data?.vnp_BankCode
       const payDate = verifyResult.data?.vnp_PayDate
-
       // Find payment record
       const payment = await prisma.payment.findFirst({
         where: { gatewayTransactionId: orderId }
@@ -245,17 +215,14 @@ export class VNPayPayment {
       if (!payment) {
         return { success: false, message: 'Payment not found', responseCode: '01' }
       }
-
       // Check if payment amount matches
       if (payment.amount.toNumber() !== amount) {
         return { success: false, message: 'Amount mismatch', responseCode: '04' }
       }
-
       // Check if payment is already processed
       if (payment.status === 'completed') {
         return { success: true, message: 'Payment already processed', responseCode: '00' }
       }
-
       // Process payment based on response code
       if (responseCode === '00') {
         // Payment successful
@@ -272,7 +239,6 @@ export class VNPayPayment {
             }
           }
         })
-
         // Update booking status
         await prisma.booking.update({
           where: { id: payment.bookingId },
@@ -281,10 +247,8 @@ export class VNPayPayment {
             status: 'confirmed'
           }
         })
-
         // Send confirmation email
         await this.sendConfirmationEmail(payment.bookingId)
-
         // Send Discord notification
         await this.sendDiscordNotification(payment.bookingId, 'completed', {
           orderId: orderId || '',
@@ -292,10 +256,8 @@ export class VNPayPayment {
           amount,
           paymentMethod: 'VNPay'
         })
-
         // Trigger service delivery workflow
         await this.triggerServiceDelivery(payment.bookingId)
-
         getLogger().info('VNPay payment completed', { orderId, transactionNo, amount })
         return { success: true, message: 'Payment processed successfully', responseCode: '00' }
       } else {
@@ -311,12 +273,10 @@ export class VNPayPayment {
             }
           }
         })
-
         await prisma.booking.update({
           where: { id: payment.bookingId },
           data: { paymentStatus: 'failed' }
         })
-
         getLogger().warn('VNPay payment failed', { orderId, responseCode })
         return { success: true, message: 'Payment failure processed', responseCode: '00' }
       }
@@ -325,7 +285,6 @@ export class VNPayPayment {
       return { success: false, message: 'IPN processing failed', responseCode: '99' }
     }
   }
-
   // Query payment status
   async queryPayment(
     orderId: string,
@@ -338,7 +297,6 @@ export class VNPayPayment {
     try {
       const requestId = Date.now().toString()
       const createDate = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '')
-
       const queryParams = {
         vnp_RequestId: requestId,
         vnp_Version: '2.1.0',
@@ -350,20 +308,16 @@ export class VNPayPayment {
         vnp_CreateDate: createDate,
         vnp_IpAddr: '127.0.0.1'
       }
-
       // Sort and create signature
       const sortedParams = Object.keys(queryParams).sort()
       const signData = sortedParams
         .map(key => `${key}=${queryParams[key as keyof typeof queryParams]}`)
         .join('&')
-
       const signature = crypto.createHmac('sha512', this.hashSecret).update(signData).digest('hex')
-
       const requestBody = {
         ...queryParams,
         vnp_SecureHash: signature
       }
-
       const response = await fetch('https://sandbox.vnpayment.vn/merchant_webapi/api/transaction', {
         method: 'POST',
         headers: {
@@ -371,9 +325,7 @@ export class VNPayPayment {
         },
         body: JSON.stringify(requestBody)
       })
-
       const responseData = await response.json()
-
       if (responseData.vnp_ResponseCode === '00') {
         return { success: true, data: responseData }
       } else {
@@ -387,7 +339,6 @@ export class VNPayPayment {
       }
     }
   }
-
   // Refund payment
   async refundPayment(
     orderId: string,
@@ -402,7 +353,6 @@ export class VNPayPayment {
     try {
       const requestId = Date.now().toString()
       const createDate = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '')
-
       const refundParams = {
         vnp_RequestId: requestId,
         vnp_Version: '2.1.0',
@@ -418,20 +368,16 @@ export class VNPayPayment {
         vnp_CreateBy: 'System',
         vnp_IpAddr: '127.0.0.1'
       }
-
       // Sort and create signature
       const sortedParams = Object.keys(refundParams).sort()
       const signData = sortedParams
         .map(key => `${key}=${refundParams[key as keyof typeof refundParams]}`)
         .join('&')
-
       const signature = crypto.createHmac('sha512', this.hashSecret).update(signData).digest('hex')
-
       const requestBody = {
         ...refundParams,
         vnp_SecureHash: signature
       }
-
       const response = await fetch('https://sandbox.vnpayment.vn/merchant_webapi/api/transaction', {
         method: 'POST',
         headers: {
@@ -439,9 +385,7 @@ export class VNPayPayment {
         },
         body: JSON.stringify(requestBody)
       })
-
       const responseData = await response.json()
-
       if (responseData.vnp_ResponseCode === '00') {
         // Update payment record with refund info
         const payment = await prisma.payment.findFirst({
@@ -458,7 +402,6 @@ export class VNPayPayment {
             }
           })
         }
-
         return { success: true, data: responseData }
       } else {
         return { success: false, error: responseData.vnp_Message }
@@ -471,7 +414,6 @@ export class VNPayPayment {
       }
     }
   }
-
   private getResponseMessage(responseCode: string): string {
     const messages: { [key: string]: string } = {
       '00': 'Giao dịch thành công',
@@ -488,10 +430,8 @@ export class VNPayPayment {
       '79': 'Giao dịch không thành công do: KH nhập sai mật khẩu thanh toán quá số lần quy định.',
       '99': 'Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê)'
     }
-
     return messages[responseCode] || 'Lỗi không xác định'
   }
-
   // Send confirmation email
   private async sendConfirmationEmail(bookingId: string): Promise<void> {
     try {
@@ -504,7 +444,6 @@ export class VNPayPayment {
           }
         }
       })
-
       if (booking) {
         const { sendEmail } = await import('@/lib/email')
         await sendEmail({
@@ -528,7 +467,6 @@ export class VNPayPayment {
       console.error('Failed to send confirmation email:', error)
     }
   }
-
   // Send Discord notification
   private async sendDiscordNotification(
     bookingId: string,
@@ -544,7 +482,6 @@ export class VNPayPayment {
           serviceTier: { include: { service: true } }
         }
       })
-
       if (booking) {
         await discordNotifier.sendPaymentNotification({
           bookingId: booking.id,
@@ -560,7 +497,6 @@ export class VNPayPayment {
       console.error('Failed to send Discord notification:', error)
     }
   }
-
   // Trigger service delivery workflow
   private async triggerServiceDelivery(bookingId: string): Promise<void> {
     try {
@@ -572,7 +508,6 @@ export class VNPayPayment {
           }
         }
       })
-
       if (booking) {
         // Update booking to in-progress
         await prisma.booking.update({
@@ -582,7 +517,6 @@ export class VNPayPayment {
             startDate: new Date()
           }
         })
-
         // Create service delivery task
         await prisma.serviceTask.create({
           data: {
@@ -595,7 +529,6 @@ export class VNPayPayment {
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
           }
         })
-
         getLogger().info('Service delivery workflow triggered', {
           bookingNumber: booking.bookingNumber
         })

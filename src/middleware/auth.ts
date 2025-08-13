@@ -4,6 +4,7 @@ import { getToken } from 'next-auth/jwt'
 import type { NextRequest } from 'next/server'
 import { getEdgeLogger } from '@/lib/monitoring/edge-logger'
 import { createEdgeRateLimiter, type EdgeRateLimiter } from '@/lib/rate-limit-edge'
+import { validateCSRF } from '@/lib/csrf-protection'
 
 // Protected routes that require authentication
 const protectedRoutes = [
@@ -135,30 +136,17 @@ async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
 
 // CSRF token validation for state-changing requests
 export function validateCSRFToken(req: NextRequest): boolean {
-  if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
-    return true
+  const result = validateCSRF(req)
+  
+  if (!result.valid) {
+    getEdgeLogger().warn('CSRF validation failed', {
+      path: req.nextUrl.pathname,
+      reason: result.reason,
+      method: req.method,
+      origin: req.headers.get('origin'),
+      ip: req.ip || req.headers.get('x-forwarded-for')
+    })
   }
-
-  // Skip CSRF validation for public endpoints
-  const { pathname } = req.nextUrl
-  const publicEndpoints = [
-    '/api/auth/signup',
-    '/api/auth/signin',
-    '/api/auth/callback',
-    '/api/leads',
-    '/api/health',
-    '/api/payments/webhook',
-    '/api/payments/momo/webhook',
-    '/api/payments/vnpay/ipn',
-    '/api/payments/zalopay/callback'
-  ]
-
-  if (publicEndpoints.some(endpoint => pathname.startsWith(endpoint))) {
-    return true
-  }
-
-  const token = req.headers.get('x-csrf-token')
-  const sessionToken = req.cookies.get('csrf-token')?.value
-
-  return token === sessionToken && !!token
+  
+  return result.valid
 }

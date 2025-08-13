@@ -1,15 +1,13 @@
 import crypto from 'crypto'
-
 import { db, prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
-
+import { generateSecureRandomInt } from '@/lib/crypto-utils'
 interface ZaloPayRequest {
   bookingId: string
   amount: number
   description: string
   callbackUrl?: string
 }
-
 interface ZaloPayResponse {
   return_code: number
   return_message: string
@@ -19,7 +17,6 @@ interface ZaloPayResponse {
   order_url?: string
   order_token?: string
 }
-
 interface ZaloPayQueryResponse {
   return_code: number
   return_message: string
@@ -29,7 +26,6 @@ interface ZaloPayQueryResponse {
   amount?: number
   zp_trans_id?: string
 }
-
 interface ZaloPayRefundResponse {
   return_code: number
   return_message: string
@@ -38,7 +34,6 @@ interface ZaloPayRefundResponse {
   m_refund_id?: string
   refund_id?: string
 }
-
 interface ZaloPayRefundStatusResponse {
   return_code: number
   return_message: string
@@ -51,30 +46,25 @@ interface ZaloPayRefundStatusResponse {
     status: number
   }>
 }
-
 export class ZaloPayPayment {
   private appId: string
   private key1: string
   private key2: string
   private endpoint: string
-
   constructor() {
     const appId = process.env.ZALOPAY_APP_ID
     const key1 = process.env.ZALOPAY_KEY1
     const key2 = process.env.ZALOPAY_KEY2
-
     if (!appId || !key1 || !key2) {
       throw new Error(
         'ZaloPay payment configuration missing: ZALOPAY_APP_ID, ZALOPAY_KEY1, or ZALOPAY_KEY2'
       )
     }
-
     this.appId = appId
     this.key1 = key1
     this.key2 = key2
     this.endpoint = process.env.ZALOPAY_ENDPOINT || 'https://sb-openapi.zalopay.vn/v2/create'
   }
-
   // Tạo payment order
   async createOrder(request: ZaloPayRequest): Promise<{
     success: boolean
@@ -96,15 +86,12 @@ export class ZaloPayPayment {
       if (!booking) {
         return { success: false, error: 'Booking not found' }
       }
-
       const transId = `${Date.now()}`
       const appTransId = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}_${booking.bookingNumber}_${transId}`
-
       const embedData = JSON.stringify({
         bookingId: request.bookingId,
         redirecturl: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`
       })
-
       const items = JSON.stringify([
         {
           itemid: booking.serviceTier.id,
@@ -113,7 +100,6 @@ export class ZaloPayPayment {
           itemquantity: 1
         }
       ])
-
       const orderData = {
         app_id: parseInt(this.appId),
         app_user: booking.user.email,
@@ -127,22 +113,18 @@ export class ZaloPayPayment {
         callback_url:
           request.callbackUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
       }
-
       // Tạo MAC signature
       const data = `${orderData.app_id}|${orderData.app_trans_id}|${orderData.app_user}|${orderData.amount}|${orderData.app_time}|${orderData.embed_data}|${orderData.item}`
       const mac = crypto.createHmac('sha256', this.key1).update(data).digest('hex')
-
       const requestBody = {
         ...orderData,
         mac
       }
-
       getLogger().debug('ZaloPay request', {
         appTransId,
         amount: request.amount,
         macPrefix: mac.substring(0, 10)
       })
-
       const response = await fetch(this.endpoint, {
         method: 'POST',
         headers: {
@@ -152,9 +134,7 @@ export class ZaloPayPayment {
           Object.entries(requestBody).map(([k, v]) => [k, String(v)])
         ).toString()
       })
-
       const responseData: ZaloPayResponse = await response.json()
-
       if (responseData.return_code === 1) {
         // Tạo payment record
         await db.payment.create({
@@ -165,7 +145,6 @@ export class ZaloPayPayment {
           gatewayTransactionId: appTransId,
           gatewayOrderId: appTransId
         })
-
         return {
           success: true,
           data: responseData
@@ -185,7 +164,6 @@ export class ZaloPayPayment {
       }
     }
   }
-
   // Xử lý callback từ ZaloPay
   async handleCallback(callbackData: { data: string; mac: string }): Promise<{
     success: boolean
@@ -193,43 +171,34 @@ export class ZaloPayPayment {
   }> {
     try {
       const { data: dataStr, mac: receivedMac } = callbackData
-
       // Verify MAC
       const expectedMac = crypto.createHmac('sha256', this.key2).update(dataStr).digest('hex')
-
       if (receivedMac !== expectedMac) {
         console.error('ZaloPay callback MAC verification failed')
         return { success: false, message: 'Invalid MAC' }
       }
-
       const data = JSON.parse(dataStr)
       const { app_trans_id, zp_trans_id, amount, embed_data } = data
-
       // Parse embed data
       const embedDataObj = JSON.parse(embed_data)
       const { bookingId } = embedDataObj
-
       // Tìm payment record
       const payment = await db.payment.findByGatewayTransactionId(app_trans_id)
       if (!payment) {
         console.error('Payment not found for app_trans_id:', app_trans_id)
         return { success: false, message: 'Payment not found' }
       }
-
       // Cập nhật payment status
       await db.payment.updateStatus(payment.id, 'completed', {
         zpTransId: zp_trans_id,
         amount,
         ...data
       })
-
       // Cập nhật booking status
       await db.booking.updatePaymentStatus(payment.bookingId, 'completed')
       await db.booking.updateStatus(payment.bookingId, 'confirmed')
-
       // Send confirmation email
       await this.sendConfirmationEmail(payment.bookingId)
-
       // Send Discord notification
       await this.sendDiscordNotification(payment.bookingId, 'completed', {
         orderId: app_trans_id,
@@ -237,10 +206,8 @@ export class ZaloPayPayment {
         amount,
         paymentMethod: 'ZaloPay'
       })
-
       // Trigger service delivery workflow
       await this.triggerServiceDelivery(payment.bookingId)
-
       getLogger().info('ZaloPay payment completed', { app_trans_id, zp_trans_id, amount })
       return { success: true, message: 'Payment processed successfully' }
     } catch (error) {
@@ -248,7 +215,6 @@ export class ZaloPayPayment {
       return { success: false, message: 'Callback processing failed' }
     }
   }
-
   // Query payment status
   async queryPaymentStatus(appTransId: string): Promise<{
     success: boolean
@@ -258,13 +224,11 @@ export class ZaloPayPayment {
     try {
       const data = `${this.appId}|${appTransId}|${this.key1}`
       const mac = crypto.createHmac('sha256', this.key1).update(data).digest('hex')
-
       const requestBody = {
         app_id: this.appId,
         app_trans_id: appTransId,
         mac
       }
-
       const response = await fetch('https://sb-openapi.zalopay.vn/v2/query', {
         method: 'POST',
         headers: {
@@ -272,9 +236,7 @@ export class ZaloPayPayment {
         },
         body: new URLSearchParams(requestBody).toString()
       })
-
       const responseData = await response.json()
-
       if (responseData.return_code === 1) {
         return { success: true, data: responseData }
       } else {
@@ -288,7 +250,6 @@ export class ZaloPayPayment {
       }
     }
   }
-
   // Refund payment
   async refundPayment(
     zpTransId: string,
@@ -301,11 +262,9 @@ export class ZaloPayPayment {
   }> {
     try {
       const timestamp = Date.now()
-      const uid = `${timestamp}${Math.floor(111 + Math.random() * 999)}`
-
+      const uid = `${timestamp}${generateSecureRandomInt(111, 999)}`
       const data = `${this.appId}|${zpTransId}|${refundAmount}|${description}|${timestamp}`
       const mac = crypto.createHmac('sha256', this.key1).update(data).digest('hex')
-
       const requestBody = {
         app_id: this.appId,
         zp_trans_id: zpTransId,
@@ -315,7 +274,6 @@ export class ZaloPayPayment {
         uid,
         mac
       }
-
       const response = await fetch('https://sb-openapi.zalopay.vn/v2/refund', {
         method: 'POST',
         headers: {
@@ -325,9 +283,7 @@ export class ZaloPayPayment {
           Object.entries(requestBody).map(([k, v]) => [k, String(v)])
         ).toString()
       })
-
       const responseData = await response.json()
-
       if (responseData.return_code === 1) {
         // Update payment record with refund info
         const payment = await prisma.payment.findFirst({
@@ -338,7 +294,6 @@ export class ZaloPayPayment {
             }
           }
         })
-
         if (payment) {
           await prisma.payment.update({
             where: { id: payment.id },
@@ -350,7 +305,6 @@ export class ZaloPayPayment {
             }
           })
         }
-
         return { success: true, data: responseData }
       } else {
         return { success: false, error: responseData.return_message }
@@ -363,7 +317,6 @@ export class ZaloPayPayment {
       }
     }
   }
-
   // Get refund status
   async getRefundStatus(mRefundId: string): Promise<{
     success: boolean
@@ -374,14 +327,12 @@ export class ZaloPayPayment {
       const timestamp = Date.now()
       const data = `${this.appId}|${mRefundId}|${timestamp}`
       const mac = crypto.createHmac('sha256', this.key1).update(data).digest('hex')
-
       const requestBody = {
         app_id: this.appId,
         m_refund_id: mRefundId,
         timestamp,
         mac
       }
-
       const response = await fetch('https://sb-openapi.zalopay.vn/v2/query_refund', {
         method: 'POST',
         headers: {
@@ -391,9 +342,7 @@ export class ZaloPayPayment {
           Object.entries(requestBody).map(([k, v]) => [k, String(v)])
         ).toString()
       })
-
       const responseData = await response.json()
-
       if (responseData.return_code === 1) {
         return { success: true, data: responseData }
       } else {
@@ -407,7 +356,6 @@ export class ZaloPayPayment {
       }
     }
   }
-
   // Send confirmation email
   private async sendConfirmationEmail(bookingId: string): Promise<void> {
     try {
@@ -420,7 +368,6 @@ export class ZaloPayPayment {
           }
         }
       })
-
       if (booking) {
         const { sendEmail } = await import('@/lib/email')
         await sendEmail({
@@ -444,7 +391,6 @@ export class ZaloPayPayment {
       console.error('Failed to send confirmation email:', error)
     }
   }
-
   // Send Discord notification
   private async sendDiscordNotification(
     bookingId: string,
@@ -460,7 +406,6 @@ export class ZaloPayPayment {
           serviceTier: { include: { service: true } }
         }
       })
-
       if (booking) {
         await discordNotifier.sendPaymentNotification({
           bookingId: booking.id,
@@ -476,7 +421,6 @@ export class ZaloPayPayment {
       console.error('Failed to send Discord notification:', error)
     }
   }
-
   // Trigger service delivery workflow
   private async triggerServiceDelivery(bookingId: string): Promise<void> {
     try {
@@ -488,7 +432,6 @@ export class ZaloPayPayment {
           }
         }
       })
-
       if (booking) {
         // Update booking to in-progress
         await prisma.booking.update({
@@ -498,7 +441,6 @@ export class ZaloPayPayment {
             startDate: new Date()
           }
         })
-
         // Create service delivery task
         await prisma.serviceTask.create({
           data: {
@@ -511,7 +453,6 @@ export class ZaloPayPayment {
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
           }
         })
-
         getLogger().info('Service delivery workflow triggered', {
           bookingNumber: booking.bookingNumber
         })

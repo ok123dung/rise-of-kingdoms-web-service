@@ -1,7 +1,5 @@
 'use client'
-
 import { useEffect, useState } from 'react'
-
 import {
   BarChart3,
   Users,
@@ -15,7 +13,6 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-
 interface DashboardStats {
   totalRevenue: number
   totalBookings: number
@@ -28,30 +25,24 @@ interface DashboardStats {
   monthlyRevenue: number[]
   topServices: any[]
 }
-
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     // Check authentication and admin role
     if (status === 'loading') return // Still loading
-
     if (status === 'unauthenticated') {
       router.push('/auth/signin?callbackUrl=/admin/dashboard')
       return
     }
-
     if (session?.user?.role !== 'admin' && session?.user?.role !== 'superadmin') {
       router.push('/auth/error?error=accessdenied')
       return
     }
-
     fetchDashboardData()
   }, [session, status, router])
-
   const fetchDashboardData = async () => {
     try {
       // In real app, these would be API calls
@@ -110,7 +101,6 @@ export default function AdminDashboard() {
           { name: 'KvK Support - Elite', bookings: 0, revenue: 0 }
         ]
       }
-
       setStats(mockStats)
       setLoading(false)
     } catch (error) {
@@ -118,14 +108,12 @@ export default function AdminDashboard() {
       setLoading(false)
     }
   }
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND'
     }).format(amount)
   }
-
   const getStatusBadge = (status: string) => {
     const statusClasses = {
       confirmed: 'bg-green-100 text-green-800',
@@ -135,7 +123,6 @@ export default function AdminDashboard() {
       contacted: 'bg-purple-100 text-purple-800',
       qualified: 'bg-green-100 text-green-800'
     }
-
     return (
       <span
         className={`rounded-full px-2 py-1 text-xs font-medium ${statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800'}`}
@@ -144,13 +131,11 @@ export default function AdminDashboard() {
       </span>
     )
   }
-
   const getLeadScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600 bg-green-100'
     if (score >= 60) return 'text-yellow-600 bg-yellow-100'
     return 'text-red-600 bg-red-100'
   }
-
   // Show loading state
   if (status === 'loading' || loading) {
     return (
@@ -159,17 +144,14 @@ export default function AdminDashboard() {
       </div>
     )
   }
-
   // Don't render anything if not authenticated (redirect will happen)
   if (status === 'unauthenticated') {
     return null
   }
-
   // Don't render if user doesn't have admin role (redirect will happen)
   if (session?.user?.role !== 'admin' && session?.user?.role !== 'superadmin') {
     return null
   }
-
   if (!stats) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -181,7 +163,6 @@ export default function AdminDashboard() {
       </div>
     )
   }
-
   return (
     <div className="mx-auto max-w-7xl p-6">
       {/* Admin Header */}
@@ -190,7 +171,6 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600">Tổng quan business Rise of Kingdoms Services</p>
         </div>
-
         <div className="flex items-center gap-4">
           {/* User Info */}
           <div className="flex items-center gap-3 rounded-lg border bg-white p-3 shadow-sm">
@@ -204,7 +184,6 @@ export default function AdminDashboard() {
               <p className="text-xs capitalize text-gray-500">{session?.user?.role} • Online</p>
             </div>
           </div>
-
           {/* Logout Button */}
           <button
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-800"
@@ -218,7 +197,6 @@ export default function AdminDashboard() {
           </button>
         </div>
       </div>
-
       {/* Stats Grid */}
       <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg bg-white p-6 shadow-md">
@@ -238,7 +216,6 @@ export default function AdminDashboard() {
             <span className="ml-1 text-sm text-gray-600">từ tháng trước</span>
           </div>
         </div>
-
         <div className="rounded-lg bg-white p-6 shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -254,7 +231,6 @@ export default function AdminDashboard() {
             <span className="ml-1 text-sm text-gray-600">từ tháng trước</span>
           </div>
         </div>
-
         <div className="rounded-lg bg-white p-6 shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -270,7 +246,6 @@ export default function AdminDashboard() {
             <span className="ml-1 text-sm text-gray-600">từ tháng trước</span>
           </div>
         </div>
-
         <div className="rounded-lg bg-white p-6 shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -287,7 +262,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-
       {/* Charts and Tables */}
       <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Recent Bookings */}
@@ -317,7 +291,6 @@ export default function AdminDashboard() {
             ))}
           </div>
         </div>
-
         {/* Top Services */}
         <div className="rounded-lg bg-white p-6 shadow-md">
           <h3 className="mb-4 text-lg font-semibold text-gray-900">Dịch vụ phổ biến</h3>
@@ -336,7 +309,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-
       {/* Recent Leads */}
       <div className="rounded-lg bg-white p-6 shadow-md">
         <h3 className="mb-4 text-lg font-semibold text-gray-900">Leads mới nhất</h3>
@@ -397,7 +369,6 @@ export default function AdminDashboard() {
           </table>
         </div>
       </div>
-
       {/* Quick Actions */}
       <div className="mt-8">
         <h3 className="mb-4 text-lg font-semibold text-gray-900">Thao tác nhanh</h3>
@@ -406,12 +377,10 @@ export default function AdminDashboard() {
             <Users className="mr-2 h-5 w-5 text-blue-600" />
             <span className="font-medium text-blue-600">Quản lý khách hàng</span>
           </button>
-
           <button className="flex items-center justify-center rounded-lg border-2 border-green-200 bg-green-50 p-4 transition-colors hover:bg-green-100">
             <BarChart3 className="mr-2 h-5 w-5 text-green-600" />
             <span className="font-medium text-green-600">Xem báo cáo</span>
           </button>
-
           <button className="flex items-center justify-center rounded-lg border-2 border-purple-200 bg-purple-50 p-4 transition-colors hover:bg-purple-100">
             <MessageCircle className="mr-2 h-5 w-5 text-purple-600" />
             <span className="font-medium text-purple-600">Discord dashboard</span>

@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useParams, useRouter } from 'next/navigation'
@@ -14,7 +13,7 @@ import {
   ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-
+import { BookingChat } from '@/components/BookingChat'
 interface BookingDetail {
   id: string
   bookingNumber: string
@@ -51,27 +50,23 @@ interface BookingDetail {
     createdAt: string
   }>
 }
-
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
   processing: 'bg-blue-100 text-blue-800',
   completed: 'bg-green-100 text-green-800',
   cancelled: 'bg-red-100 text-red-800'
 }
-
 export default function BookingDetailPage() {
   const { data: session } = useSession()
   const params = useParams()
   const router = useRouter()
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     if (session?.user && params.id) {
       fetchBookingDetail()
     }
   }, [session, params.id])
-
   const fetchBookingDetail = async () => {
     try {
       const response = await fetch(`/api/user/bookings/${params.id}`)
@@ -87,7 +82,6 @@ export default function BookingDetailPage() {
       setLoading(false)
     }
   }
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -95,11 +89,9 @@ export default function BookingDetailPage() {
       </div>
     )
   }
-
   if (!booking) {
     return null
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -128,7 +120,6 @@ export default function BookingDetailPage() {
           {booking.status === 'cancelled' && 'Đã hủy'}
         </span>
       </div>
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
@@ -147,7 +138,6 @@ export default function BookingDetailPage() {
               </div>
             </div>
           </div>
-
           {/* Timeline */}
           {booking.startDate && (
             <div className="bg-white shadow rounded-lg p-6">
@@ -172,7 +162,6 @@ export default function BookingDetailPage() {
               </div>
             </div>
           )}
-
           {/* Requirements */}
           {booking.customerRequirements && (
             <div className="bg-white shadow rounded-lg p-6">
@@ -180,7 +169,6 @@ export default function BookingDetailPage() {
               <p className="text-sm text-gray-700 whitespace-pre-wrap">{booking.customerRequirements}</p>
             </div>
           )}
-
           {/* Game Details */}
           {booking.bookingDetails && (
             <div className="bg-white shadow rounded-lg p-6">
@@ -195,8 +183,12 @@ export default function BookingDetailPage() {
               </dl>
             </div>
           )}
+          {/* Live Chat */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Chat với nhân viên</h2>
+            <BookingChat bookingId={booking.id} />
+          </div>
         </div>
-
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Payment Summary */}
@@ -235,7 +227,6 @@ export default function BookingDetailPage() {
                 </div>
               </div>
             </dl>
-
             <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-500">Trạng thái</span>
@@ -248,7 +239,6 @@ export default function BookingDetailPage() {
                 </span>
               </div>
             </div>
-
             {booking.paymentStatus === 'pending' && booking.status !== 'cancelled' && (
               <div className="mt-4">
                 <Link
@@ -261,7 +251,6 @@ export default function BookingDetailPage() {
               </div>
             )}
           </div>
-
           {/* Actions */}
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Hành động</h2>

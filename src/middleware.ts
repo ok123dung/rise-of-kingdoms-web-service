@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 
 import { authMiddleware, validateCSRFToken } from './middleware/auth'
+import { generateNonce, addCSPHeaders } from './lib/csp'
+import { uploadProtectionMiddleware } from './middleware/upload-protection'
 
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+
+  // Generate CSP nonce for this request
+  const nonce = generateNonce()
 
   // Security headers
   const headers = new Headers(req.headers)
@@ -13,7 +19,21 @@ export async function middleware(req: NextRequest) {
   headers.set('X-Content-Type-Options', 'nosniff')
   headers.set('X-XSS-Protection', '1; mode=block')
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()')
+  
+  // Add CSP headers with nonce
+  addCSPHeaders(headers, nonce)
+  
+  // Additional security headers for production
+  if (process.env.NODE_ENV === 'production') {
+    headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+  }
+  
+  // Apply upload protection for file uploads
+  const uploadProtection = await uploadProtectionMiddleware(req)
+  if (uploadProtection) {
+    return uploadProtection
+  }
 
   // CORS configuration for API routes
   if (pathname.startsWith('/api')) {
@@ -58,6 +78,9 @@ export async function middleware(req: NextRequest) {
       headers
     }
   })
+  
+  // Pass nonce to the request for use in components
+  response.headers.set('x-nonce', nonce)
 
   // Set security headers on response
   headers.forEach((value, key) => {
@@ -93,7 +116,6 @@ export const config = {
 }
 
 function generateCSRFToken(): string {
-  const array = new Uint8Array(32)
-  crypto.getRandomValues(array)
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+  // Use crypto.randomBytes for better entropy
+  return crypto.randomBytes(32).toString('hex')
 }

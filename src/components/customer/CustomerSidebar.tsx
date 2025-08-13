@@ -12,7 +12,9 @@ import {
   HelpCircle,
   X,
   Menu,
-  Home
+  Home,
+  ShieldCheck,
+  FolderOpen
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -24,6 +26,8 @@ const navigation = [
   { name: 'Tin nhắn', href: '/dashboard/messages', icon: MessageSquare },
   { name: 'Gia hạn dịch vụ', href: '/dashboard/renewals', icon: RefreshCw },
   { name: 'Hồ sơ cá nhân', href: '/dashboard/profile', icon: User },
+  { name: 'Tệp tin', href: '/dashboard/files', icon: FolderOpen },
+  { name: 'Bảo mật', href: '/dashboard/security', icon: ShieldCheck },
   { name: 'Hỗ trợ', href: '/dashboard/support', icon: HelpCircle }
 ]
 

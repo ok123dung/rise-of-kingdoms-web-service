@@ -14,5 +14,11 @@
       "main": true,
       "dependabot/**": false
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/webhooks",
+      "schedule": "*/5 * * * *"
+    }
+  ]
 }

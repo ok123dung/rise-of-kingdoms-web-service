@@ -1,13 +1,10 @@
 'use client'
-
 import { useState, useEffect } from 'react'
-
 import { User, Bell, Settings, LogOut, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-
+import { RealtimeNotifications } from '@/components/RealtimeNotifications'
 interface CustomerData {
   id: string
   name: string
@@ -18,12 +15,10 @@ interface CustomerData {
   totalSpent: number
   notificationCount: number
 }
-
 interface CustomerHeaderProps {
   showBreadcrumb?: boolean
   breadcrumbItems?: Array<{ label: string; href?: string }>
 }
-
 export default function CustomerHeader({
   showBreadcrumb = true,
   breadcrumbItems = []
@@ -32,17 +27,14 @@ export default function CustomerHeader({
   const [loading, setLoading] = useState(true)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const router = useRouter()
-
   useEffect(() => {
     fetchCustomerData()
   }, [])
-
   const fetchCustomerData = async () => {
     try {
       setLoading(true)
       // Simulate API call - replace with real endpoint
       await new Promise(resolve => setTimeout(resolve, 500))
-
       // Mock customer data
       const mockCustomer: CustomerData = {
         id: '1',
@@ -53,7 +45,6 @@ export default function CustomerHeader({
         totalSpent: 15750000,
         notificationCount: 3
       }
-
       setCustomer(mockCustomer)
     } catch (err) {
       console.error('Error fetching customer data:', err)
@@ -61,14 +52,12 @@ export default function CustomerHeader({
       setLoading(false)
     }
   }
-
   const formatVND = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND'
     }).format(amount)
   }
-
   const getTierColor = (tier: string) => {
     switch (tier) {
       case 'vip':
@@ -79,7 +68,6 @@ export default function CustomerHeader({
         return 'bg-gradient-to-r from-blue-400 to-blue-600'
     }
   }
-
   const getTierLabel = (tier: string) => {
     const labels = {
       vip: 'VIP',
@@ -88,7 +76,6 @@ export default function CustomerHeader({
     }
     return labels[tier as keyof typeof labels]
   }
-
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -96,12 +83,10 @@ export default function CustomerHeader({
       .join('')
       .toUpperCase()
   }
-
   const handleLogout = () => {
     // Implement logout logic
     router.push('/auth/signin')
   }
-
   if (loading) {
     return (
       <header className="border-b border-gray-200 bg-white">
@@ -111,7 +96,6 @@ export default function CustomerHeader({
       </header>
     )
   }
-
   if (!customer) {
     return (
       <header className="border-b border-gray-200 bg-white">
@@ -121,7 +105,6 @@ export default function CustomerHeader({
       </header>
     )
   }
-
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
       <div className="container-max">
@@ -147,7 +130,6 @@ export default function CustomerHeader({
             </nav>
           </div>
         )}
-
         {/* Main header */}
         <div className="flex items-center justify-between py-4">
           {/* Left side - Customer info */}
@@ -166,7 +148,6 @@ export default function CustomerHeader({
                 getInitials(customer.name)
               )}
             </div>
-
             {/* Customer details */}
             <div>
               <div className="flex items-center gap-2">
@@ -184,22 +165,10 @@ export default function CustomerHeader({
               </div>
             </div>
           </div>
-
           {/* Right side - Actions */}
           <div className="flex items-center gap-2">
-            {/* Notifications */}
-            <Link
-              className="relative rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
-              href="/dashboard/notifications"
-            >
-              <Bell className="h-5 w-5" />
-              {customer.notificationCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                  {customer.notificationCount}
-                </span>
-              )}
-            </Link>
-
+            {/* Realtime Notifications */}
+            <RealtimeNotifications />
             {/* User menu */}
             <div className="relative">
               <button
@@ -209,7 +178,6 @@ export default function CustomerHeader({
                 <Settings className="h-5 w-5" />
                 <ChevronDown className="h-4 w-4" />
               </button>
-
               {/* Dropdown menu */}
               {showUserMenu && (
                 <>

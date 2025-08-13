@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db'
 import { Prisma } from '@prisma/client'
 import { NotFoundError, ValidationError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
+import { generateSecureNumericCode } from '@/lib/crypto-utils'
 import type { Booking, ServiceTier, User } from '@/types/database'
 
 export class BookingService {
@@ -239,7 +240,7 @@ export class BookingService {
     const year = date.getFullYear().toString().slice(-2)
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
     const day = date.getDate().toString().padStart(2, '0')
-    const random = Math.floor(Math.random() * 9999).toString().padStart(4, '0')
+    const random = generateSecureNumericCode(4)
     
     return `BK${year}${month}${day}${random}`
   }

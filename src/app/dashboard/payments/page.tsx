@@ -1,12 +1,10 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { CreditCardIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-
 interface Payment {
   id: string
   paymentNumber: string
@@ -28,21 +26,18 @@ interface Payment {
     }
   }
 }
-
 const statusIcons = {
   pending: ClockIcon,
   completed: CheckCircleIcon,
   failed: XCircleIcon,
   cancelled: XCircleIcon
 }
-
 const statusColors = {
   pending: 'text-yellow-600 bg-yellow-100',
   completed: 'text-green-600 bg-green-100',
   failed: 'text-red-600 bg-red-100',
   cancelled: 'text-gray-600 bg-gray-100'
 }
-
 const paymentMethodNames: Record<string, string> = {
   momo: 'MoMo',
   vnpay: 'VNPay',
@@ -50,25 +45,21 @@ const paymentMethodNames: Record<string, string> = {
   bank_transfer: 'Chuyển khoản',
   cash: 'Tiền mặt'
 }
-
 export default function PaymentsPage() {
   const { data: session } = useSession()
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
-
   useEffect(() => {
     if (session?.user) {
       fetchPayments()
     }
   }, [session, filter])
-
   const fetchPayments = async () => {
     try {
       const url = filter === 'all' 
         ? '/api/user/payments'
         : `/api/user/payments?status=${filter}`
-      
       const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
@@ -80,7 +71,6 @@ export default function PaymentsPage() {
       setLoading(false)
     }
   }
-
   const getStatusText = (status: string) => {
     const statusTexts: Record<string, string> = {
       pending: 'Chờ thanh toán',
@@ -90,7 +80,6 @@ export default function PaymentsPage() {
     }
     return statusTexts[status] || status
   }
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -98,7 +87,6 @@ export default function PaymentsPage() {
       </div>
     )
   }
-
   return (
     <div className="space-y-6">
       <div>
@@ -107,7 +95,6 @@ export default function PaymentsPage() {
           Xem lại tất cả các giao dịch thanh toán của bạn
         </p>
       </div>
-
       {/* Filters */}
       <div className="flex space-x-2">
         <button
@@ -151,7 +138,6 @@ export default function PaymentsPage() {
           Thất bại
         </button>
       </div>
-
       {payments.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-6 text-center">
           <CreditCardIcon className="mx-auto h-12 w-12 text-gray-400" />
@@ -168,7 +154,6 @@ export default function PaymentsPage() {
             {payments.map((payment) => {
               const StatusIcon = statusIcons[payment.status as keyof typeof statusIcons]
               const statusColor = statusColors[payment.status as keyof typeof statusColors]
-              
               return (
                 <li key={payment.id}>
                   <Link href={`/dashboard/payments/${payment.id}`} className="block hover:bg-gray-50">

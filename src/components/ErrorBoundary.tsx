@@ -3,6 +3,7 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react'
 
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
+import * as Sentry from '@sentry/nextjs'
 
 import { clientLogger } from '@/lib/client-logger'
 import { logError, getLogger } from '@/lib/monitoring/logger'
@@ -33,7 +34,16 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
-    const errorId = Math.random().toString(36).substring(7)
+    // Capture error to Sentry and get event ID
+    const sentryId = Sentry.captureException(error, {
+      tags: {
+        component: 'ErrorBoundary',
+        type: 'react_error'
+      }
+    })
+    
+    const errorId = typeof sentryId === 'string' ? sentryId : Math.random().toString(36).substring(7)
+    
     return {
       hasError: true,
       error,
@@ -45,6 +55,19 @@ export class ErrorBoundary extends Component<Props, State> {
     // Log to our monitoring system
     logError(error, {
       componentStack: errorInfo.componentStack ?? undefined
+    })
+
+    // Send additional context to Sentry
+    Sentry.withScope((scope) => {
+      scope.setContext('errorBoundary', {
+        componentStack: errorInfo.componentStack,
+        errorId: this.state.errorId,
+        url: typeof window !== 'undefined' ? window.location.href : 'unknown',
+        userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown'
+      })
+      scope.setLevel('error')
+      scope.setTag('error.boundary', true)
+      Sentry.captureException(error)
     })
 
     // Log additional context

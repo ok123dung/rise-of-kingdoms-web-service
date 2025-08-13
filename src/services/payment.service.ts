@@ -5,6 +5,7 @@ import { MoMoPayment } from '@/lib/payments/momo'
 import { VNPayPayment } from '@/lib/payments/vnpay'
 import { ZaloPayPayment } from '@/lib/payments/zalopay'
 import { BankingTransfer } from '@/lib/payments/banking'
+import { generateSecurePaymentRef } from '@/lib/crypto-utils'
 import type { Payment, Booking } from '@/types/database'
 
 export class PaymentService {
@@ -273,10 +274,7 @@ export class PaymentService {
   }
 
   private generatePaymentNumber(): string {
-    const date = new Date()
-    const timestamp = date.getTime().toString(36)
-    const random = Math.random().toString(36).substring(2, 7)
-    return `PAY_${timestamp}_${random}`.toUpperCase()
+    return generateSecurePaymentRef('PAY')
   }
 
   private async processPayment(options: {
