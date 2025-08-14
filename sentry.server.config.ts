@@ -19,8 +19,7 @@ Sentry.init({
   
   // Integrations
   integrations: [
-    // Prisma integration
-    new Sentry.Integrations.Prisma({ client: true }),
+    // Prisma integration will be added conditionally when available
   ],
   
   // Filtering
