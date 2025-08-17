@@ -1,24 +1,50 @@
 {
-  "version": 2,
-  "framework": "nextjs", 
   "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "devCommand": "npm run dev",
   "installCommand": "npm install",
+  "framework": "nextjs",
   "regions": ["sin1"],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
+  },
   "functions": {
-    "src/app/api/**/*.ts": {
+    "src/app/api/**/*": {
       "maxDuration": 30
     }
   },
-  "git": {
-    "deploymentEnabled": {
-      "main": true,
-      "dependabot/**": false
-    }
-  },
-  "crons": [
+  "headers": [
     {
-      "path": "/api/cron/webhooks",
-      "schedule": "0 */12 * * *"
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "on"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/health",
+      "destination": "/api/health"
     }
   ]
 }
