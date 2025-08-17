@@ -74,7 +74,7 @@ export class WebhookRetryService {
       })
 
       if (!event) {
-        getLogger().error('Webhook event not found', { eventId })
+        getLogger().error('Webhook event not found', new Error('Event not found'), { eventId })
         return false
       }
 
@@ -84,7 +84,7 @@ export class WebhookRetryService {
       }
 
       if (event.status === 'failed' && event.attempts >= this.config.maxAttempts) {
-        getLogger().error('Webhook event exceeded max attempts', { eventId })
+        getLogger().error('Webhook event exceeded max attempts', new Error('Max attempts exceeded'), { eventId })
         return false
       }
 
@@ -144,7 +144,7 @@ export class WebhookRetryService {
         case 'vnpay':
           return await this.handleVNPayWebhook(event)
         default:
-          getLogger().error('Unknown webhook provider', { provider: event.provider })
+          getLogger().error('Unknown webhook provider', new Error('Unknown provider'), { provider: event.provider })
           return false
       }
     } catch (error) {
@@ -178,11 +178,14 @@ export class WebhookRetryService {
         where: { 
           paymentNumber: orderId,
           paymentMethod: 'momo'
+        },
+        include: {
+          booking: true
         }
       })
 
       if (!payment) {
-        getLogger().error('Payment not found for MoMo webhook', { orderId })
+        getLogger().error('Payment not found for MoMo webhook', new Error('Payment not found'), { orderId })
         return false // Retry later
       }
 
@@ -193,7 +196,7 @@ export class WebhookRetryService {
           status: 'completed',
           transactionId: transId,
           metadata: {
-            ...payment.metadata,
+            ...(typeof payment.metadata === 'object' ? payment.metadata : {}),
             momoRequestId: requestId,
             momoMessage: message
           }
@@ -207,7 +210,7 @@ export class WebhookRetryService {
       })
 
       // Send real-time notification
-      emitWebSocketEvent('user', payment.userId, 'payment:completed', {
+      emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
         paymentId: payment.id,
         amount: payment.amount,
         method: 'MoMo'
@@ -242,11 +245,14 @@ export class WebhookRetryService {
         where: { 
           paymentNumber: app_trans_id,
           paymentMethod: 'zalopay'
+        },
+        include: {
+          booking: true
         }
       })
 
       if (!payment) {
-        getLogger().error('Payment not found for ZaloPay webhook', { app_trans_id })
+        getLogger().error('Payment not found for ZaloPay webhook', new Error('Payment not found'), { app_trans_id })
         return false
       }
 
@@ -256,7 +262,7 @@ export class WebhookRetryService {
           status: 'completed',
           transactionId: zp_trans_id,
           metadata: {
-            ...payment.metadata,
+            ...(typeof payment.metadata === 'object' ? payment.metadata : {}),
             zaloPayTransId: zp_trans_id
           }
         }
@@ -267,7 +273,7 @@ export class WebhookRetryService {
         data: { paymentStatus: 'paid' }
       })
 
-      emitWebSocketEvent('user', payment.userId, 'payment:completed', {
+      emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
         paymentId: payment.id,
         amount: payment.amount,
         method: 'ZaloPay'
@@ -302,11 +308,14 @@ export class WebhookRetryService {
         where: { 
           paymentNumber: vnp_TxnRef,
           paymentMethod: 'vnpay'
+        },
+        include: {
+          booking: true
         }
       })
 
       if (!payment) {
-        getLogger().error('Payment not found for VNPay webhook', { vnp_TxnRef })
+        getLogger().error('Payment not found for VNPay webhook', new Error('Payment not found'), { vnp_TxnRef })
         return false
       }
 
@@ -316,7 +325,7 @@ export class WebhookRetryService {
           status: 'completed',
           transactionId: vnp_TransactionNo,
           metadata: {
-            ...payment.metadata,
+            ...(typeof payment.metadata === 'object' ? payment.metadata : {}),
             vnpayTransactionNo: vnp_TransactionNo
           }
         }
@@ -327,7 +336,7 @@ export class WebhookRetryService {
         data: { paymentStatus: 'paid' }
       })
 
-      emitWebSocketEvent('user', payment.userId, 'payment:completed', {
+      emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
         paymentId: payment.id,
         amount: payment.amount,
         method: 'VNPay'
@@ -364,7 +373,7 @@ export class WebhookRetryService {
     getLogger().info('Webhook retry scheduled', {
       eventId: event.eventId,
       attempts,
-      nextRetryAt
+      nextRetryAt: nextRetryAt?.toISOString()
     })
   }
 

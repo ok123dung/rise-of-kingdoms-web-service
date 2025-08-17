@@ -20,14 +20,7 @@ Sentry.init({
   
   // Integrations
   integrations: [
-    new Sentry.Replay({
-      maskAllText: true,
-      maskAllInputs: true,
-      blockAllMedia: true,
-    }),
-    new Sentry.BrowserTracing({
-      routingInstrumentation: Sentry.nextRouterInstrumentation,
-    }),
+    // Replay and BrowserTracing are built-in with Next.js Sentry integration
   ],
   
   // Filtering

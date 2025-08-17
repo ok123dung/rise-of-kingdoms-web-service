@@ -16,7 +16,7 @@ interface CacheEntry<T> {
 // In-memory cache for development
 class MemoryCache {
   private store = new Map<string, CacheEntry<any>>()
-  private cleanupInterval: NodeJS.Timer
+  private cleanupInterval: NodeJS.Timeout
 
   constructor() {
     // Cleanup expired entries every minute
@@ -87,7 +87,8 @@ class RedisCache {
 
   constructor(redisUrl?: string) {
     this.redis = new Redis({
-      url: redisUrl || process.env.REDIS_URL || ''
+      url: redisUrl || process.env.UPSTASH_REDIS_REST_URL || '',
+      token: process.env.UPSTASH_REDIS_REST_TOKEN || ''
     })
   }
 

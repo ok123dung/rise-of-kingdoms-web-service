@@ -6,6 +6,7 @@ export interface ErrorContext {
   action?: string
   metadata?: Record<string, any>
   tags?: Record<string, string>
+  [key: string]: any
 }
 
 export class AppError extends Error {
@@ -81,7 +82,7 @@ export function handleError(error: Error | AppError, context?: ErrorContext): vo
   }
 
   // Log to monitoring
-  getLogger().error(error.message, error, context)
+  getLogger().error(error.message, error, context ? { ...context } : undefined)
 
   // Send to Sentry with context
   if (error instanceof AppError) {
@@ -95,8 +96,8 @@ export function handleError(error: Error | AppError, context?: ErrorContext): vo
             app: {
               statusCode: error.statusCode,
               isOperational: error.isOperational,
-              ...error.context,
-            },
+              ...(error.context || {})
+            } as any,
           },
           tags: {
             type: 'operational',
@@ -132,7 +133,7 @@ export function handleError(error: Error | AppError, context?: ErrorContext): vo
     Sentry.captureException(error, {
       level: 'error',
       contexts: {
-        app: context,
+        app: context as any,
       },
       tags: {
         type: 'unknown',
@@ -166,7 +167,7 @@ export function createErrorResponse(error: Error | AppError): {
     message: safeMessage,
     statusCode,
     timestamp: new Date().toISOString(),
-    requestId: Sentry.getCurrentHub().getScope()?.getTransaction()?.traceId,
+    requestId: Sentry.getActiveSpan()?.spanContext().traceId,
   }
 }
 

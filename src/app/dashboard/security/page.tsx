@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Navbar } from '@/components/layout/Navbar'
-import { Footer } from '@/components/layout/Footer'
-import { TwoFactorSetup } from '@/components/TwoFactorSetup'
+import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
+import TwoFactorSetup from '@/components/TwoFactorSetup'
 import { ShieldCheck, ShieldOff, Key, RefreshCw, AlertCircle } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -114,7 +114,7 @@ export default function SecurityPage() {
   if (status === 'loading' || !twoFactorStatus) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
-        <Navbar />
+        <Header />
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-amber-600" />
         </div>
@@ -125,7 +125,7 @@ export default function SecurityPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
-      <Navbar />
+      <Header />
       
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-2xl">

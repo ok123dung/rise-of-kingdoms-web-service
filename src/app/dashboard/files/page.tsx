@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { FileUpload, FileList } from '@/components/FileUpload'
-import { Navbar } from '@/components/layout/Navbar'
-import { Footer } from '@/components/layout/Footer'
+import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
 import { Folder, Grid, List, Loader2 } from 'lucide-react'
 export default function FilesPage() {
   const [files, setFiles] = useState<any[]>([])
@@ -56,7 +56,7 @@ export default function FilesPage() {
   ]
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
-      <Navbar />
+      <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Quản lý tệp tin</h1>

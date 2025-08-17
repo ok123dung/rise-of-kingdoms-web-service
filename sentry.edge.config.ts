@@ -18,7 +18,8 @@ Sentry.init({
   transportOptions: {
     // Reduce timeout for edge functions
     fetchOptions: {
-      timeout: 5000,
+      // Note: timeout is not a standard fetch option
+      // We'll handle timeouts at the application level
     },
   },
   

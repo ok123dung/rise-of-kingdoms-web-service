@@ -107,7 +107,7 @@ export class SecureWebSocketServer {
 
         // Verify token hasn't expired
         const now = Date.now() / 1000
-        if (decoded.exp && decoded.exp < now) {
+        if ('exp' in decoded && typeof decoded.exp === 'number' && decoded.exp < now) {
           return next(new Error('Token expired'))
         }
 
@@ -149,7 +149,7 @@ export class SecureWebSocketServer {
       const originalEmit = socket.emit
       socket.emit = function(...args: any[]) {
         socket.lastActivity = Date.now()
-        return originalEmit.apply(socket, args)
+        return originalEmit.apply(socket, args as [string, ...any[]])
       }
       next()
     })
@@ -240,18 +240,7 @@ export class SecureWebSocketServer {
         const booking = await prisma.booking.findFirst({
           where: {
             id: bookingId,
-            OR: [
-              { userId: socket.userId },
-              { 
-                serviceTier: { 
-                  service: { 
-                    staffMembers: { 
-                      some: { userId: socket.userId } 
-                    } 
-                  } 
-                } 
-              }
-            ]
+            userId: socket.userId // Only allow user to subscribe to their own bookings
           },
           select: { id: true, status: true }
         })
@@ -303,11 +292,8 @@ export class SecureWebSocketServer {
               userId: socket.userId!,
               bookingId,
               type: 'chat',
-              message: sanitizedMessage,
-              metadata: {
-                socketId: socket.id,
-                sessionId: socket.sessionId
-              }
+              content: sanitizedMessage,
+              channel: `socket:${socket.id}`
             },
             include: {
               user: {
@@ -374,18 +360,7 @@ export class SecureWebSocketServer {
     const booking = await prisma.booking.findFirst({
       where: {
         id: bookingId,
-        OR: [
-          { userId },
-          { 
-            serviceTier: { 
-              service: { 
-                staffMembers: { 
-                  some: { userId } 
-                } 
-              } 
-            } 
-          }
-        ]
+        userId // Only check if user owns the booking
       },
       select: { id: true }
     })

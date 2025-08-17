@@ -242,12 +242,6 @@ export default function ProfilePage() {
               <dd className="mt-1 text-sm text-gray-900">{session.user.id}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Ngày tạo</dt>
-              <dd className="mt-1 text-sm text-gray-900">
-                {session.user.createdAt && new Date(session.user.createdAt).toLocaleDateString('vi-VN')}
-              </dd>
-            </div>
-            <div>
               <dt className="text-sm font-medium text-gray-500">Vai trò</dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {session.user.role === 'admin' ? 'Quản trị viên' : 'Khách hàng'}

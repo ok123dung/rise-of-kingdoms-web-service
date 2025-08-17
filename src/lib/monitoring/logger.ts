@@ -289,7 +289,11 @@ class Logger {
   }
 
   logSecurityEvent(
-    event: 'auth_failed' | 'rate_limit_exceeded' | 'suspicious_activity' | 'unauthorized_access',
+    event: 'auth_failed' | 'rate_limit_exceeded' | 'suspicious_activity' | 'unauthorized_access' |
+           'login_attempt_while_locked' | 'login_failed' | 'login_success' | 'oauth_login' |
+           'signin' | 'signout' | 'account_locked' | 'account_unlocked_manually' |
+           'session_token_rotated' | '2fa_setup_initiated' | '2fa_enabled' | '2fa_login_success' |
+           '2fa_backup_code_used' | '2fa_login_failed' | '2fa_disabled' | '2fa_backup_codes_regenerated',
     context?: LogContext
   ): void {
     this.warn(`Security event: ${event}`, {

@@ -17,6 +17,7 @@ model User {
   password          String   // FIXED: Added missing password field
   phone             String?
   fullName          String   @map("full_name")
+  image             String?  // User avatar URL
   discordUsername   String?  @map("discord_username")
   discordId         String?  @map("discord_id")
   rokPlayerId       String?  @map("rok_player_id")
@@ -143,6 +144,8 @@ model Payment {
   paymentGateway       String    @map("payment_gateway")
   gatewayTransactionId String?   @map("gateway_transaction_id")
   gatewayOrderId       String?   @map("gateway_order_id")
+  transactionId        String?   @map("transaction_id")
+  metadata             Json?
   status               String    @default("pending")
   failureReason        String?   @map("failure_reason")
   gatewayResponse      Json?     @map("gateway_response")

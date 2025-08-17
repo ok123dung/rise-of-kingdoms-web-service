@@ -5,7 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import DiscordProvider from 'next-auth/providers/discord'
 import { z } from 'zod'
 
-import { prisma } from '@/lib/db'
+import { prisma, basePrisma } from '@/lib/db'
 import { getLogger, type LogContext } from '@/lib/monitoring/logger'
 
 import type { User } from '@prisma/client'
@@ -190,7 +190,7 @@ const loginSchema = z.object({
 })
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(basePrisma),
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -290,7 +290,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, account, profile }) {
       if (user) {
-        token.role = user.role
+        token.role = user.role || 'user'
         token.userId = user.id
       }
 

@@ -97,7 +97,7 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
       getLogger().warn('CSRF validation failed: invalid origin', {
         origin: checkOrigin,
         path: pathname,
-        ip: req.ip || req.headers.get('x-forwarded-for')
+        ip: req.ip || req.headers.get('x-forwarded-for') || undefined
       })
       return { valid: false, reason: 'invalid origin' }
     }

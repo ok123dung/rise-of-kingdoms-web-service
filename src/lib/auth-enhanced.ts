@@ -5,7 +5,7 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
-import { prisma } from '@/lib/db'
+import { prisma, basePrisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 import { 
   accountLockout, 
@@ -41,10 +41,6 @@ declare module 'next-auth' {
       userAgent?: string
     }
   }
-  
-  interface User {
-    role?: string
-  }
 }
 
 declare module 'next-auth/jwt' {
@@ -58,7 +54,7 @@ declare module 'next-auth/jwt' {
 }
 
 export const authOptionsEnhanced: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(basePrisma),
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -80,7 +76,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
           if (lockoutStatus.isLocked) {
             getLogger().logSecurityEvent('login_attempt_while_locked', {
               email,
-              lockedUntil: lockoutStatus.lockedUntil
+              lockedUntil: lockoutStatus.lockedUntil?.toISOString()
             })
             throw new Error(lockoutStatus.message || 'Account is locked')
           }
@@ -130,8 +126,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
           await prisma.user.update({
             where: { id: user.id },
             data: { 
-              lastLogin: new Date(),
-              lastLoginIp: req?.headers?.['x-forwarded-for'] as string || req?.headers?.['x-real-ip'] as string
+              lastLogin: new Date()
             }
           })
 

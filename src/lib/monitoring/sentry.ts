@@ -46,10 +46,10 @@ export function trackEvent(eventName: string, data?: Record<string, any>) {
 
 // Performance monitoring
 export function startTransaction(name: string, op: string = 'custom') {
-  return Sentry.startTransaction({
+  return Sentry.startSpan({
     name,
     op,
-  })
+  }, (span) => span)
 }
 
 // Measure performance
@@ -65,24 +65,24 @@ export function measurePerformance<T>(
     if (result instanceof Promise) {
       return result
         .then(value => {
-          transaction.setStatus('ok')
+          transaction.setStatus({ code: 1 })
           return value
         })
         .catch(error => {
-          transaction.setStatus('internal_error')
+          transaction.setStatus({ code: 2 })
           throw error
         })
         .finally(() => {
-          transaction.finish()
+          transaction.end()
         })
     }
     
-    transaction.setStatus('ok')
-    transaction.finish()
+    transaction.setStatus({ code: 1 })
+    transaction.end()
     return result
   } catch (error) {
-    transaction.setStatus('internal_error')
-    transaction.finish()
+    transaction.setStatus({ code: 2 })
+    transaction.end()
     throw error
   }
 }
@@ -145,17 +145,17 @@ export function monitorApiCall(
   responseTime: number,
   statusCode: number
 ) {
-  const transaction = Sentry.getCurrentHub().getScope()?.getTransaction()
+  const transaction = Sentry.getActiveSpan()
   
   if (transaction) {
-    const span = transaction.startChild({
+    Sentry.startSpan({
       op: 'http.client',
-      description: `${method} ${endpoint}`,
+      name: `${method} ${endpoint}`,
+    }, (span) => {
+      span.setStatus({ code: 1 })
+      span.setAttribute('http.status_code', statusCode)
+      span.setAttribute('response_time', responseTime)
     })
-    
-    span.setHttpStatus(statusCode)
-    span.setData('response_time', responseTime)
-    span.finish()
   }
   
   // Track slow API calls
@@ -182,17 +182,16 @@ export function monitorDatabaseQuery(
   duration: number,
   success: boolean
 ) {
-  const transaction = Sentry.getCurrentHub().getScope()?.getTransaction()
+  const transaction = Sentry.getActiveSpan()
   
   if (transaction) {
-    const span = transaction.startChild({
+    Sentry.startSpan({
       op: 'db.query',
-      description: `${operation} ${table}`,
+      name: `${operation} ${table}`,
+    }, (span) => {
+      span.setAttribute('duration', duration)
+      span.setStatus(success ? { code: 1 } : { code: 2 })
     })
-    
-    span.setData('duration', duration)
-    span.setStatus(success ? 'ok' : 'internal_error')
-    span.finish()
   }
   
   // Track slow queries
@@ -223,7 +222,7 @@ export function trackFeatureFlag(flag: string, enabled: boolean, user?: string) 
 
 // Session replay helper
 export function maskSensitiveData() {
-  Sentry.configureScope(scope => {
+  Sentry.withScope(scope => {
     scope.setContext('replay', {
       mask_all_text: true,
       mask_all_inputs: true,
@@ -238,7 +237,7 @@ export function showFeedbackDialog(options?: {
   email?: string
   title?: string
 }) {
-  const user = Sentry.getCurrentHub().getScope()?.getUser()
+  const user = Sentry.getCurrentScope().getUser()
   
   // @ts-ignore - Sentry feedback API
   if (window.Sentry?.showReportDialog) {

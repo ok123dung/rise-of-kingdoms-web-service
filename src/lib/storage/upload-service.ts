@@ -8,7 +8,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import sharp from 'sharp'
-import { r2Client, R2_BUCKET, generateFileKey, getPublicUrl, isValidFileType, isValidFileSize } from './r2-client'
+import { r2Client, R2_BUCKET, generateFileKey, getPublicUrl, isValidFileType, isValidFileSize, ALLOWED_FILE_TYPES } from './r2-client'
 import { getLogger } from '@/lib/monitoring/logger'
 import { prisma } from '@/lib/db'
 
@@ -49,7 +49,7 @@ export class UploadService {
     try {
       // Validate file type
       const fileCategory = this.getFileCategory(mimeType)
-      if (!isValidFileType(mimeType, fileCategory)) {
+      if (!isValidFileType(mimeType, fileCategory as any)) {
         return {
           success: false,
           error: 'Invalid file type'
@@ -66,7 +66,7 @@ export class UploadService {
       }
 
       // Validate file size
-      if (!isValidFileSize(buffer.length, fileCategory)) {
+      if (!isValidFileSize(buffer.length, fileCategory as any)) {
         return {
           success: false,
           error: 'File size exceeds limit'
@@ -393,7 +393,7 @@ export class UploadService {
             userId,
             folder: sourceFile.folder,
             isPublic: sourceFile.isPublic,
-            metadata: sourceFile.metadata
+            metadata: sourceFile.metadata || undefined
           }
         })
       }

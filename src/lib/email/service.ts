@@ -81,7 +81,7 @@ export class EmailService {
         subject: options.subject,
         html: options.html,
         text: options.text,
-        reply_to: options.replyTo,
+        replyTo: options.replyTo,
         attachments: options.attachments
       })
 

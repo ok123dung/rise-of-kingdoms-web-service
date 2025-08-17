@@ -14,9 +14,6 @@ Sentry.init({
   // Environment
   environment: process.env.NODE_ENV,
   
-  // Server-specific options
-  autoSessionTracking: true,
-  
   // Integrations
   integrations: [
     // Prisma integration will be added conditionally when available

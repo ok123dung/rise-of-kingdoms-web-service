@@ -196,7 +196,7 @@ export default function SupportPage() {
                     Email: {session?.user?.email}
                   </p>
                   <p className="text-sm text-gray-600">
-                    Họ tên: {session?.user?.fullName}
+                    Họ tên: {session?.user?.name}
                   </p>
                 </div>
                 <div className="flex justify-end">

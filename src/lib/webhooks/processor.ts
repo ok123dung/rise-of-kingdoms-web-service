@@ -1,8 +1,8 @@
 import { WebhookRetryService } from './retry-service'
 import { getLogger } from '@/lib/monitoring/logger'
 
-let processorInterval: NodeJS.Timer | null = null
-let cleanupInterval: NodeJS.Timer | null = null
+let processorInterval: NodeJS.Timeout | null = null
+let cleanupInterval: NodeJS.Timeout | null = null
 
 const webhookService = new WebhookRetryService({
   maxAttempts: 5,

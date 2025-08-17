@@ -14,7 +14,7 @@ interface RateLimitConfig {
 // Memory-safe rate limiter with automatic cleanup
 export class MemorySafeRateLimiter {
   private store = new Map<string, RateLimitEntry>()
-  private cleanupTimer: NodeJS.Timer | null = null
+  private cleanupTimer: NodeJS.Timeout | null = null
   private lastCleanup = Date.now()
   private readonly maxEntries: number
   private readonly cleanupInterval: number
@@ -119,7 +119,8 @@ export class RedisRateLimiter {
     redisUrl?: string
   ) {
     this.redis = new Redis({
-      url: redisUrl || process.env.REDIS_URL || ''
+      url: redisUrl || process.env.UPSTASH_REDIS_REST_URL || '',
+      token: process.env.UPSTASH_REDIS_REST_TOKEN || ''
     })
   }
   public async checkLimit(identifier: string): Promise<{
@@ -137,7 +138,7 @@ export class RedisRateLimiter {
       pipe.incr(key)
       pipe.expire(key, Math.ceil(this.config.window / 1000))
       const results = await pipe.exec()
-      const count = results?.[0]?.[1] as number || 1
+      const count = (results?.[0] as any)?.[1] as number || 1
       const remaining = Math.max(0, this.config.max - count)
       const success = count <= this.config.max
       return {

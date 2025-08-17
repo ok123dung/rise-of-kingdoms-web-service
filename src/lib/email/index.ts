@@ -60,7 +60,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
       text: options.text,
       cc: options.cc,
       bcc: options.bcc,
-      reply_to: options.replyTo
+      replyTo: options.replyTo
     })
 
     if (error) {

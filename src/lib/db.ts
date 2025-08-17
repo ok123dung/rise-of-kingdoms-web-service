@@ -1,11 +1,11 @@
-import { type Prisma } from '@prisma/client'
+import { type Prisma, PrismaClient } from '@prisma/client'
 
 import { handleDatabaseError, NotFoundError, retryWithBackoff } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
-import { prisma, checkDatabaseHealth } from '@/lib/db-enhanced'
+import { prisma, checkDatabaseHealth, basePrisma } from '@/lib/db-enhanced'
 
 // Re-export enhanced prisma client
-export { prisma }
+export { prisma, basePrisma }
 
 // Enhanced database connection health check
 export async function checkDatabaseConnection() {

@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       .digest('hex')
 
     if (signature !== expectedSignature) {
-      getLogger().error('Invalid MoMo webhook signature', { orderId })
+      getLogger().error('Invalid MoMo webhook signature', new Error('Invalid signature'), { orderId })
       return NextResponse.json(
         { message: 'Invalid signature' },
         { status: 400 }

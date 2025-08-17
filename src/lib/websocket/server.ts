@@ -82,10 +82,7 @@ export class WebSocketServer {
           const booking = await prisma.booking.findFirst({
             where: {
               id: bookingId,
-              OR: [
-                { userId: socket.userId },
-                { serviceTier: { service: { staffMembers: { some: { userId: socket.userId } } } } }
-              ]
+              userId: socket.userId // Only allow users to access their own bookings
             }
           })
 
@@ -107,15 +104,16 @@ export class WebSocketServer {
           if (!socket.userId) return
 
           // Verify access and save message
-          const message = await prisma.message.create({
+          const message = await prisma.communication.create({
             data: {
+              type: 'chat',
               content: data.message,
-              senderId: socket.userId,
+              userId: socket.userId,
               bookingId: data.bookingId,
-              isFromStaff: socket.userRole === 'staff' || socket.userRole === 'admin'
+              channel: socket.userRole === 'staff' || socket.userRole === 'admin' ? 'staff' : 'customer'
             },
             include: {
-              sender: {
+              user: {
                 select: {
                   id: true,
                   fullName: true,

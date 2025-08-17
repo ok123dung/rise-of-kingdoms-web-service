@@ -1,4 +1,5 @@
 import { PrismaClient, type Prisma } from '@prisma/client'
+import type { UnwrapTuple } from '@prisma/client/runtime/library'
 import { getLogger } from '@/lib/monitoring/logger'
 
 // Connection pool configuration
@@ -205,13 +206,11 @@ class EnhancedPrismaClient extends PrismaClient {
   }
 
   // Override $transaction to add timeout and retry logic
-  async $transaction<T>(
-    fn: (prisma: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>) => Promise<T>,
-    options?: {
-      maxWait?: number
-      timeout?: number
-      isolationLevel?: Prisma.TransactionIsolationLevel
-    }
+  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P]): Promise<UnwrapTuple<P>>
+  $transaction<R>(fn: (prisma: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>) => Promise<R>, options?: { maxWait?: number; timeout?: number; isolationLevel?: Prisma.TransactionIsolationLevel }): Promise<R>
+  async $transaction<T = any>(
+    arg: any,
+    options?: any
   ): Promise<T> {
     const defaultOptions = {
       maxWait: CONNECTION_POOL_CONFIG.pool_timeout,
@@ -221,7 +220,11 @@ class EnhancedPrismaClient extends PrismaClient {
 
     return this.circuitBreaker.execute(async () => {
       try {
-        return await super.$transaction(fn, defaultOptions)
+        if (Array.isArray(arg)) {
+          return await super.$transaction(arg, options) as any
+        } else {
+          return await super.$transaction(arg, defaultOptions) as any
+        }
       } catch (error) {
         // Log transaction errors with context
         getLogger().error('Transaction failed', error as Error, {
@@ -247,7 +250,7 @@ if (process.env.NODE_ENV !== 'production') {
 // Auto-connect on first use
 let isConnecting = false
 async function ensureConnected() {
-  if (!isConnecting && !prismaEnhanced.$isConnected) {
+  if (!isConnecting) {
     isConnecting = true
     try {
       await prismaEnhanced.$connect()
@@ -301,3 +304,16 @@ export async function disconnectDatabase() {
   await prismaEnhanced.$disconnect()
   getLogger().info('Database disconnected')
 }
+
+// Export base Prisma client for NextAuth adapter
+// The PrismaAdapter doesn't work well with our enhanced client
+export const basePrisma = new PrismaClient({
+  log: process.env.NODE_ENV === 'development' 
+    ? ['query', 'error', 'warn'] 
+    : ['error'],
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL
+    }
+  }
+})
