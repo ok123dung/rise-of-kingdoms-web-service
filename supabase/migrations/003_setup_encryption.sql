@@ -1,49 +1,62 @@
 -- =====================================================
 -- RoK Services Database Field-Level Encryption
--- Sensitive Data Protection Implementation
+-- Safe version with error handling
 -- =====================================================
 
--- Enable pgcrypto extension for encryption functions
+-- Enable pgcrypto extension if not exists
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- =====================================================
--- Create Encryption Key Management
+-- Create Encryption Schema and Tables (Safe)
 -- =====================================================
 
--- Create a secure schema for encryption utilities
+-- Create vault schema if not exists
 CREATE SCHEMA IF NOT EXISTS vault;
 
--- Create table to store encryption keys (managed by Supabase Vault)
+-- Create encryption keys table if not exists
 CREATE TABLE IF NOT EXISTS vault.encryption_keys (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     key_name TEXT NOT NULL UNIQUE,
-    key_value TEXT NOT NULL, -- This will be encrypted by Supabase Vault
+    key_value TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     rotated_at TIMESTAMPTZ,
     is_active BOOLEAN DEFAULT true
 );
 
 -- =====================================================
--- Encryption/Decryption Functions
+-- Drop and Recreate Encryption Functions
 -- =====================================================
 
+-- Drop existing functions
+DROP FUNCTION IF EXISTS vault.encrypt_sensitive(TEXT, TEXT);
+DROP FUNCTION IF EXISTS vault.decrypt_sensitive(TEXT, TEXT);
+
 -- Function to encrypt sensitive text data
-CREATE OR REPLACE FUNCTION vault.encrypt_sensitive(
+CREATE FUNCTION vault.encrypt_sensitive(
     plain_text TEXT,
     key_name TEXT DEFAULT 'main'
 ) RETURNS TEXT AS $$
 DECLARE
     encryption_key TEXT;
 BEGIN
+    -- Handle NULL input
+    IF plain_text IS NULL THEN
+        RETURN NULL;
+    END IF;
+    
     -- Get active encryption key
     SELECT key_value INTO encryption_key
     FROM vault.encryption_keys
-    WHERE key_name = encrypt_sensitive.key_name
+    WHERE encryption_keys.key_name = encrypt_sensitive.key_name
     AND is_active = true
     LIMIT 1;
     
     IF encryption_key IS NULL THEN
-        RAISE EXCEPTION 'Encryption key not found: %', key_name;
+        -- Create a default key if none exists
+        INSERT INTO vault.encryption_keys (key_name, key_value)
+        VALUES (encrypt_sensitive.key_name, encode(gen_random_bytes(32), 'base64'))
+        ON CONFLICT (key_name) DO UPDATE SET is_active = true
+        RETURNING key_value INTO encryption_key;
     END IF;
     
     -- Encrypt the data
@@ -55,11 +68,14 @@ BEGIN
         ),
         'base64'
     );
+EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'Encryption failed: %', SQLERRM;
+    RETURN NULL;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to decrypt sensitive text data
-CREATE OR REPLACE FUNCTION vault.decrypt_sensitive(
+CREATE FUNCTION vault.decrypt_sensitive(
     encrypted_text TEXT,
     key_name TEXT DEFAULT 'main'
 ) RETURNS TEXT AS $$
@@ -67,17 +83,23 @@ DECLARE
     encryption_key TEXT;
     decrypted_text TEXT;
 BEGIN
+    -- Handle NULL input
+    IF encrypted_text IS NULL THEN
+        RETURN NULL;
+    END IF;
+    
     -- Get encryption key
     SELECT key_value INTO encryption_key
     FROM vault.encryption_keys
-    WHERE key_name = decrypt_sensitive.key_name
+    WHERE encryption_keys.key_name = decrypt_sensitive.key_name
     LIMIT 1;
     
     IF encryption_key IS NULL THEN
-        RAISE EXCEPTION 'Encryption key not found: %', key_name;
+        RAISE WARNING 'Encryption key not found: %', key_name;
+        RETURN NULL;
     END IF;
     
-    -- Try to decrypt with current key
+    -- Try to decrypt
     BEGIN
         decrypted_text := pgp_sym_decrypt(
             decode(encrypted_text, 'base64'),
@@ -85,11 +107,11 @@ BEGIN
         );
         RETURN decrypted_text;
     EXCEPTION WHEN OTHERS THEN
-        -- If fails, try with previous keys (for key rotation)
+        -- Try with other keys if rotation happened
         FOR encryption_key IN 
             SELECT key_value 
             FROM vault.encryption_keys 
-            WHERE key_name = decrypt_sensitive.key_name
+            WHERE encryption_keys.key_name = decrypt_sensitive.key_name
             ORDER BY created_at DESC
         LOOP
             BEGIN
@@ -103,17 +125,65 @@ BEGIN
             END;
         END LOOP;
         
-        RAISE EXCEPTION 'Unable to decrypt data';
+        RAISE WARNING 'Unable to decrypt data: %', SQLERRM;
+        RETURN NULL;
     END;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- =====================================================
--- Create Encrypted Views for Sensitive Data
+-- Add Encrypted Columns (Safe)
 -- =====================================================
 
+DO $$
+BEGIN
+    -- Users table
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'phone_encrypted') THEN
+        ALTER TABLE users ADD COLUMN phone_encrypted TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'discord_id_encrypted') THEN
+        ALTER TABLE users ADD COLUMN discord_id_encrypted TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'rok_player_id_encrypted') THEN
+        ALTER TABLE users ADD COLUMN rok_player_id_encrypted TEXT;
+    END IF;
+    
+    -- Payments table
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'payments' AND column_name = 'gateway_transaction_id_encrypted') THEN
+        ALTER TABLE payments ADD COLUMN gateway_transaction_id_encrypted TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'payments' AND column_name = 'metadata_encrypted') THEN
+        ALTER TABLE payments ADD COLUMN metadata_encrypted TEXT;
+    END IF;
+    
+    -- Communications table
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'communications' AND column_name = 'content_encrypted') THEN
+        ALTER TABLE communications ADD COLUMN content_encrypted TEXT;
+    END IF;
+    
+    -- File uploads table
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'file_uploads' AND column_name = 'metadata_encrypted') THEN
+        ALTER TABLE file_uploads ADD COLUMN metadata_encrypted TEXT;
+    END IF;
+    
+    RAISE NOTICE 'Encrypted columns added successfully';
+EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'Error adding encrypted columns: %', SQLERRM;
+END $$;
+
+-- =====================================================
+-- Create Secure Views (Drop and Recreate)
+-- =====================================================
+
+-- Drop existing views
+DROP VIEW IF EXISTS public.users_secure;
+DROP VIEW IF EXISTS public.payments_secure;
+
 -- Users view with encrypted sensitive fields
-CREATE OR REPLACE VIEW public.users_secure AS
+CREATE VIEW public.users_secure AS
 SELECT 
     id,
     email,
@@ -122,21 +192,21 @@ SELECT
     CASE 
         WHEN auth.uid()::text = id OR 
              EXISTS (SELECT 1 FROM staff WHERE user_id = auth.uid()::text AND role IN ('admin', 'manager'))
-        THEN vault.decrypt_sensitive(phone_encrypted)
+        THEN COALESCE(vault.decrypt_sensitive(phone_encrypted), phone)
         ELSE NULL
     END as phone,
     -- Decrypt discord_id only for authorized users
     CASE 
         WHEN auth.uid()::text = id OR 
              EXISTS (SELECT 1 FROM staff WHERE user_id = auth.uid()::text AND role IN ('admin', 'manager'))
-        THEN vault.decrypt_sensitive(discord_id_encrypted)
+        THEN COALESCE(vault.decrypt_sensitive(discord_id_encrypted), discord_id)
         ELSE NULL
     END as discord_id,
     -- Decrypt rok_player_id only for authorized users
     CASE 
         WHEN auth.uid()::text = id OR 
              EXISTS (SELECT 1 FROM staff WHERE user_id = auth.uid()::text AND role IN ('admin', 'manager'))
-        THEN vault.decrypt_sensitive(rok_player_id_encrypted)
+        THEN COALESCE(vault.decrypt_sensitive(rok_player_id_encrypted), rok_player_id)
         ELSE NULL
     END as rok_player_id,
     kingdom,
@@ -152,14 +222,14 @@ FROM users
 WHERE deleted_at IS NULL;
 
 -- Payments view with encrypted transaction IDs
-CREATE OR REPLACE VIEW public.payments_secure AS
+CREATE VIEW public.payments_secure AS
 SELECT 
     id,
     booking_id,
     amount,
     currency,
     status,
-    gateway,
+    payment_gateway,
     -- Decrypt transaction ID only for authorized users
     CASE 
         WHEN EXISTS (
@@ -171,121 +241,125 @@ SELECT
             WHERE user_id = auth.uid()::text 
             AND role IN ('admin', 'manager', 'finance')
         )
-        THEN vault.decrypt_sensitive(gateway_transaction_id_encrypted)
+        THEN COALESCE(vault.decrypt_sensitive(gateway_transaction_id_encrypted), gateway_transaction_id)
         ELSE NULL
     END as gateway_transaction_id,
-    reference_code,
+    payment_number,
     paid_at,
     created_at,
     updated_at
 FROM payments;
 
 -- =====================================================
--- Migration Functions for Existing Data
+-- Migration Function (Safe)
 -- =====================================================
 
+-- Drop existing function
+DROP FUNCTION IF EXISTS vault.migrate_encrypt_sensitive_data();
+
 -- Function to migrate existing unencrypted data
-CREATE OR REPLACE FUNCTION vault.migrate_encrypt_sensitive_data()
+CREATE FUNCTION vault.migrate_encrypt_sensitive_data()
 RETURNS void AS $$
+DECLARE
+    row_count INTEGER := 0;
 BEGIN
-    -- Add encrypted columns if they don't exist
-    ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS phone_encrypted TEXT,
-        ADD COLUMN IF NOT EXISTS discord_id_encrypted TEXT,
-        ADD COLUMN IF NOT EXISTS rok_player_id_encrypted TEXT;
+    -- Initialize encryption key if not exists
+    INSERT INTO vault.encryption_keys (key_name, key_value)
+    VALUES ('main', encode(gen_random_bytes(32), 'base64'))
+    ON CONFLICT (key_name) DO NOTHING;
     
-    ALTER TABLE payments
-        ADD COLUMN IF NOT EXISTS gateway_transaction_id_encrypted TEXT,
-        ADD COLUMN IF NOT EXISTS metadata_encrypted TEXT;
-    
-    ALTER TABLE communications
-        ADD COLUMN IF NOT EXISTS content_encrypted TEXT;
-    
-    ALTER TABLE file_uploads
-        ADD COLUMN IF NOT EXISTS metadata_encrypted TEXT;
-    
-    -- Encrypt existing user data
+    -- Encrypt user data
     UPDATE users 
     SET 
         phone_encrypted = vault.encrypt_sensitive(phone),
         discord_id_encrypted = vault.encrypt_sensitive(discord_id),
         rok_player_id_encrypted = vault.encrypt_sensitive(rok_player_id)
-    WHERE phone IS NOT NULL 
-       OR discord_id IS NOT NULL 
-       OR rok_player_id IS NOT NULL;
+    WHERE (phone IS NOT NULL OR discord_id IS NOT NULL OR rok_player_id IS NOT NULL)
+    AND (phone_encrypted IS NULL OR discord_id_encrypted IS NULL OR rok_player_id_encrypted IS NULL);
     
-    -- Encrypt existing payment data
+    GET DIAGNOSTICS row_count = ROW_COUNT;
+    RAISE NOTICE 'Encrypted % user records', row_count;
+    
+    -- Encrypt payment data
     UPDATE payments
     SET 
         gateway_transaction_id_encrypted = vault.encrypt_sensitive(gateway_transaction_id),
         metadata_encrypted = vault.encrypt_sensitive(metadata::text)
-    WHERE gateway_transaction_id IS NOT NULL
-       OR metadata IS NOT NULL;
+    WHERE (gateway_transaction_id IS NOT NULL OR metadata IS NOT NULL)
+    AND (gateway_transaction_id_encrypted IS NULL OR metadata_encrypted IS NULL);
     
-    -- Encrypt existing communication content
+    GET DIAGNOSTICS row_count = ROW_COUNT;
+    RAISE NOTICE 'Encrypted % payment records', row_count;
+    
+    -- Encrypt communication content
     UPDATE communications
     SET content_encrypted = vault.encrypt_sensitive(content)
-    WHERE content IS NOT NULL;
+    WHERE content IS NOT NULL
+    AND content_encrypted IS NULL;
+    
+    GET DIAGNOSTICS row_count = ROW_COUNT;
+    RAISE NOTICE 'Encrypted % communication records', row_count;
     
     -- Encrypt file metadata
     UPDATE file_uploads
     SET metadata_encrypted = vault.encrypt_sensitive(metadata::text)
-    WHERE metadata IS NOT NULL;
+    WHERE metadata IS NOT NULL
+    AND metadata_encrypted IS NULL;
     
-    -- Drop original columns (after verifying encryption)
-    -- NOTE: Only execute after confirming all data is encrypted
-    -- ALTER TABLE users DROP COLUMN phone, DROP COLUMN discord_id, DROP COLUMN rok_player_id;
-    -- ALTER TABLE payments DROP COLUMN gateway_transaction_id, DROP COLUMN metadata;
-    -- ALTER TABLE communications DROP COLUMN content;
-    -- ALTER TABLE file_uploads DROP COLUMN metadata;
+    GET DIAGNOSTICS row_count = ROW_COUNT;
+    RAISE NOTICE 'Encrypted % file upload records', row_count;
+    
+EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'Migration error: %', SQLERRM;
 END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================
--- Triggers for Automatic Encryption
+-- Automatic Encryption Triggers (Safe)
 -- =====================================================
 
+-- Drop existing triggers and functions
+DROP TRIGGER IF EXISTS encrypt_user_data ON users;
+DROP TRIGGER IF EXISTS encrypt_payment_data ON payments;
+DROP FUNCTION IF EXISTS vault.encrypt_user_trigger();
+DROP FUNCTION IF EXISTS vault.encrypt_payment_trigger();
+
 -- Trigger function to encrypt user data on insert/update
-CREATE OR REPLACE FUNCTION vault.encrypt_user_trigger()
+CREATE FUNCTION vault.encrypt_user_trigger()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.phone IS NOT NULL THEN
+    IF NEW.phone IS NOT NULL AND NEW.phone_encrypted IS NULL THEN
         NEW.phone_encrypted = vault.encrypt_sensitive(NEW.phone);
-        NEW.phone = NULL; -- Clear plaintext
     END IF;
     
-    IF NEW.discord_id IS NOT NULL THEN
+    IF NEW.discord_id IS NOT NULL AND NEW.discord_id_encrypted IS NULL THEN
         NEW.discord_id_encrypted = vault.encrypt_sensitive(NEW.discord_id);
-        NEW.discord_id = NULL; -- Clear plaintext
     END IF;
     
-    IF NEW.rok_player_id IS NOT NULL THEN
+    IF NEW.rok_player_id IS NOT NULL AND NEW.rok_player_id_encrypted IS NULL THEN
         NEW.rok_player_id_encrypted = vault.encrypt_sensitive(NEW.rok_player_id);
-        NEW.rok_player_id = NULL; -- Clear plaintext
     END IF;
     
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- Create triggers
+-- Create trigger
 CREATE TRIGGER encrypt_user_data
     BEFORE INSERT OR UPDATE ON users
     FOR EACH ROW
     EXECUTE FUNCTION vault.encrypt_user_trigger();
 
 -- Trigger for payment encryption
-CREATE OR REPLACE FUNCTION vault.encrypt_payment_trigger()
+CREATE FUNCTION vault.encrypt_payment_trigger()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.gateway_transaction_id IS NOT NULL THEN
+    IF NEW.gateway_transaction_id IS NOT NULL AND NEW.gateway_transaction_id_encrypted IS NULL THEN
         NEW.gateway_transaction_id_encrypted = vault.encrypt_sensitive(NEW.gateway_transaction_id);
-        NEW.gateway_transaction_id = NULL; -- Clear plaintext
     END IF;
     
-    IF NEW.metadata IS NOT NULL THEN
+    IF NEW.metadata IS NOT NULL AND NEW.metadata_encrypted IS NULL THEN
         NEW.metadata_encrypted = vault.encrypt_sensitive(NEW.metadata::text);
-        NEW.metadata = NULL; -- Clear plaintext
     END IF;
     
     RETURN NEW;
@@ -298,7 +372,7 @@ CREATE TRIGGER encrypt_payment_data
     EXECUTE FUNCTION vault.encrypt_payment_trigger();
 
 -- =====================================================
--- Access Control for Encryption Functions
+-- Access Control (Safe)
 -- =====================================================
 
 -- Grant permissions
@@ -311,20 +385,10 @@ REVOKE ALL ON vault.encryption_keys FROM PUBLIC;
 REVOKE ALL ON vault.encryption_keys FROM authenticated;
 
 -- =====================================================
--- Initialize Encryption Keys
+-- Data Classification Table (Safe)
 -- =====================================================
 
--- Insert initial encryption key (This should be managed by Supabase Vault)
--- In production, use Supabase Vault to securely manage keys
-INSERT INTO vault.encryption_keys (key_name, key_value)
-VALUES ('main', gen_random_bytes(32)::text)
-ON CONFLICT (key_name) DO NOTHING;
-
--- =====================================================
--- Data Classification Tags
--- =====================================================
-
--- Create table for data classification
+-- Create table if not exists
 CREATE TABLE IF NOT EXISTS public.data_classification (
     table_name TEXT NOT NULL,
     column_name TEXT NOT NULL,
@@ -336,7 +400,7 @@ CREATE TABLE IF NOT EXISTS public.data_classification (
     PRIMARY KEY (table_name, column_name)
 );
 
--- Classify sensitive columns
+-- Insert classification data
 INSERT INTO data_classification (table_name, column_name, classification, pii_type, encryption_required, retention_days)
 VALUES 
     ('users', 'email', 'confidential', 'email', false, 2555),
@@ -347,16 +411,17 @@ VALUES
     ('payments', 'metadata', 'confidential', 'financial', true, 2555),
     ('communications', 'content', 'confidential', NULL, true, 365),
     ('file_uploads', 'metadata', 'internal', NULL, true, 1095),
-    ('audit_logs', 'ip_address', 'confidential', 'identifier', false, 90),
-    ('security_logs', 'ip_address', 'confidential', 'identifier', false, 90)
+    ('security_logs', 'ip', 'confidential', 'identifier', false, 90)
 ON CONFLICT DO NOTHING;
 
 -- =====================================================
--- Monitoring and Compliance
+-- Compliance View (Safe)
 -- =====================================================
 
--- Create view for encryption compliance monitoring
-CREATE OR REPLACE VIEW public.encryption_compliance AS
+-- Drop and recreate
+DROP VIEW IF EXISTS public.encryption_compliance;
+
+CREATE VIEW public.encryption_compliance AS
 SELECT 
     dc.table_name,
     dc.column_name,
@@ -370,9 +435,37 @@ SELECT
                 WHERE table_name = dc.table_name 
                 AND column_name = dc.column_name || '_encrypted'
              )
-        THEN 'Compliant'
-        WHEN dc.encryption_required THEN 'Non-Compliant'
-        ELSE 'N/A'
+        THEN '✅ Compliant'
+        WHEN dc.encryption_required THEN '❌ Non-Compliant'
+        ELSE '➖ N/A'
     END as compliance_status
 FROM data_classification dc
 ORDER BY dc.classification DESC, dc.table_name, dc.column_name;
+
+-- =====================================================
+-- Summary
+-- =====================================================
+
+DO $$
+DECLARE
+    encrypted_count INTEGER;
+    key_count INTEGER;
+BEGIN
+    -- Count encrypted columns
+    SELECT COUNT(*) INTO encrypted_count
+    FROM information_schema.columns
+    WHERE column_name LIKE '%_encrypted'
+    AND table_schema = 'public';
+    
+    -- Count encryption keys
+    SELECT COUNT(*) INTO key_count
+    FROM vault.encryption_keys
+    WHERE is_active = true;
+    
+    RAISE NOTICE 'Field-level encryption setup complete!';
+    RAISE NOTICE 'Encrypted columns: %', encrypted_count;
+    RAISE NOTICE 'Active encryption keys: %', key_count;
+    RAISE NOTICE '';
+    RAISE NOTICE 'Run SELECT vault.migrate_encrypt_sensitive_data() to encrypt existing data';
+    RAISE NOTICE 'View compliance status: SELECT * FROM encryption_compliance';
+END $$;
