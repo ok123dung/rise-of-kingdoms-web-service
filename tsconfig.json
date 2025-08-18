@@ -28,5 +28,17 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/types/**/*.d.ts"],
-  "exclude": ["node_modules", "src/__tests__/**/*", "src/lib/testing/**/*"]
+  "exclude": [
+    "node_modules",
+    "src/__tests__/**/*",
+    "src/lib/testing/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "__mocks__/**/*",
+    "jest.*.js",
+    "coverage/**/*",
+    "tests/**/*"
+  ]
 }

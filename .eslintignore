@@ -1,38 +1,52 @@
 # Dependencies
-node_modules
-.pnp
-.pnp.js
+node_modules/
 
-# Production
-build
-dist
-out
-.next
+# Production build
+.next/
+out/
+build/
+dist/
 
 # Testing
-coverage
-.nyc_output
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# Turbo
-.turbo
-
-# Vercel
-.vercel
-
-# Prisma
-prisma/migrations
-
-# Generated files
-generated
-public/sw.js
-public/workbox-*.js
+coverage/
+.nyc_output/
+jest.*.js
+__mocks__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
 
 # Config files
-*.config.js
-*.config.ts
-tailwind.config.ts
+next.config.js
+tailwind.config.js
 postcss.config.js
+playwright.config.ts
+lighthouserc.js
+wrangler.toml
+
+# Scripts
+scripts/
+*.sh
+
+# Documentation
+*.md
+docs/
+
+# Environment files
+.env*
+
+# Cache
+.eslintcache
+.cache/
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Other
+public/sw.js
+src/instrumentation.ts
