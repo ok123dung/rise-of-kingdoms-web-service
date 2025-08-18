@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth'
 import { UploadService } from '@/lib/storage/upload-service'
 import { getLogger } from '@/lib/monitoring/logger'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)

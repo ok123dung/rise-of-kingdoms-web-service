@@ -3,6 +3,8 @@ import crypto from 'crypto'
 import { webhookService } from '@/lib/webhooks/processor'
 import { getLogger } from '@/lib/monitoring/logger'
 
+export const dynamic = 'force-dynamic'
+
 function sortObject(obj: any) {
   const sorted: any = {}
   const keys = Object.keys(obj).sort()

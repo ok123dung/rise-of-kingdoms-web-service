@@ -5,6 +5,8 @@ import { getLogger } from '@/lib/monitoring/logger'
 // This endpoint should be called by a cron job service
 // Example: Vercel Cron, GitHub Actions, or external cron service
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Verify cron secret
