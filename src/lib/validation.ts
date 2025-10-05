@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { passwordSchema } from './password-validation'
 
 // Email validation schema
 export const emailSchema = z
@@ -44,14 +45,7 @@ export const rokPowerSchema = z
 // User registration/update validation
 export const userValidationSchema = z.object({
   email: emailSchema,
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must be less than 128 characters')
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      'Password must contain at least one lowercase, one uppercase, and one number'
-    ),
+  password: passwordSchema,
   fullName: z
     .string()
     .min(2, 'Full name must be at least 2 characters')
@@ -67,7 +61,7 @@ export const userValidationSchema = z.object({
   rokPower: rokPowerSchema
 })
 
-// Signup validation schema (simplified for registration)
+// Signup validation schema (using strong password validation)
 export const signupSchema = z.object({
   fullName: z
     .string()
@@ -79,10 +73,7 @@ export const signupSchema = z.object({
     .email('Định dạng email không hợp lệ')
     .min(5, 'Email phải có ít nhất 5 ký tự')
     .max(255, 'Email không được quá 255 ký tự'),
-  password: z
-    .string()
-    .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
-    .max(128, 'Mật khẩu không được quá 128 ký tự'),
+  password: passwordSchema,
   phone: z
     .string()
     .regex(

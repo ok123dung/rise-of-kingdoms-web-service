@@ -4,10 +4,45 @@ Website cung cấp dịch vụ chuyên nghiệp cho game Rise of Kingdoms tại 
 
 ## 🚀 Quick Start
 
-### Development
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database (Supabase, Neon, or local)
+- npm or yarn
+
+### Development Setup
+
+1. **Install Dependencies**
 ```bash
 npm install
+```
+
+2. **Configure Environment Variables**
+```bash
+# Copy the example environment file
+cp .env.example .env.local
+
+# Edit .env.local and add your configuration:
+# - DATABASE_URL: Your PostgreSQL connection string
+# - NEXTAUTH_SECRET: Generate with: openssl rand -base64 32
+# - Other API keys as needed
+```
+
+3. **Setup Database**
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Run migrations
+npx prisma migrate dev
+
+# (Optional) Seed initial data
+npx tsx prisma/seed.ts
+```
+
+4. **Start Development Server**
+```bash
 npm run dev
+# Open http://localhost:3000
 ```
 
 ### Production Build
@@ -34,11 +69,15 @@ NEXT_PUBLIC_DISCORD_INVITE=https://discord.gg/rokservices
 
 ## 🛠 Tech Stack
 
-- **Framework**: Next.js 14 with TypeScript
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript (strict mode)
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js
 - **Styling**: Tailwind CSS
-- **Icons**: Lucide React
+- **Icons**: Lucide React & Heroicons
 - **Deployment**: Vercel
-- **CDN**: Cloudflare
+- **Monitoring**: Sentry
+- **Payment Gateways**: MoMo, ZaloPay, VNPay
 
 ## 📱 Features
 
@@ -60,19 +99,85 @@ Vietnamese Rise of Kingdoms players seeking professional gaming services.
 
 ## 🔧 Development
 
-### Scripts
-- `npm run dev` - Development server
-- `npm run build` - Production build
-- `npm run lint` - ESLint check
-- `npm run type-check` - TypeScript check
+### Available Scripts
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint errors automatically
+- `npm run type-check` - TypeScript type checking
+- `npm run format` - Format code with Prettier
+- `npm run test` - Run Jest tests
+- `npm run test:e2e` - Run Playwright E2E tests
+- `npm run db:studio` - Open Prisma Studio
+- `npm run db:migrate` - Run database migrations
 
 ### Project Structure
 ```
 src/
 ├── app/                 # Next.js 14 app directory
-├── components/          # Reusable components
-├── lib/                 # Utility functions
-└── styles/              # Global styles
+│   ├── api/            # API routes
+│   ├── (auth)/         # Auth pages
+│   ├── admin/          # Admin dashboard
+│   └── ...
+├── components/          # React components
+│   ├── ui/             # UI components
+│   ├── sections/       # Page sections
+│   └── ...
+├── lib/                # Utility functions
+│   ├── auth/           # Authentication utilities
+│   ├── payments/       # Payment integrations
+│   └── ...
+├── types/              # TypeScript type definitions
+└── middleware/         # Next.js middleware
+prisma/
+├── schema.prisma       # Database schema
+├── migrations/         # Database migrations
+└── seed.ts            # Database seeding
+```
+
+### Security Features
+
+✅ **Strong Password Policy**
+- Minimum 12 characters
+- Requires uppercase, lowercase, numbers, and special characters
+- Checks against common passwords
+- Prevents sequential/repeating characters
+
+✅ **Security Headers**
+- Content Security Policy (CSP)
+- X-Frame-Options: DENY
+- X-Content-Type-Options: nosniff
+- Strict-Transport-Security (HSTS)
+- CSRF Protection
+
+✅ **Input Validation**
+- Zod schema validation on all API endpoints
+- SQL injection prevention via Prisma ORM
+- XSS protection with sanitization
+
+✅ **Rate Limiting**
+- Auth endpoints: 5 req/min
+- Payment endpoints: 20 req/min
+- General API: 60 req/min
+
+### Environment Variables
+
+Required variables (see [.env.example](.env.example) for full list):
+
+```bash
+# Database
+DATABASE_URL=           # PostgreSQL connection string
+DIRECT_URL=            # Direct database connection (for migrations)
+
+# Authentication
+NEXTAUTH_URL=          # Your site URL
+NEXTAUTH_SECRET=       # Generate with: openssl rand -base64 32
+
+# Security
+API_SECRET_KEY=        # Generate with: openssl rand -base64 32
+JWT_SECRET=            # Generate with: openssl rand -base64 32
+ENCRYPTION_KEY=        # Generate with: openssl rand -base64 32
 ```
 
 ## 🌐 Domain Configuration

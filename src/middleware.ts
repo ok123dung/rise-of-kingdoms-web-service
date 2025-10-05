@@ -16,7 +16,11 @@ export async function middleware(req: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
   
-  // Content Security Policy - temporarily allow unsafe-inline for Next.js
+  // Content Security Policy
+  // Note: 'unsafe-inline' and 'unsafe-eval' are required for Next.js to function properly
+  // Next.js uses inline scripts for hydration and client-side navigation
+  // To fully remove these, consider implementing nonce-based CSP (requires significant refactoring)
+  // Alternative: Use Strict CSP with nonces/hashes for production (see next.config.js)
   const cspHeader = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
@@ -26,7 +30,8 @@ export async function middleware(req: NextRequest) {
     "connect-src 'self' https://www.google-analytics.com https://vitals.vercel-insights.com ws://localhost:* wss://localhost:*",
     "frame-ancestors 'none'",
     "base-uri 'self'",
-    "form-action 'self'"
+    "form-action 'self'",
+    "object-src 'none'"
   ].join('; ')
   
   response.headers.set('Content-Security-Policy', cspHeader)
