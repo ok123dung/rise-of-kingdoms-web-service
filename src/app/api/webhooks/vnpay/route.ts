@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { webhookService } from '@/lib/webhooks/processor'
 import { getLogger } from '@/lib/monitoring/logger'
+import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
+import { parseVNPayTimestamp } from '@/lib/webhooks/timestamp-utils'
+import type { VNPayWebhookParams } from '@/types/webhook-payloads'
 
 export const dynamic = 'force-dynamic'
 
-function sortObject(obj: any) {
-  const sorted: any = {}
+function sortObject(obj: Record<string, string>): Record<string, string> {
+  const sorted: Record<string, string> = {}
   const keys = Object.keys(obj).sort()
   keys.forEach(key => {
     sorted[key] = obj[key]
@@ -15,13 +19,19 @@ function sortObject(obj: any) {
 }
 
 export async function GET(request: NextRequest) {
+  // Apply rate limiting for webhook endpoint
+  const rateLimitResponse = await withRateLimit(request, rateLimiters.webhookVnpay)
+  if (rateLimitResponse) {
+    return rateLimitResponse
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams
-    const vnpParams: any = {}
-    
+    const vnpParams: Partial<VNPayWebhookParams> = {}
+
     searchParams.forEach((value, key) => {
       if (key.startsWith('vnp_')) {
-        vnpParams[key] = value
+        vnpParams[key as keyof VNPayWebhookParams] = value
       }
     })
 
@@ -29,8 +39,11 @@ export async function GET(request: NextRequest) {
     delete vnpParams['vnp_SecureHash']
     delete vnpParams['vnp_SecureHashType']
 
-    // Sort parameters
-    const sortedParams = sortObject(vnpParams)
+    // Sort parameters - filter undefined values
+    const cleanParams = Object.fromEntries(
+      Object.entries(vnpParams).filter(([_, v]) => v !== undefined)
+    ) as Record<string, string>
+    const sortedParams = sortObject(cleanParams)
     const signData = new URLSearchParams(sortedParams).toString()
     
     // Verify signature
@@ -45,8 +58,31 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Store webhook event for processing
+    // Replay protection: validate timestamp and check for duplicates
     const eventId = `vnpay_${vnpParams.vnp_TxnRef}_${vnpParams.vnp_TransactionNo}`
+    // Parse VNPay timestamp (yyyyMMddHHmmss) to milliseconds
+    const timestampMs = parseVNPayTimestamp(vnpParams.vnp_PayDate)
+    const replayValidation = await validateWebhookReplayProtection(
+      'vnpay',
+      eventId,
+      timestampMs
+    )
+
+    if (!replayValidation.valid) {
+      getLogger().warn('VNPay webhook replay attack detected', {
+        eventId,
+        error: replayValidation.error,
+        isDuplicate: replayValidation.isDuplicate
+      })
+
+      // Return success to prevent retries, but don't process
+      return NextResponse.json({
+        RspCode: '00',
+        Message: replayValidation.isDuplicate ? 'Already processed' : 'Invalid request'
+      })
+    }
+
+    // Store webhook event for processing
     await webhookService.storeWebhookEvent(
       'vnpay',
       'payment_notification',

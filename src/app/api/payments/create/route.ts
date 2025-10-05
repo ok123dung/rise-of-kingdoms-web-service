@@ -38,16 +38,34 @@ async function createPaymentHandler(request: NextRequest) {
       throw new ValidationError('Invalid payment request data')
     }
 
-    // Verify booking exists and belongs to user
-    const booking = await db.booking.findById(validatedData.bookingId)
+    // Get session info first
+    const session = await getCurrentSession()
+    const userIsStaff = await isStaff()
+
+    // Verify booking exists with all needed relations in a single query (fix N+1)
+    const booking = await prisma.booking.findUnique({
+      where: { id: validatedData.bookingId },
+      include: {
+        user: true,
+        serviceTier: {
+          include: {
+            service: true
+          }
+        },
+        payments: {
+          where: {
+            status: { in: ['pending', 'completed'] }
+          },
+          select: { id: true, status: true }
+        }
+      }
+    })
+
     if (!booking) {
       throw new NotFoundError('Booking')
     }
 
     // Check if user owns this booking (unless admin)
-    const session = await getCurrentSession()
-    const userIsStaff = await isStaff()
-
     if (booking.userId !== session?.user?.id && !userIsStaff) {
       throw new AuthorizationError('You do not have access to this booking')
     }
@@ -57,15 +75,8 @@ async function createPaymentHandler(request: NextRequest) {
       throw new PaymentError('Booking is not in valid state for payment')
     }
 
-    // Check if payment already exists and is pending/completed
-    const existingPayment = await prisma.payment.findFirst({
-      where: {
-        bookingId: validatedData.bookingId,
-        status: { in: ['pending', 'completed'] }
-      }
-    })
-
-    if (existingPayment) {
+    // Check if payment already exists (now included in the booking query)
+    if (booking.payments && booking.payments.length > 0) {
       throw new PaymentError('Payment already exists for this booking')
     }
 

@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { webhookService } from '@/lib/webhooks/processor'
 import { getLogger } from '@/lib/monitoring/logger'
+import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting for webhook endpoint
+  const rateLimitResponse = await withRateLimit(request, rateLimiters.webhookZalopay)
+  if (rateLimitResponse) {
+    return rateLimitResponse
+  }
+
   try {
     const formData = await request.formData()
     const data = formData.get('data') as string
@@ -42,8 +50,29 @@ export async function POST(request: NextRequest) {
       status
     } = jsonData
 
-    // Store webhook event for processing
+    // Replay protection: validate timestamp and check for duplicates
     const eventId = `zalopay_${app_trans_id}_${zp_trans_id}`
+    const replayValidation = await validateWebhookReplayProtection(
+      'zalopay',
+      eventId,
+      server_time // ZaloPay timestamp in milliseconds
+    )
+
+    if (!replayValidation.valid) {
+      getLogger().warn('ZaloPay webhook replay attack detected', {
+        eventId,
+        error: replayValidation.error,
+        isDuplicate: replayValidation.isDuplicate
+      })
+
+      // Return success to prevent retries, but don't process
+      return NextResponse.json({
+        return_code: 1,
+        return_message: replayValidation.isDuplicate ? 'Already processed' : 'Invalid request'
+      })
+    }
+
+    // Store webhook event for processing
     await webhookService.storeWebhookEvent(
       'zalopay',
       'payment_notification',

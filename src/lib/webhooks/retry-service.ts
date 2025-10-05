@@ -175,12 +175,16 @@ export class WebhookRetryService {
 
       // Find payment by order ID
       const payment = await prisma.payment.findFirst({
-        where: { 
+        where: {
           paymentNumber: orderId,
           paymentMethod: 'momo'
         },
         include: {
-          booking: true
+          booking: {
+            include: {
+              user: true
+            }
+          }
         }
       })
 
@@ -189,27 +193,30 @@ export class WebhookRetryService {
         return false // Retry later
       }
 
-      // Update payment status
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: 'completed',
-          transactionId: transId,
-          metadata: {
-            ...(typeof payment.metadata === 'object' ? payment.metadata : {}),
-            momoRequestId: requestId,
-            momoMessage: message
+      // Use transaction to ensure atomicity
+      await prisma.$transaction(async (tx) => {
+        // Update payment status
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: 'completed',
+            gatewayTransactionId: transId,
+            gatewayResponse: {
+              momoRequestId: requestId,
+              momoMessage: message,
+              momoTransId: transId
+            }
           }
-        }
+        })
+
+        // Update booking payment status
+        await tx.booking.update({
+          where: { id: payment.bookingId },
+          data: { paymentStatus: 'paid' }
+        })
       })
 
-      // Update booking payment status
-      await prisma.booking.update({
-        where: { id: payment.bookingId },
-        data: { paymentStatus: 'paid' }
-      })
-
-      // Send real-time notification
+      // Send real-time notification (outside transaction)
       emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
         paymentId: payment.id,
         amount: payment.amount,
@@ -242,12 +249,16 @@ export class WebhookRetryService {
       }
 
       const payment = await prisma.payment.findFirst({
-        where: { 
+        where: {
           paymentNumber: app_trans_id,
           paymentMethod: 'zalopay'
         },
         include: {
-          booking: true
+          booking: {
+            include: {
+              user: true
+            }
+          }
         }
       })
 
@@ -256,23 +267,28 @@ export class WebhookRetryService {
         return false
       }
 
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: 'completed',
-          transactionId: zp_trans_id,
-          metadata: {
-            ...(typeof payment.metadata === 'object' ? payment.metadata : {}),
-            zaloPayTransId: zp_trans_id
+      // Use transaction to ensure atomicity
+      await prisma.$transaction(async (tx) => {
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: 'completed',
+            gatewayTransactionId: zp_trans_id,
+            gatewayResponse: {
+              zaloPayTransId: zp_trans_id,
+              appTransId: app_trans_id,
+              status
+            }
           }
-        }
+        })
+
+        await tx.booking.update({
+          where: { id: payment.bookingId },
+          data: { paymentStatus: 'paid' }
+        })
       })
 
-      await prisma.booking.update({
-        where: { id: payment.bookingId },
-        data: { paymentStatus: 'paid' }
-      })
-
+      // Send real-time notification (outside transaction)
       emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
         paymentId: payment.id,
         amount: payment.amount,
@@ -305,12 +321,16 @@ export class WebhookRetryService {
       }
 
       const payment = await prisma.payment.findFirst({
-        where: { 
+        where: {
           paymentNumber: vnp_TxnRef,
           paymentMethod: 'vnpay'
         },
         include: {
-          booking: true
+          booking: {
+            include: {
+              user: true
+            }
+          }
         }
       })
 
@@ -319,23 +339,28 @@ export class WebhookRetryService {
         return false
       }
 
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: 'completed',
-          transactionId: vnp_TransactionNo,
-          metadata: {
-            ...(typeof payment.metadata === 'object' ? payment.metadata : {}),
-            vnpayTransactionNo: vnp_TransactionNo
+      // Use transaction to ensure atomicity
+      await prisma.$transaction(async (tx) => {
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: 'completed',
+            gatewayTransactionId: vnp_TransactionNo,
+            gatewayResponse: {
+              vnpayTransactionNo: vnp_TransactionNo,
+              vnpTxnRef: vnp_TxnRef,
+              vnpResponseCode: vnp_ResponseCode
+            }
           }
-        }
+        })
+
+        await tx.booking.update({
+          where: { id: payment.bookingId },
+          data: { paymentStatus: 'paid' }
+        })
       })
 
-      await prisma.booking.update({
-        where: { id: payment.bookingId },
-        data: { paymentStatus: 'paid' }
-      })
-
+      // Send real-time notification (outside transaction)
       emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
         paymentId: payment.id,
         amount: payment.amount,

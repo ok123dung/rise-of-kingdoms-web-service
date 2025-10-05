@@ -149,6 +149,28 @@ export const rateLimiters = {
     windowMs: 60 * 60 * 1000, // 1 hour
     max: 3, // 3 attempts per hour
     keyPrefix: 'strict'
+  }),
+  // Webhook rate limiting - prevent abuse and DDoS
+  webhook: new RateLimiter({
+    windowMs: 60 * 1000, // 1 minute
+    max: 100, // 100 webhooks per minute per IP
+    keyPrefix: 'webhook'
+  }),
+  // Per-provider webhook limits (stricter)
+  webhookVnpay: new RateLimiter({
+    windowMs: 60 * 1000, // 1 minute
+    max: 50, // 50 VNPay webhooks per minute
+    keyPrefix: 'webhook:vnpay'
+  }),
+  webhookMomo: new RateLimiter({
+    windowMs: 60 * 1000, // 1 minute
+    max: 50, // 50 MoMo webhooks per minute
+    keyPrefix: 'webhook:momo'
+  }),
+  webhookZalopay: new RateLimiter({
+    windowMs: 60 * 1000, // 1 minute
+    max: 50, // 50 ZaloPay webhooks per minute
+    keyPrefix: 'webhook:zalopay'
   })
 }
 // Middleware helper

@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { webhookService } from '@/lib/webhooks/processor'
 import { getLogger } from '@/lib/monitoring/logger'
+import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting for webhook endpoint
+  const rateLimitResponse = await withRateLimit(request, rateLimiters.webhookMomo)
+  if (rateLimitResponse) {
+    return rateLimitResponse
+  }
+
   try {
     const body = await request.json()
     
@@ -53,8 +61,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Store webhook event for processing
+    // Replay protection: validate timestamp and check for duplicates
     const eventId = `momo_${orderId}_${transId}`
+    const replayValidation = await validateWebhookReplayProtection(
+      'momo',
+      eventId,
+      responseTime // MoMo timestamp in milliseconds
+    )
+
+    if (!replayValidation.valid) {
+      getLogger().warn('MoMo webhook replay attack detected', {
+        eventId,
+        error: replayValidation.error,
+        isDuplicate: replayValidation.isDuplicate
+      })
+
+      // Return success to prevent retries, but don't process
+      return NextResponse.json({
+        message: replayValidation.isDuplicate ? 'Already processed' : 'Invalid request',
+        resultCode: 0
+      })
+    }
+
+    // Store webhook event for processing
     await webhookService.storeWebhookEvent(
       'momo',
       'payment_notification',

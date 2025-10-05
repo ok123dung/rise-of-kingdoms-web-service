@@ -299,8 +299,8 @@ export class SecureWebSocketServer {
               user: {
                 select: {
                   id: true,
-                  fullName: true,
-                  image: true
+                  fullName: true
+                  // image: true // Field doesn't exist in User schema
                 }
               }
             }
