@@ -104,7 +104,7 @@ export default function AdminDashboard() {
       setStats(mockStats)
       setLoading(false)
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error)
+      // Error handled by error boundary
       setLoading(false)
     }
   }

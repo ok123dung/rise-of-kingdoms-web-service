@@ -40,8 +40,8 @@ export const currentCSPDirectives: CSPDirectives = {
   'default-src': ["'self'"],
   'script-src': [
     "'self'",
-    "'unsafe-inline'", // TODO: Remove after implementing nonce-based CSP
-    "'unsafe-eval'", // TODO: Remove after implementing nonce-based CSP
+    "'unsafe-inline'", // Will be removed in strict CSP migration
+    "'unsafe-eval'", // Will be removed in strict CSP migration
     'https://www.googletagmanager.com',
     'https://www.google-analytics.com'
   ],

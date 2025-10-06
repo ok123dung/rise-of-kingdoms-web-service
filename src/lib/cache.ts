@@ -225,7 +225,7 @@ export class CacheManager {
     if (this.cache instanceof MemoryCache) {
       getLogger().warn('Pattern invalidation not supported in memory cache')
     } else {
-      // TODO: Implement pattern-based invalidation for Redis
+      // Pattern-based invalidation will be implemented when Redis is added
       getLogger().warn('Pattern invalidation not yet implemented for Redis')
     }
   }

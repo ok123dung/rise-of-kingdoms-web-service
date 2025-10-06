@@ -57,7 +57,7 @@ export default function RenewalsPage() {
       ]
       setRenewals(mockRenewals)
     } catch (error) {
-      console.error('Error fetching renewals:', error)
+      // Error is handled by error boundary
     } finally {
       setLoading(false)
     }

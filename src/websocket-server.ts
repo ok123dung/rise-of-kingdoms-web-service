@@ -1,13 +1,24 @@
 import { initializeWebSocketServer } from './lib/websocket/init'
 import { config } from 'dotenv'
+
 // Load environment variables
 config()
+
 const PORT = parseInt(process.env.WS_PORT || '3001', 10)
-console.log('Starting WebSocket server...')
+
+// Only log in development
+if (process.env.NODE_ENV === 'development') {
+  console.log('Starting WebSocket server...')
+}
+
 try {
   initializeWebSocketServer(PORT)
-  console.log(`✅ WebSocket server started on port ${PORT}`)
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`✅ WebSocket server started on port ${PORT}`)
+  }
 } catch (error) {
-  console.error('❌ Failed to start WebSocket server:', error)
+  if (process.env.NODE_ENV === 'development') {
+    console.error('❌ Failed to start WebSocket server:', error)
+  }
   process.exit(1)
 }
