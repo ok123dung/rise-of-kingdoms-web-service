@@ -6,7 +6,10 @@ import crypto from 'crypto'
  * @returns Hexadecimal string of specified length
  */
 export function generateSecureRandomString(length: number): string {
-  return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length)
+  return crypto
+    .randomBytes(Math.ceil(length / 2))
+    .toString('hex')
+    .slice(0, length)
 }
 
 /**
@@ -35,7 +38,7 @@ export function generateSecureRandomInt(min: number, max: number): number {
  * @param length - Length of random part (default 16)
  * @returns Random ID string
  */
-export function generateSecureId(prefix: string = '', length: number = 16): string {
+export function generateSecureId(prefix = '', length = 16): string {
   const randomPart = generateSecureRandomString(length)
   return prefix ? `${prefix}_${randomPart}` : randomPart
 }
@@ -48,11 +51,11 @@ export function generateSecureId(prefix: string = '', length: number = 16): stri
 export function generateSecureAlphanumeric(length: number): string {
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
   let result = ''
-  
+
   for (let i = 0; i < length; i++) {
     result += chars[generateSecureRandomInt(0, chars.length - 1)]
   }
-  
+
   return result
 }
 
@@ -61,7 +64,7 @@ export function generateSecureAlphanumeric(length: number): string {
  * @param prefix - Prefix for the number
  * @returns Formatted booking number
  */
-export function generateSecureBookingNumber(prefix: string = 'BK'): string {
+export function generateSecureBookingNumber(prefix = 'BK'): string {
   const timestamp = Date.now().toString(36).toUpperCase()
   const random = generateSecureAlphanumeric(6)
   return `${prefix}${timestamp}${random}`
@@ -75,12 +78,13 @@ export function generateSecureBookingNumber(prefix: string = 'BK'): string {
 export function generateSecurePaymentRef(provider: string): string {
   const timestamp = Date.now()
   const random = generateSecureRandomInt(1000, 9999)
-  const hash = crypto.createHash('sha256')
+  const hash = crypto
+    .createHash('sha256')
     .update(`${provider}${timestamp}${random}`)
     .digest('hex')
     .substring(0, 8)
     .toUpperCase()
-  
+
   return `${provider.toUpperCase()}_${timestamp}_${hash}`
 }
 
@@ -96,15 +100,15 @@ export function generateSecureUUID(): string {
  * @param length - Length of the ID (default 21)
  * @returns Short unique ID
  */
-export function generateShortId(length: number = 21): string {
+export function generateShortId(length = 21): string {
   const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'
   let id = ''
-  
+
   const bytes = crypto.randomBytes(length)
   for (let i = 0; i < length; i++) {
     id += alphabet[bytes[i] & 63]
   }
-  
+
   return id
 }
 

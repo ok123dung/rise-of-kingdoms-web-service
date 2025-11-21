@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+
 import { getLogger } from '@/lib/monitoring/logger'
 
 // Serverless-optimized Prisma configuration
@@ -31,7 +32,10 @@ export async function ensureDbConnected(): Promise<void> {
   try {
     await prisma.$connect()
   } catch (error) {
-    getLogger().error('Failed to connect to database', error instanceof Error ? error : new Error(String(error)))
+    getLogger().error(
+      'Failed to connect to database',
+      error instanceof Error ? error : new Error(String(error))
+    )
     throw new Error('Database connection failed')
   }
 }
@@ -41,39 +45,43 @@ export async function disconnectDb(): Promise<void> {
   try {
     await prisma.$disconnect()
   } catch (error) {
-    getLogger().error('Failed to disconnect from database', error instanceof Error ? error : new Error(String(error)))
+    getLogger().error(
+      'Failed to disconnect from database',
+      error instanceof Error ? error : new Error(String(error))
+    )
   }
 }
 
 // Serverless-safe query wrapper
-export async function queryWithRetry<T>(
-  operation: () => Promise<T>,
-  maxRetries = 3
-): Promise<T> {
+export async function queryWithRetry<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
   let lastError: Error | null = null
-  
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       await ensureDbConnected()
       return await operation()
     } catch (error) {
       lastError = error as Error
-      getLogger().error('Database operation failed', error instanceof Error ? error : new Error(String(error)), { 
-        attempt: i + 1,
-        maxRetries 
-      })
-      
+      getLogger().error(
+        'Database operation failed',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          attempt: i + 1,
+          maxRetries
+        }
+      )
+
       // Check if it's a connection error
       if (error instanceof Error && error.message.includes('P1001')) {
         // Wait before retry with exponential backoff
         await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000))
         continue
       }
-      
+
       // If not a connection error, throw immediately
       throw error
     }
   }
-  
+
   throw lastError || new Error('Database operation failed after retries')
 }

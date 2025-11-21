@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
-import type { NextRequest } from 'next/server'
+import { validateCSRF } from '@/lib/csrf-protection'
 import { getEdgeLogger } from '@/lib/monitoring/edge-logger'
 import { createEdgeRateLimiter, type EdgeRateLimiter } from '@/lib/rate-limit-edge'
-import { validateCSRF } from '@/lib/csrf-protection'
+
+import type { NextRequest } from 'next/server'
 
 // Protected routes that require authentication
 const protectedRoutes = [
@@ -80,10 +81,14 @@ export async function authMiddleware(req: NextRequest) {
         })
       }
     } catch (error) {
-      getEdgeLogger().error('Auth middleware error', error instanceof Error ? error : new Error(String(error)), { 
-        path: pathname,
-        method: req.method 
-      })
+      getEdgeLogger().error(
+        'Auth middleware error',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          path: pathname,
+          method: req.method
+        }
+      )
       return NextResponse.json({ error: 'Authentication error' }, { status: 500 })
     }
   }
@@ -101,11 +106,11 @@ async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
 
   // Get the appropriate rate limiter
   const rateLimiter = rateLimiters.get(limitKey) || rateLimiters.get('default')!
-  
+
   // Create identifier with IP and user agent for better fingerprinting
   const userAgent = req.headers.get('user-agent') || 'unknown'
   const identifier = `${ip}:${userAgent.substring(0, 50)}`
-  
+
   const result = await rateLimiter.checkLimit(identifier)
 
   if (!result.success) {
@@ -119,10 +124,13 @@ async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
         headers: {
           'Retry-After': String(result.retryAfter || 60),
           'X-RateLimit-Limit': String(
-            limitKey === '/api/auth' ? 5 : 
-            limitKey === '/api/leads' ? 10 : 
-            limitKey === '/api/payments' ? 20 : 
-            60
+            limitKey === '/api/auth'
+              ? 5
+              : limitKey === '/api/leads'
+                ? 10
+                : limitKey === '/api/payments'
+                  ? 20
+                  : 60
           ),
           'X-RateLimit-Remaining': String(result.remaining),
           'X-RateLimit-Reset': String(result.reset)
@@ -137,7 +145,7 @@ async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
 // CSRF token validation for state-changing requests
 export function validateCSRFToken(req: NextRequest): boolean {
   const result = validateCSRF(req)
-  
+
   if (!result.valid) {
     getEdgeLogger().warn('CSRF validation failed', {
       path: req.nextUrl.pathname,
@@ -147,6 +155,6 @@ export function validateCSRFToken(req: NextRequest): boolean {
       ip: req.ip || req.headers.get('x-forwarded-for')
     })
   }
-  
+
   return result.valid
 }

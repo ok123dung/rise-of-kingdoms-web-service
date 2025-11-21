@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import Link from 'next/link'
 
 export default function DiagnosticsPage() {
@@ -18,7 +19,7 @@ export default function DiagnosticsPage() {
         platform: navigator.platform,
         serviceWorker: 'serviceWorker' in navigator,
         localStorage: typeof localStorage !== 'undefined',
-        sessionStorage: typeof sessionStorage !== 'undefined',
+        sessionStorage: typeof sessionStorage !== 'undefined'
       }
 
       // Check service worker
@@ -30,7 +31,7 @@ export default function DiagnosticsPage() {
             scope: reg.scope,
             active: reg.active?.state,
             waiting: reg.waiting?.state,
-            installing: reg.installing?.state,
+            installing: reg.installing?.state
           }))
         } catch (e) {
           diag.serviceWorkerError = (e as Error).message
@@ -53,7 +54,7 @@ export default function DiagnosticsPage() {
         pathname: window.location.pathname,
         hostname: window.location.hostname,
         port: window.location.port,
-        protocol: window.location.protocol,
+        protocol: window.location.protocol
       }
 
       // Check for console errors
@@ -85,12 +86,12 @@ export default function DiagnosticsPage() {
   const clearServiceWorker = async () => {
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations()
-      for (let registration of registrations) {
+      for (const registration of registrations) {
         await registration.unregister()
       }
       if ('caches' in window) {
         const cacheNames = await caches.keys()
-        for (let cacheName of cacheNames) {
+        for (const cacheName of cacheNames) {
           await caches.delete(cacheName)
         }
       }
@@ -100,58 +101,58 @@ export default function DiagnosticsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Navigation Diagnostics</h1>
-        
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Navigation Tests</h2>
-          
+      <div className="mx-auto max-w-4xl">
+        <h1 className="mb-8 text-3xl font-bold">Navigation Diagnostics</h1>
+
+        <div className="mb-6 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">Navigation Tests</h2>
+
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium mb-2">Test Links (using Next.js Link):</h3>
+              <h3 className="mb-2 font-medium">Test Links (using Next.js Link):</h3>
               <div className="space-x-4">
-                <Link href="/" className="text-blue-600 hover:text-blue-800 underline">
+                <Link className="text-blue-600 underline hover:text-blue-800" href="/">
                   Home
                 </Link>
-                <Link href="/services" className="text-blue-600 hover:text-blue-800 underline">
+                <Link className="text-blue-600 underline hover:text-blue-800" href="/services">
                   Services
                 </Link>
-                <Link href="/about" className="text-blue-600 hover:text-blue-800 underline">
+                <Link className="text-blue-600 underline hover:text-blue-800" href="/about">
                   About
                 </Link>
-                <Link href="/contact" className="text-blue-600 hover:text-blue-800 underline">
+                <Link className="text-blue-600 underline hover:text-blue-800" href="/contact">
                   Contact
                 </Link>
               </div>
             </div>
 
             <div>
-              <h3 className="font-medium mb-2">Test with regular anchor tags:</h3>
+              <h3 className="mb-2 font-medium">Test with regular anchor tags:</h3>
               <div className="space-x-4">
-                <a href="/" className="text-green-600 hover:text-green-800 underline">
+                <a className="text-green-600 underline hover:text-green-800" href="/">
                   Home (a tag)
                 </a>
-                <a href="/services" className="text-green-600 hover:text-green-800 underline">
+                <a className="text-green-600 underline hover:text-green-800" href="/services">
                   Services (a tag)
                 </a>
-                <a href="/about" className="text-green-600 hover:text-green-800 underline">
+                <a className="text-green-600 underline hover:text-green-800" href="/about">
                   About (a tag)
                 </a>
               </div>
             </div>
 
             <div>
-              <h3 className="font-medium mb-2">Test Fetch:</h3>
+              <h3 className="mb-2 font-medium">Test Fetch:</h3>
               <div className="space-x-2">
                 <button
+                  className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                   onClick={() => testNavigation('/services')}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                 >
                   Test /services
                 </button>
                 <button
+                  className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                   onClick={() => testNavigation('/api/health')}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                 >
                   Test /api/health
                 </button>
@@ -161,29 +162,29 @@ export default function DiagnosticsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Browser Diagnostics</h2>
-          <pre className="bg-gray-100 p-4 rounded overflow-auto text-xs">
+        <div className="mb-6 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">Browser Diagnostics</h2>
+          <pre className="overflow-auto rounded bg-gray-100 p-4 text-xs">
             {JSON.stringify(diagnostics, null, 2)}
           </pre>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Actions</h2>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">Actions</h2>
           <button
+            className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
             onClick={clearServiceWorker}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
           >
             Clear Service Worker & Caches
           </button>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="mt-2 text-sm text-gray-600">
             This will unregister all service workers and clear all caches, then reload the page.
           </p>
         </div>
 
         <div className="mt-6 text-sm text-gray-600">
           <p>If navigation is not working:</p>
-          <ol className="list-decimal list-inside mt-2 space-y-1">
+          <ol className="mt-2 list-inside list-decimal space-y-1">
             <li>Try clicking the "Clear Service Worker & Caches" button</li>
             <li>Open DevTools (F12) and check the Console for errors</li>
             <li>In DevTools, go to Application → Service Workers and unregister any workers</li>

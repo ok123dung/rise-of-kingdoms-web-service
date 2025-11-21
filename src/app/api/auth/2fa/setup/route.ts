@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+
 import { authOptions } from '@/lib/auth'
 import { TwoFactorAuthService } from '@/lib/auth/two-factor'
 import { getLogger } from '@/lib/monitoring/logger'
@@ -7,19 +8,13 @@ import { getLogger } from '@/lib/monitoring/logger'
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Generate 2FA secret and QR code
-    const result = await TwoFactorAuthService.generateSecret(
-      session.user.id,
-      session.user.email
-    )
+    const result = await TwoFactorAuthService.generateSecret(session.user.id, session.user.email)
 
     return NextResponse.json({
       success: true,
@@ -29,23 +24,17 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('2FA setup error', error as Error)
-    
-    return NextResponse.json(
-      { error: 'Failed to setup 2FA' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to setup 2FA' }, { status: 500 })
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Get 2FA status
@@ -57,10 +46,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('2FA status error', error as Error)
-    
-    return NextResponse.json(
-      { error: 'Failed to get 2FA status' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to get 2FA status' }, { status: 500 })
   }
 }

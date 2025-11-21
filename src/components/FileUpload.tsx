@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+
 import { Upload, X, FileText, Image, Film, File, Loader2, CheckCircle } from 'lucide-react'
 
 interface FileUploadProps {
@@ -91,14 +92,14 @@ export function FileUpload({
       }
 
       const data = await response.json()
-      
+
       onUpload({
         ...data.file,
         filename: file.name
       })
-      
+
       setUploadProgress(100)
-      
+
       // Reset after success
       setTimeout(() => {
         setUploadProgress(0)
@@ -124,14 +125,12 @@ export function FileUpload({
       <div className={className}>
         <input
           ref={inputRef}
-          type="file"
           accept={accept}
-          onChange={handleChange}
           className="hidden"
+          type="file"
+          onChange={handleChange}
         />
-        <div onClick={() => inputRef.current?.click()}>
-          {children}
-        </div>
+        <div onClick={() => inputRef.current?.click()}>{children}</div>
       </div>
     )
   }
@@ -146,36 +145,37 @@ export function FileUpload({
     >
       <input
         ref={inputRef}
-        type="file"
         accept={accept}
-        onChange={handleChange}
         className="hidden"
+        type="file"
+        onChange={handleChange}
       />
-      
+
       <div
-        onClick={() => inputRef.current?.click()}
         className={`
-          relative overflow-hidden rounded-lg border-2 border-dashed p-8
-          cursor-pointer transition-all
-          ${dragActive 
-            ? 'border-blue-500 bg-blue-50' 
-            : 'border-gray-300 hover:border-gray-400 bg-white'
+          relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed
+          p-8 transition-all
+          ${
+            dragActive
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-300 bg-white hover:border-gray-400'
           }
           ${isUploading ? 'pointer-events-none' : ''}
         `}
+        onClick={() => inputRef.current?.click()}
       >
         {/* Upload Progress Overlay */}
         {isUploading && (
-          <div className="absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">
             <div className="text-center">
               {uploadProgress < 100 ? (
                 <>
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
+                  <Loader2 className="mx-auto mb-2 h-8 w-8 animate-spin text-blue-600" />
                   <p className="text-sm font-medium">Uploading... {uploadProgress}%</p>
                 </>
               ) : (
                 <>
-                  <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <CheckCircle className="mx-auto mb-2 h-8 w-8 text-green-600" />
                   <p className="text-sm font-medium text-green-600">Upload complete!</p>
                 </>
               )}
@@ -185,13 +185,9 @@ export function FileUpload({
 
         {/* Upload Icon and Text */}
         <div className="text-center">
-          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-          <p className="text-sm font-medium text-gray-900 mb-1">
-            Click to upload or drag and drop
-          </p>
-          <p className="text-xs text-gray-500">
-            Maximum file size: {formatFileSize(maxSize)}
-          </p>
+          <Upload className="mx-auto mb-3 h-12 w-12 text-gray-400" />
+          <p className="mb-1 text-sm font-medium text-gray-900">Click to upload or drag and drop</p>
+          <p className="text-xs text-gray-500">Maximum file size: {formatFileSize(maxSize)}</p>
         </div>
       </div>
     </div>
@@ -237,8 +233,8 @@ export function FileList({ files, onDelete, loading }: FileListProps) {
 
   if (files.length === 0) {
     return (
-      <div className="text-center py-8">
-        <File className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+      <div className="py-8 text-center">
+        <File className="mx-auto mb-3 h-12 w-12 text-gray-400" />
         <p className="text-sm text-gray-500">No files uploaded yet</p>
       </div>
     )
@@ -246,38 +242,34 @@ export function FileList({ files, onDelete, loading }: FileListProps) {
 
   return (
     <div className="space-y-2">
-      {files.map((file) => (
+      {files.map(file => (
         <div
           key={file.id}
-          className="flex items-center justify-between p-3 bg-white rounded-lg border hover:border-gray-300 transition-colors"
+          className="flex items-center justify-between rounded-lg border bg-white p-3 transition-colors hover:border-gray-300"
         >
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="text-gray-400">
-              {getFileIcon(file.mimeType)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {file.filename}
-              </p>
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <div className="text-gray-400">{getFileIcon(file.mimeType)}</div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-gray-900">{file.filename}</p>
               <p className="text-xs text-gray-500">
                 {formatFileSize(file.size)} • {new Date(file.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <a
-              href={file.url}
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-sm text-blue-600 hover:text-blue-700"
+              href={file.url}
+              rel="noopener noreferrer"
+              target="_blank"
             >
               View
             </a>
             {onDelete && (
               <button
-                onClick={() => onDelete(file.key)}
                 className="text-red-600 hover:text-red-700"
+                onClick={() => onDelete(file.key)}
               >
                 <X className="h-4 w-4" />
               </button>

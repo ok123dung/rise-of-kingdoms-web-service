@@ -1,9 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
+
+import { Folder, Grid, List } from 'lucide-react'
+
 import { FileUpload, FileList } from '@/components/FileUpload'
-import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import { Folder, Grid, List, Loader2 } from 'lucide-react'
+import Header from '@/components/layout/Header'
+
 export default function FilesPage() {
   const [files, setFiles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -62,21 +65,21 @@ export default function FilesPage() {
           <h1 className="text-3xl font-bold text-gray-900">Quản lý tệp tin</h1>
           <p className="mt-2 text-gray-600">Upload và quản lý các tệp tin của bạn</p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="font-semibold text-gray-900 mb-4">Thư mục</h2>
+            <div className="rounded-lg bg-white p-4 shadow">
+              <h2 className="mb-4 font-semibold text-gray-900">Thư mục</h2>
               <ul className="space-y-2">
-                {folders.map((folder) => (
+                {folders.map(folder => (
                   <li key={folder.id || 'all'}>
                     <button
-                      onClick={() => setCurrentFolder(folder.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                         currentFolder === folder.id
                           ? 'bg-blue-50 text-blue-700'
-                          : 'hover:bg-gray-50 text-gray-700'
+                          : 'text-gray-700 hover:bg-gray-50'
                       }`}
+                      onClick={() => setCurrentFolder(folder.id)}
                     >
                       <folder.icon className="h-4 w-4" />
                       {folder.name}
@@ -88,15 +91,15 @@ export default function FilesPage() {
             {/* Upload Widget */}
             <div className="mt-6">
               <FileUpload
-                onUpload={handleUpload}
                 folder={currentFolder || 'general'}
                 maxSize={20 * 1024 * 1024} // 20MB
+                onUpload={handleUpload}
               />
             </div>
           </div>
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow">
+            <div className="rounded-lg bg-white shadow">
               {/* Header */}
               <div className="border-b px-6 py-4">
                 <div className="flex items-center justify-between">
@@ -105,14 +108,14 @@ export default function FilesPage() {
                   </h2>
                   <div className="flex items-center gap-2">
                     <button
+                      className={`rounded p-2 ${viewMode === 'list' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
                       onClick={() => setViewMode('list')}
-                      className={`p-2 rounded ${viewMode === 'list' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
                     >
                       <List className="h-4 w-4" />
                     </button>
                     <button
+                      className={`rounded p-2 ${viewMode === 'grid' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
                       onClick={() => setViewMode('grid')}
-                      className={`p-2 rounded ${viewMode === 'grid' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
                     >
                       <Grid className="h-4 w-4" />
                     </button>
@@ -121,17 +124,13 @@ export default function FilesPage() {
               </div>
               {/* Success Message */}
               {uploadSuccess && (
-                <div className="mx-6 mt-4 p-3 bg-green-50 text-green-700 rounded-lg">
+                <div className="mx-6 mt-4 rounded-lg bg-green-50 p-3 text-green-700">
                   File uploaded successfully!
                 </div>
               )}
               {/* File List */}
               <div className="p-6">
-                <FileList
-                  files={files}
-                  onDelete={handleDelete}
-                  loading={loading}
-                />
+                <FileList files={files} loading={loading} onDelete={handleDelete} />
               </div>
             </div>
           </div>

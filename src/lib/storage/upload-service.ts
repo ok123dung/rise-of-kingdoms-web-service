@@ -3,14 +3,23 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
-  ListObjectsV2Command,
   CopyObjectCommand
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import sharp from 'sharp'
-import { r2Client, R2_BUCKET, generateFileKey, getPublicUrl, isValidFileType, isValidFileSize, ALLOWED_FILE_TYPES } from './r2-client'
-import { getLogger } from '@/lib/monitoring/logger'
+
 import { prisma } from '@/lib/db'
+import { getLogger } from '@/lib/monitoring/logger'
+
+import {
+  r2Client,
+  R2_BUCKET,
+  generateFileKey,
+  getPublicUrl,
+  isValidFileType,
+  isValidFileSize,
+  type ALLOWED_FILE_TYPES
+} from './r2-client'
 
 export interface UploadOptions {
   folder: string
@@ -161,7 +170,11 @@ export class UploadService {
 
       // Get processed buffer
       const processedBuffer = await processedImage.toBuffer()
-      const processedMimeType = options.format ? `image/${options.format}` : metadata.format ? `image/${metadata.format}` : 'image/jpeg'
+      const processedMimeType = options.format
+        ? `image/${options.format}`
+        : metadata.format
+          ? `image/${metadata.format}`
+          : 'image/jpeg'
 
       // Upload main image
       const mainResult = await this.uploadFile(
@@ -183,18 +196,20 @@ export class UploadService {
           .toBuffer()
 
         const thumbnailKey = mainResult.key.replace(/\.[^.]+$/, '_thumb.webp')
-        
-        await r2Client.send(new PutObjectCommand({
-          Bucket: R2_BUCKET,
-          Key: thumbnailKey,
-          Body: thumbnailBuffer,
-          ContentType: 'image/webp'
-        }))
+
+        await r2Client.send(
+          new PutObjectCommand({
+            Bucket: R2_BUCKET,
+            Key: thumbnailKey,
+            Body: thumbnailBuffer,
+            ContentType: 'image/webp'
+          })
+        )
 
         // Update database with thumbnail key
         await prisma.fileUpload.update({
           where: { key: mainResult.key },
-          data: { 
+          data: {
             thumbnailKey,
             metadata: {
               thumbnailUrl: getPublicUrl(thumbnailKey)
@@ -226,17 +241,21 @@ export class UploadService {
       }
 
       // Delete from R2
-      await r2Client.send(new DeleteObjectCommand({
-        Bucket: R2_BUCKET,
-        Key: key
-      }))
+      await r2Client.send(
+        new DeleteObjectCommand({
+          Bucket: R2_BUCKET,
+          Key: key
+        })
+      )
 
       // Delete thumbnail if exists
       if (file.thumbnailKey) {
-        await r2Client.send(new DeleteObjectCommand({
-          Bucket: R2_BUCKET,
-          Key: file.thumbnailKey
-        }))
+        await r2Client.send(
+          new DeleteObjectCommand({
+            Bucket: R2_BUCKET,
+            Key: file.thumbnailKey
+          })
+        )
       }
 
       // Delete from database
@@ -252,10 +271,7 @@ export class UploadService {
   }
 
   // Get signed URL for private files
-  static async getSignedUrl(
-    key: string,
-    expiresIn: number = 3600
-  ): Promise<string> {
+  static async getSignedUrl(key: string, expiresIn = 3600): Promise<string> {
     try {
       const command = new GetObjectCommand({
         Bucket: R2_BUCKET,
@@ -275,11 +291,11 @@ export class UploadService {
     folder: string,
     userId: string,
     mimeType: string,
-    expiresIn: number = 3600
+    expiresIn = 3600
   ): Promise<{ uploadUrl: string; key: string }> {
     try {
       const key = generateFileKey(folder, userId, filename)
-      
+
       const command = new PutObjectCommand({
         Bucket: R2_BUCKET,
         Key: key,
@@ -296,12 +312,7 @@ export class UploadService {
   }
 
   // List user files
-  static async listUserFiles(
-    userId: string,
-    folder?: string,
-    limit: number = 20,
-    offset: number = 0
-  ) {
+  static async listUserFiles(userId: string, folder?: string, limit = 20, offset = 0) {
     try {
       const where = {
         userId,
@@ -320,14 +331,10 @@ export class UploadService {
 
       // Add signed URLs for private files
       const filesWithUrls = await Promise.all(
-        files.map(async (file) => ({
+        files.map(async file => ({
           ...file,
-          url: file.isPublic 
-            ? getPublicUrl(file.key)
-            : await this.getSignedUrl(file.key),
-          thumbnailUrl: file.thumbnailKey
-            ? getPublicUrl(file.thumbnailKey)
-            : null
+          url: file.isPublic ? getPublicUrl(file.key) : await this.getSignedUrl(file.key),
+          thumbnailUrl: file.thumbnailKey ? getPublicUrl(file.thumbnailKey) : null
         }))
       )
 
@@ -353,10 +360,12 @@ export class UploadService {
   // Check file existence
   static async fileExists(key: string): Promise<boolean> {
     try {
-      await r2Client.send(new HeadObjectCommand({
-        Bucket: R2_BUCKET,
-        Key: key
-      }))
+      await r2Client.send(
+        new HeadObjectCommand({
+          Bucket: R2_BUCKET,
+          Key: key
+        })
+      )
       return true
     } catch {
       return false
@@ -371,11 +380,13 @@ export class UploadService {
   ): Promise<boolean> {
     try {
       // Copy in R2
-      await r2Client.send(new CopyObjectCommand({
-        Bucket: R2_BUCKET,
-        CopySource: `${R2_BUCKET}/${sourceKey}`,
-        Key: destinationKey
-      }))
+      await r2Client.send(
+        new CopyObjectCommand({
+          Bucket: R2_BUCKET,
+          CopySource: `${R2_BUCKET}/${sourceKey}`,
+          Key: destinationKey
+        })
+      )
 
       // Get source file data
       const sourceFile = await prisma.fileUpload.findFirst({

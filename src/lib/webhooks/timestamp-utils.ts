@@ -65,10 +65,7 @@ export function toVNPayTimestamp(timestamp: number): string {
  * @param maxAgeMs - Maximum age in milliseconds (default: 5 minutes)
  * @returns true if timestamp is valid
  */
-export function isTimestampValid(
-  timestamp: number,
-  maxAgeMs: number = 5 * 60 * 1000
-): boolean {
+export function isTimestampValid(timestamp: number, maxAgeMs: number = 5 * 60 * 1000): boolean {
   const now = Date.now()
   const age = now - timestamp
 

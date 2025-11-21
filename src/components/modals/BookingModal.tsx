@@ -3,6 +3,7 @@
 import { useState, useCallback, memo, useMemo } from 'react'
 
 import { X, Calendar, Clock, User, MessageSquare } from 'lucide-react'
+
 import { clientLogger } from '@/lib/client-logger'
 
 interface BookingModalProps {
@@ -38,42 +39,56 @@ const BookingModal = memo(function BookingModal({
 
   if (!isOpen) return null
 
-  const selectedServiceData = useMemo(() => 
-    services.find(s => s.id === selectedService),
+  const selectedServiceData = useMemo(
+    () => services.find(s => s.id === selectedService),
     [selectedService]
   )
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      setIsSubmitting(true)
 
-    try {
-      // Mock booking creation
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      try {
+        // Mock booking creation
+        await new Promise(resolve => setTimeout(resolve, 1500))
 
-      const bookingData = {
-        id: `BK_${Date.now()}`,
-        serviceId: selectedService,
-        serviceName: selectedServiceData?.name,
-        customerName,
-        customerEmail,
-        customerPhone,
-        scheduledDate: selectedDate,
-        scheduledTime: selectedTime,
-        notes,
-        status: 'confirmed',
-        amount: selectedServiceData?.price || 0,
-        createdAt: new Date().toISOString()
+        const bookingData = {
+          id: `BK_${Date.now()}`,
+          serviceId: selectedService,
+          serviceName: selectedServiceData?.name,
+          customerName,
+          customerEmail,
+          customerPhone,
+          scheduledDate: selectedDate,
+          scheduledTime: selectedTime,
+          notes,
+          status: 'confirmed',
+          amount: selectedServiceData?.price || 0,
+          createdAt: new Date().toISOString()
+        }
+
+        onBookingSuccess?.(bookingData)
+        onClose()
+      } catch (error) {
+        clientLogger.error('Booking failed:', error)
+      } finally {
+        setIsSubmitting(false)
       }
-
-      onBookingSuccess?.(bookingData)
-      onClose()
-    } catch (error) {
-      clientLogger.error('Booking failed:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }, [selectedService, selectedServiceData, customerName, customerEmail, customerPhone, selectedDate, selectedTime, notes, onBookingSuccess, onClose])
+    },
+    [
+      selectedService,
+      selectedServiceData,
+      customerName,
+      customerEmail,
+      customerPhone,
+      selectedDate,
+      selectedTime,
+      notes,
+      onBookingSuccess,
+      onClose
+    ]
+  )
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

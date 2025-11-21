@@ -27,7 +27,8 @@ export const servicesData: Record<string, ServiceData> = {
     slug: 'strategy-consulting',
     name: 'Tư vấn chiến thuật Rise of Kingdoms',
     shortDescription: 'Chiến lược chuyên sâu từ các chuyên gia hàng đầu',
-    description: 'Dịch vụ tư vấn chiến thuật chuyên nghiệp giúp bạn phát triển kingdom mạnh mẽ, tối ưu commander và chiến thắng trong mọi trận chiến.',
+    description:
+      'Dịch vụ tư vấn chiến thuật chuyên nghiệp giúp bạn phát triển kingdom mạnh mẽ, tối ưu commander và chiến thắng trong mọi trận chiến.',
     icon: Shield,
     features: [
       'Phân tích kingdom và đưa ra chiến lược phát triển',
@@ -84,7 +85,8 @@ export const servicesData: Record<string, ServiceData> = {
     slug: 'alliance-management',
     name: 'Quản lý liên minh chuyên nghiệp',
     shortDescription: 'Xây dựng và phát triển liên minh mạnh mẽ',
-    description: 'Dịch vụ hỗ trợ quản lý liên minh từ A-Z, giúp xây dựng một liên minh đoàn kết và mạnh mẽ trong Rise of Kingdoms.',
+    description:
+      'Dịch vụ hỗ trợ quản lý liên minh từ A-Z, giúp xây dựng một liên minh đoàn kết và mạnh mẽ trong Rise of Kingdoms.',
     icon: Users,
     features: [
       'Tư vấn cấu trúc và tổ chức liên minh',
@@ -141,7 +143,8 @@ export const servicesData: Record<string, ServiceData> = {
     slug: 'commander-training',
     name: 'Training Commander chuyên sâu',
     shortDescription: 'Tối ưu hóa sức mạnh commander của bạn',
-    description: 'Hướng dẫn chi tiết cách build và sử dụng commander hiệu quả nhất cho từng mục đích trong Rise of Kingdoms.',
+    description:
+      'Hướng dẫn chi tiết cách build và sử dụng commander hiệu quả nhất cho từng mục đích trong Rise of Kingdoms.',
     icon: Target,
     features: [
       'Phân tích và đánh giá commander hiện tại',
@@ -198,7 +201,8 @@ export const servicesData: Record<string, ServiceData> = {
     slug: 'kvk-support',
     name: 'Hỗ trợ KvK chuyên nghiệp',
     shortDescription: 'Chiến thắng trong Kingdom vs Kingdom',
-    description: 'Dịch vụ hỗ trợ toàn diện cho KvK, từ chuẩn bị đến chiến thuật và execution trong trận chiến.',
+    description:
+      'Dịch vụ hỗ trợ toàn diện cho KvK, từ chuẩn bị đến chiến thuật và execution trong trận chiến.',
     icon: Trophy,
     features: [
       'Lập kế hoạch pre-KvK preparation',
@@ -255,7 +259,8 @@ export const servicesData: Record<string, ServiceData> = {
     slug: 'vip-support',
     name: 'VIP Support 24/7',
     shortDescription: 'Dịch vụ hỗ trợ cao cấp không giới hạn',
-    description: 'Gói dịch vụ VIP all-inclusive với support 24/7, tư vấn không giới hạn và nhiều đặc quyền độc quyền.',
+    description:
+      'Gói dịch vụ VIP all-inclusive với support 24/7, tư vấn không giới hạn và nhiều đặc quyền độc quyền.',
     icon: Crown,
     features: [
       'Hỗ trợ 24/7 qua mọi kênh',
@@ -313,7 +318,8 @@ export const servicesData: Record<string, ServiceData> = {
     slug: 'personal-coaching',
     name: 'Coaching 1-on-1',
     shortDescription: 'Huấn luyện cá nhân từ top players',
-    description: 'Được coaching trực tiếp 1-1 từ những player hàng đầu, với lộ trình training được thiết kế riêng cho bạn.',
+    description:
+      'Được coaching trực tiếp 1-1 từ những player hàng đầu, với lộ trình training được thiết kế riêng cho bạn.',
     icon: Star,
     features: [
       'Đánh giá skill level hiện tại',
@@ -361,7 +367,7 @@ export const servicesData: Record<string, ServiceData> = {
           'Unlimited sessions',
           'Play together daily',
           'Complete transformation',
-          'Join coach\'s alliance',
+          "Join coach's alliance",
           'Lifetime mentorship'
         ]
       }

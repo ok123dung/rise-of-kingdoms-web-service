@@ -8,18 +8,8 @@ interface NonceContextType {
 
 const NonceContext = createContext<NonceContextType | undefined>(undefined)
 
-export function NonceProvider({ 
-  children, 
-  nonce 
-}: { 
-  children: React.ReactNode
-  nonce: string 
-}) {
-  return (
-    <NonceContext.Provider value={{ nonce }}>
-      {children}
-    </NonceContext.Provider>
-  )
+export function NonceProvider({ children, nonce }: { children: React.ReactNode; nonce: string }) {
+  return <NonceContext.Provider value={{ nonce }}>{children}</NonceContext.Provider>
 }
 
 export function useNonce() {
@@ -31,37 +21,13 @@ export function useNonce() {
 }
 
 // Helper component for inline scripts
-export function InlineScript({ 
-  children,
-  ...props 
-}: { 
-  children: string
-  [key: string]: any 
-}) {
+export function InlineScript({ children, ...props }: { children: string; [key: string]: any }) {
   const nonce = useNonce()
-  return (
-    <script 
-      nonce={nonce}
-      dangerouslySetInnerHTML={{ __html: children }}
-      {...props}
-    />
-  )
+  return <script dangerouslySetInnerHTML={{ __html: children }} nonce={nonce} {...props} />
 }
 
 // Helper component for inline styles
-export function InlineStyle({ 
-  children,
-  ...props 
-}: { 
-  children: string
-  [key: string]: any 
-}) {
+export function InlineStyle({ children, ...props }: { children: string; [key: string]: any }) {
   const nonce = useNonce()
-  return (
-    <style 
-      nonce={nonce}
-      dangerouslySetInnerHTML={{ __html: children }}
-      {...props}
-    />
-  )
+  return <style dangerouslySetInnerHTML={{ __html: children }} nonce={nonce} {...props} />
 }

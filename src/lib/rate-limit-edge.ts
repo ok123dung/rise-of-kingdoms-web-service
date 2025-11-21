@@ -31,13 +31,11 @@ class EdgeRateLimitStore {
     if (this.store.size > 10000) {
       // Remove oldest entries
       const entries = Array.from(this.store.entries())
-      const toRemove = entries
-        .sort((a, b) => a[1].resetTime - b[1].resetTime)
-        .slice(0, 2000)
-      
+      const toRemove = entries.sort((a, b) => a[1].resetTime - b[1].resetTime).slice(0, 2000)
+
       toRemove.forEach(([k]) => this.store.delete(k))
     }
-    
+
     this.store.set(key, value)
   }
 

@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
+
 import { generateShortId } from '@/lib/crypto-utils'
 
 // Express-like types for compatibility
@@ -289,11 +290,27 @@ class Logger {
   }
 
   logSecurityEvent(
-    event: 'auth_failed' | 'rate_limit_exceeded' | 'suspicious_activity' | 'unauthorized_access' |
-           'login_attempt_while_locked' | 'login_failed' | 'login_success' | 'oauth_login' |
-           'signin' | 'signout' | 'account_locked' | 'account_unlocked_manually' |
-           'session_token_rotated' | '2fa_setup_initiated' | '2fa_enabled' | '2fa_login_success' |
-           '2fa_backup_code_used' | '2fa_login_failed' | '2fa_disabled' | '2fa_backup_codes_regenerated',
+    event:
+      | 'auth_failed'
+      | 'rate_limit_exceeded'
+      | 'suspicious_activity'
+      | 'unauthorized_access'
+      | 'login_attempt_while_locked'
+      | 'login_failed'
+      | 'login_success'
+      | 'oauth_login'
+      | 'signin'
+      | 'signout'
+      | 'account_locked'
+      | 'account_unlocked_manually'
+      | 'session_token_rotated'
+      | '2fa_setup_initiated'
+      | '2fa_enabled'
+      | '2fa_login_success'
+      | '2fa_backup_code_used'
+      | '2fa_login_failed'
+      | '2fa_disabled'
+      | '2fa_backup_codes_regenerated',
     context?: LogContext
   ): void {
     this.warn(`Security event: ${event}`, {
@@ -625,7 +642,10 @@ export class ApplicationMonitor {
           details: { message: 'Disk space check simplified', memoryRSS: Math.round(rss) }
         }
       }
-      return { status: 'healthy', details: { message: 'Disk space check skipped in browser/edge runtime' } }
+      return {
+        status: 'healthy',
+        details: { message: 'Disk space check skipped in browser/edge runtime' }
+      }
     } catch (error) {
       return {
         status: 'unhealthy',
@@ -636,13 +656,13 @@ export class ApplicationMonitor {
 
   private async checkMemory(): Promise<{ status: string; details?: Record<string, unknown> }> {
     // Check if we're in Node.js environment with process.memoryUsage available
-    if (typeof process === 'undefined' || !process.memoryUsage) {
+    if (!process?.memoryUsage) {
       return {
         status: 'healthy',
         details: { message: 'Memory check skipped in edge runtime' }
       }
     }
-    
+
     const used = process.memoryUsage()
     const totalHeap = used.heapTotal / 1024 / 1024 // MB
     const usedHeap = used.heapUsed / 1024 / 1024 // MB

@@ -6,14 +6,17 @@ export function generateNonce(): string {
 }
 
 // Generate hash for inline scripts/styles that can't use nonces
-export function generateHash(content: string, algorithm: 'sha256' | 'sha384' | 'sha512' = 'sha256'): string {
+export function generateHash(
+  content: string,
+  algorithm: 'sha256' | 'sha384' | 'sha512' = 'sha256'
+): string {
   const hash = crypto.createHash(algorithm)
   hash.update(content)
   return `'${algorithm}-${hash.digest('base64')}'`
 }
 
 // Build secure CSP header with nonce
-export function buildCSPHeader(nonce: string, isDevelopment: boolean = false): string {
+export function buildCSPHeader(nonce: string, isDevelopment = false): string {
   const directives = {
     'default-src': ["'self'"],
     'script-src': [
@@ -42,7 +45,9 @@ export function buildCSPHeader(nonce: string, isDevelopment: boolean = false): s
       'https://www.google-analytics.com',
       'https://sandbox.vnpayment.vn',
       'https://*.sentry.io', // Sentry monitoring
-      ...(isDevelopment ? ['ws://localhost:*', 'wss://localhost:*'] : ['wss://rokdbot.com', 'wss://www.rokdbot.com']),
+      ...(isDevelopment
+        ? ['ws://localhost:*', 'wss://localhost:*']
+        : ['wss://rokdbot.com', 'wss://www.rokdbot.com'])
     ],
     'frame-ancestors': ["'none'"],
     'form-action': ["'self'"],
@@ -54,7 +59,7 @@ export function buildCSPHeader(nonce: string, isDevelopment: boolean = false): s
     'frame-src': ["'none'"],
     'child-src': ["'self'", 'blob:'],
     'upgrade-insecure-requests': isDevelopment ? [] : [''],
-    'block-all-mixed-content': isDevelopment ? [] : [''],
+    'block-all-mixed-content': isDevelopment ? [] : ['']
   }
 
   return Object.entries(directives)

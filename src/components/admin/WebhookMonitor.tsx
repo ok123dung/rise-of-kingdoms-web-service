@@ -1,15 +1,17 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { 
-  RefreshCw, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+
+import { format } from 'date-fns'
+import {
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+  Clock,
   AlertTriangle,
   RotateCcw,
   Loader2
 } from 'lucide-react'
-import { format } from 'date-fns'
+
 interface WebhookEvent {
   id: string
   provider: string
@@ -79,7 +81,7 @@ export function WebhookMonitor() {
       case 'failed':
         return <XCircle className="h-5 w-5 text-red-500" />
       case 'processing':
-        return <RefreshCw className="h-5 w-5 text-blue-500 animate-spin" />
+        return <RefreshCw className="h-5 w-5 animate-spin text-blue-500" />
       case 'pending':
         return <Clock className="h-5 w-5 text-yellow-500" />
       default:
@@ -109,24 +111,24 @@ export function WebhookMonitor() {
     <div className="space-y-6">
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+          <div className="rounded-lg bg-white p-4 shadow">
             <p className="text-sm text-gray-500">Total</p>
             <p className="text-2xl font-bold">{stats.total}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="rounded-lg bg-white p-4 shadow">
             <p className="text-sm text-gray-500">Pending</p>
             <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="rounded-lg bg-white p-4 shadow">
             <p className="text-sm text-gray-500">Processing</p>
             <p className="text-2xl font-bold text-blue-600">{stats.processing}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="rounded-lg bg-white p-4 shadow">
             <p className="text-sm text-gray-500">Completed</p>
             <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="rounded-lg bg-white p-4 shadow">
             <p className="text-sm text-gray-500">Failed</p>
             <p className="text-2xl font-bold text-red-600">{stats.failed}</p>
           </div>
@@ -136,9 +138,9 @@ export function WebhookMonitor() {
       <div className="flex items-center gap-2">
         <span className="text-sm text-gray-600">Filter:</span>
         <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
           className="rounded-lg border border-gray-300 px-3 py-1 text-sm"
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
         >
           <option value="all">All</option>
           <option value="pending">Pending</option>
@@ -147,42 +149,42 @@ export function WebhookMonitor() {
           <option value="failed">Failed</option>
         </select>
         <button
-          onClick={fetchWebhooks}
           className="ml-auto text-sm text-blue-600 hover:text-blue-700"
+          onClick={fetchWebhooks}
         >
           <RefreshCw className="h-4 w-4" />
         </button>
       </div>
       {/* Webhook List */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="overflow-hidden rounded-lg bg-white shadow">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                 Status
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                 Provider
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                 Event ID
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                 Attempts
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                 Created
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                 Next Retry
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {webhooks.map((webhook) => (
+            {webhooks.map(webhook => (
               <tr key={webhook.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -191,33 +193,28 @@ export function WebhookMonitor() {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex px-2 py-1 text-xs rounded-full ${getProviderColor(webhook.provider)}`}>
+                  <span
+                    className={`inline-flex rounded-full px-2 py-1 text-xs ${getProviderColor(webhook.provider)}`}
+                  >
                     {webhook.provider.toUpperCase()}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    {webhook.eventId}
-                  </code>
+                  <code className="rounded bg-gray-100 px-2 py-1 text-xs">{webhook.eventId}</code>
                 </td>
-                <td className="px-4 py-3 text-sm">
-                  {webhook.attempts}/5
-                </td>
+                <td className="px-4 py-3 text-sm">{webhook.attempts}/5</td>
                 <td className="px-4 py-3 text-sm text-gray-600">
                   {format(new Date(webhook.createdAt), 'dd/MM HH:mm')}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-600">
-                  {webhook.nextRetryAt 
-                    ? format(new Date(webhook.nextRetryAt), 'dd/MM HH:mm')
-                    : '-'
-                  }
+                  {webhook.nextRetryAt ? format(new Date(webhook.nextRetryAt), 'dd/MM HH:mm') : '-'}
                 </td>
                 <td className="px-4 py-3">
                   {webhook.status === 'failed' && (
                     <button
-                      onClick={() => retryWebhook(webhook.eventId)}
-                      disabled={retrying === webhook.eventId}
                       className="text-blue-600 hover:text-blue-700"
+                      disabled={retrying === webhook.eventId}
+                      onClick={() => retryWebhook(webhook.eventId)}
                     >
                       {retrying === webhook.eventId ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -232,9 +229,7 @@ export function WebhookMonitor() {
           </tbody>
         </table>
         {webhooks.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            No webhooks found
-          </div>
+          <div className="py-8 text-center text-gray-500">No webhooks found</div>
         )}
       </div>
     </div>

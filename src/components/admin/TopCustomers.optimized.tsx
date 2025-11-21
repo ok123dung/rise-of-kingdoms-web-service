@@ -20,79 +20,81 @@ interface TopCustomer {
 }
 
 // Memoized customer item component
-const CustomerItem = memo(({ 
-  customer, 
-  index,
-  formatVND,
-  formatDate,
-  getTierBadge,
-  getInitials
-}: {
-  customer: TopCustomer
-  index: number
-  formatVND: (amount: number) => string
-  formatDate: (dateString: string) => string
-  getTierBadge: (tier: string) => JSX.Element
-  getInitials: (name: string) => string
-}) => {
-  const rankingClass = useMemo(() => {
-    if (index === 0) return 'bg-yellow-100 text-yellow-800'
-    if (index === 1) return 'bg-gray-100 text-gray-800'
-    if (index === 2) return 'bg-orange-100 text-orange-800'
-    return 'bg-blue-100 text-blue-800'
-  }, [index])
+const CustomerItem = memo(
+  ({
+    customer,
+    index,
+    formatVND,
+    formatDate,
+    getTierBadge,
+    getInitials
+  }: {
+    customer: TopCustomer
+    index: number
+    formatVND: (amount: number) => string
+    formatDate: (dateString: string) => string
+    getTierBadge: (tier: string) => JSX.Element
+    getInitials: (name: string) => string
+  }) => {
+    const rankingClass = useMemo(() => {
+      if (index === 0) return 'bg-yellow-100 text-yellow-800'
+      if (index === 1) return 'bg-gray-100 text-gray-800'
+      if (index === 2) return 'bg-orange-100 text-orange-800'
+      return 'bg-blue-100 text-blue-800'
+    }, [index])
 
-  return (
-    <Link
-      className="block transition-colors hover:bg-gray-50"
-      href={`/admin/customers/${customer.id}`}
-    >
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Ranking number */}
-            <div
-              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${rankingClass}`}
-            >
-              {index + 1}
-            </div>
-
-            {/* Avatar */}
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white">
-              {customer.avatar ? (
-                <img
-                  alt={customer.name}
-                  className="h-full w-full rounded-full object-cover"
-                  src={customer.avatar}
-                />
-              ) : (
-                getInitials(customer.name)
-              )}
-            </div>
-
-            {/* Customer info */}
-            <div className="min-w-0 flex-1">
-              <div className="mb-1 flex items-center gap-2">
-                <p className="truncate font-semibold text-gray-900">{customer.name}</p>
-                {getTierBadge(customer.tier)}
+    return (
+      <Link
+        className="block transition-colors hover:bg-gray-50"
+        href={`/admin/customers/${customer.id}`}
+      >
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* Ranking number */}
+              <div
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${rankingClass}`}
+              >
+                {index + 1}
               </div>
-              <p className="truncate text-sm text-gray-600">{customer.email}</p>
-              <p className="text-xs text-gray-500">
-                Lần cuối: {formatDate(customer.lastBooking)}
-              </p>
-            </div>
-          </div>
 
-          {/* Stats */}
-          <div className="ml-4 text-right">
-            <div className="font-bold text-green-600">{formatVND(customer.totalSpent)}</div>
-            <div className="text-xs text-gray-600">{customer.bookingsCount} đơn hàng</div>
+              {/* Avatar */}
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white">
+                {customer.avatar ? (
+                  <img
+                    alt={customer.name}
+                    className="h-full w-full rounded-full object-cover"
+                    src={customer.avatar}
+                  />
+                ) : (
+                  getInitials(customer.name)
+                )}
+              </div>
+
+              {/* Customer info */}
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex items-center gap-2">
+                  <p className="truncate font-semibold text-gray-900">{customer.name}</p>
+                  {getTierBadge(customer.tier)}
+                </div>
+                <p className="truncate text-sm text-gray-600">{customer.email}</p>
+                <p className="text-xs text-gray-500">
+                  Lần cuối: {formatDate(customer.lastBooking)}
+                </p>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="ml-4 text-right">
+              <div className="font-bold text-green-600">{formatVND(customer.totalSpent)}</div>
+              <div className="text-xs text-gray-600">{customer.bookingsCount} đơn hàng</div>
+            </div>
           </div>
         </div>
-      </div>
-    </Link>
-  )
-})
+      </Link>
+    )
+  }
+)
 
 CustomerItem.displayName = 'CustomerItem'
 
@@ -289,11 +291,11 @@ export default function TopCustomers() {
             <CustomerItem
               key={customer.id}
               customer={customer}
-              index={index}
-              formatVND={formatVND}
               formatDate={formatDate}
-              getTierBadge={getTierBadge}
+              formatVND={formatVND}
               getInitials={getInitials}
+              getTierBadge={getTierBadge}
+              index={index}
             />
           ))}
         </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+
 import { ChatBubbleLeftRightIcon, InboxIcon } from '@heroicons/react/24/outline'
 
 export default function MessagesPage() {
@@ -10,13 +11,11 @@ export default function MessagesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Tin nhắn</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Quản lý tin nhắn và thông báo từ hệ thống
-        </p>
+        <p className="mt-1 text-sm text-gray-500">Quản lý tin nhắn và thông báo từ hệ thống</p>
       </div>
 
       {messages.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
+        <div className="rounded-lg bg-white p-12 text-center shadow">
           <InboxIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">Không có tin nhắn</h3>
           <p className="mt-1 text-sm text-gray-500">
@@ -24,16 +23,16 @@ export default function MessagesPage() {
           </p>
           <div className="mt-6">
             <a
+              className="bg-rok-gold hover:bg-rok-gold-dark inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm"
               href="/dashboard/support"
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rok-gold hover:bg-rok-gold-dark"
             >
-              <ChatBubbleLeftRightIcon className="mr-2 -ml-1 h-5 w-5" />
+              <ChatBubbleLeftRightIcon className="-ml-1 mr-2 h-5 w-5" />
               Liên hệ hỗ trợ
             </a>
           </div>
         </div>
       ) : (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <div className="overflow-hidden bg-white shadow sm:rounded-md">
           {/* Messages list will go here */}
         </div>
       )}

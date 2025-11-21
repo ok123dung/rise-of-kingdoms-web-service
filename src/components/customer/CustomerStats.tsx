@@ -1,22 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-
 import {
   ShoppingCart,
   DollarSign,
-  TrendingUp,
-  Calendar,
-  Target,
+  CheckCircle,
   Award,
+  Target,
   Clock,
-  CheckCircle
+  Calendar,
+  TrendingUp
 } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
-interface CustomerStats {
+interface CustomerStatsData {
   totalBookings: number
   totalSpent: number
   activeServices: number
@@ -26,56 +23,17 @@ interface CustomerStats {
   nextTierThreshold?: number
   currentTierProgress: number
   recentActivity: {
-    lastBooking: string
-    lastPayment: string
-    upcomingService?: string
+    lastBooking: string | null
+    lastPayment: string | null
+    upcomingService?: string | null
   }
 }
 
 interface CustomerStatsProps {
-  userId?: string
+  stats: CustomerStatsData
 }
 
-export default function CustomerStats({ userId }: CustomerStatsProps) {
-  const [stats, setStats] = useState<CustomerStats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchCustomerStats()
-  }, [])
-
-  const fetchCustomerStats = async () => {
-    try {
-      setLoading(true)
-      // Simulate API call - replace with real endpoint
-      await new Promise(resolve => setTimeout(resolve, 800))
-
-      // Mock customer stats data
-      const mockStats: CustomerStats = {
-        totalBookings: 12,
-        totalSpent: 15750000,
-        activeServices: 2,
-        completedServices: 10,
-        averageRating: 4.8,
-        memberSince: '2024-01-15',
-        nextTierThreshold: 20000000,
-        currentTierProgress: 78.75, // (15750000/20000000) * 100
-        recentActivity: {
-          lastBooking: '2024-07-20',
-          lastPayment: '2024-07-20',
-          upcomingService: '2024-07-25'
-        }
-      }
-
-      setStats(mockStats)
-    } catch (err) {
-      setError('Không thể tải thống kê khách hàng')
-    } finally {
-      setLoading(false)
-    }
-  }
-
+export default function CustomerStats({ stats }: CustomerStatsProps) {
   const formatVND = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -83,11 +41,13 @@ export default function CustomerStats({ userId }: CustomerStatsProps) {
     }).format(amount)
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A'
     return new Intl.DateTimeFormat('vi-VN').format(new Date(dateString))
   }
 
-  const getTimeSince = (dateString: string) => {
+  const getTimeSince = (dateString: string | null) => {
+    if (!dateString) return ''
     const date = new Date(dateString)
     const now = new Date()
     const diffTime = Math.abs(now.getTime() - date.getTime())
@@ -97,36 +57,6 @@ export default function CustomerStats({ userId }: CustomerStatsProps) {
     if (diffDays < 7) return `${diffDays} ngày`
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} tuần`
     return `${Math.ceil(diffDays / 30)} tháng`
-  }
-
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map(i => (
-          <Card key={i}>
-            <CardContent className="p-6">
-              <LoadingSpinner size="sm" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
-  }
-
-  if (error || !stats) {
-    return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <div className="mb-2 text-red-600">{error}</div>
-          <button
-            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-            onClick={fetchCustomerStats}
-          >
-            Thử lại
-          </button>
-        </CardContent>
-      </Card>
-    )
   }
 
   return (
@@ -159,7 +89,7 @@ export default function CustomerStats({ userId }: CustomerStatsProps) {
                 <p className="text-sm font-medium text-gray-600">Tổng chi tiêu</p>
                 <p className="text-2xl font-bold text-gray-900">{formatVND(stats.totalSpent)}</p>
                 <p className="mt-1 text-xs text-gray-500">
-                  Trung bình: {formatVND(stats.totalSpent / stats.totalBookings)}/đơn
+                  Trung bình: {stats.totalBookings > 0 ? formatVND(stats.totalSpent / stats.totalBookings) : 0}/đơn
                 </p>
               </div>
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
@@ -176,7 +106,7 @@ export default function CustomerStats({ userId }: CustomerStatsProps) {
               <div>
                 <p className="text-sm font-medium text-gray-600">Tỷ lệ hoàn thành</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {Math.round((stats.completedServices / stats.totalBookings) * 100)}%
+                  {stats.totalBookings > 0 ? Math.round((stats.completedServices / stats.totalBookings) * 100) : 0}%
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
                   {stats.completedServices}/{stats.totalBookings} dịch vụ
@@ -201,9 +131,8 @@ export default function CustomerStats({ userId }: CustomerStatsProps) {
                     {[1, 2, 3, 4, 5].map(star => (
                       <div
                         key={star}
-                        className={`h-4 w-4 ${
-                          star <= stats.averageRating ? 'text-yellow-400' : 'text-gray-300'
-                        }`}
+                        className={`h-4 w-4 ${star <= stats.averageRating ? 'text-yellow-400' : 'text-gray-300'
+                          }`}
                       >
                         ★
                       </div>
@@ -293,8 +222,13 @@ export default function CustomerStats({ userId }: CustomerStatsProps) {
                   <div>
                     <p className="text-sm font-medium">Đơn hàng cuối</p>
                     <p className="text-xs text-gray-600">
-                      {formatDate(stats.recentActivity.lastBooking)} (
-                      {getTimeSince(stats.recentActivity.lastBooking)} trước)
+                      {stats.recentActivity.lastBooking ? (
+                        <>
+                          {formatDate(stats.recentActivity.lastBooking)} ({getTimeSince(stats.recentActivity.lastBooking)} trước)
+                        </>
+                      ) : (
+                        'Chưa có đơn hàng'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -308,8 +242,13 @@ export default function CustomerStats({ userId }: CustomerStatsProps) {
                   <div>
                     <p className="text-sm font-medium">Thanh toán cuối</p>
                     <p className="text-xs text-gray-600">
-                      {formatDate(stats.recentActivity.lastPayment)} (
-                      {getTimeSince(stats.recentActivity.lastPayment)} trước)
+                      {stats.recentActivity.lastPayment ? (
+                        <>
+                          {formatDate(stats.recentActivity.lastPayment)} ({getTimeSince(stats.recentActivity.lastPayment)} trước)
+                        </>
+                      ) : (
+                        'Chưa có thanh toán'
+                      )}
                     </p>
                   </div>
                 </div>

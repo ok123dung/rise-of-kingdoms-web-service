@@ -1,6 +1,8 @@
 import { PrismaClient, type Prisma } from '@prisma/client'
-import type { UnwrapTuple } from '@prisma/client/runtime/library'
+
 import { getLogger } from '@/lib/monitoring/logger'
+
+import type { UnwrapTuple } from '@prisma/client/runtime/library'
 
 // Connection pool configuration
 const CONNECTION_POOL_CONFIG = {
@@ -11,7 +13,7 @@ const CONNECTION_POOL_CONFIG = {
   // Connection idle timeout (ms)
   idle_in_transaction_session_timeout: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '10000'),
   // Statement timeout (ms)
-  statement_timeout: parseInt(process.env.DATABASE_STATEMENT_TIMEOUT || '20000'),
+  statement_timeout: parseInt(process.env.DATABASE_STATEMENT_TIMEOUT || '20000')
 }
 
 // Circuit breaker configuration
@@ -19,7 +21,7 @@ class CircuitBreaker {
   private failures = 0
   private lastFailureTime = 0
   private state: 'closed' | 'open' | 'half-open' = 'closed'
-  
+
   constructor(
     private readonly threshold = 5,
     private readonly timeout = 60000, // 1 minute
@@ -52,7 +54,7 @@ class CircuitBreaker {
   private recordFailure() {
     this.failures++
     this.lastFailureTime = Date.now()
-    
+
     if (this.failures >= this.threshold) {
       this.state = 'open'
       getLogger().error(`Circuit breaker opened after ${this.failures} failures`)
@@ -146,7 +148,7 @@ class EnhancedPrismaClient extends PrismaClient {
       getLogger().error('Database connection failed', error as Error, {
         attempts: this.connectionAttempts
       })
-      
+
       // Implement exponential backoff for reconnection
       if (this.connectionAttempts < 5) {
         const delay = Math.min(1000 * Math.pow(2, this.connectionAttempts), 30000)
@@ -154,7 +156,7 @@ class EnhancedPrismaClient extends PrismaClient {
         await new Promise(resolve => setTimeout(resolve, delay))
         return this.$connect()
       }
-      
+
       throw error
     }
   }
@@ -169,7 +171,7 @@ class EnhancedPrismaClient extends PrismaClient {
     }
   }> {
     const now = Date.now()
-    
+
     // Only check every 5 seconds to avoid overloading
     if (now - this.lastConnectionCheck < 5000) {
       return {
@@ -207,11 +209,20 @@ class EnhancedPrismaClient extends PrismaClient {
 
   // Override $transaction to add timeout and retry logic
   $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P]): Promise<UnwrapTuple<P>>
-  $transaction<R>(fn: (prisma: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>) => Promise<R>, options?: { maxWait?: number; timeout?: number; isolationLevel?: Prisma.TransactionIsolationLevel }): Promise<R>
-  async $transaction<T = any>(
-    arg: any,
-    options?: any
-  ): Promise<T> {
+  $transaction<R>(
+    fn: (
+      prisma: Omit<
+        PrismaClient,
+        '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+      >
+    ) => Promise<R>,
+    options?: {
+      maxWait?: number
+      timeout?: number
+      isolationLevel?: Prisma.TransactionIsolationLevel
+    }
+  ): Promise<R>
+  async $transaction<T = any>(arg: any, options?: any): Promise<T> {
     const defaultOptions = {
       maxWait: CONNECTION_POOL_CONFIG.pool_timeout,
       timeout: CONNECTION_POOL_CONFIG.statement_timeout,
@@ -221,9 +232,9 @@ class EnhancedPrismaClient extends PrismaClient {
     return this.circuitBreaker.execute(async () => {
       try {
         if (Array.isArray(arg)) {
-          return await super.$transaction(arg, options) as any
+          return (await super.$transaction(arg, options)) as any
         } else {
-          return await super.$transaction(arg, defaultOptions) as any
+          return (await super.$transaction(arg, defaultOptions)) as any
         }
       } catch (error) {
         // Log transaction errors with context
@@ -278,7 +289,7 @@ export const prisma = new Proxy(prismaEnhanced, {
         }
       })
     }
-    
+
     // For $-prefixed methods
     if (typeof prop === 'string' && prop.startsWith('$') && prop !== '$connect') {
       const value = Reflect.get(target, prop, receiver)
@@ -289,7 +300,7 @@ export const prisma = new Proxy(prismaEnhanced, {
         }
       }
     }
-    
+
     return Reflect.get(target, prop, receiver)
   }
 })
@@ -308,9 +319,7 @@ export async function disconnectDatabase() {
 // Export base Prisma client for NextAuth adapter
 // The PrismaAdapter doesn't work well with our enhanced client
 export const basePrisma = new PrismaClient({
-  log: process.env.NODE_ENV === 'development' 
-    ? ['query', 'error', 'warn'] 
-    : ['error'],
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   datasources: {
     db: {
       url: process.env.DATABASE_URL

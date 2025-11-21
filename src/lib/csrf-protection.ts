@@ -1,5 +1,7 @@
 import crypto from 'crypto'
-import { NextRequest } from 'next/server'
+
+import { type NextRequest } from 'next/server'
+
 import { getLogger } from './monitoring/logger'
 
 export interface CSRFValidationResult {
@@ -18,32 +20,32 @@ export function generateSignedCSRFToken(secret: string): string {
   const timestamp = Date.now()
   const randomPart = crypto.randomBytes(24).toString('hex')
   const data = `${timestamp}.${randomPart}`
-  
+
   const hmac = crypto.createHmac('sha256', secret)
   hmac.update(data)
   const signature = hmac.digest('hex')
-  
+
   return `${data}.${signature}`
 }
 
 // Verify a signed CSRF token
-export function verifySignedCSRFToken(token: string, secret: string, maxAge: number = 86400000): boolean {
+export function verifySignedCSRFToken(token: string, secret: string, maxAge = 86400000): boolean {
   try {
     const parts = token.split('.')
     if (parts.length !== 3) return false
-    
+
     const [timestamp, randomPart, signature] = parts
     const data = `${timestamp}.${randomPart}`
-    
+
     // Check timestamp
     const tokenAge = Date.now() - parseInt(timestamp, 10)
     if (tokenAge > maxAge) return false
-    
+
     // Verify signature
     const hmac = crypto.createHmac('sha256', secret)
     hmac.update(data)
     const expectedSignature = hmac.digest('hex')
-    
+
     return crypto.timingSafeEqual(
       Buffer.from(signature, 'hex'),
       Buffer.from(expectedSignature, 'hex')
@@ -61,7 +63,7 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
   }
 
   const { pathname, origin, hostname } = req.nextUrl
-  
+
   // Webhook endpoints need special handling
   const webhookEndpoints = [
     '/api/payments/webhook',
@@ -70,7 +72,7 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
     '/api/payments/zalopay/callback',
     '/api/webhooks/'
   ]
-  
+
   if (webhookEndpoints.some(endpoint => pathname.startsWith(endpoint))) {
     // Webhooks use signature verification instead of CSRF
     return { valid: true, reason: 'webhook endpoint' }
@@ -79,7 +81,7 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
   // 1. Origin/Referer check
   const requestOrigin = req.headers.get('origin')
   const referer = req.headers.get('referer')
-  
+
   if (requestOrigin || referer) {
     const allowedOrigins = [
       `https://${hostname}`,
@@ -87,11 +89,11 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
       'https://rokdbot.com',
       'https://www.rokdbot.com'
     ]
-    
+
     if (process.env.ALLOWED_ORIGINS) {
       allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(','))
     }
-    
+
     const checkOrigin = requestOrigin || new URL(referer!).origin
     if (!allowedOrigins.includes(checkOrigin)) {
       getLogger().warn('CSRF validation failed: invalid origin', {
@@ -106,11 +108,11 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
   // 2. Double-submit cookie validation
   const headerToken = req.headers.get('x-csrf-token')
   const cookieToken = req.cookies.get('csrf-token')?.value
-  
+
   if (!headerToken || !cookieToken) {
     return { valid: false, reason: 'missing CSRF token' }
   }
-  
+
   if (headerToken !== cookieToken) {
     return { valid: false, reason: 'token mismatch' }
   }
@@ -130,13 +132,14 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
     '/api/user/delete',
     '/api/admin/'
   ]
-  
+
   if (sensitiveEndpoints.some(endpoint => pathname.startsWith(endpoint))) {
     // Require fresh token for sensitive operations
     const tokenAge = getTokenAge(cookieToken)
-    if (tokenAge > 900000) { // 15 minutes
-      return { 
-        valid: false, 
+    if (tokenAge > 900000) {
+      // 15 minutes
+      return {
+        valid: false,
         reason: 'token too old for sensitive operation',
         newToken: generateSignedCSRFToken(csrfSecret || 'default')
       }
@@ -172,7 +175,7 @@ export function getCSRFMetaTags(token: string): string {
 // Client-side helper to include CSRF token in fetch requests
 export function getCSRFHeaders(): HeadersInit {
   if (typeof window === 'undefined') return {}
-  
+
   const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
   if (!token) {
     // Try to get from cookie
@@ -180,11 +183,11 @@ export function getCSRFHeaders(): HeadersInit {
       .split('; ')
       .find(row => row.startsWith('csrf-token='))
       ?.split('=')[1]
-    
+
     if (cookieToken) {
       return { 'X-CSRF-Token': cookieToken }
     }
   }
-  
+
   return token ? { 'X-CSRF-Token': token } : {}
 }

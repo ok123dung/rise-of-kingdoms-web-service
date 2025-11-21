@@ -1,8 +1,9 @@
 import { hash, compare } from 'bcryptjs'
+
 import { prisma } from '@/lib/db'
+import { sendWelcomeEmail } from '@/lib/email'
 import { NotFoundError, ValidationError, AuthenticationError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
-import { sendWelcomeEmail } from '@/lib/email'
 import type { User } from '@/types/database'
 
 export class UserService {
@@ -178,40 +179,34 @@ export class UserService {
    * Get user statistics
    */
   async getUserStats(userId: string) {
-    const [
-      user,
-      totalBookings,
-      activeBookings,
-      completedBookings,
-      totalSpent,
-      lastBooking
-    ] = await Promise.all([
-      prisma.user.findUnique({ where: { id: userId } }),
-      prisma.booking.count({
-        where: { userId }
-      }),
-      prisma.booking.count({
-        where: {
-          userId,
-          status: { in: ['pending', 'confirmed', 'in_progress'] }
-        }
-      }),
-      prisma.booking.count({
-        where: { userId, status: 'completed' }
-      }),
-      prisma.payment.aggregate({
-        where: {
-          booking: { userId },
-          status: 'completed'
-        },
-        _sum: { amount: true }
-      }),
-      prisma.booking.findFirst({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        select: { createdAt: true }
-      })
-    ])
+    const [user, totalBookings, activeBookings, completedBookings, totalSpent, lastBooking] =
+      await Promise.all([
+        prisma.user.findUnique({ where: { id: userId } }),
+        prisma.booking.count({
+          where: { userId }
+        }),
+        prisma.booking.count({
+          where: {
+            userId,
+            status: { in: ['pending', 'confirmed', 'in_progress'] }
+          }
+        }),
+        prisma.booking.count({
+          where: { userId, status: 'completed' }
+        }),
+        prisma.payment.aggregate({
+          where: {
+            booking: { userId },
+            status: 'completed'
+          },
+          _sum: { amount: true }
+        }),
+        prisma.booking.findFirst({
+          where: { userId },
+          orderBy: { createdAt: 'desc' },
+          select: { createdAt: true }
+        })
+      ])
 
     return {
       totalBookings,

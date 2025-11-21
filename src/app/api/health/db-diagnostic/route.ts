@@ -1,15 +1,19 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
 import { headers } from 'next/headers'
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { prisma } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   const headersList = headers()
   const authHeader = headersList.get('authorization')
-  
+
   // Basic protection - only allow with secret header in production
-  if (process.env.NODE_ENV === 'production' && authHeader !== `Bearer ${process.env.NEXTAUTH_SECRET}`) {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    authHeader !== `Bearer ${process.env.NEXTAUTH_SECRET}`
+  ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -39,7 +43,7 @@ export async function GET(request: NextRequest) {
     const startTime = Date.now()
     await prisma.$connect()
     const connectionTime = Date.now() - startTime
-    
+
     diagnostics.checks.connection = {
       status: 'connected',
       connectionTimeMs: connectionTime,
@@ -51,7 +55,7 @@ export async function GET(request: NextRequest) {
       const queryStart = Date.now()
       await prisma.$queryRaw`SELECT 1 as test`
       const queryTime = Date.now() - queryStart
-      
+
       diagnostics.checks.query = {
         status: 'success',
         queryTimeMs: queryTime,
@@ -72,11 +76,11 @@ export async function GET(request: NextRequest) {
         WHERE schemaname = 'public'
         ORDER BY tablename;
       `
-      
+
       const expectedTables = ['users', 'services', 'service_tiers', 'bookings', 'payments', 'leads']
       const existingTables = tables.map(t => t.tablename)
       const missingTables = expectedTables.filter(t => !existingTables.includes(t))
-      
+
       diagnostics.checks.schema = {
         status: missingTables.length === 0 ? 'complete' : 'incomplete',
         totalTables: tables.length,
@@ -97,7 +101,7 @@ export async function GET(request: NextRequest) {
         FROM pg_stat_activity 
         WHERE datname = current_database()
       `
-      
+
       diagnostics.checks.connectionPool = {
         activeConnections: poolStatus[0]?.count || 0,
         status: 'healthy'
@@ -108,12 +112,15 @@ export async function GET(request: NextRequest) {
         note: 'This is normal for some database providers'
       }
     }
-
   } catch (connectionError) {
     diagnostics.checks.connection = {
       status: 'failed',
-      error: connectionError instanceof Error ? connectionError.message : 'Unknown connection error',
-      errorCode: connectionError instanceof Error && 'code' in connectionError ? connectionError.code : undefined
+      error:
+        connectionError instanceof Error ? connectionError.message : 'Unknown connection error',
+      errorCode:
+        connectionError instanceof Error && 'code' in connectionError
+          ? connectionError.code
+          : undefined
     }
 
     // Provide specific recommendations based on error
@@ -126,21 +133,22 @@ export async function GET(request: NextRequest) {
     } catch (disconnectError) {
       diagnostics.checks.disconnect = {
         status: 'failed',
-        error: disconnectError instanceof Error ? disconnectError.message : 'Unknown disconnect error'
+        error:
+          disconnectError instanceof Error ? disconnectError.message : 'Unknown disconnect error'
       }
     }
   }
 
   // Overall health status
   diagnostics.overallStatus = determineOverallStatus(diagnostics.checks)
-  
+
   // Add quick fix URL if unhealthy
   if (diagnostics.overallStatus !== 'healthy') {
     diagnostics.quickFixUrl = '/VERCEL-DEPLOYMENT-FIX.md'
   }
 
-  return NextResponse.json(diagnostics, { 
-    status: diagnostics.overallStatus === 'healthy' ? 200 : 503 
+  return NextResponse.json(diagnostics, {
+    status: diagnostics.overallStatus === 'healthy' ? 200 : 503
   })
 }
 
@@ -156,29 +164,29 @@ function detectDatabaseProvider(url: string): string {
 
 function getRecommendations(errorMessage: string): string[] {
   const recommendations = []
-  
+
   if (errorMessage.includes('P1001') || errorMessage.includes('connect')) {
     recommendations.push('Ensure DATABASE_URL is set in Vercel environment variables')
     recommendations.push('Add connection pooling: ?pgbouncer=true&connection_limit=1')
     recommendations.push('Verify database server is accessible from Vercel')
   }
-  
+
   if (errorMessage.includes('timeout')) {
     recommendations.push('Add connection timeout: ?connect_timeout=30')
     recommendations.push('Ensure database region is close to Vercel deployment region')
   }
-  
+
   if (errorMessage.includes('SSL') || errorMessage.includes('certificate')) {
     recommendations.push('Add SSL mode to DATABASE_URL: ?sslmode=require')
     recommendations.push('For some providers, try: ?ssl=true')
   }
-  
+
   if (errorMessage.includes('too many connections')) {
     recommendations.push('Enable connection pooling: ?pgbouncer=true')
     recommendations.push('Limit connections: ?connection_limit=1')
     recommendations.push('Consider upgrading database plan for more connections')
   }
-  
+
   return recommendations
 }
 
@@ -187,11 +195,12 @@ function determineOverallStatus(checks: any): string {
   if (!checks.databaseUrl?.configured) return 'critical'
   if (checks.connection?.status !== 'connected') return 'unhealthy'
   if (checks.query?.status !== 'success') return 'unhealthy'
-  if (checks.schema?.status === 'incomplete' && checks.schema?.missingTables?.length > 0) return 'warning'
-  
+  if (checks.schema?.status === 'incomplete' && checks.schema?.missingTables?.length > 0)
+    return 'warning'
+
   // Performance checks
   if (checks.connection?.connectionTimeMs > 10000) return 'degraded'
   if (checks.query?.queryTimeMs > 2000) return 'degraded'
-  
+
   return 'healthy'
 }

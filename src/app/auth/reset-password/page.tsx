@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
+
 import { Eye, EyeOff, Lock, CheckCircle, XCircle } from 'lucide-react'
+import Link from 'next/link'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams()
@@ -96,15 +97,13 @@ function ResetPasswordForm() {
         <div className="w-full max-w-md text-center">
           <div className="rounded-lg bg-white p-8 shadow-xl">
             <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">
-              Đặt lại mật khẩu thành công!
-            </h2>
+            <h2 className="mt-4 text-2xl font-bold text-gray-900">Đặt lại mật khẩu thành công!</h2>
             <p className="mt-2 text-gray-600">
               Bạn sẽ được chuyển đến trang đăng nhập trong giây lát...
             </p>
             <Link
-              href="/auth/signin"
               className="mt-4 inline-block text-blue-600 hover:text-blue-800"
+              href="/auth/signin"
             >
               Đăng nhập ngay
             </Link>
@@ -130,8 +129,8 @@ function ResetPasswordForm() {
               <XCircle className="mx-auto h-12 w-12 text-red-500" />
               <p className="mt-2 text-sm text-red-800">{error}</p>
               <Link
-                href="/auth/forgot-password"
                 className="mt-2 inline-block text-sm text-blue-600 hover:text-blue-800"
+                href="/auth/forgot-password"
               >
                 Yêu cầu link mới
               </Link>
@@ -139,7 +138,7 @@ function ResetPasswordForm() {
           )}
 
           {token && (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               {error && (
                 <div className="rounded-lg bg-red-50 p-4">
                   <p className="text-sm text-red-800">{error}</p>
@@ -148,22 +147,20 @@ function ResetPasswordForm() {
 
               {/* New Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Mật khẩu mới
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Mật khẩu mới</label>
                 <div className="relative mt-1">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    required
                     className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                     placeholder="Nhập mật khẩu mới"
-                    required
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
                   />
                   <button
-                    type="button"
                     className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                    type="button"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -178,7 +175,9 @@ function ResetPasswordForm() {
                     ) : (
                       <XCircle className="h-4 w-4 text-gray-300" />
                     )}
-                    <span className={`text-xs ${passwordStrength.length ? 'text-green-600' : 'text-gray-500'}`}>
+                    <span
+                      className={`text-xs ${passwordStrength.length ? 'text-green-600' : 'text-gray-500'}`}
+                    >
                       Ít nhất 8 ký tự
                     </span>
                   </div>
@@ -188,7 +187,9 @@ function ResetPasswordForm() {
                     ) : (
                       <XCircle className="h-4 w-4 text-gray-300" />
                     )}
-                    <span className={`text-xs ${passwordStrength.lowercase && passwordStrength.uppercase ? 'text-green-600' : 'text-gray-500'}`}>
+                    <span
+                      className={`text-xs ${passwordStrength.lowercase && passwordStrength.uppercase ? 'text-green-600' : 'text-gray-500'}`}
+                    >
                       Chữ hoa và chữ thường
                     </span>
                   </div>
@@ -198,7 +199,9 @@ function ResetPasswordForm() {
                     ) : (
                       <XCircle className="h-4 w-4 text-gray-300" />
                     )}
-                    <span className={`text-xs ${passwordStrength.number ? 'text-green-600' : 'text-gray-500'}`}>
+                    <span
+                      className={`text-xs ${passwordStrength.number ? 'text-green-600' : 'text-gray-500'}`}
+                    >
                       Ít nhất một số
                     </span>
                   </div>
@@ -207,25 +210,27 @@ function ResetPasswordForm() {
 
               {/* Confirm Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Xác nhận mật khẩu
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
                 <div className="relative mt-1">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
                     className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                     placeholder="Nhập lại mật khẩu mới"
-                    required
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
                   />
                   <button
-                    type="button"
                     className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                    type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
-                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
                 {confirmPassword && password !== confirmPassword && (
@@ -235,19 +240,16 @@ function ResetPasswordForm() {
 
               {/* Submit Button */}
               <button
-                type="submit"
-                disabled={isSubmitting || !password || password !== confirmPassword}
                 className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                disabled={isSubmitting || !password || password !== confirmPassword}
+                type="submit"
               >
                 {isSubmitting ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
               </button>
 
               {/* Back to Sign In */}
               <div className="text-center">
-                <Link
-                  href="/auth/signin"
-                  className="text-sm text-blue-600 hover:text-blue-800"
-                >
+                <Link className="text-sm text-blue-600 hover:text-blue-800" href="/auth/signin">
                   Quay lại đăng nhập
                 </Link>
               </div>
@@ -261,16 +263,18 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 px-4">
-        <div className="w-full max-w-md text-center">
-          <div className="rounded-lg bg-white p-8 shadow-xl">
-            <div className="animate-spin mx-auto h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-            <p className="mt-4 text-gray-600">Đang tải...</p>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 px-4">
+          <div className="w-full max-w-md text-center">
+            <div className="rounded-lg bg-white p-8 shadow-xl">
+              <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+              <p className="mt-4 text-gray-600">Đang tải...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   )

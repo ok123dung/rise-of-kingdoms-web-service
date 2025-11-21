@@ -109,9 +109,7 @@ export function buildCSPHeader(directives: CSPDirectives, nonce?: string): strin
       }
 
       if (Array.isArray(value)) {
-        const values = nonce
-          ? value.map((v) => v.replace('{{NONCE}}', nonce))
-          : value
+        const values = nonce ? value.map(v => v.replace('{{NONCE}}', nonce)) : value
 
         return `${key} ${values.join(' ')}`
       }
@@ -130,7 +128,7 @@ export function buildCSPHeader(directives: CSPDirectives, nonce?: string): strin
  */
 export function generateCSPNonce(): string {
   const randomBytes = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-    .map((b) => b.toString(16).padStart(2, '0'))
+    .map(b => b.toString(16).padStart(2, '0'))
     .join('')
 
   return Buffer.from(randomBytes, 'hex').toString('base64')

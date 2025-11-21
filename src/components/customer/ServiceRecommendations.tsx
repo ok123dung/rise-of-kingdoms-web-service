@@ -1,106 +1,32 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-
 import { Star, TrendingUp, Target, Users, Crown, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface ServiceRecommendation {
   id: string
   name: string
   slug: string
-  description: string
+  description: string | null
   basePrice: number
-  originalPrice?: number
+  originalPrice?: number | null
   discount?: number
-  category: string
+  category: string | null
   rating: number
   reviewCount: number
   isPopular: boolean
   isFeatured: boolean
-  recommendationReason: 'popular' | 'similar_customers' | 'upgrade' | 'trending'
+  recommendationReason: string
   estimatedDuration: string
 }
 
 interface ServiceRecommendationsProps {
-  userId?: string
+  recommendations: ServiceRecommendation[]
 }
 
-export default function ServiceRecommendations({ userId }: ServiceRecommendationsProps) {
-  const [recommendations, setRecommendations] = useState<ServiceRecommendation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchRecommendations()
-  }, [])
-
-  const fetchRecommendations = async () => {
-    try {
-      setLoading(true)
-      // Simulate API call - replace with real endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Mock recommendations data
-      const mockRecommendations: ServiceRecommendation[] = [
-        {
-          id: '1',
-          name: 'Advanced KvK Strategy',
-          slug: 'advanced-kvk-strategy',
-          description:
-            'Nâng cao kỹ năng KvK với chiến thuật chuyên sâu và phân tích trận đấu chi tiết',
-          basePrice: 2800000,
-          originalPrice: 3200000,
-          discount: 12.5,
-          category: 'coaching',
-          rating: 4.9,
-          reviewCount: 156,
-          isPopular: true,
-          isFeatured: true,
-          recommendationReason: 'upgrade',
-          estimatedDuration: '4 tuần'
-        },
-        {
-          id: '2',
-          name: 'Guild Leadership Mastery',
-          slug: 'guild-leadership-mastery',
-          description: 'Học cách quản lý và phát triển guild hiệu quả, tăng sức mạnh tập thể',
-          basePrice: 1950000,
-          category: 'management',
-          rating: 4.7,
-          reviewCount: 89,
-          isPopular: false,
-          isFeatured: false,
-          recommendationReason: 'similar_customers',
-          estimatedDuration: '3 tuần'
-        },
-        {
-          id: '3',
-          name: 'ROK Account Boost Premium',
-          slug: 'rok-account-boost-premium',
-          description: 'Dịch vụ tăng cường account toàn diện với boost tài nguyên và power',
-          basePrice: 4200000,
-          category: 'automation',
-          rating: 4.8,
-          reviewCount: 234,
-          isPopular: true,
-          isFeatured: false,
-          recommendationReason: 'trending',
-          estimatedDuration: '2 tuần'
-        }
-      ]
-
-      setRecommendations(mockRecommendations)
-    } catch (err) {
-      setError('Không thể tải gợi ý dịch vụ')
-    } finally {
-      setLoading(false)
-    }
-  }
-
+export default function ServiceRecommendations({ recommendations }: ServiceRecommendationsProps) {
   const getRecommendationBadge = (reason: string) => {
     switch (reason) {
       case 'popular':
@@ -141,40 +67,6 @@ export default function ServiceRecommendations({ userId }: ServiceRecommendation
       style: 'currency',
       currency: 'VND'
     }).format(amount)
-  }
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Dịch vụ dành cho bạn</CardTitle>
-        </CardHeader>
-        <CardContent className="flex h-[200px] items-center justify-center">
-          <LoadingSpinner text="Đang tải gợi ý..." />
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Dịch vụ dành cho bạn</CardTitle>
-        </CardHeader>
-        <CardContent className="flex h-[200px] items-center justify-center">
-          <div className="text-center text-red-600">
-            <p>{error}</p>
-            <button
-              className="mt-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-              onClick={fetchRecommendations}
-            >
-              Thử lại
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-    )
   }
 
   if (recommendations.length === 0) {

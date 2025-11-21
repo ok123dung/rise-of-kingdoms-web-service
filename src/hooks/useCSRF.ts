@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import { getCSRFHeaders } from '@/lib/csrf-protection'
 
 export function useCSRF() {
@@ -7,7 +8,7 @@ export function useCSRF() {
   useEffect(() => {
     // Get CSRF token from meta tag or cookie
     const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-    
+
     if (metaToken) {
       setCSRFToken(metaToken)
     } else {
@@ -16,7 +17,7 @@ export function useCSRF() {
         .split('; ')
         .find(row => row.startsWith('csrf-token='))
         ?.split('=')[1]
-      
+
       if (cookieToken) {
         setCSRFToken(cookieToken)
       }

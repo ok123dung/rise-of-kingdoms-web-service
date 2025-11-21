@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { withAuth, withRateLimit, getCurrentSession, isStaff } from '@/lib/auth'
-import { db, prisma } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import {
   ValidationError,
   NotFoundError,

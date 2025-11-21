@@ -1,11 +1,11 @@
+import { generateSecurePaymentRef } from '@/lib/crypto-utils'
 import { prisma } from '@/lib/db'
 import { NotFoundError, ValidationError, PaymentError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
+import { BankingTransfer } from '@/lib/payments/banking'
 import { MoMoPayment } from '@/lib/payments/momo'
 import { VNPayPayment } from '@/lib/payments/vnpay'
 import { ZaloPayPayment } from '@/lib/payments/zalopay'
-import { BankingTransfer } from '@/lib/payments/banking'
-import { generateSecurePaymentRef } from '@/lib/crypto-utils'
 import type { Payment, Booking } from '@/types/database'
 
 export class PaymentService {
@@ -41,7 +41,10 @@ export class PaymentService {
       data: {
         bookingId: data.bookingId,
         paymentNumber,
-        amount: typeof booking.finalAmount === 'number' ? booking.finalAmount : booking.finalAmount.toNumber(),
+        amount:
+          typeof booking.finalAmount === 'number'
+            ? booking.finalAmount
+            : booking.finalAmount.toNumber(),
         currency: booking.currency,
         paymentMethod: data.paymentMethod,
         paymentGateway: data.paymentMethod,
@@ -77,10 +80,7 @@ export class PaymentService {
   /**
    * Verify payment callback
    */
-  async verifyPaymentCallback(
-    paymentMethod: string,
-    callbackData: Record<string, any>
-  ) {
+  async verifyPaymentCallback(paymentMethod: string, callbackData: Record<string, any>) {
     switch (paymentMethod) {
       case 'momo':
         return await this.momoPayment.handleWebhook(callbackData as any)
@@ -126,15 +126,18 @@ export class PaymentService {
   /**
    * Get user payments
    */
-  async getUserPayments(userId: string, options?: {
-    status?: string
-    limit?: number
-    offset?: number
-  }) {
+  async getUserPayments(
+    userId: string,
+    options?: {
+      status?: string
+      limit?: number
+      offset?: number
+    }
+  ) {
     const where: any = {
       booking: { userId }
     }
-    
+
     if (options?.status) {
       where.status = options.status
     }

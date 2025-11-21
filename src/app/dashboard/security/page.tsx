@@ -1,12 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import TwoFactorSetup from '@/components/TwoFactorSetup'
+
 import { ShieldCheck, ShieldOff, Key, RefreshCw, AlertCircle } from 'lucide-react'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+
+import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/Header'
+import TwoFactorSetup from '@/components/TwoFactorSetup'
+import ChangePasswordForm from '@/components/security/ChangePasswordForm'
 
 interface TwoFactorStatus {
   enabled: boolean
@@ -76,7 +79,11 @@ export default function SecurityPage() {
   }
 
   const handleRegenerateBackupCodes = async () => {
-    if (!confirm('Are you sure you want to regenerate backup codes? Your old codes will no longer work.')) {
+    if (
+      !confirm(
+        'Are you sure you want to regenerate backup codes? Your old codes will no longer work.'
+      )
+    ) {
       return
     }
 
@@ -98,7 +105,9 @@ export default function SecurityPage() {
 
       if (data.success) {
         // Show backup codes to user
-        alert(`New backup codes:\n\n${data.backupCodes.join('\n')}\n\nPlease save these codes in a secure location!`)
+        alert(
+          `New backup codes:\n\n${data.backupCodes.join('\n')}\n\nPlease save these codes in a secure location!`
+        )
         setSuccess('Backup codes regenerated successfully')
         fetchTwoFactorStatus()
       } else {
@@ -126,7 +135,7 @@ export default function SecurityPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-2xl">
           <h1 className="mb-8 text-3xl font-bold text-gray-900">Bảo mật tài khoản</h1>
@@ -139,10 +148,13 @@ export default function SecurityPage() {
           )}
 
           {success && (
-            <div className="mb-4 rounded-lg bg-green-50 p-3 text-green-600">
-              {success}
-            </div>
+            <div className="mb-4 rounded-lg bg-green-50 p-3 text-green-600">{success}</div>
           )}
+
+          {/* Change Password Form */}
+          <div className="mb-6">
+            <ChangePasswordForm />
+          </div>
 
           {/* 2FA Status Card */}
           <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
@@ -156,24 +168,24 @@ export default function SecurityPage() {
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">Xác thực hai yếu tố (2FA)</h2>
                   <p className="text-sm text-gray-600">
-                    {twoFactorStatus.enabled 
+                    {twoFactorStatus.enabled
                       ? 'Đã bật - Tài khoản của bạn được bảo vệ'
                       : 'Chưa bật - Bật để tăng cường bảo mật'}
                   </p>
                 </div>
               </div>
-              
+
               {twoFactorStatus.enabled ? (
                 <button
+                  className="rounded-lg bg-red-100 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
                   onClick={() => setShowDisable(true)}
-                  className="rounded-lg bg-red-100 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-200 transition-colors"
                 >
                   Tắt 2FA
                 </button>
               ) : (
                 <button
+                  className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700"
                   onClick={() => setShowSetup(true)}
-                  className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition-colors"
                 >
                   Bật 2FA
                 </button>
@@ -190,8 +202,8 @@ export default function SecurityPage() {
                     </span>
                   </div>
                   <button
-                    onClick={handleRegenerateBackupCodes}
                     className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+                    onClick={handleRegenerateBackupCodes}
                   >
                     <RefreshCw className="h-4 w-4" />
                     Tạo mã mới
@@ -206,13 +218,13 @@ export default function SecurityPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
               <div className="w-full max-w-md rounded-xl bg-white p-6">
                 <h3 className="mb-4 text-xl font-semibold">Thiết lập xác thực hai yếu tố</h3>
-                <TwoFactorSetup 
+                <TwoFactorSetup
+                  onCancel={() => setShowSetup(false)}
                   onComplete={() => {
                     setShowSetup(false)
                     fetchTwoFactorStatus()
                     setSuccess('2FA has been enabled successfully!')
                   }}
-                  onCancel={() => setShowSetup(false)}
                 />
               </div>
             </div>
@@ -226,29 +238,29 @@ export default function SecurityPage() {
                 <p className="mb-4 text-sm text-gray-600">
                   Nhập mật khẩu của bạn để tắt 2FA. Điều này sẽ làm giảm bảo mật tài khoản.
                 </p>
-                
+
                 <input
+                  className="mb-4 w-full rounded-lg border border-gray-300 px-3 py-2"
+                  placeholder="Mật khẩu"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mật khẩu"
-                  className="mb-4 w-full rounded-lg border border-gray-300 px-3 py-2"
+                  onChange={e => setPassword(e.target.value)}
                 />
 
                 <div className="flex gap-3">
                   <button
+                    className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
                     onClick={() => {
                       setShowDisable(false)
                       setPassword('')
                     }}
-                    className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
                   >
                     Hủy
                   </button>
                   <button
-                    onClick={handleDisable2FA}
-                    disabled={!password || loading}
                     className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
+                    disabled={!password || loading}
+                    onClick={handleDisable2FA}
                   >
                     {loading ? 'Đang xử lý...' : 'Tắt 2FA'}
                   </button>

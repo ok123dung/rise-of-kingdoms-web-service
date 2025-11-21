@@ -12,7 +12,7 @@ export function monitorPerformanceBudget() {
         const entries = list.getEntries()
         let totalSize = 0
 
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           const perfEntry = entry as PerformanceEntryWithTransferSize
           if (perfEntry.transferSize) {
             totalSize += perfEntry.transferSize

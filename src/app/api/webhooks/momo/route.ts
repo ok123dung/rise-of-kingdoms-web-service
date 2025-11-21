@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { webhookService } from '@/lib/webhooks/processor'
+
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { getLogger } from '@/lib/monitoring/logger'
-import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
+import { webhookService } from '@/lib/webhooks/processor'
+import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
 
 export async function POST(request: NextRequest) {
   // Apply rate limiting for webhook endpoint
@@ -14,7 +16,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    
+
     // Verify webhook signature
     const {
       partnerCode,
@@ -33,7 +35,7 @@ export async function POST(request: NextRequest) {
     } = body
 
     // Verify signature
-    const rawSignature = 
+    const rawSignature =
       `accessKey=${process.env.MOMO_ACCESS_KEY}` +
       `&amount=${amount}` +
       `&extraData=${extraData}` +
@@ -54,11 +56,10 @@ export async function POST(request: NextRequest) {
       .digest('hex')
 
     if (signature !== expectedSignature) {
-      getLogger().error('Invalid MoMo webhook signature', new Error('Invalid signature'), { orderId })
-      return NextResponse.json(
-        { message: 'Invalid signature' },
-        { status: 400 }
-      )
+      getLogger().error('Invalid MoMo webhook signature', new Error('Invalid signature'), {
+        orderId
+      })
+      return NextResponse.json({ message: 'Invalid signature' }, { status: 400 })
     }
 
     // Replay protection: validate timestamp and check for duplicates
@@ -84,12 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Store webhook event for processing
-    await webhookService.storeWebhookEvent(
-      'momo',
-      'payment_notification',
-      eventId,
-      body
-    )
+    await webhookService.storeWebhookEvent('momo', 'payment_notification', eventId, body)
 
     // Process immediately
     const processed = await webhookService.processWebhookEvent(eventId)
@@ -105,10 +101,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('MoMo webhook error', error as Error)
-    
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
   }
 }

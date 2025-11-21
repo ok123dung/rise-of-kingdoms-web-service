@@ -40,10 +40,14 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     // For now, return true to avoid blocking signup
     return true
   } catch (error) {
-    getLogger().error('Email sending failed', error instanceof Error ? error : new Error(String(error)), { 
-      to: options.to,
-      subject: options.subject 
-    })
+    getLogger().error(
+      'Email sending failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        to: options.to,
+        subject: options.subject
+      }
+    )
     return false
   }
 }
@@ -338,25 +342,153 @@ Trân trọng,
   })
 }
 
-// Order confirmation email
+// Account created email with password
+export async function sendAccountCreatedEmail(email: string, fullName: string, password: string): Promise<boolean> {
+  const loginUrl = `${process.env.NEXTAUTH_URL || 'https://rokdbot.com'}/auth/signin`
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Tài khoản mới - RoK Services</title>
+      <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #f59e0b; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px; }
+        .credentials { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin: 20px 0; }
+        .button { display: inline-block; background: #f59e0b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Chào mừng đến với RoK Services!</h1>
+        </div>
+        <div class="content">
+          <p>Xin chào <strong>${fullName}</strong>,</p>
+          <p>Tài khoản của bạn đã được tạo tự động khi bạn đặt dịch vụ. Dưới đây là thông tin đăng nhập của bạn:</p>
+          
+          <div class="credentials">
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Mật khẩu:</strong> <code>${password}</code></p>
+          </div>
+
+          <p>Vui lòng đăng nhập và đổi mật khẩu ngay sau khi truy cập.</p>
+          
+          <p style="text-align: center;">
+            <a href="${loginUrl}" class="button">Đăng nhập ngay</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+
+  return await sendEmail({
+    to: email,
+    subject: '🔐 Thông tin tài khoản RoK Services của bạn',
+    html: htmlContent,
+    text: `Xin chào ${fullName}, tài khoản của bạn đã được tạo. Email: ${email}, Mật khẩu: ${password}. Đăng nhập tại: ${loginUrl}`
+  })
+}
+
+// Booking received email
+export async function sendBookingReceivedEmail(
+  email: string,
+  fullName: string,
+  bookingNumber: string,
+  serviceName: string
+): Promise<boolean> {
+  const paymentUrl = `${process.env.NEXTAUTH_URL || 'https://rokdbot.com'}/booking` // Ideally link to specific booking if possible
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Đã nhận yêu cầu đặt lịch</h1>
+        </div>
+        <div class="content">
+          <p>Xin chào <strong>${fullName}</strong>,</p>
+          <p>Chúng tôi đã nhận được yêu cầu đặt lịch <strong>${serviceName}</strong> của bạn.</p>
+          <p>Mã đơn hàng: <strong>${bookingNumber}</strong></p>
+          <p>Vui lòng hoàn tất thanh toán để kích hoạt dịch vụ.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+
+  return await sendEmail({
+    to: email,
+    subject: `📅 Xác nhận yêu cầu đặt lịch #${bookingNumber}`,
+    html: htmlContent,
+    text: `Xin chào ${fullName}, chúng tôi đã nhận được yêu cầu đặt lịch ${serviceName} (Mã: ${bookingNumber}). Vui lòng hoàn tất thanh toán.`
+  })
+}
+
+// Order confirmation email (Updated)
 export async function sendOrderConfirmationEmail(
   email: string,
   fullName: string,
   orderDetails: {
-    orderNumber: string;
-    serviceName: string;
-    amount: number;
-    currency: string;
-    paymentMethod?: string;
+    orderNumber: string
+    serviceName: string
+    amount: number
+    currency: string
+    paymentMethod?: string
   }
 ): Promise<boolean> {
-  // Implementation for order confirmation email
-  // This would be used when users book services
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #10b981; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px; }
+        .details { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin: 20px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Thanh toán thành công!</h1>
+        </div>
+        <div class="content">
+          <p>Xin chào <strong>${fullName}</strong>,</p>
+          <p>Cảm ơn bạn đã thanh toán. Dịch vụ của bạn đã được kích hoạt.</p>
+          
+          <div class="details">
+            <p><strong>Mã đơn hàng:</strong> ${orderDetails.orderNumber}</p>
+            <p><strong>Dịch vụ:</strong> ${orderDetails.serviceName}</p>
+            <p><strong>Thành tiền:</strong> ${orderDetails.amount.toLocaleString()} ${orderDetails.currency}</p>
+            <p><strong>Phương thức:</strong> ${orderDetails.paymentMethod || 'N/A'}</p>
+          </div>
+
+          <p>Đội ngũ của chúng tôi sẽ liên hệ với bạn sớm nhất có thể.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
 
   return await sendEmail({
     to: email,
-    subject: '✅ Xác nhận đơn hàng - RoK Services',
-    html: `<h1>Đơn hàng đã được xác nhận</h1><p>Xin chào ${fullName}, đơn hàng của bạn đã được xác nhận.</p>`,
-    text: `Đơn hàng đã được xác nhận\nXin chào ${fullName}, đơn hàng của bạn đã được xác nhận.`
+    subject: `✅ Thanh toán thành công #${orderDetails.orderNumber}`,
+    html: htmlContent,
+    text: `Xin chào ${fullName}, thanh toán cho đơn hàng #${orderDetails.orderNumber} đã thành công. Cảm ơn bạn đã sử dụng dịch vụ.`
   })
 }

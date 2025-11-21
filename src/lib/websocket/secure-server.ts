@@ -1,10 +1,12 @@
-import { Server as HTTPServer } from 'http'
-import { Server as SocketIOServer, Socket } from 'socket.io'
-import { getLogger } from '@/lib/monitoring/logger'
-import { prisma } from '@/lib/db'
-import { verifyToken } from '@/lib/auth/jwt'
-import { createOptimizedRateLimiter } from '@/lib/rate-limit-lru'
 import crypto from 'crypto'
+import { type Server as HTTPServer } from 'http'
+
+import { Server as SocketIOServer, type Socket } from 'socket.io'
+
+import { verifyToken } from '@/lib/auth/jwt'
+import { prisma } from '@/lib/db'
+import { getLogger } from '@/lib/monitoring/logger'
+import { createOptimizedRateLimiter } from '@/lib/rate-limit-lru'
 
 interface AuthenticatedSocket extends Socket {
   userId?: string
@@ -63,11 +65,11 @@ export class SecureWebSocketServer {
       'https://rokdbot.com',
       'https://www.rokdbot.com'
     ]
-    
+
     if (process.env.ALLOWED_WS_ORIGINS) {
       origins.push(...process.env.ALLOWED_WS_ORIGINS.split(','))
     }
-    
+
     return origins
   }
 
@@ -80,28 +82,28 @@ export class SecureWebSocketServer {
 
       const ip = socket.handshake.address
       const result = await this.rateLimiter.checkLimit(ip)
-      
+
       if (!result.success) {
         return next(new Error('Too many connection attempts'))
       }
-      
+
       next()
     })
 
     // Authentication middleware
     this.io.use(async (socket: AuthenticatedSocket, next) => {
       try {
-        const token = socket.handshake.auth.token
-        const sessionId = socket.handshake.auth.sessionId
-        
+        const { token } = socket.handshake.auth
+        const { sessionId } = socket.handshake.auth
+
         if (!token) {
           return next(new Error('Authentication required'))
         }
 
         // Verify JWT token
         const decoded = await verifyToken(token)
-        
-        if (!decoded || !decoded.userId) {
+
+        if (!decoded?.userId) {
           return next(new Error('Invalid token'))
         }
 
@@ -147,7 +149,7 @@ export class SecureWebSocketServer {
     // Activity tracking middleware
     this.io.use((socket: AuthenticatedSocket, next) => {
       const originalEmit = socket.emit
-      socket.emit = function(...args: any[]) {
+      socket.emit = function (...args: any[]) {
         socket.lastActivity = Date.now()
         return originalEmit.apply(socket, args as [string, ...any[]])
       }
@@ -172,7 +174,7 @@ export class SecureWebSocketServer {
       // Join user-specific room with validation
       if (socket.userId) {
         socket.join(`user:${socket.userId}`)
-        
+
         // Join role-specific room
         if (socket.userRole === 'admin' || socket.userRole === 'staff') {
           socket.join(`role:${socket.userRole}`)
@@ -185,9 +187,9 @@ export class SecureWebSocketServer {
           try {
             // Check session validity
             if (!this.isSessionValid(socket)) {
-              socket.emit('error', { 
+              socket.emit('error', {
                 code: 'SESSION_EXPIRED',
-                message: 'Session expired' 
+                message: 'Session expired'
               })
               socket.disconnect()
               return
@@ -196,7 +198,7 @@ export class SecureWebSocketServer {
             // Rate limiting per event
             const rateLimitKey = `${socket.userId}:${eventName}`
             const result = await this.rateLimiter.checkLimit(rateLimitKey)
-            
+
             if (!result.success) {
               socket.emit('error', {
                 code: 'RATE_LIMITED',
@@ -227,7 +229,7 @@ export class SecureWebSocketServer {
       // Secure booking subscription
       secureHandler('booking:subscribe', async (data: { bookingId: string }) => {
         const { bookingId } = data
-        
+
         if (!bookingId || typeof bookingId !== 'string') {
           socket.emit('error', {
             code: 'INVALID_REQUEST',
@@ -247,9 +249,9 @@ export class SecureWebSocketServer {
 
         if (booking) {
           socket.join(`booking:${bookingId}`)
-          socket.emit('booking:subscribed', { 
+          socket.emit('booking:subscribed', {
             bookingId,
-            status: booking.status 
+            status: booking.status
           })
         } else {
           socket.emit('error', {
@@ -260,12 +262,9 @@ export class SecureWebSocketServer {
       })
 
       // Secure chat message handler
-      secureHandler('chat:message', async (data: {
-        bookingId: string
-        message: string
-      }) => {
+      secureHandler('chat:message', async (data: { bookingId: string; message: string }) => {
         const { bookingId, message } = data
-        
+
         // Validate input
         if (!bookingId || !message || typeof message !== 'string') {
           socket.emit('error', {
@@ -277,14 +276,14 @@ export class SecureWebSocketServer {
 
         // Sanitize message
         const sanitizedMessage = message.trim().substring(0, 1000)
-        
+
         if (sanitizedMessage.length === 0) {
           return
         }
 
         // Verify access and send message
         const hasAccess = await this.verifyBookingAccess(socket.userId!, bookingId)
-        
+
         if (hasAccess) {
           // Store message in database
           const chatMessage = await prisma.communication.create({
@@ -323,7 +322,7 @@ export class SecureWebSocketServer {
       })
 
       // Handle disconnect
-      socket.on('disconnect', (reason) => {
+      socket.on('disconnect', reason => {
         getLogger().info('WebSocket client disconnected', {
           socketId: socket.id,
           userId: socket.userId,
@@ -333,12 +332,12 @@ export class SecureWebSocketServer {
         if (socket.userId) {
           this.removeUserSocket(socket.userId, socket.id)
         }
-        
+
         this.socketSessions.delete(socket.id)
       })
 
       // Handle errors
-      socket.on('error', (error) => {
+      socket.on('error', error => {
         getLogger().error('WebSocket error', error, {
           socketId: socket.id,
           userId: socket.userId
@@ -349,10 +348,10 @@ export class SecureWebSocketServer {
 
   private isSessionValid(socket: AuthenticatedSocket): boolean {
     if (!socket.lastActivity) return false
-    
+
     const now = Date.now()
     const sessionAge = now - socket.lastActivity
-    
+
     return sessionAge < this.options.sessionTimeout
   }
 
@@ -364,7 +363,7 @@ export class SecureWebSocketServer {
       },
       select: { id: true }
     })
-    
+
     return !!booking
   }
 
@@ -386,26 +385,29 @@ export class SecureWebSocketServer {
 
   private startSessionCleanup() {
     // Clean up expired sessions every 5 minutes
-    setInterval(() => {
-      const now = Date.now()
-      let cleaned = 0
-      
-      for (const [socketId, session] of this.socketSessions.entries()) {
-        const age = now - session.createdAt
-        if (age > this.options.sessionTimeout) {
-          const socket = this.io.sockets.sockets.get(socketId)
-          if (socket) {
-            socket.disconnect()
+    setInterval(
+      () => {
+        const now = Date.now()
+        let cleaned = 0
+
+        for (const [socketId, session] of this.socketSessions.entries()) {
+          const age = now - session.createdAt
+          if (age > this.options.sessionTimeout) {
+            const socket = this.io.sockets.sockets.get(socketId)
+            if (socket) {
+              socket.disconnect()
+            }
+            this.socketSessions.delete(socketId)
+            cleaned++
           }
-          this.socketSessions.delete(socketId)
-          cleaned++
         }
-      }
-      
-      if (cleaned > 0) {
-        getLogger().info('WebSocket session cleanup', { cleaned })
-      }
-    }, 5 * 60 * 1000)
+
+        if (cleaned > 0) {
+          getLogger().info('WebSocket session cleanup', { cleaned })
+        }
+      },
+      5 * 60 * 1000
+    )
   }
 
   // Public methods for server-side events

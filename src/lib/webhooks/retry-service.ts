@@ -24,12 +24,7 @@ export class WebhookRetryService {
   }
 
   // Store webhook event for processing
-  async storeWebhookEvent(
-    provider: string,
-    eventType: string,
-    eventId: string,
-    payload: any
-  ) {
+  async storeWebhookEvent(provider: string, eventType: string, eventId: string, payload: any) {
     try {
       // Check if event already exists
       const existingEvent = await prisma.webhookEvent.findUnique({
@@ -84,7 +79,11 @@ export class WebhookRetryService {
       }
 
       if (event.status === 'failed' && event.attempts >= this.config.maxAttempts) {
-        getLogger().error('Webhook event exceeded max attempts', new Error('Max attempts exceeded'), { eventId })
+        getLogger().error(
+          'Webhook event exceeded max attempts',
+          new Error('Max attempts exceeded'),
+          { eventId }
+        )
         return false
       }
 
@@ -119,7 +118,7 @@ export class WebhookRetryService {
       }
     } catch (error) {
       getLogger().error('Failed to process webhook event', error as Error)
-      
+
       // Update error status
       await prisma.webhookEvent.update({
         where: { eventId },
@@ -144,7 +143,9 @@ export class WebhookRetryService {
         case 'vnpay':
           return await this.handleVNPayWebhook(event)
         default:
-          getLogger().error('Unknown webhook provider', new Error('Unknown provider'), { provider: event.provider })
+          getLogger().error('Unknown webhook provider', new Error('Unknown provider'), {
+            provider: event.provider
+          })
           return false
       }
     } catch (error) {
@@ -156,17 +157,10 @@ export class WebhookRetryService {
   // Handle MoMo webhook
   private async handleMoMoWebhook(event: any): Promise<boolean> {
     try {
-      const payload = event.payload
-      
+      const { payload } = event
+
       // Extract payment info
-      const {
-        orderId,
-        requestId,
-        amount,
-        resultCode,
-        message,
-        transId
-      } = payload
+      const { orderId, requestId, amount, resultCode, message, transId } = payload
 
       if (resultCode !== 0) {
         getLogger().warn('MoMo payment failed', { orderId, message })
@@ -189,12 +183,14 @@ export class WebhookRetryService {
       })
 
       if (!payment) {
-        getLogger().error('Payment not found for MoMo webhook', new Error('Payment not found'), { orderId })
+        getLogger().error('Payment not found for MoMo webhook', new Error('Payment not found'), {
+          orderId
+        })
         return false // Retry later
       }
 
       // Use transaction to ensure atomicity
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async tx => {
         // Update payment status
         await tx.payment.update({
           where: { id: payment.id },
@@ -234,14 +230,9 @@ export class WebhookRetryService {
   // Handle ZaloPay webhook
   private async handleZaloPayWebhook(event: any): Promise<boolean> {
     try {
-      const payload = event.payload
-      
-      const {
-        app_trans_id,
-        zp_trans_id,
-        status,
-        amount
-      } = payload
+      const { payload } = event
+
+      const { app_trans_id, zp_trans_id, status, amount } = payload
 
       if (status !== 1) {
         getLogger().warn('ZaloPay payment failed', { app_trans_id })
@@ -263,12 +254,14 @@ export class WebhookRetryService {
       })
 
       if (!payment) {
-        getLogger().error('Payment not found for ZaloPay webhook', new Error('Payment not found'), { app_trans_id })
+        getLogger().error('Payment not found for ZaloPay webhook', new Error('Payment not found'), {
+          app_trans_id
+        })
         return false
       }
 
       // Use transaction to ensure atomicity
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async tx => {
         await tx.payment.update({
           where: { id: payment.id },
           data: {
@@ -306,14 +299,9 @@ export class WebhookRetryService {
   // Handle VNPay webhook
   private async handleVNPayWebhook(event: any): Promise<boolean> {
     try {
-      const payload = event.payload
-      
-      const {
-        vnp_TxnRef,
-        vnp_TransactionNo,
-        vnp_ResponseCode,
-        vnp_Amount
-      } = payload
+      const { payload } = event
+
+      const { vnp_TxnRef, vnp_TransactionNo, vnp_ResponseCode, vnp_Amount } = payload
 
       if (vnp_ResponseCode !== '00') {
         getLogger().warn('VNPay payment failed', { vnp_TxnRef })
@@ -335,12 +323,14 @@ export class WebhookRetryService {
       })
 
       if (!payment) {
-        getLogger().error('Payment not found for VNPay webhook', new Error('Payment not found'), { vnp_TxnRef })
+        getLogger().error('Payment not found for VNPay webhook', new Error('Payment not found'), {
+          vnp_TxnRef
+        })
         return false
       }
 
       // Use transaction to ensure atomicity
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async tx => {
         await tx.payment.update({
           where: { id: payment.id },
           data: {
@@ -406,14 +396,11 @@ export class WebhookRetryService {
   async processPendingWebhooks() {
     try {
       const now = new Date()
-      
+
       const pendingEvents = await prisma.webhookEvent.findMany({
         where: {
           status: 'pending',
-          OR: [
-            { nextRetryAt: null },
-            { nextRetryAt: { lte: now } }
-          ],
+          OR: [{ nextRetryAt: null }, { nextRetryAt: { lte: now } }],
           attempts: { lt: this.config.maxAttempts }
         },
         orderBy: { createdAt: 'asc' },
@@ -436,7 +423,7 @@ export class WebhookRetryService {
   }
 
   // Clean up old completed/failed webhooks
-  async cleanupOldWebhooks(daysToKeep: number = 30) {
+  async cleanupOldWebhooks(daysToKeep = 30) {
     try {
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)

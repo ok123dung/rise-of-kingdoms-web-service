@@ -1,88 +1,31 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-
 import { Calendar, Clock, AlertCircle, CheckCircle, PlayCircle, PauseCircle } from 'lucide-react'
 import Link from 'next/link'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface ActiveBooking {
   id: string
   bookingNumber: string
   serviceName: string
   tierName: string
-  status: 'pending' | 'in_progress' | 'paused' | 'completed'
-  startDate: string
-  endDate: string
+  status: string
+  startDate: string | null
+  endDate: string | null
   progress: number
   nextSession?: string
   assignedStaff?: {
     name: string
     avatar?: string
-  }
+  } | null
 }
 
 interface ActiveBookingsProps {
-  userId?: string
+  bookings: ActiveBooking[]
 }
 
-export default function ActiveBookings({ userId }: ActiveBookingsProps) {
-  const [bookings, setBookings] = useState<ActiveBooking[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchActiveBookings()
-  }, [])
-
-  const fetchActiveBookings = async () => {
-    try {
-      setLoading(true)
-      // Simulate API call - replace with real endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Mock active bookings data
-      const mockBookings: ActiveBooking[] = [
-        {
-          id: '1',
-          bookingNumber: 'RK240720001',
-          serviceName: 'Coaching KvK chuyên sâu',
-          tierName: 'Premium',
-          status: 'in_progress',
-          startDate: '2024-07-15',
-          endDate: '2024-08-15',
-          progress: 65,
-          nextSession: '2024-07-25T19:00:00',
-          assignedStaff: {
-            name: 'Trainer Alex',
-            avatar: undefined
-          }
-        },
-        {
-          id: '2',
-          bookingNumber: 'RK240718002',
-          serviceName: 'Tối ưu tài nguyên',
-          tierName: 'Pro',
-          status: 'pending',
-          startDate: '2024-07-20',
-          endDate: '2024-07-27',
-          progress: 0,
-          assignedStaff: {
-            name: 'Manager Sarah'
-          }
-        }
-      ]
-
-      setBookings(mockBookings)
-    } catch (err) {
-      setError('Không thể tải danh sách dịch vụ đang hoạt động')
-    } finally {
-      setLoading(false)
-    }
-  }
-
+export default function ActiveBookings({ bookings }: ActiveBookingsProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending':
@@ -123,7 +66,8 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
     }
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A'
     return new Intl.DateTimeFormat('vi-VN').format(new Date(dateString))
   }
 
@@ -142,40 +86,6 @@ export default function ActiveBookings({ userId }: ActiveBookingsProps) {
       .map(n => n[0])
       .join('')
       .toUpperCase()
-  }
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Dịch vụ đang hoạt động</CardTitle>
-        </CardHeader>
-        <CardContent className="flex h-[200px] items-center justify-center">
-          <LoadingSpinner text="Đang tải..." />
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Dịch vụ đang hoạt động</CardTitle>
-        </CardHeader>
-        <CardContent className="flex h-[200px] items-center justify-center">
-          <div className="text-center text-red-600">
-            <p>{error}</p>
-            <button
-              className="mt-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-              onClick={fetchActiveBookings}
-            >
-              Thử lại
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-    )
   }
 
   if (bookings.length === 0) {

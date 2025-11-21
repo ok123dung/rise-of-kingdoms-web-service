@@ -163,14 +163,14 @@ function SignInContent() {
                 <div className="relative">
                   <ShieldCheck className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                   <input
-                    required={requires2FA}
                     autoComplete="one-time-code"
                     className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
                     id="totpCode"
+                    maxLength={9}
                     name="totpCode"
                     placeholder="123456"
+                    required={requires2FA}
                     type="text"
-                    maxLength={9}
                     value={totpCode}
                     onChange={e => setTotpCode(e.target.value)}
                   />

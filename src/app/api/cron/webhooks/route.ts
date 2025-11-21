@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { webhookService } from '@/lib/webhooks/processor'
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { getLogger } from '@/lib/monitoring/logger'
+import { webhookService } from '@/lib/webhooks/processor'
 
 // This endpoint should be called by a cron job service
 // Example: Vercel Cron, GitHub Actions, or external cron service
@@ -14,10 +15,7 @@ export async function GET(request: NextRequest) {
     const cronSecret = process.env.CRON_SECRET
 
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     getLogger().info('Running webhook cron job')
@@ -37,11 +35,8 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('Webhook cron job error', error as Error)
-    
-    return NextResponse.json(
-      { error: 'Cron job failed' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Cron job failed' }, { status: 500 })
   }
 }
 

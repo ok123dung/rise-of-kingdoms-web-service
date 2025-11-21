@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/db'
+import { sendEmail } from '@/lib/email'
 import { ValidationError, NotFoundError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
-import { sendEmail } from '@/lib/email'
+
 import type { Lead } from '@prisma/client'
 
 export class LeadService {
@@ -32,7 +33,7 @@ export class LeadService {
       // Update existing lead instead of creating duplicate
       return await this.updateLead(existingLead.id, {
         serviceInterest: data.serviceInterest || existingLead.serviceInterest || undefined,
-        notes: data.notes 
+        notes: data.notes
           ? `${existingLead.notes || ''}\n[${new Date().toISOString()}] ${data.notes}`
           : existingLead.notes || undefined
       })
@@ -211,24 +212,16 @@ export class LeadService {
   /**
    * Get lead statistics
    */
-  async getLeadStats(query?: {
-    fromDate?: Date
-    toDate?: Date
-  }) {
+  async getLeadStats(query?: { fromDate?: Date; toDate?: Date }) {
     const where: any = {}
-    
+
     if (query?.fromDate || query?.toDate) {
       where.createdAt = {}
       if (query.fromDate) where.createdAt.gte = query.fromDate
       if (query.toDate) where.createdAt.lte = query.toDate
     }
 
-    const [
-      total,
-      byStatus,
-      bySource,
-      conversionRate
-    ] = await Promise.all([
+    const [total, byStatus, bySource, conversionRate] = await Promise.all([
       prisma.lead.count({ where }),
       prisma.lead.groupBy({
         by: ['status'],
@@ -247,14 +240,20 @@ export class LeadService {
 
     return {
       total,
-      byStatus: byStatus.reduce((acc, item) => ({
-        ...acc,
-        [item.status]: item._count
-      }), {}),
-      bySource: bySource.reduce((acc, item) => ({
-        ...acc,
-        [item.source || 'unknown']: item._count
-      }), {}),
+      byStatus: byStatus.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.status]: item._count
+        }),
+        {}
+      ),
+      bySource: bySource.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.source || 'unknown']: item._count
+        }),
+        {}
+      ),
       conversionRate: total > 0 ? (conversionRate / total) * 100 : 0
     }
   }
@@ -286,18 +285,15 @@ export class LeadService {
   /**
    * Private helper methods
    */
-  private async checkExistingLead(
-    email?: string,
-    phone?: string
-  ): Promise<Lead | null> {
+  private async checkExistingLead(email?: string, phone?: string): Promise<Lead | null> {
     if (!email && !phone) return null
 
     const where: any = { OR: [] }
-    
+
     if (email) {
       where.OR.push({ email: email.toLowerCase() })
     }
-    
+
     if (phone) {
       where.OR.push({ phone })
     }

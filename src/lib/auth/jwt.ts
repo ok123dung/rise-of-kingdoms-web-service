@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+
 import { getLogger } from '@/lib/monitoring/logger'
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key'

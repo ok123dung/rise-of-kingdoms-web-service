@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+
 import { withCache, withETag, CacheConfigs } from '@/lib/api-cache'
 // Static services data for now since Railway DB has issues
 const staticServices = [

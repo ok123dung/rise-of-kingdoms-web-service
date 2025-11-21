@@ -1,7 +1,9 @@
 'use client'
 import { useEffect, useRef, useCallback, useState } from 'react'
-import { io, Socket } from 'socket.io-client'
+
 import { useSession } from 'next-auth/react'
+import { io, type Socket } from 'socket.io-client'
+
 interface UseWebSocketOptions {
   autoConnect?: boolean
   reconnection?: boolean
@@ -44,11 +46,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           setConnectionError(null)
           console.log('WebSocket connected')
         })
-        socket.on('disconnect', (reason) => {
+        socket.on('disconnect', reason => {
           setIsConnected(false)
           console.log('WebSocket disconnected:', reason)
         })
-        socket.on('connect_error', (error) => {
+        socket.on('connect_error', error => {
           setConnectionError(error.message)
           console.error('WebSocket connection error:', error)
         })
@@ -85,17 +87,26 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     socketRef.current.emit(event, ...args)
   }, [])
   // Subscribe to a booking room
-  const subscribeToBooking = useCallback((bookingId: string) => {
-    emit('booking:subscribe', bookingId)
-  }, [emit])
+  const subscribeToBooking = useCallback(
+    (bookingId: string) => {
+      emit('booking:subscribe', bookingId)
+    },
+    [emit]
+  )
   // Send a chat message
-  const sendMessage = useCallback((bookingId: string, message: string) => {
-    emit('chat:send', { bookingId, message })
-  }, [emit])
+  const sendMessage = useCallback(
+    (bookingId: string, message: string) => {
+      emit('chat:send', { bookingId, message })
+    },
+    [emit]
+  )
   // Send typing indicator
-  const sendTypingIndicator = useCallback((bookingId: string, isTyping: boolean) => {
-    emit('chat:typing', { bookingId, isTyping })
-  }, [emit])
+  const sendTypingIndicator = useCallback(
+    (bookingId: string, isTyping: boolean) => {
+      emit('chat:typing', { bookingId, isTyping })
+    },
+    [emit]
+  )
   return {
     socket: socketRef.current,
     isConnected,
@@ -122,7 +133,7 @@ export function useBookingWebSocket(bookingId: string) {
       ws.on('booking:subscribed', ({ bookingId: id }) => {
         console.log('Subscribed to booking:', id)
       }),
-      ws.on('chat:message', (message) => {
+      ws.on('chat:message', message => {
         setMessages(prev => [...prev, message])
       }),
       ws.on('chat:typing', ({ userId, isTyping }) => {
@@ -163,11 +174,11 @@ export function useNotificationWebSocket() {
   useEffect(() => {
     if (!ws.isConnected) return
     const unsubscribers = [
-      ws.on('notification:new', (notification) => {
+      ws.on('notification:new', notification => {
         setNotifications(prev => [notification, ...prev])
         setUnreadCount(prev => prev + 1)
       }),
-      ws.on('payment:update', (payment) => {
+      ws.on('payment:update', payment => {
         // Handle payment updates
         console.log('Payment update:', payment)
       })
@@ -177,9 +188,7 @@ export function useNotificationWebSocket() {
     }
   }, [ws])
   const markAsRead = useCallback((notificationId: string) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
-    )
+    setNotifications(prev => prev.map(n => (n.id === notificationId ? { ...n, read: true } : n)))
     setUnreadCount(prev => Math.max(0, prev - 1))
   }, [])
   return {

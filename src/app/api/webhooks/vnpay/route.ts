@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { webhookService } from '@/lib/webhooks/processor'
+
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { getLogger } from '@/lib/monitoring/logger'
-import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
+import { webhookService } from '@/lib/webhooks/processor'
+import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
 import { parseVNPayTimestamp } from '@/lib/webhooks/timestamp-utils'
 import type { VNPayWebhookParams } from '@/types/webhook-payloads'
 
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const searchParams = request.nextUrl.searchParams
+    const { searchParams } = request.nextUrl
     const vnpParams: Partial<VNPayWebhookParams> = {}
 
     searchParams.forEach((value, key) => {
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
     ) as Record<string, string>
     const sortedParams = sortObject(cleanParams)
     const signData = new URLSearchParams(sortedParams).toString()
-    
+
     // Verify signature
     const hmac = crypto.createHmac('sha512', process.env.VNPAY_HASH_SECRET || '')
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex')
@@ -62,11 +64,7 @@ export async function GET(request: NextRequest) {
     const eventId = `vnpay_${vnpParams.vnp_TxnRef}_${vnpParams.vnp_TransactionNo}`
     // Parse VNPay timestamp (yyyyMMddHHmmss) to milliseconds
     const timestampMs = parseVNPayTimestamp(vnpParams.vnp_PayDate)
-    const replayValidation = await validateWebhookReplayProtection(
-      'vnpay',
-      eventId,
-      timestampMs
-    )
+    const replayValidation = await validateWebhookReplayProtection('vnpay', eventId, timestampMs)
 
     if (!replayValidation.valid) {
       getLogger().warn('VNPay webhook replay attack detected', {
@@ -83,12 +81,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Store webhook event for processing
-    await webhookService.storeWebhookEvent(
-      'vnpay',
-      'payment_notification',
-      eventId,
-      vnpParams
-    )
+    await webhookService.storeWebhookEvent('vnpay', 'payment_notification', eventId, vnpParams)
 
     // Process immediately
     const processed = await webhookService.processWebhookEvent(eventId)
@@ -104,7 +97,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('VNPay webhook error', error as Error)
-    
+
     return NextResponse.json({
       RspCode: '99',
       Message: 'Internal server error'

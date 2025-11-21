@@ -1,18 +1,13 @@
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
+import bcrypt from 'bcryptjs'
 import { type NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import DiscordProvider from 'next-auth/providers/discord'
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
-import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
+import { accountLockout, sessionTokenManager } from '@/lib/auth-security'
 import { prisma, basePrisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
-import { 
-  accountLockout, 
-  sessionTokenManager, 
-  deviceFingerprint,
-  csrfProtection 
-} from '@/lib/auth-security'
 
 // Enhanced login schema with additional validation
 const loginSchema = z.object({
@@ -125,7 +120,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
           // Update user login info
           await prisma.user.update({
             where: { id: user.id },
-            data: { 
+            data: {
               lastLogin: new Date()
             }
           })
@@ -161,17 +156,17 @@ export const authOptionsEnhanced: NextAuthOptions = {
       }
     })
   ],
-  
+
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
     updateAge: 24 * 60 * 60 // Update session every 24 hours
   },
-  
+
   jwt: {
     maxAge: 30 * 24 * 60 * 60
   },
-  
+
   pages: {
     signIn: '/auth/signin',
     signOut: '/auth/signout',
@@ -179,7 +174,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
     verifyRequest: '/auth/verify-request',
     newUser: '/auth/new-user'
   },
-  
+
   callbacks: {
     async jwt({ token, user, account, trigger }) {
       // Initial sign in
@@ -192,20 +187,17 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
       // Token rotation on role change or periodic rotation
       if (trigger === 'update' || sessionTokenManager.shouldRotate(token.tokenIssuedAt)) {
-        const rotated = await sessionTokenManager.rotateToken(
-          token.sessionId,
-          token.userId
-        )
-        
+        const rotated = await sessionTokenManager.rotateToken(token.sessionId, token.userId)
+
         token.sessionId = rotated.sessionId
         token.tokenIssuedAt = Date.now()
-        
+
         // Re-fetch user role in case it changed
         const user = await prisma.user.findUnique({
           where: { id: token.userId },
           include: { staffProfile: true }
         })
-        
+
         if (user) {
           token.role = user.staffProfile?.role || 'customer'
         }
@@ -213,12 +205,12 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
       return token
     },
-    
+
     async session({ session, token, user }) {
       if (token) {
         session.user.id = token.userId
         session.user.role = token.role
-        
+
         session.security = {
           sessionId: token.sessionId,
           fingerprint: token.fingerprint,
@@ -229,20 +221,17 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
       return session
     },
-    
+
     async signIn({ user, account, profile }) {
       // Additional security checks during sign in
       if (account?.provider === 'discord' && profile) {
         try {
           const discordProfile = profile as any
-          
+
           // Check if Discord account exists or create/update
           let existingUser = await prisma.user.findFirst({
             where: {
-              OR: [
-                { email: discordProfile.email },
-                { discordId: discordProfile.id }
-              ]
+              OR: [{ email: discordProfile.email }, { discordId: discordProfile.id }]
             }
           })
 
@@ -283,7 +272,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
       return true
     }
   },
-  
+
   events: {
     async signIn({ user, account, isNewUser }) {
       getLogger().logSecurityEvent('signin', {
@@ -292,14 +281,14 @@ export const authOptionsEnhanced: NextAuthOptions = {
         isNewUser
       })
     },
-    
+
     async signOut({ session, token }) {
       getLogger().logSecurityEvent('signout', {
         userId: token?.sub,
         sessionId: (session as any)?.security?.sessionId
       })
     },
-    
+
     async session({ session, token }) {
       // Track active sessions
       getLogger().debug('Session accessed', {
@@ -308,6 +297,6 @@ export const authOptionsEnhanced: NextAuthOptions = {
       })
     }
   },
-  
+
   debug: process.env.NODE_ENV === 'development'
 }

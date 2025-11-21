@@ -2,8 +2,8 @@
 
 import React, { Component, type ErrorInfo, type ReactNode } from 'react'
 
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
 import * as Sentry from '@sentry/nextjs'
+import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
 
 import { clientLogger } from '@/lib/client-logger'
 import { logError, getLogger } from '@/lib/monitoring/logger'
@@ -41,9 +41,10 @@ export class ErrorBoundary extends Component<Props, State> {
         type: 'react_error'
       }
     })
-    
-    const errorId = typeof sentryId === 'string' ? sentryId : Math.random().toString(36).substring(7)
-    
+
+    const errorId =
+      typeof sentryId === 'string' ? sentryId : Math.random().toString(36).substring(7)
+
     return {
       hasError: true,
       error,
@@ -58,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
     })
 
     // Send additional context to Sentry
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       scope.setContext('errorBoundary', {
         componentStack: errorInfo.componentStack,
         errorId: this.state.errorId,

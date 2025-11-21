@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis'
+
 interface RateLimitEntry {
   count: number
   resetTime: number
@@ -41,7 +42,7 @@ export class MemorySafeRateLimiter {
   }
   private cleanup() {
     const now = Date.now()
-    const cutoff = now - (this.config.window * 2) // Keep entries for 2x window
+    const cutoff = now - this.config.window * 2 // Keep entries for 2x window
     let removed = 0
     for (const [key, entry] of this.store.entries()) {
       if (entry.resetTime < cutoff) {
@@ -57,10 +58,13 @@ export class MemorySafeRateLimiter {
   private enforceMemoryLimit() {
     // If we have too many entries, force cleanup
     if (this.store.size >= this.maxEntries) {
-      console.warn(`[RateLimiter] Memory limit reached (${this.store.size} entries), forcing cleanup`)
+      console.warn(
+        `[RateLimiter] Memory limit reached (${this.store.size} entries), forcing cleanup`
+      )
       // Remove oldest entries
-      const entries = Array.from(this.store.entries())
-        .sort((a, b) => a[1].firstRequest - b[1].firstRequest)
+      const entries = Array.from(this.store.entries()).sort(
+        (a, b) => a[1].firstRequest - b[1].firstRequest
+      )
       const toRemove = Math.floor(this.maxEntries * 0.2) // Remove 20%
       for (let i = 0; i < toRemove; i++) {
         this.store.delete(entries[i][0])
@@ -138,7 +142,7 @@ export class RedisRateLimiter {
       pipe.incr(key)
       pipe.expire(key, Math.ceil(this.config.window / 1000))
       const results = await pipe.exec()
-      const count = (results?.[0] as any)?.[1] as number || 1
+      const count = ((results?.[0] as any)?.[1] as number) || 1
       const remaining = Math.max(0, this.config.max - count)
       const success = count <= this.config.max
       return {
@@ -163,7 +167,9 @@ export class RedisRateLimiter {
   }
 }
 // Factory function to create appropriate rate limiter
-export function createRateLimiter(config: RateLimitConfig): MemorySafeRateLimiter | RedisRateLimiter {
+export function createRateLimiter(
+  config: RateLimitConfig
+): MemorySafeRateLimiter | RedisRateLimiter {
   if (process.env.REDIS_URL && process.env.NODE_ENV === 'production') {
     return new RedisRateLimiter(config)
   }

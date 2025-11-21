@@ -1,8 +1,8 @@
-import { type Prisma, PrismaClient } from '@prisma/client'
+import { type Prisma, type PrismaClient } from '@prisma/client'
 
+import { prisma, checkDatabaseHealth, basePrisma } from '@/lib/db-enhanced'
 import { handleDatabaseError, NotFoundError, retryWithBackoff } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
-import { prisma, checkDatabaseHealth, basePrisma } from '@/lib/db-enhanced'
 
 // Re-export enhanced prisma client
 export { prisma, basePrisma }
@@ -11,26 +11,26 @@ export { prisma, basePrisma }
 export async function checkDatabaseConnection() {
   try {
     const health = await checkDatabaseHealth()
-    
+
     if (health.isHealthy) {
-      return { 
-        status: 'healthy', 
+      return {
+        status: 'healthy',
         message: 'Database connection successful',
         details: health
       }
     } else {
-      return { 
-        status: 'unhealthy', 
+      return {
+        status: 'unhealthy',
         message: 'Database connection unhealthy',
         details: health
       }
     }
   } catch (error) {
     getLogger().error('Database connection check failed', error as Error)
-    return { 
-      status: 'unhealthy', 
-      message: 'Database connection failed', 
-      error 
+    return {
+      status: 'unhealthy',
+      message: 'Database connection failed',
+      error
     }
   }
 }

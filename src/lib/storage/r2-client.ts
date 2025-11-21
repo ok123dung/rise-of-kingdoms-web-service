@@ -1,10 +1,11 @@
-import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
+import { S3Client, type S3ClientConfig } from '@aws-sdk/client-s3'
+
 import { getLogger } from '@/lib/monitoring/logger'
 
 // R2 configuration
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY
+const { R2_ACCOUNT_ID } = process.env
+const { R2_ACCESS_KEY_ID } = process.env
+const { R2_SECRET_ACCESS_KEY } = process.env
 const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'rokservices-files'
 
 if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
@@ -37,7 +38,11 @@ export const FILE_SIZE_LIMITS = {
 // Allowed file types
 export const ALLOWED_FILE_TYPES = {
   avatar: ['image/jpeg', 'image/png', 'image/webp'],
-  document: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  document: [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ],
   image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
   video: ['video/mp4', 'video/webm', 'video/quicktime'],
   screenshot: ['image/jpeg', 'image/png', 'image/webp']
@@ -48,11 +53,11 @@ export function generateFileKey(
   folder: string,
   userId: string,
   filename: string,
-  timestamp: boolean = true
+  timestamp = true
 ): string {
   const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_')
   const uniqueId = timestamp ? Date.now() : ''
-  
+
   return `${folder}/${userId}/${uniqueId ? `${uniqueId}-` : ''}${sanitizedFilename}`
 }
 
@@ -71,10 +76,7 @@ export function isValidFileType(
 }
 
 // Validate file size
-export function isValidFileSize(
-  size: number,
-  category: keyof typeof FILE_SIZE_LIMITS
-): boolean {
+export function isValidFileSize(size: number, category: keyof typeof FILE_SIZE_LIMITS): boolean {
   const limit = FILE_SIZE_LIMITS[category] || FILE_SIZE_LIMITS.default
   return size <= limit
 }

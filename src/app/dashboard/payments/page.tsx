@@ -1,10 +1,17 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+
+import {
+  CreditCardIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon
+} from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import { CreditCardIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+
 interface Payment {
   id: string
   paymentNumber: string
@@ -57,9 +64,7 @@ export default function PaymentsPage() {
   }, [session, filter])
   const fetchPayments = async () => {
     try {
-      const url = filter === 'all' 
-        ? '/api/user/payments'
-        : `/api/user/payments?status=${filter}`
+      const url = filter === 'all' ? '/api/user/payments' : `/api/user/payments?status=${filter}`
       const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
@@ -82,8 +87,8 @@ export default function PaymentsPage() {
   }
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rok-gold"></div>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="border-rok-gold h-12 w-12 animate-spin rounded-full border-b-2" />
       </div>
     )
   }
@@ -98,74 +103,81 @@ export default function PaymentsPage() {
       {/* Filters */}
       <div className="flex space-x-2">
         <button
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
-            filter === 'all' 
-              ? 'bg-rok-gold text-white' 
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+          className={`rounded-md px-4 py-2 text-sm font-medium ${
+            filter === 'all'
+              ? 'bg-rok-gold text-white'
+              : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
           }`}
+          onClick={() => setFilter('all')}
         >
           Tất cả
         </button>
         <button
-          onClick={() => setFilter('completed')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
-            filter === 'completed' 
-              ? 'bg-rok-gold text-white' 
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+          className={`rounded-md px-4 py-2 text-sm font-medium ${
+            filter === 'completed'
+              ? 'bg-rok-gold text-white'
+              : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
           }`}
+          onClick={() => setFilter('completed')}
         >
           Thành công
         </button>
         <button
-          onClick={() => setFilter('pending')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
-            filter === 'pending' 
-              ? 'bg-rok-gold text-white' 
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+          className={`rounded-md px-4 py-2 text-sm font-medium ${
+            filter === 'pending'
+              ? 'bg-rok-gold text-white'
+              : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
           }`}
+          onClick={() => setFilter('pending')}
         >
           Đang chờ
         </button>
         <button
-          onClick={() => setFilter('failed')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
-            filter === 'failed' 
-              ? 'bg-rok-gold text-white' 
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+          className={`rounded-md px-4 py-2 text-sm font-medium ${
+            filter === 'failed'
+              ? 'bg-rok-gold text-white'
+              : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
           }`}
+          onClick={() => setFilter('failed')}
         >
           Thất bại
         </button>
       </div>
       {payments.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 text-center">
+        <div className="rounded-lg bg-white p-6 text-center shadow">
           <CreditCardIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">
-            {filter === 'all' ? 'Chưa có thanh toán nào' : `Không có thanh toán ${getStatusText(filter).toLowerCase()}`}
+            {filter === 'all'
+              ? 'Chưa có thanh toán nào'
+              : `Không có thanh toán ${getStatusText(filter).toLowerCase()}`}
           </h3>
           <p className="mt-1 text-sm text-gray-500">
             {filter === 'all' && 'Các thanh toán của bạn sẽ xuất hiện ở đây.'}
           </p>
         </div>
       ) : (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <div className="overflow-hidden bg-white shadow sm:rounded-md">
           <ul className="divide-y divide-gray-200">
-            {payments.map((payment) => {
+            {payments.map(payment => {
               const StatusIcon = statusIcons[payment.status as keyof typeof statusIcons]
               const statusColor = statusColors[payment.status as keyof typeof statusColors]
               return (
                 <li key={payment.id}>
-                  <Link href={`/dashboard/payments/${payment.id}`} className="block hover:bg-gray-50">
+                  <Link
+                    className="block hover:bg-gray-50"
+                    href={`/dashboard/payments/${payment.id}`}
+                  >
                     <div className="px-4 py-4 sm:px-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <div className={`flex-shrink-0 p-2 rounded-full ${statusColor}`}>
+                          <div className={`flex-shrink-0 rounded-full p-2 ${statusColor}`}>
                             <StatusIcon className="h-6 w-6" />
                           </div>
                           <div className="ml-4">
                             <div className="flex items-center">
-                              <span className="text-2xl mr-2">{payment.booking.serviceTier.service.icon}</span>
+                              <span className="mr-2 text-2xl">
+                                {payment.booking.serviceTier.service.icon}
+                              </span>
                               <div>
                                 <p className="text-sm font-medium text-gray-900">
                                   {payment.booking.serviceTier.service.name}
@@ -194,7 +206,9 @@ export default function PaymentsPage() {
                               {getStatusText(payment.status)}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {format(new Date(payment.createdAt), 'dd/MM/yyyy HH:mm', { locale: vi })}
+                              {format(new Date(payment.createdAt), 'dd/MM/yyyy HH:mm', {
+                                locale: vi
+                              })}
                             </p>
                           </div>
                         </div>
@@ -202,7 +216,8 @@ export default function PaymentsPage() {
                       {payment.booking && (
                         <div className="mt-2">
                           <p className="text-sm text-gray-500">
-                            Đơn hàng: #{payment.booking.bookingNumber} - {payment.booking.serviceTier.name}
+                            Đơn hàng: #{payment.booking.bookingNumber} -{' '}
+                            {payment.booking.serviceTier.name}
                           </p>
                         </div>
                       )}

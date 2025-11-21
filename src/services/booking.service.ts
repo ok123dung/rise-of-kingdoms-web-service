@@ -1,9 +1,10 @@
-import { prisma } from '@/lib/db'
 import { Prisma } from '@prisma/client'
+
+import { generateSecureNumericCode } from '@/lib/crypto-utils'
+import { prisma } from '@/lib/db'
 import { NotFoundError, ValidationError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
-import { generateSecureNumericCode } from '@/lib/crypto-utils'
-import type { Booking, ServiceTier, User } from '@/types/database'
+import type { Booking, ServiceTier } from '@/types/database'
 
 export class BookingService {
   private logger = getLogger()
@@ -20,7 +21,7 @@ export class BookingService {
   }): Promise<Booking> {
     // Validate service tier exists
     const serviceTier = await this.getServiceTier(data.serviceTierId)
-    
+
     // Check if user has active booking for same service
     const existingBooking = await this.checkExistingBooking(data.userId, serviceTier.serviceId)
     if (existingBooking) {
@@ -38,8 +39,12 @@ export class BookingService {
         serviceTierId: data.serviceTierId,
         status: 'pending',
         paymentStatus: 'pending',
-        totalAmount: new Prisma.Decimal(typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()),
-        finalAmount: new Prisma.Decimal(typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()),
+        totalAmount: new Prisma.Decimal(
+          typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()
+        ),
+        finalAmount: new Prisma.Decimal(
+          typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()
+        ),
         currency: 'VND',
         customerRequirements: data.customerRequirements,
         startDate: data.scheduledDate,
@@ -53,10 +58,10 @@ export class BookingService {
       }
     })
 
-    this.logger.info('Booking created', { 
-      bookingId: booking.id, 
+    this.logger.info('Booking created', {
+      bookingId: booking.id,
       userId: data.userId,
-      serviceTierId: data.serviceTierId 
+      serviceTierId: data.serviceTierId
     })
 
     return booking
@@ -92,13 +97,16 @@ export class BookingService {
   /**
    * Get user bookings
    */
-  async getUserBookings(userId: string, options?: {
-    status?: string
-    limit?: number
-    offset?: number
-  }) {
+  async getUserBookings(
+    userId: string,
+    options?: {
+      status?: string
+      limit?: number
+      offset?: number
+    }
+  ) {
     const where: any = { userId }
-    
+
     if (options?.status) {
       where.status = options.status
     }
@@ -109,9 +117,9 @@ export class BookingService {
         include: {
           serviceTier: {
             include: { service: true }
+          },
+          payments: true
         },
-        payments: true
-      },
         orderBy: { createdAt: 'desc' },
         take: options?.limit || 10,
         skip: options?.offset || 0
@@ -128,9 +136,9 @@ export class BookingService {
   async updateBookingStatus(
     bookingId: string,
     status: string,
-    options?: { 
+    options?: {
       userId?: string
-      notes?: string 
+      notes?: string
     }
   ): Promise<Booking> {
     const booking = await this.getBookingById(bookingId, options?.userId)
@@ -139,7 +147,7 @@ export class BookingService {
       where: { id: bookingId },
       data: {
         status,
-        internalNotes: options?.notes 
+        internalNotes: options?.notes
           ? `${booking.internalNotes}\n[${new Date().toISOString()}] ${options.notes}`
           : booking.internalNotes
       },
@@ -163,11 +171,7 @@ export class BookingService {
   /**
    * Cancel booking
    */
-  async cancelBooking(
-    bookingId: string,
-    userId: string,
-    reason: string
-  ): Promise<Booking> {
+  async cancelBooking(bookingId: string, userId: string, reason: string): Promise<Booking> {
     const booking = await this.getBookingById(bookingId, userId)
 
     // Check if booking can be cancelled
@@ -218,10 +222,7 @@ export class BookingService {
     return serviceTier
   }
 
-  private async checkExistingBooking(
-    userId: string,
-    serviceId: string
-  ): Promise<boolean> {
+  private async checkExistingBooking(userId: string, serviceId: string): Promise<boolean> {
     const count = await prisma.booking.count({
       where: {
         userId,
@@ -241,7 +242,7 @@ export class BookingService {
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
     const day = date.getDate().toString().padStart(2, '0')
     const random = generateSecureNumericCode(4)
-    
+
     return `BK${year}${month}${day}${random}`
   }
 }

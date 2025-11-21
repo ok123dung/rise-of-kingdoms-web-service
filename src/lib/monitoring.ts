@@ -1,5 +1,6 @@
 // Monitoring and Health Check System for Rise of Kingdoms Services
 import { type NextRequest } from 'next/server'
+
 export interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy'
   timestamp: string

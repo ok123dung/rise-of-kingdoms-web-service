@@ -1,10 +1,12 @@
 import { createServer } from 'http'
-import { WebSocketServer } from './server'
+
 import { getLogger } from '@/lib/monitoring/logger'
+
+import { WebSocketServer } from './server'
 
 let wsServer: WebSocketServer | null = null
 
-export function initializeWebSocketServer(port: number = 3001) {
+export function initializeWebSocketServer(port = 3001) {
   if (wsServer) {
     getLogger().info('WebSocket server already initialized')
     return wsServer
@@ -13,10 +15,10 @@ export function initializeWebSocketServer(port: number = 3001) {
   try {
     // Create HTTP server for WebSocket
     const httpServer = createServer()
-    
+
     // Initialize WebSocket server
     wsServer = new WebSocketServer(httpServer)
-    
+
     // Start listening
     httpServer.listen(port, () => {
       getLogger().info(`WebSocket server running on port ${port}`)

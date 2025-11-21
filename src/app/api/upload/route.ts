@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+
 import { authOptions } from '@/lib/auth'
-import { UploadService } from '@/lib/storage/upload-service'
 import { getLogger } from '@/lib/monitoring/logger'
+import { UploadService } from '@/lib/storage/upload-service'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60 // 60 seconds for file uploads
@@ -10,24 +11,18 @@ export const maxDuration = 60 // 60 seconds for file uploads
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const folder = formData.get('folder') as string || 'general'
+    const folder = (formData.get('folder') as string) || 'general'
     const isPublic = formData.get('isPublic') === 'true'
-    
+
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
     // Check file size before processing
@@ -41,27 +36,19 @@ export async function POST(request: NextRequest) {
 
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer())
-    
+
     // Upload file
-    const result = await UploadService.uploadFile(
-      buffer,
-      file.name,
-      file.type,
-      {
-        folder,
-        userId: session.user.id,
-        isPublic,
-        metadata: {
-          uploadedBy: session.user.email
-        }
+    const result = await UploadService.uploadFile(buffer, file.name, file.type, {
+      folder,
+      userId: session.user.id,
+      isPublic,
+      metadata: {
+        uploadedBy: session.user.email
       }
-    )
+    })
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || 'Upload failed' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: result.error || 'Upload failed' }, { status: 400 })
     }
 
     return NextResponse.json({
@@ -75,11 +62,8 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('File upload error', error as Error)
-    
-    return NextResponse.json(
-      { error: 'Failed to upload file' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
   }
 }
 
@@ -87,24 +71,18 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const searchParams = request.nextUrl.searchParams
+    const { searchParams } = request.nextUrl
     const filename = searchParams.get('filename')
     const folder = searchParams.get('folder') || 'general'
     const mimeType = searchParams.get('mimeType') || 'application/octet-stream'
-    
+
     if (!filename) {
-      return NextResponse.json(
-        { error: 'Filename is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Filename is required' }, { status: 400 })
     }
 
     const { uploadUrl, key } = await UploadService.getPresignedUploadUrl(
@@ -121,10 +99,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('Presigned URL error', error as Error)
-    
-    return NextResponse.json(
-      { error: 'Failed to generate upload URL' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to generate upload URL' }, { status: 500 })
   }
 }

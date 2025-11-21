@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, RefreshCw, Home, MessageCircle } from 'lucide-react'
 import Link from 'next/link'

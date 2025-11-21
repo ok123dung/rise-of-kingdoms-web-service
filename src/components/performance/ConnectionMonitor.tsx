@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import type { ExtendedNavigator } from '@/types/performance'
 
 interface ConnectionMonitorProps {

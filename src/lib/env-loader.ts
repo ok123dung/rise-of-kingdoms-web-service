@@ -25,15 +25,14 @@ export function loadEnvironment() {
     if (process.env.NODE_ENV === 'development') {
       checkOptionalVariables()
     }
-
   } catch (error) {
     getLogger().error('Failed to load environment', error as Error)
-    
+
     // In production, fail fast on invalid environment
     if (process.env.NODE_ENV === 'production') {
       throw error
     }
-    
+
     // In development, show helpful error message
     console.error('\n⚠️  Environment Configuration Error\n')
     console.error((error as Error).message)
@@ -68,22 +67,22 @@ export function createSecureEnvProxy(): typeof process.env {
   return new Proxy(process.env, {
     get(target, prop: string) {
       const value = target[prop]
-      
+
       // Warn when accessing sensitive values directly
       if (isSensitiveKey(prop) && process.env.NODE_ENV === 'development') {
         console.warn(`⚠️  Accessing sensitive environment variable: ${prop}`)
         console.trace()
       }
-      
+
       return value
     },
-    
+
     set(target, prop: string, value) {
       // Prevent setting environment variables at runtime
       if (process.env.NODE_ENV === 'production') {
         throw new Error(`Cannot set environment variable ${prop} at runtime`)
       }
-      
+
       target[prop] = value
       return true
     }
@@ -112,10 +111,14 @@ export function logEnvironmentInfo() {
   // Add masked values for debugging (only in development)
   if (process.env.NODE_ENV === 'development') {
     info.masked = {
-      databaseUrl: process.env.DATABASE_URL ? maskSensitiveValue(process.env.DATABASE_URL) : 'not set',
+      databaseUrl: process.env.DATABASE_URL
+        ? maskSensitiveValue(process.env.DATABASE_URL)
+        : 'not set',
       nextAuthSecret: process.env.NEXTAUTH_SECRET ? 'set' : 'not set',
       apiKeys: {
-        resend: process.env.RESEND_API_KEY ? maskSensitiveValue(process.env.RESEND_API_KEY) : 'not set',
+        resend: process.env.RESEND_API_KEY
+          ? maskSensitiveValue(process.env.RESEND_API_KEY)
+          : 'not set',
         sentry: process.env.SENTRY_AUTH_TOKEN ? 'set' : 'not set'
       }
     }

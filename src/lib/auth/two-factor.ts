@@ -1,6 +1,8 @@
-import speakeasy from 'speakeasy'
-import QRCode from 'qrcode'
 import { randomBytes } from 'crypto'
+
+import QRCode from 'qrcode'
+import speakeasy from 'speakeasy'
+
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
@@ -144,7 +146,7 @@ export class TwoFactorAuthService {
       if (twoFactorAuth.backupCodes.includes(token)) {
         // Remove used backup code
         const updatedCodes = twoFactorAuth.backupCodes.filter(code => code !== token)
-        
+
         await prisma.twoFactorAuth.update({
           where: { userId },
           data: {
@@ -178,7 +180,7 @@ export class TwoFactorAuthService {
       if (password) {
         const user = await prisma.user.findUnique({ where: { id: userId } })
         if (!user) return false
-        
+
         // Password verification would go here
         // const isValid = await bcrypt.compare(password, user.password)
         // if (!isValid) return false
@@ -239,7 +241,7 @@ export class TwoFactorAuthService {
    */
   private static generateBackupCodes(): string[] {
     const codes: string[] = []
-    
+
     for (let i = 0; i < BACKUP_CODES_COUNT; i++) {
       const code = randomBytes(4).toString('hex').toUpperCase()
       codes.push(`${code.slice(0, 4)}-${code.slice(4)}`)
@@ -266,9 +268,7 @@ export class TwoFactorAuthService {
       return {
         enabled: twoFactorAuth.enabled,
         backupCodesRemaining: twoFactorAuth.backupCodes.length,
-        lastBackupCodeUsed: twoFactorAuth.lastUsedBackupCode 
-          ? twoFactorAuth.updatedAt 
-          : undefined
+        lastBackupCodeUsed: twoFactorAuth.lastUsedBackupCode ? twoFactorAuth.updatedAt : undefined
       }
     } catch (error) {
       getLogger().error('2FA status retrieval error', error as Error)

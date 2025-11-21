@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { passwordSchema } from './password-validation'
 
 // Email validation schema

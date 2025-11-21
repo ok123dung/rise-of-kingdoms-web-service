@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import type { FirstInputEntry, LayoutShiftEntry } from '@/types/performance'
 
 interface WebVitalsMonitorProps {
@@ -22,7 +23,7 @@ export function WebVitalsMonitor({ onMetric }: WebVitalsMonitorProps) {
         if (lastEntry) {
           const value = Math.round(lastEntry.startTime)
           onMetric?.({ name: 'LCP', value })
-          
+
           if (window.gtag) {
             window.gtag('event', 'web_vitals', {
               event_category: 'performance',
@@ -43,10 +44,10 @@ export function WebVitalsMonitor({ onMetric }: WebVitalsMonitorProps) {
     try {
       const fidObserver = new PerformanceObserver(list => {
         const entries = list.getEntries() as FirstInputEntry[]
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           const value = Math.round(entry.processingStart - entry.startTime)
           onMetric?.({ name: 'FID', value })
-          
+
           if (window.gtag) {
             window.gtag('event', 'web_vitals', {
               event_category: 'performance',
@@ -67,7 +68,7 @@ export function WebVitalsMonitor({ onMetric }: WebVitalsMonitorProps) {
     try {
       const clsObserver = new PerformanceObserver(list => {
         const entries = list.getEntries() as LayoutShiftEntry[]
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           if (!entry.hadRecentInput) {
             clsValue += entry.value
           }
@@ -84,7 +85,7 @@ export function WebVitalsMonitor({ onMetric }: WebVitalsMonitorProps) {
       if (clsValue > 0) {
         const value = Math.round(clsValue * 1000)
         onMetric?.({ name: 'CLS', value })
-        
+
         if (window.gtag) {
           window.gtag('event', 'web_vitals', {
             event_category: 'performance',

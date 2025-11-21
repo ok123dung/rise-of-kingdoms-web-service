@@ -53,10 +53,7 @@ export function validateWebhookTimestamp(timestamp: number | string): boolean {
  * Check if webhook event has already been processed (idempotency check)
  * Returns true if this is a duplicate event
  */
-export async function isDuplicateWebhook(
-  provider: string,
-  eventId: string
-): Promise<boolean> {
+export async function isDuplicateWebhook(provider: string, eventId: string): Promise<boolean> {
   try {
     const existingEvent = await prisma.webhookEvent.findUnique({
       where: { eventId },
@@ -130,10 +127,7 @@ export function generateWebhookNonce(): string {
  * Verify webhook nonce
  * Ensures nonce has valid format and hasn't been used before
  */
-export async function verifyWebhookNonce(
-  provider: string,
-  nonce: string
-): Promise<boolean> {
+export async function verifyWebhookNonce(provider: string, nonce: string): Promise<boolean> {
   try {
     // Parse nonce format: timestamp_randomhex
     const [timestampStr, randomHex] = nonce.split('_')
@@ -185,7 +179,7 @@ export async function verifyWebhookNonce(
  * Clean up old webhook events and nonces
  * Should be run periodically to prevent database bloat
  */
-export async function cleanupOldWebhookProtectionData(daysToKeep: number = 7): Promise<number> {
+export async function cleanupOldWebhookProtectionData(daysToKeep = 7): Promise<number> {
   try {
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)

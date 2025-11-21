@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { WebVitalsMonitor } from './WebVitalsMonitor'
-import { PageLoadMonitor } from './PageLoadMonitor'
+
 import { ConnectionMonitor } from './ConnectionMonitor'
 import { DeviceMonitor } from './DeviceMonitor'
+import { PageLoadMonitor } from './PageLoadMonitor'
 import { ScrollDepthMonitor } from './ScrollDepthMonitor'
 import { usePerformanceOptimization } from './usePerformanceOptimization'
+import { WebVitalsMonitor } from './WebVitalsMonitor'
 
 interface PerformanceMetrics {
   webVitals: Record<string, number>

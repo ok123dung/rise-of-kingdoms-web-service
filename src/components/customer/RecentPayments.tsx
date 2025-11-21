@@ -1,12 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-
 import { CreditCard, CheckCircle, XCircle, Clock, AlertCircle, Eye } from 'lucide-react'
 import Link from 'next/link'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface RecentPayment {
   id: string
@@ -14,75 +11,17 @@ interface RecentPayment {
   bookingId: string
   serviceName: string
   amount: number
-  status: 'completed' | 'pending' | 'failed' | 'refunded'
-  method: 'momo' | 'zalopay' | 'vnpay' | 'bank_transfer'
+  status: string
+  method: string
   createdAt: string
-  paidAt?: string
+  paidAt: string | null
 }
 
 interface RecentPaymentsProps {
-  userId?: string
+  payments: RecentPayment[]
 }
 
-export default function RecentPayments({ userId }: RecentPaymentsProps) {
-  const [payments, setPayments] = useState<RecentPayment[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchRecentPayments()
-  }, [])
-
-  const fetchRecentPayments = async () => {
-    try {
-      setLoading(true)
-      // Simulate API call - replace with real endpoint
-      await new Promise(resolve => setTimeout(resolve, 800))
-
-      // Mock recent payments data
-      const mockPayments: RecentPayment[] = [
-        {
-          id: '1',
-          paymentNumber: 'PAY24072001',
-          bookingId: 'RK240720001',
-          serviceName: 'Coaching KvK chuyên sâu',
-          amount: 2250000,
-          status: 'completed',
-          method: 'momo',
-          createdAt: '2024-07-20T14:30:00',
-          paidAt: '2024-07-20T14:32:00'
-        },
-        {
-          id: '2',
-          paymentNumber: 'PAY24071802',
-          bookingId: 'RK240718002',
-          serviceName: 'Tối ưu tài nguyên',
-          amount: 1650000,
-          status: 'completed',
-          method: 'zalopay',
-          createdAt: '2024-07-18T16:45:00',
-          paidAt: '2024-07-18T16:47:00'
-        },
-        {
-          id: '3',
-          paymentNumber: 'PAY24071503',
-          bookingId: 'RK240715003',
-          serviceName: 'Quản lý guild nâng cao',
-          amount: 3200000,
-          status: 'failed',
-          method: 'vnpay',
-          createdAt: '2024-07-15T10:20:00'
-        }
-      ]
-
-      setPayments(mockPayments)
-    } catch (err) {
-      setError('Không thể tải lịch sử thanh toán')
-    } finally {
-      setLoading(false)
-    }
-  }
-
+export default function RecentPayments({ payments }: RecentPaymentsProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
@@ -147,40 +86,6 @@ export default function RecentPayments({ userId }: RecentPaymentsProps) {
       hour: '2-digit',
       minute: '2-digit'
     }).format(new Date(dateString))
-  }
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Thanh toán gần đây</CardTitle>
-        </CardHeader>
-        <CardContent className="flex h-[200px] items-center justify-center">
-          <LoadingSpinner text="Đang tải..." />
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Thanh toán gần đây</CardTitle>
-        </CardHeader>
-        <CardContent className="flex h-[200px] items-center justify-center">
-          <div className="text-center text-red-600">
-            <p>{error}</p>
-            <button
-              className="mt-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-              onClick={fetchRecentPayments}
-            >
-              Thử lại
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-    )
   }
 
   if (payments.length === 0) {
@@ -248,13 +153,12 @@ export default function RecentPayments({ userId }: RecentPaymentsProps) {
 
                   <div className="ml-4 text-right">
                     <div
-                      className={`font-bold ${
-                        payment.status === 'completed'
+                      className={`font-bold ${payment.status === 'completed'
                           ? 'text-green-600'
                           : payment.status === 'failed'
                             ? 'text-red-600'
                             : 'text-gray-600'
-                      }`}
+                        }`}
                     >
                       {formatVND(payment.amount)}
                     </div>

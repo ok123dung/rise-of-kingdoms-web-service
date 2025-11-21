@@ -130,7 +130,7 @@ export default function ServicesPage() {
             <div className="mb-8">
               <Link
                 className="inline-flex transform items-center space-x-2 rounded-xl bg-gradient-to-r from-accent-600 to-accent-700 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all duration-200 hover:-translate-y-1 hover:from-accent-700 hover:to-accent-800 hover:shadow-xl"
-                href="/contact"
+                href="/booking"
               >
                 <Phone className="h-5 w-5" />
                 <span>Đặt lịch tư vấn miễn phí ngay</span>
@@ -174,7 +174,7 @@ export default function ServicesPage() {
                 const IconComponent = service.icon
                 const lowestPrice = Math.min(...service.pricing.map(p => p.price))
                 const popularTier = service.pricing.find((_, index) => index === 1) // Middle tier is popular
-                
+
                 return (
                   <div
                     key={service.slug}
@@ -201,9 +201,7 @@ export default function ServicesPage() {
                       <div className="text-3xl font-bold text-primary-600">
                         {lowestPrice.toLocaleString('vi-VN')}đ
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {service.pricing[0].duration}
-                      </div>
+                      <div className="text-sm text-gray-500">{service.pricing[0].duration}</div>
                     </div>
 
                     <ul className="mb-8 space-y-3">
@@ -218,12 +216,12 @@ export default function ServicesPage() {
                     <div className="space-y-3">
                       <Link
                         className="block w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
-                        href="/contact"
+                        href={`/booking?service=${service.slug}`}
                       >
-                        Đặt lịch tư vấn miễn phí
+                        Đặt lịch ngay
                       </Link>
-                      <Link 
-                        className="btn-secondary block w-full text-center text-sm" 
+                      <Link
+                        className="btn-secondary block w-full text-center text-sm"
                         href={`/services/${service.slug}`}
                       >
                         Xem chi tiết dịch vụ

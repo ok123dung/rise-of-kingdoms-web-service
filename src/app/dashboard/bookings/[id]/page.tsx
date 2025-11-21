@@ -1,19 +1,22 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { useParams, useRouter } from 'next/navigation'
-import { format } from 'date-fns'
-import { vi } from 'date-fns/locale'
-import { 
+
+import {
   ArrowLeftIcon,
-  CalendarIcon, 
-  ClockIcon, 
+  CalendarIcon,
+  ClockIcon,
   CreditCardIcon,
   DocumentTextIcon,
   ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline'
+import { format } from 'date-fns'
+import { vi } from 'date-fns/locale'
 import Link from 'next/link'
+import { useParams, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+
 import { BookingChat } from '@/components/BookingChat'
+
 interface BookingDetail {
   id: string
   bookingNumber: string
@@ -84,8 +87,8 @@ export default function BookingDetailPage() {
   }
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rok-gold"></div>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="border-rok-gold h-12 w-12 animate-spin rounded-full border-b-2" />
       </div>
     )
   }
@@ -98,10 +101,10 @@ export default function BookingDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link
-            href="/dashboard/bookings"
             className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            href="/dashboard/bookings"
           >
-            <ArrowLeftIcon className="w-4 h-4 mr-1" />
+            <ArrowLeftIcon className="mr-1 h-4 w-4" />
             Quay lại
           </Link>
           <div>
@@ -113,7 +116,9 @@ export default function BookingDetailPage() {
             </p>
           </div>
         </div>
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColors[booking.status as keyof typeof statusColors]}`}>
+        <span
+          className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${statusColors[booking.status as keyof typeof statusColors]}`}
+        >
           {booking.status === 'pending' && 'Chờ xử lý'}
           {booking.status === 'processing' && 'Đang xử lý'}
           {booking.status === 'completed' && 'Hoàn thành'}
@@ -122,12 +127,12 @@ export default function BookingDetailPage() {
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           {/* Service Info */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Thông tin dịch vụ</h2>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Thông tin dịch vụ</h2>
             <div className="flex items-start space-x-4">
-              <div className="flex-shrink-0 h-12 w-12 rounded-lg bg-rok-gold/10 flex items-center justify-center">
+              <div className="bg-rok-gold/10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg">
                 <span className="text-3xl">{booking.serviceTier.service.icon}</span>
               </div>
               <div className="flex-1">
@@ -140,11 +145,11 @@ export default function BookingDetailPage() {
           </div>
           {/* Timeline */}
           {booking.startDate && (
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Thời gian thực hiện</h2>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-lg font-medium text-gray-900">Thời gian thực hiện</h2>
               <div className="space-y-3">
                 <div className="flex items-center text-sm">
-                  <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
+                  <CalendarIcon className="mr-2 h-5 w-5 text-gray-400" />
                   <span className="text-gray-500">Bắt đầu:</span>
                   <span className="ml-2 text-gray-900">
                     {format(new Date(booking.startDate), 'dd/MM/yyyy HH:mm', { locale: vi })}
@@ -152,7 +157,7 @@ export default function BookingDetailPage() {
                 </div>
                 {booking.endDate && (
                   <div className="flex items-center text-sm">
-                    <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
+                    <ClockIcon className="mr-2 h-5 w-5 text-gray-400" />
                     <span className="text-gray-500">Dự kiến hoàn thành:</span>
                     <span className="ml-2 text-gray-900">
                       {format(new Date(booking.endDate), 'dd/MM/yyyy HH:mm', { locale: vi })}
@@ -164,15 +169,17 @@ export default function BookingDetailPage() {
           )}
           {/* Requirements */}
           {booking.customerRequirements && (
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Yêu cầu của khách hàng</h2>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{booking.customerRequirements}</p>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-lg font-medium text-gray-900">Yêu cầu của khách hàng</h2>
+              <p className="whitespace-pre-wrap text-sm text-gray-700">
+                {booking.customerRequirements}
+              </p>
             </div>
           )}
           {/* Game Details */}
           {booking.bookingDetails && (
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Thông tin game</h2>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-lg font-medium text-gray-900">Thông tin game</h2>
               <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
                 {Object.entries(booking.bookingDetails).map(([key, value]) => (
                   <div key={key}>
@@ -184,16 +191,16 @@ export default function BookingDetailPage() {
             </div>
           )}
           {/* Live Chat */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Chat với nhân viên</h2>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Chat với nhân viên</h2>
             <BookingChat bookingId={booking.id} />
           </div>
         </div>
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Payment Summary */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Thanh toán</h2>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Thanh toán</h2>
             <dl className="space-y-3">
               <div className="flex justify-between">
                 <dt className="text-sm text-gray-500">Tạm tính</dt>
@@ -208,17 +215,18 @@ export default function BookingDetailPage() {
                 <div className="flex justify-between">
                   <dt className="text-sm text-gray-500">Giảm giá</dt>
                   <dd className="text-sm font-medium text-green-600">
-                    -{new Intl.NumberFormat('vi-VN', {
+                    -
+                    {new Intl.NumberFormat('vi-VN', {
                       style: 'currency',
                       currency: 'VND'
                     }).format(booking.discountAmount)}
                   </dd>
                 </div>
               )}
-              <div className="pt-3 border-t border-gray-200">
+              <div className="border-t border-gray-200 pt-3">
                 <div className="flex justify-between">
                   <dt className="text-base font-medium text-gray-900">Tổng cộng</dt>
-                  <dd className="text-base font-medium text-rok-gold">
+                  <dd className="text-rok-gold text-base font-medium">
                     {new Intl.NumberFormat('vi-VN', {
                       style: 'currency',
                       currency: 'VND'
@@ -227,14 +235,16 @@ export default function BookingDetailPage() {
                 </div>
               </div>
             </dl>
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-4 border-t border-gray-200 pt-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-500">Trạng thái</span>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  booking.paymentStatus === 'paid' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    booking.paymentStatus === 'paid'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
                   {booking.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
                 </span>
               </div>
@@ -242,29 +252,29 @@ export default function BookingDetailPage() {
             {booking.paymentStatus === 'pending' && booking.status !== 'cancelled' && (
               <div className="mt-4">
                 <Link
+                  className="bg-rok-gold hover:bg-rok-gold-dark inline-flex w-full items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm"
                   href={`/dashboard/payments/new?booking=${booking.id}`}
-                  className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-rok-gold hover:bg-rok-gold-dark"
                 >
-                  <CreditCardIcon className="w-4 h-4 mr-2" />
+                  <CreditCardIcon className="mr-2 h-4 w-4" />
                   Thanh toán ngay
                 </Link>
               </div>
             )}
           </div>
           {/* Actions */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Hành động</h2>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Hành động</h2>
             <div className="space-y-3">
-              <button className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2" />
+              <button className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                <ChatBubbleLeftRightIcon className="mr-2 h-4 w-4" />
                 Liên hệ hỗ trợ
               </button>
-              <button className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                <DocumentTextIcon className="w-4 h-4 mr-2" />
+              <button className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                <DocumentTextIcon className="mr-2 h-4 w-4" />
                 Xuất hóa đơn
               </button>
               {booking.status === 'pending' && (
-                <button className="w-full inline-flex justify-center items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50">
+                <button className="inline-flex w-full items-center justify-center rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50">
                   Hủy đơn hàng
                 </button>
               )}

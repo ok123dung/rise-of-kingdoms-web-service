@@ -57,7 +57,11 @@ export const hashPassword = async (password: string) => {
 }
 
 // Check password history to prevent reuse
-export const checkPasswordHistory = async (userId: string, newPassword: string, historyLimit: number = 5): Promise<boolean> => {
+export const checkPasswordHistory = async (
+  userId: string,
+  newPassword: string,
+  historyLimit = 5
+): Promise<boolean> => {
   const passwordHistory = await prisma.passwordHistory.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
@@ -227,7 +231,7 @@ export const authOptions: NextAuthOptions = {
           // Check 2FA if enabled
           const { TwoFactorAuthService } = await import('@/lib/auth/two-factor')
           const is2FAEnabled = await TwoFactorAuthService.isEnabled(user.id)
-          
+
           if (is2FAEnabled) {
             // Require 2FA code
             if (!credentials.totpCode) {
@@ -236,13 +240,13 @@ export const authOptions: NextAuthOptions = {
               // We'll handle this differently
               return null
             }
-            
+
             // Verify 2FA code
             const verifyResult = await TwoFactorAuthService.verifyToken(
               user.id,
               credentials.totpCode
             )
-            
+
             if (!verifyResult.verified) {
               return null
             }

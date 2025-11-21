@@ -76,11 +76,11 @@ export default function Header() {
           >
             Đăng nhập
           </Link>
-          <Link className="btn-primary px-6 text-sm" href="/auth/signup">
-            <span className="flex items-center space-x-2">
-              <span>Đăng ký</span>
-              <Sparkles className="h-4 w-4" />
-            </span>
+          <Link
+            className="rounded-full bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-500/30"
+            href="/booking"
+          >
+            Đặt dịch vụ ngay
           </Link>
         </div>
       </nav>

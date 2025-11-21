@@ -20,7 +20,7 @@ export function PageLoadMonitor({ onMetric }: PageLoadMonitorProps) {
           // Page load time
           const loadTime = navigation.loadEventEnd - navigation.fetchStart
           onMetric?.({ name: 'pageLoadTime', value: Math.round(loadTime) })
-          
+
           if (window.gtag) {
             window.gtag('event', 'page_load_time', {
               event_category: 'performance',
@@ -32,7 +32,7 @@ export function PageLoadMonitor({ onMetric }: PageLoadMonitorProps) {
           // Time to First Byte (TTFB)
           const ttfb = navigation.responseStart - navigation.fetchStart
           onMetric?.({ name: 'TTFB', value: Math.round(ttfb) })
-          
+
           if (window.gtag) {
             window.gtag('event', 'ttfb', {
               event_category: 'performance',
@@ -44,7 +44,7 @@ export function PageLoadMonitor({ onMetric }: PageLoadMonitorProps) {
           // DOM Content Loaded
           const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.fetchStart
           onMetric?.({ name: 'domContentLoaded', value: Math.round(domContentLoaded) })
-          
+
           if (window.gtag) {
             window.gtag('event', 'dom_content_loaded', {
               event_category: 'performance',

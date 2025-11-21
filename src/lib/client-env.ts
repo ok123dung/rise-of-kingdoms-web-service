@@ -13,7 +13,7 @@ export const clientEnv = {
 if (typeof window !== 'undefined') {
   const required = ['NEXT_PUBLIC_SITE_URL']
   const missing = required.filter(key => !process.env[key])
-  
+
   if (missing.length > 0) {
     console.error(`Missing required client environment variables: ${missing.join(', ')}`)
   }

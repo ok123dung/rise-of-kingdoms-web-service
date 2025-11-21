@@ -1,4 +1,5 @@
 import { randomBytes, createHash } from 'crypto'
+
 import { getLogger } from '@/lib/monitoring/logger'
 
 // Account lockout configuration
@@ -44,7 +45,10 @@ setInterval(() => {
 export class AccountLockoutManager {
   constructor(private config: AccountLockoutConfig = DEFAULT_LOCKOUT_CONFIG) {}
 
-  async recordFailedAttempt(identifier: string, metadata?: Record<string, any>): Promise<{
+  async recordFailedAttempt(
+    identifier: string,
+    metadata?: Record<string, any>
+  ): Promise<{
     isLocked: boolean
     remainingAttempts: number
     lockedUntil?: Date
@@ -75,7 +79,7 @@ export class AccountLockoutManager {
     // Check if should lock
     if (attempt.count >= this.config.maxAttempts) {
       attempt.lockedUntil = now + this.config.lockoutDuration
-      
+
       // Log security event
       getLogger().logSecurityEvent('account_locked', {
         identifier,
@@ -129,7 +133,7 @@ export class AccountLockoutManager {
       delete attempt.lockedUntil
       failedAttempts.set(identifier, attempt)
     }
-    
+
     getLogger().logSecurityEvent('account_unlocked_manually', {
       identifier,
       unlockedBy: 'admin'
@@ -155,7 +159,10 @@ export class SessionTokenManager {
     return Date.now() - tokenIssuedAt > this.ROTATION_INTERVAL
   }
 
-  static async rotateToken(oldToken: string, userId: string): Promise<{
+  static async rotateToken(
+    oldToken: string,
+    userId: string
+  ): Promise<{
     token: string
     sessionId: string
     expiresAt: Date
@@ -190,7 +197,7 @@ export class CSRFProtection {
 
   static validateToken(token: string | null, sessionToken: string | null): boolean {
     if (!token || !sessionToken) return false
-    
+
     // In production, tokens should be stored in secure httpOnly cookies
     // and validated against session
     return token === sessionToken && token.length === this.TOKEN_LENGTH * 2
@@ -219,10 +226,7 @@ export class DeviceFingerprint {
       headers.get('sec-ch-ua-platform') || ''
     ]
 
-    return createHash('sha256')
-      .update(components.join('|'))
-      .digest('hex')
-      .substring(0, 16)
+    return createHash('sha256').update(components.join('|')).digest('hex').substring(0, 16)
   }
 
   static validate(fingerprint: string, headers: Headers): boolean {

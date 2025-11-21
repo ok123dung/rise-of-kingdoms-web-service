@@ -1,5 +1,6 @@
-import { initializeWebSocketServer } from './lib/websocket/init'
 import { config } from 'dotenv'
+
+import { initializeWebSocketServer } from './lib/websocket/init'
 
 // Load environment variables
 config()

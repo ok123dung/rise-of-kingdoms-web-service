@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
+
 import { getLogger } from '@/lib/monitoring/logger'
 
 export interface ErrorContext {
@@ -14,17 +15,12 @@ export class AppError extends Error {
   public isOperational: boolean
   public context?: ErrorContext
 
-  constructor(
-    message: string,
-    statusCode: number = 500,
-    isOperational: boolean = true,
-    context?: ErrorContext
-  ) {
+  constructor(message: string, statusCode = 500, isOperational = true, context?: ErrorContext) {
     super(message)
     this.statusCode = statusCode
     this.isOperational = isOperational
     this.context = context
-    
+
     Error.captureStackTrace(this, this.constructor)
   }
 }
@@ -36,31 +32,31 @@ export class ValidationError extends AppError {
 }
 
 export class AuthenticationError extends AppError {
-  constructor(message: string = 'Authentication failed', context?: ErrorContext) {
+  constructor(message = 'Authentication failed', context?: ErrorContext) {
     super(message, 401, true, context)
   }
 }
 
 export class AuthorizationError extends AppError {
-  constructor(message: string = 'Access denied', context?: ErrorContext) {
+  constructor(message = 'Access denied', context?: ErrorContext) {
     super(message, 403, true, context)
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message: string = 'Resource not found', context?: ErrorContext) {
+  constructor(message = 'Resource not found', context?: ErrorContext) {
     super(message, 404, true, context)
   }
 }
 
 export class ConflictError extends AppError {
-  constructor(message: string = 'Resource conflict', context?: ErrorContext) {
+  constructor(message = 'Resource conflict', context?: ErrorContext) {
     super(message, 409, true, context)
   }
 }
 
 export class RateLimitError extends AppError {
-  constructor(message: string = 'Too many requests', context?: ErrorContext) {
+  constructor(message = 'Too many requests', context?: ErrorContext) {
     super(message, 429, true, context)
   }
 }
@@ -97,15 +93,15 @@ export function handleError(error: Error | AppError, context?: ErrorContext): vo
               statusCode: error.statusCode,
               isOperational: error.isOperational,
               ...(error.context || {})
-            } as any,
+            } as any
           },
           tags: {
             type: 'operational',
             statusCode: error.statusCode.toString(),
-            ...error.context?.tags,
+            ...error.context?.tags
           },
           user: error.context?.userId ? { id: error.context.userId } : undefined,
-          extra: error.context?.metadata,
+          extra: error.context?.metadata
         })
       }
     } else {
@@ -116,16 +112,16 @@ export function handleError(error: Error | AppError, context?: ErrorContext): vo
           app: {
             statusCode: error.statusCode,
             isOperational: error.isOperational,
-            ...error.context,
-          },
+            ...error.context
+          }
         },
         tags: {
           type: 'programming',
           statusCode: error.statusCode.toString(),
-          ...error.context?.tags,
+          ...error.context?.tags
         },
         user: error.context?.userId ? { id: error.context.userId } : undefined,
-        extra: error.context?.metadata,
+        extra: error.context?.metadata
       })
     }
   } else {
@@ -133,14 +129,14 @@ export function handleError(error: Error | AppError, context?: ErrorContext): vo
     Sentry.captureException(error, {
       level: 'error',
       contexts: {
-        app: context as any,
+        app: context as any
       },
       tags: {
         type: 'unknown',
-        ...context?.tags,
+        ...context?.tags
       },
       user: context?.userId ? { id: context.userId } : undefined,
-      extra: context?.metadata,
+      extra: context?.metadata
     })
   }
 }
@@ -155,19 +151,17 @@ export function createErrorResponse(error: Error | AppError): {
 } {
   const statusCode = error instanceof AppError ? error.statusCode : 500
   const message = error.message || 'Internal server error'
-  
+
   // Don't expose internal errors in production
-  const safeMessage = 
-    process.env.NODE_ENV === 'production' && statusCode === 500
-      ? 'Internal server error'
-      : message
+  const safeMessage =
+    process.env.NODE_ENV === 'production' && statusCode === 500 ? 'Internal server error' : message
 
   return {
     error: error.name || 'Error',
     message: safeMessage,
     statusCode,
     timestamp: new Date().toISOString(),
-    requestId: Sentry.getActiveSpan()?.spanContext().traceId,
+    requestId: Sentry.getActiveSpan()?.spanContext().traceId
   }
 }
 
@@ -196,19 +190,19 @@ export async function apiErrorHandler(
     metadata: {
       url: request.url,
       method: request.method,
-      headers: Object.fromEntries(request.headers.entries()),
-    },
+      headers: Object.fromEntries(request.headers.entries())
+    }
   }
 
   handleError(error, context)
 
   const response = createErrorResponse(error)
-  
+
   return new Response(JSON.stringify(response), {
     status: response.statusCode,
     headers: {
       'Content-Type': 'application/json',
-      'X-Request-ID': response.requestId || '',
-    },
+      'X-Request-ID': response.requestId || ''
+    }
   })
 }

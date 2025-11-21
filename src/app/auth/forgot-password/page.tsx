@@ -24,17 +24,24 @@ function ForgotPasswordContent() {
     setMessage('')
 
     try {
-      // Simulate API call - In real implementation, this would call your password reset API
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
 
-      // For now, we'll show success message
-      setStatus('success')
-      setMessage(
-        'Nếu email này tồn tại trong hệ thống, bạn sẽ nhận được link reset password trong vài phút.'
-      )
+      const data = await response.json()
+
+      if (data.success) {
+        setStatus('success')
+        setMessage(data.message)
+      } else {
+        setStatus('error')
+        setMessage(data.error || 'Có lỗi xảy ra. Vui lòng thử lại sau.')
+      }
     } catch (error) {
       setStatus('error')
-      setMessage('Có lỗi xảy ra. Vui lòng thử lại sau.')
+      setMessage('Lỗi kết nối đến máy chủ. Vui lòng thử lại sau.')
     } finally {
       setIsLoading(false)
     }
@@ -43,7 +50,7 @@ function ForgotPasswordContent() {
   const handleResendEmail = () => {
     setStatus('idle')
     setMessage('')
-    handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+    handleSubmit({ preventDefault: () => { } } as React.FormEvent)
   }
 
   return (

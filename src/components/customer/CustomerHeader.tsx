@@ -1,10 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { User, Bell, Settings, LogOut, ChevronDown } from 'lucide-react'
+
+import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
+
 import { RealtimeNotifications } from '@/components/RealtimeNotifications'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+
 interface CustomerData {
   id: string
   name: string

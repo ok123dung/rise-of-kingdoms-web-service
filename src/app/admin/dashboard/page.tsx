@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+
 import {
   BarChart3,
   Users,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+
 interface DashboardStats {
   totalRevenue: number
   totalBookings: number

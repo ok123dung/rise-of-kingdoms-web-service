@@ -13,7 +13,9 @@
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": ["./tsconfig.json"],
+    "project": [
+      "./tsconfig.eslint.json"
+    ],
     "ecmaVersion": "latest",
     "sourceType": "module",
     "ecmaFeatures": {
@@ -74,7 +76,6 @@
         "fixStyle": "inline-type-imports"
       }
     ],
-    
     // React specific rules
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
@@ -83,13 +84,19 @@
     "react/jsx-filename-extension": [
       "warn",
       {
-        "extensions": [".tsx", ".jsx"]
+        "extensions": [
+          ".tsx",
+          ".jsx"
+        ]
       }
     ],
     "react/jsx-props-no-spreading": "off",
     "react/require-default-props": "off",
     "react/no-unescaped-entities": "warn",
-    "react/jsx-boolean-value": ["warn", "never"],
+    "react/jsx-boolean-value": [
+      "warn",
+      "never"
+    ],
     "react/jsx-curly-brace-presence": [
       "warn",
       {
@@ -108,11 +115,9 @@
         "reservedFirst": true
       }
     ],
-    
     // React Hooks rules
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    
     // Import rules
     "import/order": [
       "warn",
@@ -139,7 +144,9 @@
             "position": "after"
           }
         ],
-        "pathGroupsExcludedImportTypes": ["react"],
+        "pathGroupsExcludedImportTypes": [
+          "react"
+        ],
         "newlines-between": "always",
         "alphabetize": {
           "order": "asc",
@@ -151,7 +158,6 @@
     "import/no-unresolved": "error",
     "import/no-cycle": "warn",
     "import/newline-after-import": "warn",
-    
     // Unused imports
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": [
@@ -163,12 +169,15 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    
     // General JavaScript rules
     "no-console": [
       "error",
       {
-        "allow": ["warn", "error", "info"]
+        "allow": [
+          "warn",
+          "error",
+          "info"
+        ]
       }
     ],
     "no-debugger": "error",
@@ -198,7 +207,9 @@
       "warn",
       "always",
       {
-        "markers": ["/"]
+        "markers": [
+          "/"
+        ]
       }
     ],
     "radix": "warn",
@@ -212,19 +223,25 @@
         "allowTaggedTemplates": true
       }
     ],
-    
     // Accessibility rules
     "jsx-a11y/anchor-is-valid": [
       "error",
       {
-        "components": ["Link"],
-        "specialLink": ["hrefLeft", "hrefRight"],
-        "aspects": ["invalidHref", "preferButton"]
+        "components": [
+          "Link"
+        ],
+        "specialLink": [
+          "hrefLeft",
+          "hrefRight"
+        ],
+        "aspects": [
+          "invalidHref",
+          "preferButton"
+        ]
       }
     ],
     "jsx-a11y/click-events-have-key-events": "warn",
     "jsx-a11y/no-static-element-interactions": "warn",
-    
     // Prettier integration
     "prettier/prettier": [
       "warn",
@@ -236,20 +253,31 @@
   },
   "overrides": [
     {
-      "files": ["*.js", "*.jsx"],
+      "files": [
+        "*.js",
+        "*.jsx"
+      ],
       "rules": {
         "@typescript-eslint/no-var-requires": "off"
       }
     },
     {
-      "files": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"],
+      "files": [
+        "*.test.ts",
+        "*.test.tsx",
+        "*.spec.ts",
+        "*.spec.tsx"
+      ],
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "no-console": "off"
       }
     },
     {
-      "files": ["src/app/**/*.tsx", "src/pages/**/*.tsx"],
+      "files": [
+        "src/app/**/*.tsx",
+        "src/pages/**/*.tsx"
+      ],
       "rules": {
         "import/no-default-export": "off"
       }

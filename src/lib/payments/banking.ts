@@ -1,7 +1,7 @@
 import { db, prisma } from '@/lib/db'
 import { getEmailService } from '@/lib/email/service'
 import { getLogger } from '@/lib/monitoring/logger'
-import type { Booking, Payment, PaymentWithBooking } from '@/types/database'
+import type { Booking, PaymentWithBooking } from '@/types/database'
 
 interface BankingTransferRequest {
   bookingId: string
@@ -101,7 +101,10 @@ export class BankingTransfer {
         }
       }
     } catch (error) {
-      getLogger().error('Banking transfer creation error', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Banking transfer creation error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -175,7 +178,9 @@ export class BankingTransfer {
           })
         }
       } catch (error) {
-        getLogger().warn(`Failed to send Discord notification: ${error instanceof Error ? error.message : String(error)}`)
+        getLogger().warn(
+          `Failed to send Discord notification: ${error instanceof Error ? error.message : String(error)}`
+        )
       }
 
       // Trigger service delivery workflow
@@ -200,13 +205,18 @@ export class BankingTransfer {
           }
         })
       } catch (error) {
-        getLogger().warn(`Failed to trigger service delivery: ${error instanceof Error ? error.message : String(error)}`)
+        getLogger().warn(
+          `Failed to trigger service delivery: ${error instanceof Error ? error.message : String(error)}`
+        )
       }
 
       getLogger().info('Banking transfer confirmed', { transferCode, adminNotes })
       return { success: true, message: 'Transfer confirmed successfully' }
     } catch (error) {
-      getLogger().error('Banking transfer confirmation error', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Banking transfer confirmation error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return { success: false, message: 'Confirmation failed' }
     }
   }
@@ -251,7 +261,10 @@ export class BankingTransfer {
       getLogger().info('Banking transfer rejected', { transferCode, reason })
       return { success: true, message: 'Transfer rejected' }
     } catch (error) {
-      getLogger().error('Banking transfer rejection error', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Banking transfer rejection error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return { success: false, message: 'Rejection failed' }
     }
   }
@@ -285,7 +298,10 @@ export class BankingTransfer {
 
       return { success: true, data: pendingPayments }
     } catch (error) {
-      getLogger().error('Get pending transfers error', error instanceof Error ? error : new Error(String(error)))
+      getLogger().error(
+        'Get pending transfers error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get pending transfers'

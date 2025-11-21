@@ -2,8 +2,8 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { prisma } from '@/lib/db'
-import { leadValidationSchema, sanitizeUserInput, sanitizePhoneNumber } from '@/lib/validation'
 import { getLogger } from '@/lib/monitoring/logger'
+import { leadValidationSchema, sanitizeUserInput, sanitizePhoneNumber } from '@/lib/validation'
 
 // POST /api/leads - Tạo lead mới từ contact form
 
@@ -84,7 +84,10 @@ export async function POST(request: NextRequest) {
         })
       }
     } catch (error) {
-      getLogger().warn(`Failed to schedule follow-up: ${error instanceof Error ? error.message : String(error)}`, { leadId: lead.id })
+      getLogger().warn(
+        `Failed to schedule follow-up: ${error instanceof Error ? error.message : String(error)}`,
+        { leadId: lead.id }
+      )
     }
 
     // Send notification to Discord
@@ -100,7 +103,10 @@ export async function POST(request: NextRequest) {
         leadScore: lead.leadScore
       })
     } catch (error) {
-      getLogger().warn(`Failed to send Discord notification: ${error instanceof Error ? error.message : String(error)}`, { leadId: lead.id })
+      getLogger().warn(
+        `Failed to send Discord notification: ${error instanceof Error ? error.message : String(error)}`,
+        { leadId: lead.id }
+      )
     }
 
     // Send confirmation email
@@ -110,7 +116,10 @@ export async function POST(request: NextRequest) {
         const emailService = getEmailService()
         await emailService.sendLeadFollowUp(lead)
       } catch (error) {
-        getLogger().warn(`Failed to send confirmation email: ${error instanceof Error ? error.message : String(error)}`, { leadId: lead.id })
+        getLogger().warn(
+          `Failed to send confirmation email: ${error instanceof Error ? error.message : String(error)}`,
+          { leadId: lead.id }
+        )
       }
     }
 
@@ -123,7 +132,10 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    getLogger().error('Error creating lead', error instanceof Error ? error : new Error(String(error)))
+    getLogger().error(
+      'Error creating lead',
+      error instanceof Error ? error : new Error(String(error))
+    )
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -194,7 +206,10 @@ export async function GET(request: NextRequest) {
       count: leads.length
     })
   } catch (error) {
-    getLogger().error('Error fetching leads', error instanceof Error ? error : new Error(String(error)))
+    getLogger().error(
+      'Error fetching leads',
+      error instanceof Error ? error : new Error(String(error))
+    )
 
     return NextResponse.json(
       {

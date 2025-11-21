@@ -1,8 +1,10 @@
-import { Server as HTTPServer } from 'http'
-import { Server as SocketIOServer, Socket } from 'socket.io'
-import { getLogger } from '@/lib/monitoring/logger'
-import { prisma } from '@/lib/db'
+import { type Server as HTTPServer } from 'http'
+
+import { Server as SocketIOServer, type Socket } from 'socket.io'
+
 import { verifyToken } from '@/lib/auth/jwt'
+import { prisma } from '@/lib/db'
+import { getLogger } from '@/lib/monitoring/logger'
 
 interface AuthenticatedSocket extends Socket {
   userId?: string
@@ -30,16 +32,16 @@ export class WebSocketServer {
     // Authentication middleware
     this.io.use(async (socket: AuthenticatedSocket, next) => {
       try {
-        const token = socket.handshake.auth.token
-        
+        const { token } = socket.handshake.auth
+
         if (!token) {
           return next(new Error('Authentication required'))
         }
 
         // Verify JWT token
         const decoded = await verifyToken(token)
-        
-        if (!decoded || !decoded.userId) {
+
+        if (!decoded?.userId) {
           return next(new Error('Invalid token'))
         }
 
@@ -68,7 +70,7 @@ export class WebSocketServer {
       // Join user-specific room
       if (socket.userId) {
         socket.join(`user:${socket.userId}`)
-        
+
         // Join role-specific room
         if (socket.userRole) {
           socket.join(`role:${socket.userRole}`)
@@ -110,7 +112,8 @@ export class WebSocketServer {
               content: data.message,
               userId: socket.userId,
               bookingId: data.bookingId,
-              channel: socket.userRole === 'staff' || socket.userRole === 'admin' ? 'staff' : 'customer'
+              channel:
+                socket.userRole === 'staff' || socket.userRole === 'admin' ? 'staff' : 'customer'
             },
             include: {
               user: {

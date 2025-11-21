@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 import {
   Star,
   Clock,
@@ -12,9 +14,7 @@ import {
   Phone,
   Mail
 } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
-import { notFound } from 'next/navigation'
-import { useState } from 'react'
+import { useParams, useRouter, notFound } from 'next/navigation'
 
 import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
@@ -24,13 +24,13 @@ export default function ServiceDetailPage() {
   const params = useParams()
   const router = useRouter()
   const slug = params.slug as string
-  
+
   const service = servicesData[slug]
-  
+
   if (!service) {
     notFound()
   }
-  
+
   const IconComponent = service.icon
   const [selectedTierIndex, setSelectedTierIndex] = useState(1) // Default to middle tier
 

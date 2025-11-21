@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+
 import { authOptions } from '@/lib/auth'
-import { UploadService } from '@/lib/storage/upload-service'
 import { getLogger } from '@/lib/monitoring/logger'
+import { UploadService } from '@/lib/storage/upload-service'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -10,36 +11,27 @@ export const maxDuration = 60
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const folder = formData.get('folder') as string || 'images'
+    const folder = (formData.get('folder') as string) || 'images'
     const isPublic = formData.get('isPublic') === 'true'
     const width = formData.get('width') ? parseInt(formData.get('width') as string) : undefined
     const height = formData.get('height') ? parseInt(formData.get('height') as string) : undefined
     const quality = formData.get('quality') ? parseInt(formData.get('quality') as string) : 85
     const generateThumbnail = formData.get('generateThumbnail') === 'true'
-    
+
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
     // Validate image type
     if (!file.type.startsWith('image/')) {
-      return NextResponse.json(
-        { error: 'File must be an image' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'File must be an image' }, { status: 400 })
     }
 
     // Check file size before processing
@@ -53,30 +45,23 @@ export async function POST(request: NextRequest) {
 
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer())
-    
+
     // Upload and process image
-    const result = await UploadService.uploadImage(
-      buffer,
-      file.name,
-      {
-        folder,
-        userId: session.user.id,
-        isPublic,
-        metadata: {
-          uploadedBy: session.user.email
-        },
-        width,
-        height,
-        quality,
-        generateThumbnail
-      }
-    )
+    const result = await UploadService.uploadImage(buffer, file.name, {
+      folder,
+      userId: session.user.id,
+      isPublic,
+      metadata: {
+        uploadedBy: session.user.email
+      },
+      width,
+      height,
+      quality,
+      generateThumbnail
+    })
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || 'Upload failed' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: result.error || 'Upload failed' }, { status: 400 })
     }
 
     return NextResponse.json({
@@ -90,10 +75,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('Image upload error', error as Error)
-    
-    return NextResponse.json(
-      { error: 'Failed to upload image' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 })
   }
 }

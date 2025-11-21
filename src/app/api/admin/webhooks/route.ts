@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+
 import { authOptions, isAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
@@ -7,12 +8,9 @@ import { getLogger } from '@/lib/monitoring/logger'
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Check admin permission
@@ -22,13 +20,10 @@ export async function GET(request: NextRequest) {
     })
 
     if (!isAdmin(user)) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const searchParams = request.nextUrl.searchParams
+    const { searchParams } = request.nextUrl
     const status = searchParams.get('status') || undefined
     const provider = searchParams.get('provider') || undefined
     const limit = parseInt(searchParams.get('limit') || '20')
@@ -55,10 +50,13 @@ export async function GET(request: NextRequest) {
       _count: true
     })
 
-    const statusCounts = stats.reduce((acc, curr) => {
-      acc[curr.status] = curr._count
-      return acc
-    }, {} as Record<string, number>)
+    const statusCounts = stats.reduce(
+      (acc, curr) => {
+        acc[curr.status] = curr._count
+        return acc
+      },
+      {} as Record<string, number>
+    )
 
     return NextResponse.json({
       webhooks,
@@ -73,11 +71,8 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('List webhooks error', error as Error)
-    
-    return NextResponse.json(
-      { error: 'Failed to list webhooks' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to list webhooks' }, { status: 500 })
   }
 }
 
@@ -85,12 +80,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Check admin permission
@@ -100,19 +92,13 @@ export async function POST(request: NextRequest) {
     })
 
     if (!isAdmin(user)) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const { eventId } = await request.json()
 
     if (!eventId) {
-      return NextResponse.json(
-        { error: 'Event ID required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Event ID required' }, { status: 400 })
     }
 
     // Reset webhook for retry
@@ -131,10 +117,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('Retry webhook error', error as Error)
-    
-    return NextResponse.json(
-      { error: 'Failed to retry webhook' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to retry webhook' }, { status: 500 })
   }
 }

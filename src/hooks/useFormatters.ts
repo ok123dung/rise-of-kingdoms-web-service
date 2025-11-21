@@ -26,18 +26,21 @@ export function useFormatters() {
     }).format(new Date(dateString))
   }, [])
 
-  const formatRelativeTime = useCallback((dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-    
-    if (diffInSeconds < 60) return 'Vừa xong'
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
-    
-    return formatDate(dateString)
-  }, [formatDate])
+  const formatRelativeTime = useCallback(
+    (dateString: string) => {
+      const date = new Date(dateString)
+      const now = new Date()
+      const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+      if (diffInSeconds < 60) return 'Vừa xong'
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`
+      if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} ngày trước`
+
+      return formatDate(dateString)
+    },
+    [formatDate]
+  )
 
   const formatNumber = useCallback((num: number) => {
     return new Intl.NumberFormat('vi-VN').format(num)
@@ -53,11 +56,11 @@ export function useFormatters() {
 
   const formatFileSize = useCallback((bytes: number) => {
     if (bytes === 0) return '0 Bytes'
-    
+
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }, [])
 

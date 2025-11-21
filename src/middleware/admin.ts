@@ -41,7 +41,10 @@ export async function withAdminAuth(
     // User is authenticated and has admin role
     return await handler(request, token as AuthToken)
   } catch (error) {
-    getLogger().error('Admin auth middleware error', error instanceof Error ? error : new Error(String(error)))
+    getLogger().error(
+      'Admin auth middleware error',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return NextResponse.json({ error: 'Authentication check failed' }, { status: 500 })
   }
 }
@@ -67,7 +70,10 @@ export async function withSuperAdminAuth(
 
     return await handler(request, token as AuthToken)
   } catch (error) {
-    getLogger().error('Super admin auth middleware error', error instanceof Error ? error : new Error(String(error)))
+    getLogger().error(
+      'Super admin auth middleware error',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return NextResponse.json({ error: 'Authentication check failed' }, { status: 500 })
   }
 }
@@ -95,7 +101,10 @@ export async function withCustomerAuth(
 
     return await handler(request, token as AuthToken)
   } catch (error) {
-    getLogger().error('Customer auth middleware error', error instanceof Error ? error : new Error(String(error)))
+    getLogger().error(
+      'Customer auth middleware error',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return NextResponse.json({ error: 'Authentication check failed' }, { status: 500 })
   }
 }
@@ -147,7 +156,11 @@ export async function checkResourceOwnership(
         return false
     }
   } catch (error) {
-    getLogger().error('Resource ownership check failed', error instanceof Error ? error : new Error(String(error)), { resourceType, resourceId, userId })
+    getLogger().error(
+      'Resource ownership check failed',
+      error instanceof Error ? error : new Error(String(error)),
+      { resourceType, resourceId, userId }
+    )
     return false
   }
 }
@@ -242,7 +255,10 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
       } as AuthToken
     }
   } catch (error) {
-    getLogger().error('Admin access check failed', error instanceof Error ? error : new Error(String(error)))
+    getLogger().error(
+      'Admin access check failed',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       allowed: false,
       redirectUrl: '/auth/error?error=configuration'
@@ -266,7 +282,10 @@ async function logSecurityEvent(event: string, data: Record<string, unknown>) {
       }
     })
   } catch (error) {
-    getLogger().warn(`Failed to log security event: ${error instanceof Error ? error.message : String(error)}`, { event })
+    getLogger().warn(
+      `Failed to log security event: ${error instanceof Error ? error.message : String(error)}`,
+      { event }
+    )
     // Fallback logging
     getLogger().warn(`SECURITY EVENT: ${event}`, {
       data: JSON.stringify(data),
@@ -301,7 +320,10 @@ export async function logAdminAction(
 
     getLogger().info('Audit log created', { adminId, action, resource, resourceId })
   } catch (error) {
-    getLogger().warn(`Failed to log admin action: ${error instanceof Error ? error.message : String(error)}`, { action, resource })
+    getLogger().warn(
+      `Failed to log admin action: ${error instanceof Error ? error.message : String(error)}`,
+      { action, resource }
+    )
     // Fallback to console logging for critical security events
     getLogger().error('SECURITY AUDIT FAILED', error as Error, {
       timestamp: new Date().toISOString(),

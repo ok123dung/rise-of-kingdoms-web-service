@@ -1,8 +1,9 @@
 import { useCallback } from 'react'
-import { 
-  CheckCircle, 
-  Clock, 
-  XCircle, 
+
+import {
+  CheckCircle,
+  Clock,
+  XCircle,
   AlertCircle,
   RefreshCw,
   CreditCard,
@@ -100,7 +101,9 @@ export function useStatusBadges() {
 
   const renderBadge = useCallback((config: BadgeConfig) => {
     return (
-      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium ${config.className}`}>
+      <span
+        className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium ${config.className}`}
+      >
         {config.icon}
         {config.label}
       </span>

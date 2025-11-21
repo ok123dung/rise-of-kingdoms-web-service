@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis'
+
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface CacheConfig {
@@ -43,9 +44,10 @@ class MemoryCache {
     // Limit cache size
     if (this.store.size > 1000) {
       // Remove oldest entries
-      const entries = Array.from(this.store.entries())
-        .sort((a, b) => a[1].timestamp - b[1].timestamp)
-      
+      const entries = Array.from(this.store.entries()).sort(
+        (a, b) => a[1].timestamp - b[1].timestamp
+      )
+
       for (let i = 0; i < 200; i++) {
         this.store.delete(entries[i][0])
       }
@@ -174,7 +176,11 @@ export class CacheManager {
     }
 
     // If we have stale data and staleWhileRevalidate is enabled
-    if (cached !== null && fetcher && (options?.staleWhileRevalidate || this.config.staleWhileRevalidate)) {
+    if (
+      cached !== null &&
+      fetcher &&
+      (options?.staleWhileRevalidate || this.config.staleWhileRevalidate)
+    ) {
       // Return stale data immediately
       this.revalidateInBackground(cacheKey, fetcher, options?.ttl)
       return cached
@@ -190,7 +196,7 @@ export class CacheManager {
   ): Promise<void> {
     // Prevent duplicate revalidations
     if (this.revalidationQueue.has(cacheKey)) return
-    
+
     this.revalidationQueue.add(cacheKey)
 
     // Run revalidation in background
@@ -238,7 +244,7 @@ export class CacheManager {
 // Global cache instances
 const cacheInstances = new Map<string, CacheManager>()
 
-export function getCache(name: string = 'default', config?: CacheConfig): CacheManager {
+export function getCache(name = 'default', config?: CacheConfig): CacheManager {
   if (!cacheInstances.has(name)) {
     cacheInstances.set(name, new CacheManager(config))
   }
@@ -252,11 +258,16 @@ export function cached(options: { ttl?: number; key?: string } = {}) {
 
     descriptor.value = async function (...args: any[]) {
       const cache = getCache('api', { ttl: options.ttl || 300 })
-      const cacheKey = options.key || `${target.constructor.name}:${propertyKey}:${JSON.stringify(args)}`
+      const cacheKey =
+        options.key || `${target.constructor.name}:${propertyKey}:${JSON.stringify(args)}`
 
-      return cache.get(cacheKey, async () => {
-        return originalMethod.apply(this, args)
-      }, { staleWhileRevalidate: true })
+      return cache.get(
+        cacheKey,
+        async () => {
+          return originalMethod.apply(this, args)
+        },
+        { staleWhileRevalidate: true }
+      )
     }
 
     return descriptor

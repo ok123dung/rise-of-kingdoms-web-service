@@ -10,7 +10,7 @@ export async function GET() {
       hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
       hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
       nodeEnv: process.env.NODE_ENV,
-      vercelEnv: process.env.VERCEL_ENV,
+      vercelEnv: process.env.VERCEL_ENV
     }
   })
 }

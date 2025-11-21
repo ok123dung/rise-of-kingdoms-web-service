@@ -7,9 +7,9 @@ interface ScrollDepthMonitorProps {
   milestones?: number[]
 }
 
-export function ScrollDepthMonitor({ 
+export function ScrollDepthMonitor({
   onMilestone,
-  milestones = [25, 50, 75, 90] 
+  milestones = [25, 50, 75, 90]
 }: ScrollDepthMonitorProps) {
   const maxScrollDepthRef = useRef(0)
   const milestonesReachedRef = useRef(new Set<number>())
@@ -27,10 +27,7 @@ export function ScrollDepthMonitor({
 
         // Check milestones
         milestones.forEach(milestone => {
-          if (
-            scrollDepth >= milestone && 
-            !milestonesReachedRef.current.has(milestone)
-          ) {
+          if (scrollDepth >= milestone && !milestonesReachedRef.current.has(milestone)) {
             milestonesReachedRef.current.add(milestone)
             onMilestone?.(milestone)
 

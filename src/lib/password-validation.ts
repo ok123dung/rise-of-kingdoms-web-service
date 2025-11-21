@@ -9,20 +9,11 @@ export const passwordSchema = z
   .string()
   .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
   .max(PASSWORD_MAX_LENGTH, `Password must be at most ${PASSWORD_MAX_LENGTH} characters`)
+  .refine(password => /[A-Z]/.test(password), 'Password must contain at least one uppercase letter')
+  .refine(password => /[a-z]/.test(password), 'Password must contain at least one lowercase letter')
+  .refine(password => /[0-9]/.test(password), 'Password must contain at least one number')
   .refine(
-    (password) => /[A-Z]/.test(password),
-    'Password must contain at least one uppercase letter'
-  )
-  .refine(
-    (password) => /[a-z]/.test(password),
-    'Password must contain at least one lowercase letter'
-  )
-  .refine(
-    (password) => /[0-9]/.test(password),
-    'Password must contain at least one number'
-  )
-  .refine(
-    (password) => /[^A-Za-z0-9]/.test(password),
+    password => /[^A-Za-z0-9]/.test(password),
     'Password must contain at least one special character'
   )
 
@@ -42,20 +33,19 @@ const COMMON_PASSWORDS = [
 
 export function isCommonPassword(password: string): boolean {
   const lower = password.toLowerCase()
-  return COMMON_PASSWORDS.some(common => 
-    lower === common.toLowerCase() || 
-    lower.includes(common.toLowerCase())
+  return COMMON_PASSWORDS.some(
+    common => lower === common.toLowerCase() || lower.includes(common.toLowerCase())
   )
 }
 
 // Check for patterns
-export function hasRepeatingCharacters(password: string, maxRepeats: number = 3): boolean {
+export function hasRepeatingCharacters(password: string, maxRepeats = 3): boolean {
   const regex = new RegExp(`(.)\\1{${maxRepeats - 1},}`)
   return regex.test(password)
 }
 
 // Check for sequential characters
-export function hasSequentialCharacters(password: string, maxSequence: number = 3): boolean {
+export function hasSequentialCharacters(password: string, maxSequence = 3): boolean {
   for (let i = 0; i < password.length - maxSequence + 1; i++) {
     let isSequential = true
     for (let j = 0; j < maxSequence - 1; j++) {
@@ -163,28 +153,31 @@ export function validatePassword(password: string): {
 }
 
 // Generate a secure random password
-export function generateSecurePassword(length: number = 16): string {
+export function generateSecurePassword(length = 16): string {
   const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   const lowercase = 'abcdefghijklmnopqrstuvwxyz'
   const numbers = '0123456789'
   const special = '!@#$%^&*()_+-=[]{}|;:,.<>?'
-  
+
   const allChars = uppercase + lowercase + numbers + special
   const crypto = require('crypto')
-  
+
   let password = ''
-  
+
   // Ensure at least one of each required character type
   password += uppercase[crypto.randomInt(uppercase.length)]
   password += lowercase[crypto.randomInt(lowercase.length)]
   password += numbers[crypto.randomInt(numbers.length)]
   password += special[crypto.randomInt(special.length)]
-  
+
   // Fill the rest randomly
   for (let i = password.length; i < length; i++) {
     password += allChars[crypto.randomInt(allChars.length)]
   }
-  
+
   // Shuffle the password
-  return password.split('').sort(() => crypto.randomInt(3) - 1).join('')
+  return password
+    .split('')
+    .sort(() => crypto.randomInt(3) - 1)
+    .join('')
 }

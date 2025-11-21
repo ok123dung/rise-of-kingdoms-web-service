@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+
 import { Shield, Smartphone, Copy, AlertCircle, CheckCircle } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 
@@ -115,20 +116,20 @@ If you lose access to your authenticator app, you can use one of these codes to 
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="mx-auto max-w-2xl p-6">
       {/* Intro Step */}
       {step === 'intro' && (
         <div className="space-y-6">
           <div className="text-center">
-            <Shield className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Bảo Vệ Tài Khoản Với 2FA</h2>
+            <Shield className="mx-auto mb-4 h-16 w-16 text-blue-600" />
+            <h2 className="mb-2 text-2xl font-bold">Bảo Vệ Tài Khoản Với 2FA</h2>
             <p className="text-gray-600">
               Xác thực hai yếu tố (2FA) thêm một lớp bảo mật cho tài khoản của bạn
             </p>
           </div>
 
-          <div className="bg-blue-50 rounded-lg p-4">
-            <h3 className="font-semibold mb-2">Cách hoạt động:</h3>
+          <div className="rounded-lg bg-blue-50 p-4">
+            <h3 className="mb-2 font-semibold">Cách hoạt động:</h3>
             <ol className="space-y-2 text-sm">
               <li>1. Cài đặt ứng dụng authenticator trên điện thoại</li>
               <li>2. Quét mã QR hoặc nhập mã bí mật</li>
@@ -137,8 +138,8 @@ If you lose access to your authenticator app, you can use one of these codes to 
             </ol>
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <AlertCircle className="w-5 h-5 text-yellow-600 inline mr-2" />
+          <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+            <AlertCircle className="mr-2 inline h-5 w-5 text-yellow-600" />
             <span className="text-sm">
               Đề xuất: Google Authenticator, Microsoft Authenticator, hoặc Authy
             </span>
@@ -146,16 +147,16 @@ If you lose access to your authenticator app, you can use one of these codes to 
 
           <div className="flex gap-4">
             <button
-              onClick={handleStartSetup}
+              className="flex-1 rounded-lg bg-blue-600 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
               disabled={loading}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              onClick={handleStartSetup}
             >
               {loading ? 'Đang xử lý...' : 'Bắt Đầu Cài Đặt'}
             </button>
             {onCancel && (
               <button
+                className="flex-1 rounded-lg border border-gray-300 py-3 hover:bg-gray-50"
                 onClick={onCancel}
-                className="flex-1 border border-gray-300 py-3 rounded-lg hover:bg-gray-50"
               >
                 Để Sau
               </button>
@@ -168,57 +169,51 @@ If you lose access to your authenticator app, you can use one of these codes to 
       {step === 'setup' && (
         <div className="space-y-6">
           <div className="text-center">
-            <Smartphone className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Quét Mã QR</h2>
-            <p className="text-gray-600">
-              Sử dụng ứng dụng authenticator để quét mã QR bên dưới
-            </p>
+            <Smartphone className="mx-auto mb-4 h-16 w-16 text-blue-600" />
+            <h2 className="mb-2 text-2xl font-bold">Quét Mã QR</h2>
+            <p className="text-gray-600">Sử dụng ứng dụng authenticator để quét mã QR bên dưới</p>
           </div>
 
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
-            <img src={qrCode} alt="2FA QR Code" className="mx-auto" />
+          <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
+            <img alt="2FA QR Code" className="mx-auto" src={qrCode} />
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm font-medium mb-2">Không thể quét mã?</p>
-            <p className="text-xs text-gray-600 mb-2">Nhập mã này vào ứng dụng:</p>
+          <div className="rounded-lg bg-gray-50 p-4">
+            <p className="mb-2 text-sm font-medium">Không thể quét mã?</p>
+            <p className="mb-2 text-xs text-gray-600">Nhập mã này vào ứng dụng:</p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-white px-3 py-2 rounded border text-xs break-all">
+              <code className="flex-1 break-all rounded border bg-white px-3 py-2 text-xs">
                 {secret}
               </code>
               <button
+                className="rounded p-2 hover:bg-gray-200"
                 onClick={() => handleCopyCode(secret)}
-                className="p-2 hover:bg-gray-200 rounded"
               >
-                <Copy className="w-4 h-4" />
+                <Copy className="h-4 w-4" />
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="mb-2 block text-sm font-medium">
               Nhập mã xác thực 6 số từ ứng dụng
             </label>
             <input
-              type="text"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+              className="w-full rounded-lg border px-4 py-3 text-center text-2xl tracking-widest"
               maxLength={6}
               placeholder="000000"
-              className="w-full text-center text-2xl tracking-widest px-4 py-3 border rounded-lg"
+              type="text"
+              value={verificationCode}
+              onChange={e => setVerificationCode(e.target.value.replace(/\D/g, ''))}
             />
           </div>
 
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+          {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
 
           <button
-            onClick={handleVerify}
+            className="w-full rounded-lg bg-blue-600 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
             disabled={loading || verificationCode.length !== 6}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            onClick={handleVerify}
           >
             {loading ? 'Đang xác thực...' : 'Xác Thực & Kích Hoạt'}
           </button>
@@ -229,34 +224,33 @@ If you lose access to your authenticator app, you can use one of these codes to 
       {step === 'backup' && (
         <div className="space-y-6">
           <div className="text-center">
-            <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">2FA Đã Được Kích Hoạt!</h2>
-            <p className="text-gray-600">
-              Lưu các mã backup này ở nơi an toàn
-            </p>
+            <CheckCircle className="mx-auto mb-4 h-16 w-16 text-green-600" />
+            <h2 className="mb-2 text-2xl font-bold">2FA Đã Được Kích Hoạt!</h2>
+            <p className="text-gray-600">Lưu các mã backup này ở nơi an toàn</p>
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <AlertCircle className="w-5 h-5 text-yellow-600 inline mr-2" />
+          <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+            <AlertCircle className="mr-2 inline h-5 w-5 text-yellow-600" />
             <span className="text-sm font-medium">Quan trọng:</span>
-            <p className="text-sm mt-1">
-              Mỗi mã chỉ dùng được một lần. Dùng khi mất điện thoại hoặc không thể truy cập authenticator.
+            <p className="mt-1 text-sm">
+              Mỗi mã chỉ dùng được một lần. Dùng khi mất điện thoại hoặc không thể truy cập
+              authenticator.
             </p>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex justify-between items-center mb-3">
+          <div className="rounded-lg bg-gray-50 p-4">
+            <div className="mb-3 flex items-center justify-between">
               <h3 className="font-medium">Mã Backup</h3>
               <div className="flex gap-2">
                 <button
-                  onClick={handleCopyAllCodes}
                   className="text-sm text-blue-600 hover:text-blue-800"
+                  onClick={handleCopyAllCodes}
                 >
                   {copiedCode === 'all' ? 'Đã copy!' : 'Copy tất cả'}
                 </button>
                 <button
-                  onClick={handleDownloadCodes}
                   className="text-sm text-blue-600 hover:text-blue-800"
+                  onClick={handleDownloadCodes}
                 >
                   Tải xuống
                 </button>
@@ -265,17 +259,17 @@ If you lose access to your authenticator app, you can use one of these codes to 
             <div className="grid grid-cols-2 gap-2">
               {backupCodes.map((code, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  <code className="flex-1 bg-white px-3 py-2 rounded text-sm font-mono">
+                  <code className="flex-1 rounded bg-white px-3 py-2 font-mono text-sm">
                     {code}
                   </code>
                   <button
+                    className="rounded p-1 hover:bg-gray-200"
                     onClick={() => handleCopyCode(code)}
-                    className="p-1 hover:bg-gray-200 rounded"
                   >
                     {copiedCode === code ? (
-                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <CheckCircle className="h-4 w-4 text-green-600" />
                     ) : (
-                      <Copy className="w-4 h-4" />
+                      <Copy className="h-4 w-4" />
                     )}
                   </button>
                 </div>
@@ -284,8 +278,8 @@ If you lose access to your authenticator app, you can use one of these codes to 
           </div>
 
           <button
+            className="w-full rounded-lg bg-green-600 py-3 text-white hover:bg-green-700"
             onClick={onComplete}
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
           >
             Hoàn Thành
           </button>

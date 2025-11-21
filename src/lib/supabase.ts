@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+
 import { getLogger } from '@/lib/monitoring/logger'
 
 // Supabase configuration
@@ -11,25 +12,27 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Create a Supabase client for client-side operations
-export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
-      }
-    })
-  : null
+export const supabase =
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true
+        }
+      })
+    : null
 
 // Create a Supabase client with service role for server-side operations
-export const supabaseAdmin = supabaseUrl && supabaseServiceRoleKey
-  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    })
-  : null
+export const supabaseAdmin =
+  supabaseUrl && supabaseServiceRoleKey
+    ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      })
+    : null
 
 // Helper function to check if Supabase is configured
 export const isSupabaseConfigured = () => {
@@ -52,7 +55,7 @@ export const STORAGE_BUCKETS = {
 // Helper function to get public URL for a file
 export const getPublicFileUrl = (bucket: string, path: string) => {
   if (!supabase) return null
-  
+
   const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return data?.publicUrl || null
 }
@@ -72,13 +75,11 @@ export const uploadFile = async (
     throw new Error('Supabase not configured')
   }
 
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .upload(path, file, {
-      cacheControl: options?.cacheControl || '3600',
-      contentType: options?.contentType,
-      upsert: options?.upsert || false
-    })
+  const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
+    cacheControl: options?.cacheControl || '3600',
+    contentType: options?.contentType,
+    upsert: options?.upsert || false
+  })
 
   if (error) {
     getLogger().error('Supabase upload error', error)
@@ -94,9 +95,7 @@ export const deleteFile = async (bucket: string, paths: string[]) => {
     throw new Error('Supabase admin client not configured')
   }
 
-  const { data, error } = await supabaseAdmin.storage
-    .from(bucket)
-    .remove(paths)
+  const { data, error } = await supabaseAdmin.storage.from(bucket).remove(paths)
 
   if (error) {
     getLogger().error('Supabase delete error', error)
@@ -107,18 +106,12 @@ export const deleteFile = async (bucket: string, paths: string[]) => {
 }
 
 // Helper function to create signed URL for temporary access
-export const createSignedUrl = async (
-  bucket: string,
-  path: string,
-  expiresIn: number = 3600
-) => {
+export const createSignedUrl = async (bucket: string, path: string, expiresIn = 3600) => {
   if (!supabase) {
     throw new Error('Supabase not configured')
   }
 
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(path, expiresIn)
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn)
 
   if (error) {
     getLogger().error('Supabase signed URL error', error)
@@ -145,13 +138,11 @@ export const listFiles = async (
     throw new Error('Supabase not configured')
   }
 
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .list(path, {
-      limit: options?.limit || 100,
-      offset: options?.offset || 0,
-      sortBy: options?.sortBy
-    })
+  const { data, error } = await supabase.storage.from(bucket).list(path, {
+    limit: options?.limit || 100,
+    offset: options?.offset || 0,
+    sortBy: options?.sortBy
+  })
 
   if (error) {
     getLogger().error('Supabase list error', error)

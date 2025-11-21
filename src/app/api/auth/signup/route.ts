@@ -22,9 +22,11 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
       return NextResponse.json(
         {
           success: false,
-          message: 'Database not configured. Please set DATABASE_URL environment variable in Vercel Dashboard.',
+          message:
+            'Database not configured. Please set DATABASE_URL environment variable in Vercel Dashboard.',
           error_code: 'DB_NOT_CONFIGURED',
-          help_url: 'https://github.com/ok123dung/rok-services/blob/main/docs/VERCEL_DATABASE_SETUP.md'
+          help_url:
+            'https://github.com/ok123dung/rok-services/blob/main/docs/VERCEL_DATABASE_SETUP.md'
         },
         { status: 503 }
       )
@@ -36,21 +38,24 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
       await prisma.$queryRaw`SELECT 1`
     } catch (dbError) {
       getLogger().error('Database connection failed', dbError as Error)
-      
-      let errorInfo: any = {
+
+      const errorInfo: any = {
         success: false,
         error_code: 'DB_CONNECTION_FAILED',
-        message: 'Unable to connect to database. This is usually due to missing or incorrect DATABASE_URL configuration.'
+        message:
+          'Unable to connect to database. This is usually due to missing or incorrect DATABASE_URL configuration.'
       }
 
       // Provide helpful error messages based on error type
       if (dbError instanceof Error) {
         if (dbError.message.includes('P1001')) {
-          errorInfo.message = 'Cannot reach database server. Please check DATABASE_URL and ensure it includes connection pooling parameters.'
+          errorInfo.message =
+            'Cannot reach database server. Please check DATABASE_URL and ensure it includes connection pooling parameters.'
           errorInfo.hint = 'Add ?pgbouncer=true&connection_limit=1 to your DATABASE_URL'
         } else if (dbError.message.includes('P1002')) {
           errorInfo.message = 'Database server timeout. The server took too long to respond.'
-          errorInfo.hint = 'This often happens in serverless environments. Ensure connection pooling is enabled.'
+          errorInfo.hint =
+            'This often happens in serverless environments. Ensure connection pooling is enabled.'
         } else if (dbError.message.includes('ECONNREFUSED')) {
           errorInfo.message = 'Connection refused by database server.'
           errorInfo.hint = 'Verify the database host and port in your DATABASE_URL.'
@@ -58,7 +63,7 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
           errorInfo.message = 'SSL/TLS connection error.'
           errorInfo.hint = 'Try adding ?sslmode=require to your DATABASE_URL.'
         }
-        
+
         // In production, log full error but return sanitized message
         if (process.env.NODE_ENV !== 'production') {
           errorInfo.debug = {
@@ -68,9 +73,10 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
           }
         }
       }
-      
-      errorInfo.help_url = 'https://github.com/yourusername/yourrepo/blob/main/VERCEL-DEPLOYMENT-FIX.md'
-      
+
+      errorInfo.help_url =
+        'https://github.com/yourusername/yourrepo/blob/main/VERCEL-DEPLOYMENT-FIX.md'
+
       return NextResponse.json(errorInfo, { status: 503 })
     }
 

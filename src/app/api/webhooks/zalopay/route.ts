@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { webhookService } from '@/lib/webhooks/processor'
+
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { getLogger } from '@/lib/monitoring/logger'
-import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
+import { webhookService } from '@/lib/webhooks/processor'
+import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
 
 export async function POST(request: NextRequest) {
   // Apply rate limiting for webhook endpoint
@@ -33,22 +35,12 @@ export async function POST(request: NextRequest) {
 
     if (mac !== reqMac) {
       getLogger().error('Invalid ZaloPay webhook MAC')
-      return NextResponse.json(
-        { return_code: -1, return_message: 'Invalid MAC' },
-        { status: 400 }
-      )
+      return NextResponse.json({ return_code: -1, return_message: 'Invalid MAC' }, { status: 400 })
     }
 
     // Parse data
     const jsonData = JSON.parse(dataStr)
-    const {
-      app_trans_id,
-      zp_trans_id,
-      server_time,
-      amount,
-      discount_amount,
-      status
-    } = jsonData
+    const { app_trans_id, zp_trans_id, server_time, amount, discount_amount, status } = jsonData
 
     // Replay protection: validate timestamp and check for duplicates
     const eventId = `zalopay_${app_trans_id}_${zp_trans_id}`
@@ -73,12 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Store webhook event for processing
-    await webhookService.storeWebhookEvent(
-      'zalopay',
-      'payment_notification',
-      eventId,
-      jsonData
-    )
+    await webhookService.storeWebhookEvent('zalopay', 'payment_notification', eventId, jsonData)
 
     // Process immediately
     const processed = await webhookService.processWebhookEvent(eventId)
@@ -94,7 +81,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     getLogger().error('ZaloPay webhook error', error as Error)
-    
+
     return NextResponse.json(
       { return_code: 0, return_message: 'Internal server error' },
       { status: 500 }

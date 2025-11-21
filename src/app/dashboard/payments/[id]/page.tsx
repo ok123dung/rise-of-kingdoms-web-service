@@ -1,10 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { useParams, useRouter } from 'next/navigation'
-import { format } from 'date-fns'
-import { vi } from 'date-fns/locale'
-import { 
+
+import {
   ArrowLeftIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -12,7 +9,12 @@ import {
   DocumentDuplicateIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline'
+import { format } from 'date-fns'
+import { vi } from 'date-fns/locale'
 import Link from 'next/link'
+import { useParams, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+
 interface PaymentDetail {
   id: string
   paymentNumber: string
@@ -111,8 +113,8 @@ export default function PaymentDetailPage() {
   }
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rok-gold"></div>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="border-rok-gold h-12 w-12 animate-spin rounded-full border-b-2" />
       </div>
     )
   }
@@ -127,10 +129,10 @@ export default function PaymentDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link
-            href="/dashboard/payments"
             className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            href="/dashboard/payments"
           >
-            <ArrowLeftIcon className="w-4 h-4 mr-1" />
+            <ArrowLeftIcon className="mr-1 h-4 w-4" />
             Quay lại
           </Link>
           <div>
@@ -142,17 +144,17 @@ export default function PaymentDetailPage() {
             </p>
           </div>
         </div>
-        <div className={`inline-flex items-center px-3 py-1 rounded-full ${config.color}`}>
-          <StatusIcon className="w-5 h-5 mr-1" />
+        <div className={`inline-flex items-center rounded-full px-3 py-1 ${config.color}`}>
+          <StatusIcon className="mr-1 h-5 w-5" />
           <span className="text-sm font-medium">{config.text}</span>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           {/* Payment Info */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Thông tin thanh toán</h2>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Thông tin thanh toán</h2>
             <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               <div>
                 <dt className="text-sm font-medium text-gray-500">Phương thức</dt>
@@ -176,7 +178,9 @@ export default function PaymentDetailPage() {
               <div>
                 <dt className="text-sm font-medium text-gray-500">Trạng thái</dt>
                 <dd className="mt-1">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${config.color}`}
+                  >
                     {config.text}
                   </span>
                 </dd>
@@ -185,12 +189,12 @@ export default function PaymentDetailPage() {
                 <div className="sm:col-span-2">
                   <dt className="text-sm font-medium text-gray-500">Mã giao dịch</dt>
                   <dd className="mt-1 flex items-center">
-                    <code className="text-sm text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                    <code className="rounded bg-gray-100 px-2 py-1 text-sm text-gray-900">
                       {payment.gatewayTransactionId}
                     </code>
                     <button
-                      onClick={() => copyToClipboard(payment.gatewayTransactionId!)}
                       className="ml-2 text-gray-400 hover:text-gray-600"
+                      onClick={() => copyToClipboard(payment.gatewayTransactionId!)}
                     >
                       <DocumentDuplicateIcon className="h-4 w-4" />
                     </button>
@@ -209,25 +213,23 @@ export default function PaymentDetailPage() {
             </dl>
           </div>
           {/* Related Booking */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Đơn hàng liên quan</h2>
-            <Link 
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Đơn hàng liên quan</h2>
+            <Link
+              className="-m-2 block rounded-lg p-2 transition-colors hover:bg-gray-50"
               href={`/dashboard/bookings/${payment.booking.id}`}
-              className="block hover:bg-gray-50 -m-2 p-2 rounded-lg transition-colors"
             >
               <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-rok-gold/10 flex items-center justify-center">
+                <div className="bg-rok-gold/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <span className="text-2xl">{payment.booking.serviceTier.service.icon}</span>
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">
                     {payment.booking.serviceTier.service.name} - {payment.booking.serviceTier.name}
                   </p>
-                  <p className="text-sm text-gray-500">
-                    Mã đơn: #{payment.booking.bookingNumber}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Trạng thái: 
+                  <p className="text-sm text-gray-500">Mã đơn: #{payment.booking.bookingNumber}</p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Trạng thái:
                     <span className="ml-1 font-medium">
                       {payment.booking.status === 'completed' && 'Hoàn thành'}
                       {payment.booking.status === 'processing' && 'Đang xử lý'}
@@ -236,17 +238,17 @@ export default function PaymentDetailPage() {
                     </span>
                   </p>
                 </div>
-                <div className="text-sm text-rok-gold">
-                  Xem chi tiết →
-                </div>
+                <div className="text-rok-gold text-sm">Xem chi tiết →</div>
               </div>
             </Link>
           </div>
           {/* Gateway Response (for debugging, only show in development) */}
           {process.env.NODE_ENV === 'development' && payment.gatewayResponse && (
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Gateway Response (Dev Only)</h2>
-              <pre className="text-xs text-gray-600 overflow-auto bg-gray-50 p-4 rounded">
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-lg font-medium text-gray-900">
+                Gateway Response (Dev Only)
+              </h2>
+              <pre className="overflow-auto rounded bg-gray-50 p-4 text-xs text-gray-600">
                 {JSON.stringify(payment.gatewayResponse, null, 2)}
               </pre>
             </div>
@@ -255,33 +257,33 @@ export default function PaymentDetailPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Actions */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Hành động</h2>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Hành động</h2>
             <div className="space-y-3">
               {payment.status === 'failed' && (
                 <button
+                  className="bg-rok-gold hover:bg-rok-gold-dark inline-flex w-full items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm"
                   onClick={retryPayment}
-                  className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-rok-gold hover:bg-rok-gold-dark"
                 >
-                  <ArrowPathIcon className="w-4 h-4 mr-2" />
+                  <ArrowPathIcon className="mr-2 h-4 w-4" />
                   Thử lại thanh toán
                 </button>
               )}
-              <button className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                <DocumentDuplicateIcon className="w-4 h-4 mr-2" />
+              <button className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                <DocumentDuplicateIcon className="mr-2 h-4 w-4" />
                 Xuất biên lai
               </button>
               <Link
+                className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
                 href="/dashboard/support"
-                className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
                 Báo cáo vấn đề
               </Link>
             </div>
           </div>
           {/* Customer Info */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Thông tin khách hàng</h2>
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Thông tin khách hàng</h2>
             <dl className="space-y-3">
               <div>
                 <dt className="text-sm font-medium text-gray-500">Họ tên</dt>

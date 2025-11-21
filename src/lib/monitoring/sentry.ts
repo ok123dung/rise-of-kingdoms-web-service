@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
+
 import { getLogger } from './logger'
 
 // User identification
@@ -12,7 +13,7 @@ export function identifyUser(user: {
     id: user.id,
     email: user.email,
     username: user.username,
-    role: user.role,
+    role: user.role
   })
 }
 
@@ -32,36 +33,36 @@ export function addBreadcrumb(message: string, data?: any, level: Sentry.Severit
     message,
     level,
     data,
-    timestamp: Date.now() / 1000,
+    timestamp: Date.now() / 1000
   })
 }
 
 // Track custom events
 export function trackEvent(eventName: string, data?: Record<string, any>) {
   addBreadcrumb(`Event: ${eventName}`, data, 'info')
-  
+
   // Also log to our system
   getLogger().info(`Event tracked: ${eventName}`, data)
 }
 
 // Performance monitoring
-export function startTransaction(name: string, op: string = 'custom') {
-  return Sentry.startSpan({
-    name,
-    op,
-  }, (span) => span)
+export function startTransaction(name: string, op = 'custom') {
+  return Sentry.startSpan(
+    {
+      name,
+      op
+    },
+    span => span
+  )
 }
 
 // Measure performance
-export function measurePerformance<T>(
-  name: string,
-  fn: () => T | Promise<T>
-): T | Promise<T> {
+export function measurePerformance<T>(name: string, fn: () => T | Promise<T>): T | Promise<T> {
   const transaction = startTransaction(name, 'function')
-  
+
   try {
     const result = fn()
-    
+
     if (result instanceof Promise) {
       return result
         .then(value => {
@@ -76,7 +77,7 @@ export function measurePerformance<T>(
           transaction.end()
         })
     }
-    
+
     transaction.setStatus({ code: 1 })
     transaction.end()
     return result
@@ -117,23 +118,23 @@ export function captureException(
     if (context?.user) {
       scope.setUser(context.user)
     }
-    
+
     if (context?.tags) {
       Object.entries(context.tags).forEach(([key, value]) => {
         scope.setTag(key, value)
       })
     }
-    
+
     if (context?.extra) {
       Object.entries(context.extra).forEach(([key, value]) => {
         scope.setExtra(key, value)
       })
     }
-    
+
     if (context?.level) {
       scope.setLevel(context.level)
     }
-    
+
     Sentry.captureException(error)
   })
 }
@@ -146,32 +147,31 @@ export function monitorApiCall(
   statusCode: number
 ) {
   const transaction = Sentry.getActiveSpan()
-  
+
   if (transaction) {
-    Sentry.startSpan({
-      op: 'http.client',
-      name: `${method} ${endpoint}`,
-    }, (span) => {
-      span.setStatus({ code: 1 })
-      span.setAttribute('http.status_code', statusCode)
-      span.setAttribute('response_time', responseTime)
-    })
-  }
-  
-  // Track slow API calls
-  if (responseTime > 3000) {
-    captureMessage(
-      `Slow API call: ${method} ${endpoint} took ${responseTime}ms`,
-      'warning',
+    Sentry.startSpan(
       {
-        api: {
-          endpoint,
-          method,
-          responseTime,
-          statusCode,
-        },
+        op: 'http.client',
+        name: `${method} ${endpoint}`
+      },
+      span => {
+        span.setStatus({ code: 1 })
+        span.setAttribute('http.status_code', statusCode)
+        span.setAttribute('response_time', responseTime)
       }
     )
+  }
+
+  // Track slow API calls
+  if (responseTime > 3000) {
+    captureMessage(`Slow API call: ${method} ${endpoint} took ${responseTime}ms`, 'warning', {
+      api: {
+        endpoint,
+        method,
+        responseTime,
+        statusCode
+      }
+    })
   }
 }
 
@@ -183,31 +183,30 @@ export function monitorDatabaseQuery(
   success: boolean
 ) {
   const transaction = Sentry.getActiveSpan()
-  
+
   if (transaction) {
-    Sentry.startSpan({
-      op: 'db.query',
-      name: `${operation} ${table}`,
-    }, (span) => {
-      span.setAttribute('duration', duration)
-      span.setStatus(success ? { code: 1 } : { code: 2 })
-    })
-  }
-  
-  // Track slow queries
-  if (duration > 1000) {
-    captureMessage(
-      `Slow database query: ${operation} on ${table} took ${duration}ms`,
-      'warning',
+    Sentry.startSpan(
       {
-        database: {
-          operation,
-          table,
-          duration,
-          success,
-        },
+        op: 'db.query',
+        name: `${operation} ${table}`
+      },
+      span => {
+        span.setAttribute('duration', duration)
+        span.setStatus(success ? { code: 1 } : { code: 2 })
       }
     )
+  }
+
+  // Track slow queries
+  if (duration > 1000) {
+    captureMessage(`Slow database query: ${operation} on ${table} took ${duration}ms`, 'warning', {
+      database: {
+        operation,
+        table,
+        duration,
+        success
+      }
+    })
   }
 }
 
@@ -216,7 +215,7 @@ export function trackFeatureFlag(flag: string, enabled: boolean, user?: string) 
   addBreadcrumb('Feature flag evaluated', {
     flag,
     enabled,
-    user,
+    user
   })
 }
 
@@ -226,26 +225,22 @@ export function maskSensitiveData() {
     scope.setContext('replay', {
       mask_all_text: true,
       mask_all_inputs: true,
-      block_all_media: true,
+      block_all_media: true
     })
   })
 }
 
 // Create feedback widget
-export function showFeedbackDialog(options?: {
-  name?: string
-  email?: string
-  title?: string
-}) {
+export function showFeedbackDialog(options?: { name?: string; email?: string; title?: string }) {
   const user = Sentry.getCurrentScope().getUser()
-  
+
   // @ts-ignore - Sentry feedback API
   if (window.Sentry?.showReportDialog) {
     // @ts-ignore
     window.Sentry.showReportDialog({
       user: {
         name: options?.name || user?.username,
-        email: options?.email || user?.email,
+        email: options?.email || user?.email
       },
       title: options?.title || 'Báo cáo lỗi',
       subtitle: 'Hãy cho chúng tôi biết lỗi bạn gặp phải',
@@ -257,7 +252,7 @@ export function showFeedbackDialog(options?: {
       labelSubmit: 'Gửi báo cáo',
       errorGeneric: 'Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại.',
       errorFormEntry: 'Vui lòng điền đầy đủ thông tin.',
-      successMessage: 'Cảm ơn bạn đã gửi báo cáo!',
+      successMessage: 'Cảm ơn bạn đã gửi báo cáo!'
     })
   }
 }

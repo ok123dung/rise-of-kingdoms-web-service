@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
+
+import {
+  buildCSPHeader,
+  currentCSPDirectives,
+  generateCSPNonce,
+  cspReportOnly
+} from '@/lib/security/csp-config'
+
 import type { NextRequest } from 'next/server'
-import { buildCSPHeader, currentCSPDirectives, generateCSPNonce, cspReportOnly } from '@/lib/security/csp-config'
 
 export async function middleware(req: NextRequest) {
   const response = NextResponse.next()
@@ -25,7 +32,9 @@ export async function middleware(req: NextRequest) {
   const cspHeader = buildCSPHeader(currentCSPDirectives, nonce)
 
   // Use report-only mode during testing, enforce mode in production
-  const cspHeaderName = cspReportOnly ? 'Content-Security-Policy-Report-Only' : 'Content-Security-Policy'
+  const cspHeaderName = cspReportOnly
+    ? 'Content-Security-Policy-Report-Only'
+    : 'Content-Security-Policy'
   response.headers.set(cspHeaderName, cspHeader)
 
   // Store nonce in response headers for use in components (for future strict CSP)
@@ -33,7 +42,10 @@ export async function middleware(req: NextRequest) {
 
   // Production security headers
   if (process.env.NODE_ENV === 'production') {
-    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+    response.headers.set(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload'
+    )
   }
 
   return response
@@ -41,7 +53,5 @@ export async function middleware(req: NextRequest) {
 
 // Only run on pages, not API routes or static files
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)']
 }

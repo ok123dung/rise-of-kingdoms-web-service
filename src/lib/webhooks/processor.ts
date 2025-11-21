@@ -1,5 +1,6 @@
-import { WebhookRetryService } from './retry-service'
 import { getLogger } from '@/lib/monitoring/logger'
+
+import { WebhookRetryService } from './retry-service'
 
 let processorInterval: NodeJS.Timeout | null = null
 let cleanupInterval: NodeJS.Timeout | null = null
@@ -11,7 +12,7 @@ const webhookService = new WebhookRetryService({
   backoffMultiplier: 2
 })
 
-export function startWebhookProcessor(intervalMs: number = 60000) {
+export function startWebhookProcessor(intervalMs = 60000) {
   if (processorInterval) {
     getLogger().warn('Webhook processor already running')
     return
@@ -36,7 +37,8 @@ export function stopWebhookProcessor() {
   }
 }
 
-export function startWebhookCleanup(intervalMs: number = 86400000) { // 24 hours
+export function startWebhookCleanup(intervalMs = 86400000) {
+  // 24 hours
   if (cleanupInterval) {
     getLogger().warn('Webhook cleanup already running')
     return

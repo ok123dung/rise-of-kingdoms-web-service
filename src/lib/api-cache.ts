@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { getCache } from '@/lib/cache'
 import { getLogger } from '@/lib/monitoring/logger'
 
@@ -26,7 +27,7 @@ export function withCache(
     }
 
     const cache = getCache('api')
-    
+
     // Generate cache key
     let cacheKey: string
     if (typeof options.key === 'function') {
@@ -35,7 +36,7 @@ export function withCache(
       cacheKey = options.key
     } else {
       // Default key includes URL and relevant headers
-      const url = req.url
+      const { url } = req
       const acceptHeader = req.headers.get('accept') || ''
       const authHeader = req.headers.get('authorization') ? 'auth' : 'anon'
       cacheKey = `api:${req.method}:${url}:${acceptHeader}:${authHeader}`
@@ -62,12 +63,12 @@ export function withCache(
 
       // Execute handler
       const response = await handler(req, context)
-      
+
       // Only cache successful responses
       if (response.ok) {
         const clonedResponse = response.clone()
         const body = await clonedResponse.json()
-        
+
         // Extract headers we want to cache
         const headers: Record<string, string> = {}
         const headersToCache = ['content-type', 'cache-control', 'etag']
@@ -105,7 +106,7 @@ export function withCache(
 // Cache invalidation helper
 export async function invalidateApiCache(pattern?: string) {
   const cache = getCache('api')
-  
+
   if (pattern) {
     await cache.invalidate(pattern)
   } else {
@@ -117,22 +118,22 @@ export async function invalidateApiCache(pattern?: string) {
 export const CacheConfigs = {
   // Cache for 1 minute
   SHORT: { ttl: 60 },
-  
+
   // Cache for 5 minutes
   MEDIUM: { ttl: 300 },
-  
+
   // Cache for 1 hour
   LONG: { ttl: 3600 },
-  
+
   // Cache for 1 day
   VERY_LONG: { ttl: 86400 },
-  
+
   // Public data that rarely changes
   PUBLIC_STATIC: {
     ttl: 3600,
     condition: (req: NextRequest) => !req.headers.get('authorization')
   },
-  
+
   // User-specific data with shorter TTL
   USER_DATA: {
     ttl: 60,
@@ -144,34 +145,32 @@ export const CacheConfigs = {
 }
 
 // ETags support for conditional requests
-export function withETag(
-  handler: (req: NextRequest, context?: any) => Promise<Response>
-) {
+export function withETag(handler: (req: NextRequest, context?: any) => Promise<Response>) {
   return async function etagHandler(req: NextRequest, context?: any): Promise<Response> {
     const response = await handler(req, context)
-    
+
     if (response.ok && req.method === 'GET') {
       // Generate ETag from response body
       const clonedResponse = response.clone()
       const body = await clonedResponse.text()
       const etag = `"${Buffer.from(body).toString('base64').substring(0, 27)}"`
-      
+
       // Check if client has matching ETag
       const clientETag = req.headers.get('if-none-match')
       if (clientETag === etag) {
         return new NextResponse(null, {
           status: 304,
           headers: {
-            'ETag': etag,
+            ETag: etag,
             'Cache-Control': response.headers.get('cache-control') || 'public, max-age=300'
           }
         })
       }
-      
+
       // Add ETag to response
       response.headers.set('ETag', etag)
     }
-    
+
     return response
   }
 }

@@ -1,24 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { getLogger } from '@/lib/monitoring/logger'
 
 // Request size limits for different endpoints
 const SIZE_LIMITS: Record<string, number> = {
-  '/api/upload/avatar': 5 * 1024 * 1024,        // 5MB for avatars
-  '/api/upload/image': 20 * 1024 * 1024,        // 20MB for images
-  '/api/upload': 50 * 1024 * 1024,              // 50MB for general files
-  '/api/upload/document': 10 * 1024 * 1024,     // 10MB for documents
-  '/api/': 1 * 1024 * 1024,                     // 1MB for other API routes
-  default: 10 * 1024 * 1024                     // 10MB default
+  '/api/upload/avatar': 5 * 1024 * 1024, // 5MB for avatars
+  '/api/upload/image': 20 * 1024 * 1024, // 20MB for images
+  '/api/upload': 50 * 1024 * 1024, // 50MB for general files
+  '/api/upload/document': 10 * 1024 * 1024, // 10MB for documents
+  '/api/': 1 * 1024 * 1024, // 1MB for other API routes
+  default: 10 * 1024 * 1024 // 10MB default
 }
 
-export async function uploadProtectionMiddleware(request: NextRequest): Promise<NextResponse | null> {
+export async function uploadProtectionMiddleware(
+  request: NextRequest
+): Promise<NextResponse | null> {
   // Only check POST/PUT/PATCH requests
   if (!['POST', 'PUT', 'PATCH'].includes(request.method)) {
     return null
   }
 
-  const pathname = request.nextUrl.pathname
-  
+  const { pathname } = request.nextUrl
+
   // Find appropriate size limit
   let sizeLimit = SIZE_LIMITS.default
   for (const [path, limit] of Object.entries(SIZE_LIMITS)) {

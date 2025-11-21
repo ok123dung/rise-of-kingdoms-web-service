@@ -1,13 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { z } from 'zod'
+
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
-import { z } from 'zod'
 
 const updateProfileSchema = z.object({
   fullName: z.string().min(2).optional(),
-  phone: z.string().regex(/^(0|\+84)[0-9]{9,10}$/).optional().nullable(),
+  phone: z
+    .string()
+    .regex(/^(0|\+84)[0-9]{9,10}$/)
+    .optional()
+    .nullable(),
   discordUsername: z.string().optional().nullable(),
   rokPlayerId: z.string().optional().nullable(),
   rokKingdom: z.string().optional().nullable()
@@ -16,16 +21,13 @@ const updateProfileSchema = z.object({
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
-    
+
     // Validate input
     const validatedData = updateProfileSchema.parse(body)
 
@@ -37,9 +39,15 @@ export async function PUT(request: NextRequest) {
       data: {
         ...(validatedData.fullName && { fullName: validatedData.fullName }),
         ...(validatedData.phone !== undefined && { phone: validatedData.phone || null }),
-        ...(validatedData.discordUsername !== undefined && { discordUsername: validatedData.discordUsername || null }),
-        ...(validatedData.rokPlayerId !== undefined && { rokPlayerId: validatedData.rokPlayerId || null }),
-        ...(validatedData.rokKingdom !== undefined && { rokKingdom: validatedData.rokKingdom || null })
+        ...(validatedData.discordUsername !== undefined && {
+          discordUsername: validatedData.discordUsername || null
+        }),
+        ...(validatedData.rokPlayerId !== undefined && {
+          rokPlayerId: validatedData.rokPlayerId || null
+        }),
+        ...(validatedData.rokKingdom !== undefined && {
+          rokKingdom: validatedData.rokKingdom || null
+        })
       }
     })
 

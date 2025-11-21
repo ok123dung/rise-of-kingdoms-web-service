@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import type { ExtendedNavigator } from '@/types/performance'
 
 interface DeviceMonitorProps {
@@ -18,8 +19,8 @@ export function DeviceMonitor({ onDeviceInfo }: DeviceMonitorProps) {
 
     const isMobile = window.innerWidth < 768
     const nav = navigator as ExtendedNavigator
-    const deviceMemory = nav.deviceMemory
-    const hardwareConcurrency = navigator.hardwareConcurrency
+    const { deviceMemory } = nav
+    const { hardwareConcurrency } = navigator
     const isSlowDevice = 'deviceMemory' in nav && deviceMemory !== undefined && deviceMemory < 4
 
     const deviceInfo = {

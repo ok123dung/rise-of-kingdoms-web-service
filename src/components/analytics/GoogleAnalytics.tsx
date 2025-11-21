@@ -36,7 +36,7 @@ export default function GoogleAnalytics() {
 
 // Analytics tracking functions
 export const trackEvent = (eventName: string, parameters?: Record<string, any>) => {
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (window?.gtag) {
     window.gtag('event', eventName, {
       event_category: 'engagement',
       event_label: parameters?.label || '',

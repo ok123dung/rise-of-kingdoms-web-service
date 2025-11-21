@@ -2,33 +2,33 @@
 
 // Network Information API types
 interface NetworkInformation extends EventTarget {
-  effectiveType: '2g' | '3g' | '4g' | 'slow-2g';
-  downlink?: number;
-  rtt?: number;
-  saveData?: boolean;
-  type?: 'bluetooth' | 'cellular' | 'ethernet' | 'none' | 'wifi' | 'wimax' | 'other' | 'unknown';
-  downlinkMax?: number;
+  effectiveType: '2g' | '3g' | '4g' | 'slow-2g'
+  downlink?: number
+  rtt?: number
+  saveData?: boolean
+  type?: 'bluetooth' | 'cellular' | 'ethernet' | 'none' | 'wifi' | 'wimax' | 'other' | 'unknown'
+  downlinkMax?: number
 }
 
 // Extended Navigator interface
 interface ExtendedNavigator extends Navigator {
-  connection?: NetworkInformation;
-  deviceMemory?: number;
+  connection?: NetworkInformation
+  deviceMemory?: number
 }
 
 // Performance Entry types
 interface PerformanceEntryWithTransferSize extends PerformanceEntry {
-  transferSize?: number;
+  transferSize?: number
 }
 
 interface FirstInputEntry extends PerformanceEntry {
-  processingStart: DOMHighResTimeStamp;
-  startTime: DOMHighResTimeStamp;
+  processingStart: DOMHighResTimeStamp
+  startTime: DOMHighResTimeStamp
 }
 
 interface LayoutShiftEntry extends PerformanceEntry {
-  value: number;
-  hadRecentInput: boolean;
+  value: number
+  hadRecentInput: boolean
 }
 
 // Global window extension
@@ -38,13 +38,13 @@ declare global {
       command: string,
       eventNameOrDate: string | Date,
       parameters?: {
-        event_category?: string;
-        event_label?: string;
-        value?: number;
-        custom_parameter_1?: string;
-        [key: string]: any;
+        event_category?: string
+        event_label?: string
+        value?: number
+        custom_parameter_1?: string
+        [key: string]: any
       }
-    ) => void;
+    ) => void
   }
 }
 
@@ -54,4 +54,4 @@ export type {
   PerformanceEntryWithTransferSize,
   FirstInputEntry,
   LayoutShiftEntry
-};
+}
