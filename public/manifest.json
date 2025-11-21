@@ -11,7 +11,7 @@
   "background_color": "#FFFFFF",
   "lang": "vi",
   "dir": "ltr",
-  
+
   "icons": [
     {
       "src": "/images/logo-72.png",
@@ -62,7 +62,7 @@
       "purpose": "any maskable"
     }
   ],
-  
+
   "shortcuts": [
     {
       "name": "Dịch vụ",
@@ -117,14 +117,9 @@
       ]
     }
   ],
-  
-  "categories": [
-    "games",
-    "entertainment",
-    "productivity",
-    "business"
-  ],
-  
+
+  "categories": ["games", "entertainment", "productivity", "business"],
+
   "screenshots": [
     {
       "src": "/images/screenshot-1.png",
@@ -143,27 +138,27 @@
     {
       "src": "/images/screenshot-mobile-2.png",
       "sizes": "360x640",
-      "type": "image/png", 
+      "type": "image/png",
       "platform": "narrow",
       "label": "Mobile Booking Flow"
     }
   ],
-  
+
   "prefer_related_applications": false,
-  
+
   "iarc_rating_id": "e58c174a-81d2-5c3c-32cc-34b8de4a52e9",
-  
+
   "edge_side_panel": {
     "preferred_width": 400
   },
-  
+
   "protocol_handlers": [
     {
       "protocol": "web+rokservices",
       "url": "/services?action=%s"
     }
   ],
-  
+
   "file_handlers": [
     {
       "action": "/import",
@@ -173,22 +168,17 @@
       }
     }
   ],
-  
+
   "launch_handler": {
     "client_mode": "focus-existing"
   },
-  
+
   "handle_links": "preferred",
-  
+
   "capture_links": "existing-client-navigate",
-  
-  "display_override": [
-    "window-controls-overlay",
-    "minimal-ui",
-    "standalone",
-    "browser"
-  ],
-  
+
+  "display_override": ["window-controls-overlay", "minimal-ui", "standalone", "browser"],
+
   "related_applications": [
     {
       "platform": "play",

@@ -1,11 +1,10 @@
 # 🚀 COMPLETE DEPLOYMENT GUIDE
+
 ## Rise of Kingdoms Services - rokdbot.com
 
 ### 🎯 DEPLOYMENT SEQUENCE
 
-**Total Time:** ~2 hours
-**Difficulty:** Intermediate
-**Cost:** Free to start, ~$30/month at scale
+**Total Time:** ~2 hours **Difficulty:** Intermediate **Cost:** Free to start, ~$30/month at scale
 
 ---
 
@@ -50,6 +49,7 @@ npx tsx prisma/seed.ts
 ```
 
 **Verification:**
+
 ```bash
 # Test database connection
 npx prisma db pull
@@ -89,6 +89,7 @@ vercel env add NEXTAUTH_URL production
 ```
 
 **Required Environment Variables:**
+
 ```bash
 DATABASE_URL="postgresql://..." # From Supabase
 NEXTAUTH_URL="https://rokdbot.com"
@@ -119,13 +120,14 @@ chmod +x scripts/deploy-production.sh
 ```
 
 **DNS Configuration (Cloudflare):**
+
 ```
 Type: CNAME
 Name: @ (or rokdbot.com)
 Value: cname.vercel-dns.com
 TTL: Auto
 
-Type: CNAME  
+Type: CNAME
 Name: www
 Value: cname.vercel-dns.com
 TTL: Auto
@@ -161,6 +163,7 @@ TTL: Auto
 ### Step 2: Enable SSL/Security Features
 
 **Cloudflare Settings:**
+
 ```bash
 # SSL/TLS → Overview
 SSL/TLS Encryption Mode: Full (strict)
@@ -207,9 +210,10 @@ Brotli: On
 ```
 
 **Environment Variables:**
+
 ```bash
 vercel env add MOMO_PARTNER_CODE production
-vercel env add MOMO_ACCESS_KEY production  
+vercel env add MOMO_ACCESS_KEY production
 vercel env add MOMO_SECRET_KEY production
 vercel env add ZALOPAY_APP_ID production
 vercel env add ZALOPAY_KEY1 production
@@ -303,6 +307,7 @@ curl -I https://rokdbot.com
 ## 🎉 LAUNCH CHECKLIST
 
 ### Pre-Launch (Must Complete)
+
 - [ ] Database deployed và accessible
 - [ ] All environment variables configured
 - [ ] HTTPS working với valid SSL certificate
@@ -314,6 +319,7 @@ curl -I https://rokdbot.com
 - [ ] Mobile responsiveness verified
 
 ### Launch Day
+
 - [ ] Switch payment gateways to production mode
 - [ ] Announce on Discord/social media
 - [ ] Monitor error rates và performance
@@ -321,6 +327,7 @@ curl -I https://rokdbot.com
 - [ ] Collect feedback và iterate
 
 ### Post-Launch (First 48 hours)
+
 - [ ] Monitor conversion rates
 - [ ] Track revenue generation
 - [ ] Review error logs
@@ -332,16 +339,19 @@ curl -I https://rokdbot.com
 ## 📞 EMERGENCY CONTACTS & SUPPORT
 
 ### Platform Support
+
 - **Vercel:** https://vercel.com/support
 - **Supabase:** https://supabase.com/support
 - **Cloudflare:** https://support.cloudflare.com
 
 ### Payment Support
+
 - **MoMo:** business.momo.vn/contact
 - **ZaloPay:** zalopay.vn/support
 - **VNPay:** vnpay.vn/support
 
 ### Monitoring
+
 - **Sentry:** https://sentry.io/support
 - **Google Analytics:** https://support.google.com/analytics
 
@@ -350,18 +360,21 @@ curl -I https://rokdbot.com
 ## 💰 ESTIMATED COSTS
 
 ### Free Tier (MVP Launch)
+
 - Vercel: Free (hobby plan)
 - Supabase: Free (500MB database)
 - Cloudflare: Free (basic CDN + SSL)
 - **Total: $0/month**
 
 ### Production Scale (50+ customers)
+
 - Vercel Pro: $20/month
-- Supabase Pro: $25/month  
+- Supabase Pro: $25/month
 - Monitoring tools: $10/month
 - **Total: ~$55/month**
 
-### Business Scale (200+ customers)  
+### Business Scale (200+ customers)
+
 - Vercel Team: $50/month
 - Supabase Scale: $100/month
 - Premium monitoring: $30/month
@@ -372,13 +385,15 @@ curl -I https://rokdbot.com
 ## 🚀 SUCCESS METRICS
 
 ### Week 1 Targets
+
 - [ ] Website uptime: 99.9%
 - [ ] Page load time: <3 seconds
 - [ ] First 5 leads generated
 - [ ] Payment system tested
 - [ ] Zero critical bugs
 
-### Month 1 Targets  
+### Month 1 Targets
+
 - [ ] 50+ qualified leads
 - [ ] 10+ paying customers
 - [ ] 5M+ VNĐ revenue processed
@@ -386,6 +401,7 @@ curl -I https://rokdbot.com
 - [ ] Mobile traffic >85%
 
 ### Quarter 1 Targets
+
 - [ ] 200+ qualified leads
 - [ ] 50+ paying customers
 - [ ] 20M+ VNĐ revenue processed
@@ -396,6 +412,7 @@ curl -I https://rokdbot.com
 
 **🎯 READY TO DEPLOY!**
 
-Follow this guide step-by-step và bạn sẽ có một production-ready RoK Services platform trong 2 hours. System đã được optimized cho Vietnamese market và ready to generate revenue ngay lập tức.
+Follow this guide step-by-step và bạn sẽ có một production-ready RoK Services platform trong 2
+hours. System đã được optimized cho Vietnamese market và ready to generate revenue ngay lập tức.
 
 **Next Action:** Start với Phase 1 - Database Setup!

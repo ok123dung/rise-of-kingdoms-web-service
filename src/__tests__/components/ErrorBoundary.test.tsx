@@ -78,10 +78,7 @@ describe('ErrorBoundary', () => {
     )
 
     expect(onError).toHaveBeenCalled()
-    expect(onError).toHaveBeenCalledWith(
-      expect.any(Error),
-      expect.any(Object)
-    )
+    expect(onError).toHaveBeenCalledWith(expect.any(Error), expect.any(Object))
   })
 
   it('shows retry button and can retry', () => {
@@ -196,7 +193,9 @@ describe('RSCErrorBoundary', () => {
     )
 
     expect(screen.getByText('Hydration Error')).toBeInTheDocument()
-    expect(screen.getByText(/Trang đang được tải lại để khắc phục sự cố hydration/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Trang đang được tải lại để khắc phục sự cố hydration/)
+    ).toBeInTheDocument()
   })
 
   it('shows reload button for hydration errors', () => {
@@ -262,31 +261,31 @@ describe('withErrorBoundary HOC', () => {
   it('wraps component with error boundary', () => {
     const TestComponent = () => <div>Test Component</div>
     const { withErrorBoundary } = require('@/components/ErrorBoundary')
-    
+
     const WrappedComponent = withErrorBoundary(TestComponent)
-    
+
     render(<WrappedComponent />)
-    
+
     expect(screen.getByText('Test Component')).toBeInTheDocument()
   })
 
   it('shows error UI when wrapped component throws', () => {
     const { withErrorBoundary } = require('@/components/ErrorBoundary')
     const WrappedComponent = withErrorBoundary(ThrowError)
-    
+
     render(<WrappedComponent shouldThrow={true} />)
-    
+
     expect(screen.getByText('Oops! Có lỗi xảy ra')).toBeInTheDocument()
   })
 
   it('passes props to wrapped component', () => {
     const TestComponent = ({ text }: { text: string }) => <div>{text}</div>
     const { withErrorBoundary } = require('@/components/ErrorBoundary')
-    
+
     const WrappedComponent = withErrorBoundary(TestComponent)
-    
+
     render(<WrappedComponent text="Passed prop" />)
-    
+
     expect(screen.getByText('Passed prop')).toBeInTheDocument()
   })
 
@@ -294,11 +293,11 @@ describe('withErrorBoundary HOC', () => {
     const onError = jest.fn()
     const fallback = <div>HOC Custom Fallback</div>
     const { withErrorBoundary } = require('@/components/ErrorBoundary')
-    
+
     const WrappedComponent = withErrorBoundary(ThrowError, { onError, fallback })
-    
+
     render(<WrappedComponent shouldThrow={true} />)
-    
+
     expect(screen.getByText('HOC Custom Fallback')).toBeInTheDocument()
     expect(onError).toHaveBeenCalled()
   })

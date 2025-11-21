@@ -2,7 +2,8 @@
 
 ## Database Connection Error Fix
 
-The build is failing with: `Authentication failed against database server, the provided database credentials for 'postgres' are not valid`
+The build is failing with:
+`Authentication failed against database server, the provided database credentials for 'postgres' are not valid`
 
 ## Step-by-Step Solution
 
@@ -11,17 +12,20 @@ The build is failing with: `Authentication failed against database server, the p
 You have several options:
 
 #### Option A: Railway PostgreSQL (Recommended)
+
 1. Go to [Railway](https://railway.app)
 2. Create a new project
 3. Add PostgreSQL plugin
 4. Get the connection string from the Connect tab
 
 #### Option B: Neon PostgreSQL
+
 1. Go to [Neon](https://neon.tech)
 2. Create a new database
 3. Copy the connection string
 
 #### Option C: Supabase PostgreSQL
+
 1. Go to [Supabase](https://supabase.com)
 2. Create a new project
 3. Go to Settings → Database
@@ -39,6 +43,7 @@ Value: postgresql://username:password@host:port/database?sslmode=require
 ```
 
 **Important**: Make sure to:
+
 - Replace the connection string with your actual database URL
 - Include `?sslmode=require` at the end for secure connections
 - Select all environments (Production, Preview, Development)
@@ -48,6 +53,7 @@ Value: postgresql://username:password@host:port/database?sslmode=require
 After setting up the database URL:
 
 1. In your local development:
+
 ```bash
 # Generate Prisma client
 npx prisma generate
@@ -60,6 +66,7 @@ npx prisma migrate deploy
 ```
 
 2. For production, add a build command in `package.json`:
+
 ```json
 {
   "scripts": {
@@ -71,6 +78,7 @@ npx prisma migrate deploy
 ### 4. Verify Database Connection
 
 Test your database connection locally:
+
 ```bash
 # Set DATABASE_URL in .env.local
 DATABASE_URL=your_connection_string
@@ -89,6 +97,7 @@ NEXTAUTH_SECRET=generate-random-secret-here
 ```
 
 Generate NEXTAUTH_SECRET:
+
 ```bash
 openssl rand -base64 32
 ```
@@ -96,6 +105,7 @@ openssl rand -base64 32
 ### 6. Redeploy
 
 After adding all environment variables:
+
 1. Go to Deployments in Vercel
 2. Click on the three dots on the latest deployment
 3. Select "Redeploy"
@@ -107,7 +117,6 @@ After adding all environment variables:
 1. **Check connection string format**:
    - PostgreSQL: `postgresql://user:pass@host:port/db`
    - Must include protocol `postgresql://`
-   
 2. **Check database accessibility**:
    - Ensure database allows connections from Vercel IPs
    - Most cloud databases have this enabled by default

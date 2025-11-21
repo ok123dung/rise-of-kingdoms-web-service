@@ -1,6 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('@prisma/client')
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 async function seedServices() {
   try {
@@ -209,11 +209,11 @@ async function seedServices() {
           }
         ]
       }
-    ];
+    ]
 
     for (const serviceData of services) {
-      const { tiers, ...service } = serviceData;
-      
+      const { tiers, ...service } = serviceData
+
       const createdService = await prisma.service.create({
         data: {
           ...service,
@@ -224,18 +224,19 @@ async function seedServices() {
         include: {
           serviceTiers: true
         }
-      });
-      
-      console.log(`✅ Created service: ${createdService.name} with ${createdService.serviceTiers.length} tiers`);
+      })
+
+      console.log(
+        `✅ Created service: ${createdService.name} with ${createdService.serviceTiers.length} tiers`
+      )
     }
 
-    console.log('\n🎉 All services seeded successfully!');
-    
+    console.log('\n🎉 All services seeded successfully!')
   } catch (error) {
-    console.error('❌ Error seeding services:', error);
+    console.error('❌ Error seeding services:', error)
   } finally {
-    await prisma.$disconnect();
+    await prisma.$disconnect()
   }
 }
 
-seedServices();
+seedServices()

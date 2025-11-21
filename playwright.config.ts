@@ -45,53 +45,53 @@ export default defineConfig({
     actionTimeout: 10000,
 
     /* Global timeout for navigation */
-    navigationTimeout: 30000,
+    navigationTimeout: 30000
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 }
-      },
+      }
     },
 
     {
       name: 'firefox',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
         viewport: { width: 1280, height: 720 }
-      },
+      }
     },
 
     {
       name: 'webkit',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
         viewport: { width: 1280, height: 720 }
-      },
+      }
     },
 
     /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
-      use: { 
+      use: {
         ...devices['Pixel 5'],
         // Vietnamese mobile users typically use these settings
         locale: 'vi-VN',
         timezoneId: 'Asia/Ho_Chi_Minh'
-      },
+      }
     },
     {
       name: 'Mobile Safari',
-      use: { 
+      use: {
         ...devices['iPhone 12'],
         locale: 'vi-VN',
         timezoneId: 'Asia/Ho_Chi_Minh'
-      },
-    },
+      }
+    }
 
     /* Test against branded browsers. */
     // {
@@ -109,7 +109,7 @@ export default defineConfig({
     command: 'npm run build && npm start',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000, // 2 minutes
+    timeout: 120 * 1000 // 2 minutes
   },
 
   /* Global setup and teardown */
@@ -119,9 +119,9 @@ export default defineConfig({
   /* Timeouts */
   timeout: 30 * 1000, // 30 seconds per test
   expect: {
-    timeout: 10 * 1000, // 10 seconds for assertions
+    timeout: 10 * 1000 // 10 seconds for assertions
   },
 
   /* Output directories */
-  outputDir: 'test-results/',
+  outputDir: 'test-results/'
 })

@@ -3,6 +3,7 @@
 ## Overview
 
 The application now includes a comprehensive file upload system using Cloudflare R2 for storage:
+
 - Direct uploads and presigned URLs
 - Image processing with Sharp
 - Avatar management
@@ -29,6 +30,7 @@ R2_PUBLIC_URL=https://your-bucket.r2.dev  # Optional public URL
 ### 2. Database Migration
 
 Run migration to create FileUpload table:
+
 ```bash
 npx prisma migrate dev
 ```
@@ -47,6 +49,7 @@ Located in `/src/lib/storage/upload-service.ts`:
 ### API Endpoints
 
 #### Upload File
+
 ```
 POST /api/upload
 Content-Type: multipart/form-data
@@ -57,6 +60,7 @@ isPublic: boolean (optional)
 ```
 
 #### Upload Image with Processing
+
 ```
 POST /api/upload/image
 Content-Type: multipart/form-data
@@ -70,6 +74,7 @@ generateThumbnail: boolean (optional)
 ```
 
 #### Upload Avatar
+
 ```
 POST /api/upload/avatar
 Content-Type: multipart/form-data
@@ -78,16 +83,19 @@ file: File
 ```
 
 #### Get Presigned Upload URL
+
 ```
 GET /api/upload?filename=test.jpg&folder=images&mimeType=image/jpeg
 ```
 
 #### List Files
+
 ```
 GET /api/files?folder=images&limit=20&offset=0
 ```
 
 #### Delete File
+
 ```
 DELETE /api/files/[key]
 ```
@@ -95,12 +103,13 @@ DELETE /api/files/[key]
 ## React Components
 
 ### FileUpload Component
+
 ```tsx
 import { FileUpload } from '@/components/FileUpload'
 
-<FileUpload
-  onUpload={(file) => console.log('Uploaded:', file)}
-  onError={(error) => console.error(error)}
+;<FileUpload
+  onUpload={file => console.log('Uploaded:', file)}
+  onError={error => console.error(error)}
   accept="image/*"
   maxSize={10 * 1024 * 1024} // 10MB
   folder="images"
@@ -109,30 +118,29 @@ import { FileUpload } from '@/components/FileUpload'
 ```
 
 ### AvatarUpload Component
+
 ```tsx
 import { AvatarUpload } from '@/components/AvatarUpload'
 
-<AvatarUpload
+;<AvatarUpload
   currentAvatarUrl={user.image}
   size="lg"
-  onUploadComplete={(url) => console.log('New avatar:', url)}
+  onUploadComplete={url => console.log('New avatar:', url)}
 />
 ```
 
 ### FileList Component
+
 ```tsx
 import { FileList } from '@/components/FileUpload'
 
-<FileList
-  files={files}
-  onDelete={(key) => handleDelete(key)}
-  loading={loading}
-/>
+;<FileList files={files} onDelete={key => handleDelete(key)} loading={loading} />
 ```
 
 ## Usage Examples
 
 ### Direct Upload from Client
+
 ```typescript
 const formData = new FormData()
 formData.append('file', file)
@@ -148,6 +156,7 @@ const { file } = await response.json()
 ```
 
 ### Using Presigned URL
+
 ```typescript
 // Get presigned URL
 const response = await fetch('/api/upload?filename=test.pdf&folder=documents')
@@ -164,6 +173,7 @@ await fetch(uploadUrl, {
 ```
 
 ### Image Processing
+
 ```typescript
 const formData = new FormData()
 formData.append('file', imageFile)
@@ -181,6 +191,7 @@ const response = await fetch('/api/upload/image', {
 ## File Organization
 
 Files are organized by folders:
+
 - `avatars/` - User profile pictures
 - `images/` - General images
 - `documents/` - PDFs, docs, etc.
@@ -220,17 +231,20 @@ Files are organized by folders:
 ## Troubleshooting
 
 ### Upload Fails
+
 1. Check R2 credentials in .env
 2. Verify file size is within limits
 3. Check file type is allowed
 4. Look for errors in server logs
 
 ### Images Not Displaying
+
 1. Check if file is public or needs signed URL
 2. Verify R2 public URL configuration
 3. Check CORS settings in R2 bucket
 
 ### Processing Errors
+
 1. Ensure Sharp dependencies are installed
 2. Check image format is supported
 3. Verify processing options are valid

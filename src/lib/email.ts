@@ -343,7 +343,11 @@ Trân trọng,
 }
 
 // Account created email with password
-export async function sendAccountCreatedEmail(email: string, fullName: string, password: string): Promise<boolean> {
+export async function sendAccountCreatedEmail(
+  email: string,
+  fullName: string,
+  password: string
+): Promise<boolean> {
   const loginUrl = `${process.env.NEXTAUTH_URL || 'https://rokdbot.com'}/auth/signin`
 
   const htmlContent = `

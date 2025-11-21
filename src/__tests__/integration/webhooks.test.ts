@@ -16,7 +16,11 @@ import { prisma } from '@/lib/db'
 import { GET as vnpayWebhookHandler } from '@/app/api/webhooks/vnpay/route'
 import { POST as momoWebhookHandler } from '@/app/api/webhooks/momo/route'
 import { POST as zalopayWebhookHandler } from '@/app/api/webhooks/zalopay/route'
-import type { VNPayWebhookParams, MoMoWebhookPayload, ZaloPayWebhookData } from '@/types/webhook-payloads'
+import type {
+  VNPayWebhookParams,
+  MoMoWebhookPayload,
+  ZaloPayWebhookData
+} from '@/types/webhook-payloads'
 
 // Mock environment variables
 process.env.VNPAY_HASH_SECRET = 'test_vnpay_secret'
@@ -276,7 +280,7 @@ describe('Webhook Integration Tests', () => {
 
       // Attempt to process webhook with transaction
       try {
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async tx => {
           // Update payment
           await tx.payment.update({
             where: { id: payment.id },

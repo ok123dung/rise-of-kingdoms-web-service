@@ -46,7 +46,9 @@ test.describe('Booking Flow Tests', () => {
     await page.click('button[type="submit"]')
 
     // Should show validation errors
-    await expect(page.locator('.error-message, .text-red-500').count()).resolves.toBeGreaterThanOrEqual(2)
+    await expect(
+      page.locator('.error-message, .text-red-500').count()
+    ).resolves.toBeGreaterThanOrEqual(2)
 
     // Check specific field errors
     await expect(page.locator('text=/Game ID is required|Game ID là bắt buộc/i')).toBeVisible()
@@ -96,7 +98,9 @@ test.describe('Booking Flow Tests', () => {
     await expect(page.locator('[data-testid="tier-premium"]')).toBeVisible()
 
     // Each tier should show features
-    await expect(page.locator('[data-testid="tier-features"]').count()).resolves.toBeGreaterThanOrEqual(2)
+    await expect(
+      page.locator('[data-testid="tier-features"]').count()
+    ).resolves.toBeGreaterThanOrEqual(2)
   })
 
   test('should allow editing booking before payment', async ({ page }) => {

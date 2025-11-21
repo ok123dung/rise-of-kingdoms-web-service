@@ -81,7 +81,7 @@ describe('Payment Flow Integration Tests', () => {
   describe('MoMo Payment Flow', () => {
     it('should create MoMo payment successfully', async () => {
       const momoPayment = new MoMoPayment()
-      
+
       const result = await momoPayment.createPayment({
         bookingId: testBooking.id,
         amount: 100000,
@@ -90,7 +90,7 @@ describe('Payment Flow Integration Tests', () => {
 
       expect(result.success).toBe(true)
       expect(result.data).toBeDefined()
-      
+
       // Verify payment record was created
       const payment = await prisma.payment.findFirst({
         where: { bookingId: testBooking.id }
@@ -147,7 +147,7 @@ describe('Payment Flow Integration Tests', () => {
   describe('ZaloPay Payment Flow', () => {
     it('should create ZaloPay order successfully', async () => {
       const zaloPayment = new ZaloPayPayment()
-      
+
       const result = await zaloPayment.createOrder({
         bookingId: testBooking.id,
         amount: 100000,
@@ -156,7 +156,7 @@ describe('Payment Flow Integration Tests', () => {
 
       expect(result.success).toBe(true)
       expect(result.data).toBeDefined()
-      
+
       // Verify payment record was created
       const payment = await prisma.payment.findFirst({
         where: { bookingId: testBooking.id }
@@ -170,7 +170,7 @@ describe('Payment Flow Integration Tests', () => {
   describe('VNPay Payment Flow', () => {
     it('should create VNPay payment URL successfully', async () => {
       const vnpayPayment = new VNPayPayment()
-      
+
       const result = await vnpayPayment.createPaymentUrl({
         bookingId: testBooking.id,
         amount: 100000,
@@ -180,7 +180,7 @@ describe('Payment Flow Integration Tests', () => {
       expect(result.success).toBe(true)
       expect(result.data?.paymentUrl).toBeDefined()
       expect(result.data?.orderId).toBeDefined()
-      
+
       // Verify payment record was created
       const payment = await prisma.payment.findFirst({
         where: { bookingId: testBooking.id }
@@ -192,7 +192,7 @@ describe('Payment Flow Integration Tests', () => {
 
     it('should verify return URL correctly', async () => {
       const vnpayPayment = new VNPayPayment()
-      
+
       // Mock return URL query parameters
       const query = {
         vnp_Amount: '10000000', // 100,000 VND in cents
@@ -220,7 +220,7 @@ describe('Payment Flow Integration Tests', () => {
   describe('Banking Transfer Flow', () => {
     it('should create banking transfer order successfully', async () => {
       const bankingTransfer = new BankingTransfer()
-      
+
       const result = await bankingTransfer.createTransferOrder({
         bookingId: testBooking.id,
         amount: 100000,
@@ -232,7 +232,7 @@ describe('Payment Flow Integration Tests', () => {
       expect(result.data?.transferCode).toBeDefined()
       expect(result.data?.bankAccounts).toBeDefined()
       expect(result.data?.amount).toBe(100000)
-      
+
       // Verify payment record was created
       const payment = await prisma.payment.findFirst({
         where: { bookingId: testBooking.id }
@@ -244,7 +244,7 @@ describe('Payment Flow Integration Tests', () => {
 
     it('should confirm transfer successfully', async () => {
       const bankingTransfer = new BankingTransfer()
-      
+
       // First create a transfer order
       const createResult = await bankingTransfer.createTransferOrder({
         bookingId: testBooking.id,
@@ -282,7 +282,7 @@ describe('Payment Flow Integration Tests', () => {
   describe('Payment Error Handling', () => {
     it('should handle invalid booking ID', async () => {
       const momoPayment = new MoMoPayment()
-      
+
       const result = await momoPayment.createPayment({
         bookingId: 'invalid-id',
         amount: 100000,
@@ -295,7 +295,7 @@ describe('Payment Flow Integration Tests', () => {
 
     it('should handle duplicate payments', async () => {
       const momoPayment = new MoMoPayment()
-      
+
       // Create first payment
       const result1 = await momoPayment.createPayment({
         bookingId: testBooking.id,
@@ -310,7 +310,7 @@ describe('Payment Flow Integration Tests', () => {
         amount: 100000,
         orderInfo: 'Test payment'
       })
-      
+
       // Should still succeed but with different order ID
       expect(result2.success).toBe(true)
     })
@@ -347,8 +347,8 @@ describe('Payment Flow Integration Tests', () => {
       // Test completed -> refunded
       await prisma.payment.update({
         where: { id: payment.id },
-        data: { 
-          status: 'refunded', 
+        data: {
+          status: 'refunded',
           refundAmount: 100000,
           refundReason: 'Customer request',
           refundedAt: new Date()
@@ -369,7 +369,7 @@ describe('Payment Flow Integration Tests', () => {
 describe('Payment Performance Tests', () => {
   it('should handle concurrent payment creation', async () => {
     const startTime = Date.now()
-    
+
     // Create multiple test bookings
     const bookings = await Promise.all(
       Array.from({ length: 10 }, async (_, i) => {
@@ -448,7 +448,9 @@ describe('Payment Performance Tests', () => {
       bookings.map(async booking => {
         await prisma.payment.deleteMany({ where: { bookingId: booking.id } })
         await prisma.booking.delete({ where: { id: booking.id } })
-        const serviceTier = await prisma.serviceTier.findFirst({ where: { id: booking.serviceTierId } })
+        const serviceTier = await prisma.serviceTier.findFirst({
+          where: { id: booking.serviceTierId }
+        })
         if (serviceTier) {
           await prisma.serviceTier.delete({ where: { id: serviceTier.id } })
           await prisma.service.delete({ where: { id: serviceTier.serviceId } })

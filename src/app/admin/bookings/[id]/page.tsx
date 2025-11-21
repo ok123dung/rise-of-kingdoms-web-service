@@ -5,8 +5,6 @@ import { notFound } from 'next/navigation'
 import BookingActions from '@/components/admin/BookingActions'
 import { prisma } from '@/lib/db'
 
-import { Prisma } from '@prisma/client'
-
 async function getBooking(id: string): Promise<any> {
   const booking = await prisma.booking.findUnique({
     where: { id },
@@ -76,12 +74,13 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
                 <p className="text-sm text-gray-500">Trạng thái</p>
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                  ${booking.status === 'completed'
+                  ${
+                    booking.status === 'completed'
                       ? 'bg-green-100 text-green-800'
                       : booking.status === 'cancelled'
                         ? 'bg-red-100 text-red-800'
                         : 'bg-yellow-100 text-yellow-800'
-                    }`}
+                  }`}
                 >
                   {booking.status.toUpperCase()}
                 </span>
@@ -153,12 +152,13 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
                 <span className="text-sm text-gray-500">Trạng thái</span>
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                  ${booking.paymentStatus === 'completed'
+                  ${
+                    booking.paymentStatus === 'completed'
                       ? 'bg-green-100 text-green-800'
                       : booking.paymentStatus === 'failed'
                         ? 'bg-red-100 text-red-800'
                         : 'bg-yellow-100 text-yellow-800'
-                    }`}
+                  }`}
                 >
                   {booking.paymentStatus.toUpperCase()}
                 </span>

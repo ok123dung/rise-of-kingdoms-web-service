@@ -1,19 +1,15 @@
 {
-    "extends": "./tsconfig.json",
-    "include": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js",
-        "**/*.jsx",
-        "next-env.d.ts",
-        ".next/types/**/*.ts",
-        "src/types/**/*.d.ts",
-        "tests/**/*.ts",
-        "src/__tests__/**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        ".next",
-        "out"
-    ]
+  "extends": "./tsconfig.json",
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "src/types/**/*.d.ts",
+    "tests/**/*.ts",
+    "src/__tests__/**/*.ts"
+  ],
+  "exclude": ["node_modules", ".next", "out"]
 }

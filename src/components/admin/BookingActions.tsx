@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+
+import { type Booking } from '@prisma/client'
 import { Check, X, Play, Loader2 } from 'lucide-react'
-import { Booking } from '@prisma/client'
+import { useRouter } from 'next/navigation'
 
 interface BookingActionsProps {
   booking: Pick<Booking, 'id' | 'status'>
@@ -46,15 +47,15 @@ export default function BookingActions({ booking }: BookingActionsProps) {
       {booking.status === 'pending' && (
         <>
           <button
-            onClick={() => void updateStatus('confirmed')}
             className="flex items-center space-x-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            onClick={() => void updateStatus('confirmed')}
           >
             <Check className="h-4 w-4" />
             <span>Xác nhận</span>
           </button>
           <button
-            onClick={() => void updateStatus('cancelled')}
             className="flex items-center space-x-1 rounded-lg bg-red-100 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-200"
+            onClick={() => void updateStatus('cancelled')}
           >
             <X className="h-4 w-4" />
             <span>Hủy</span>
@@ -64,8 +65,8 @@ export default function BookingActions({ booking }: BookingActionsProps) {
 
       {booking.status === 'confirmed' && (
         <button
-          onClick={() => void updateStatus('in_progress')}
           className="flex items-center space-x-1 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+          onClick={() => void updateStatus('in_progress')}
         >
           <Play className="h-4 w-4" />
           <span>Bắt đầu thực hiện</span>
@@ -74,8 +75,8 @@ export default function BookingActions({ booking }: BookingActionsProps) {
 
       {booking.status === 'in_progress' && (
         <button
-          onClick={() => void updateStatus('completed')}
           className="flex items-center space-x-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          onClick={() => void updateStatus('completed')}
         >
           <Check className="h-4 w-4" />
           <span>Hoàn thành</span>

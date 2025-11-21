@@ -5,6 +5,7 @@ Website cung cấp dịch vụ chuyên nghiệp cho game Rise of Kingdoms tại 
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - PostgreSQL database (Supabase, Neon, or local)
 - npm or yarn
@@ -12,11 +13,13 @@ Website cung cấp dịch vụ chuyên nghiệp cho game Rise of Kingdoms tại 
 ### Development Setup
 
 1. **Install Dependencies**
+
 ```bash
 npm install
 ```
 
 2. **Configure Environment Variables**
+
 ```bash
 # Copy the example environment file
 cp .env.example .env.local
@@ -28,6 +31,7 @@ cp .env.example .env.local
 ```
 
 3. **Setup Database**
+
 ```bash
 # Generate Prisma client
 npx prisma generate
@@ -40,12 +44,14 @@ npx tsx prisma/seed.ts
 ```
 
 4. **Start Development Server**
+
 ```bash
 npm run dev
 # Open http://localhost:3000
 ```
 
 ### Production Build
+
 ```bash
 npm run build
 npm start
@@ -54,11 +60,13 @@ npm start
 ## 📦 Deployment
 
 ### Vercel Deployment
+
 1. Install Vercel CLI: `npm install -g vercel`
 2. Login: `vercel login`
 3. Deploy: `vercel --prod`
 
 ### Environment Variables
+
 Copy `.env.example` to `.env.local` and configure:
 
 ```bash
@@ -100,6 +108,7 @@ Vietnamese Rise of Kingdoms players seeking professional gaming services.
 ## 🔧 Development
 
 ### Available Scripts
+
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run start` - Start production server
@@ -113,6 +122,7 @@ Vietnamese Rise of Kingdoms players seeking professional gaming services.
 - `npm run db:migrate` - Run database migrations
 
 ### Project Structure
+
 ```
 src/
 ├── app/                 # Next.js 14 app directory
@@ -139,12 +149,14 @@ prisma/
 ### Security Features
 
 ✅ **Strong Password Policy**
+
 - Minimum 12 characters
 - Requires uppercase, lowercase, numbers, and special characters
 - Checks against common passwords
 - Prevents sequential/repeating characters
 
 ✅ **Security Headers**
+
 - Content Security Policy (CSP)
 - X-Frame-Options: DENY
 - X-Content-Type-Options: nosniff
@@ -152,11 +164,13 @@ prisma/
 - CSRF Protection
 
 ✅ **Input Validation**
+
 - Zod schema validation on all API endpoints
 - SQL injection prevention via Prisma ORM
 - XSS protection with sanitization
 
 ✅ **Rate Limiting**
+
 - Auth endpoints: 5 req/min
 - Payment endpoints: 20 req/min
 - General API: 60 req/min
@@ -183,6 +197,7 @@ ENCRYPTION_KEY=        # Generate with: openssl rand -base64 32
 ## 🌐 Domain Configuration
 
 Domain: `rokdbot.com`
+
 - **Frontend**: Vercel
 - **CDN**: Cloudflare
 - **SSL**: Automatic via Cloudflare

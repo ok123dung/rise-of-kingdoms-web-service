@@ -1,7 +1,6 @@
 # 🚀 Next Steps - ROK Services Development
 
-**Current Phase**: Database Setup Required
-**Overall Progress**: 75% Ready
+**Current Phase**: Database Setup Required **Overall Progress**: 75% Ready
 
 ---
 
@@ -12,6 +11,7 @@
 **You are here** → Follow [DATABASE-SETUP-INSTRUCTIONS.md](DATABASE-SETUP-INSTRUCTIONS.md)
 
 **Quick Summary:**
+
 ```bash
 # Option A: Supabase (Recommended)
 1. Visit https://supabase.com
@@ -33,6 +33,7 @@ npx prisma studio  # Should show 15 tables
 ### 2. Verify Core Functionality (30 minutes)
 
 **Actions:**
+
 ```bash
 # Start dev server
 npm run dev
@@ -53,6 +54,7 @@ http://localhost:3000/auth/signup            # Signup page
 ### 3. Create Admin Account (10 minutes)
 
 **Option A: Via UI**
+
 ```bash
 1. Go to http://localhost:3000/auth/signup
 2. Fill in form và signup
@@ -62,6 +64,7 @@ http://localhost:3000/auth/signup            # Signup page
 ```
 
 **Option B: Via Prisma Studio**
+
 ```bash
 1. npx prisma studio
 2. Go to users table
@@ -79,6 +82,7 @@ http://localhost:3000/auth/signup            # Signup page
 ### 4. Test Core Features (1 hour)
 
 **Checklist:**
+
 - [ ] Login với admin account
 - [ ] Access /admin/dashboard
 - [ ] View services list
@@ -98,6 +102,7 @@ http://localhost:3000/auth/signup            # Signup page
 **Only if you need real payments:**
 
 **MoMo:**
+
 ```bash
 1. Register at: https://business.momo.vn
 2. Get test credentials
@@ -110,6 +115,7 @@ http://localhost:3000/auth/signup            # Signup page
 **ZaloPay & VNPay**: Similar process
 
 **Test:**
+
 ```bash
 # Enable payments
 Update .env.local:
@@ -127,6 +133,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ### 6. Email Service (30 minutes)
 
 **Setup Resend:**
+
 ```bash
 1. Register: https://resend.com
 2. Verify domain (optional)
@@ -136,6 +143,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ```
 
 **Test:**
+
 ```bash
 # Trigger email (signup, booking confirmation, etc.)
 # Check Resend dashboard for delivery
@@ -146,6 +154,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ### 7. Discord Integration (1 hour)
 
 **Setup:**
+
 ```bash
 1. Create Discord Application
 2. Create bot, get token
@@ -156,6 +165,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ```
 
 **Test:**
+
 ```bash
 # Create booking → Should post to Discord
 # Check #bookings channel
@@ -166,6 +176,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ### 8. File Upload (R2) (1 hour)
 
 **Setup Cloudflare R2:**
+
 ```bash
 1. Cloudflare dashboard
 2. Create R2 bucket: rokservices-files
@@ -174,6 +185,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ```
 
 **Test:**
+
 ```bash
 # Upload avatar
 # Upload booking files
@@ -189,6 +201,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ### 9. Monitoring Setup (1 hour)
 
 **Sentry (Error Tracking):**
+
 ```bash
 1. Register: https://sentry.io
 2. Create project
@@ -197,6 +210,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ```
 
 **Google Analytics:**
+
 ```bash
 1. Create GA4 property
 2. Add measurement ID to .env.local
@@ -208,6 +222,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ### 10. Security Hardening (2 hours)
 
 **Actions:**
+
 - [ ] Enable 2FA enforcement for admins
 - [ ] Review and fix ESLint errors (security-critical ones)
 - [ ] Test rate limiting
@@ -220,6 +235,7 @@ NEXT_PUBLIC_ENABLE_PAYMENT_INTEGRATION=true
 ### 11. Performance Testing (1 hour)
 
 **Test:**
+
 ```bash
 # Load testing
 npm run test:e2e
@@ -239,6 +255,7 @@ npm run test:e2e
 ### 12. Staging Deployment (2 hours)
 
 **Vercel Setup:**
+
 ```bash
 1. Create Vercel account
 2. Import GitHub repo
@@ -252,6 +269,7 @@ npm run test:e2e
 ### 13. Production Deployment (1 day)
 
 **Pre-flight:**
+
 - [ ] Production database setup (Supabase Pro)
 - [ ] Production payment credentials
 - [ ] Domain DNS configuration
@@ -261,6 +279,7 @@ npm run test:e2e
 - [ ] Monitoring alerts
 
 **Go Live:**
+
 ```bash
 1. Deploy to production
 2. Run smoke tests
@@ -275,17 +294,20 @@ npm run test:e2e
 ## 📅 Timeline Estimates
 
 ### Minimum Viable (Local Development)
+
 - **Today**: Database setup (20 min)
 - **Today**: Core testing (1 hour)
 - **Total**: 1.5 hours → Can start developing!
 
 ### Full Featured (All Integrations)
+
 - **Week 1**: Database + core features (2-3 days)
 - **Week 2**: Payment + email + Discord (3-4 days)
 - **Week 3**: Production prep + deploy (2-3 days)
 - **Total**: ~3 weeks to production
 
 ### Minimal Launch (MVP)
+
 - **Day 1**: Database + admin account
 - **Day 2-3**: Test core features
 - **Day 4-5**: Staging deployment
@@ -297,6 +319,7 @@ npm run test:e2e
 ## 🎯 Success Criteria
 
 ### Development Ready
+
 - [x] Code compiles (TypeScript)
 - [x] Dependencies installed
 - [x] Security configured
@@ -305,6 +328,7 @@ npm run test:e2e
 - [ ] Core features tested
 
 ### Production Ready
+
 - [ ] All integrations working
 - [ ] Security audit passed
 - [ ] Performance benchmarks met
@@ -313,6 +337,7 @@ npm run test:e2e
 - [ ] Documentation complete
 
 ### Launch Ready
+
 - [ ] Staging tested thoroughly
 - [ ] Production environment verified
 - [ ] Domain & SSL configured
@@ -325,6 +350,7 @@ npm run test:e2e
 ## 📊 Priority Matrix
 
 ### Must Have (P0) - Before ANY development
+
 1. ✅ Dependencies
 2. ✅ Security secrets
 3. 🔴 **Database** ← DO THIS NOW
@@ -332,18 +358,21 @@ npm run test:e2e
 5. Core features working
 
 ### Should Have (P1) - Before staging
+
 1. Payment gateways (test mode)
 2. Email service
 3. File uploads
 4. Basic monitoring
 
 ### Nice to Have (P2) - Before production
+
 1. Discord integration
 2. Redis caching
 3. Advanced monitoring
 4. Performance optimization
 
 ### Can Wait (P3) - Post-launch
+
 1. ESLint cleanup
 2. Additional features
 3. UI improvements
@@ -356,20 +385,24 @@ npm run test:e2e
 ### Common Issues:
 
 **Database won't connect:**
+
 - Check connection string format
 - Verify password is correct
 - Test with: `npx prisma db pull`
 
 **Migrations fail:**
+
 - Try: `npx prisma migrate reset`
 - Then: `npx prisma migrate dev`
 
 **Server won't start:**
+
 - Check .env.local is present
 - Verify all required vars are set
 - Try: `rm -rf .next && npm run dev`
 
 **Need help:**
+
 - Check SETUP-GUIDE.md
 - Check DATABASE-SETUP-INSTRUCTIONS.md
 - Review error messages
@@ -393,6 +426,7 @@ npm run test:e2e
 👉 **Open [DATABASE-SETUP-INSTRUCTIONS.md](DATABASE-SETUP-INSTRUCTIONS.md) và follow the guide!**
 
 Or if you want local PostgreSQL:
+
 ```bash
 # macOS
 brew install postgresql@15

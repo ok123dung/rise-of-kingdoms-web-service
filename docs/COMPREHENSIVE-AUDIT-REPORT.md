@@ -1,19 +1,22 @@
 # Comprehensive Audit Report: rok-services
-**Project:** Rise of Kingdoms Gaming Services Platform
-**Technology Stack:** Next.js 14, TypeScript, Prisma, PostgreSQL
-**Audit Date:** October 5, 2025
-**Total Lines of Code:** 41,302
-**Total Files Audited:** 221 TypeScript files
+
+**Project:** Rise of Kingdoms Gaming Services Platform **Technology Stack:** Next.js 14, TypeScript,
+Prisma, PostgreSQL **Audit Date:** October 5, 2025 **Total Lines of Code:** 41,302 **Total Files
+Audited:** 221 TypeScript files
 
 ---
 
 ## Executive Summary
 
-The rok-services project is a well-structured Next.js 14 application built with TypeScript and Prisma ORM, providing gaming services for Rise of Kingdoms players. The codebase demonstrates professional development practices with comprehensive security measures, proper authentication flows, and payment gateway integrations.
+The rok-services project is a well-structured Next.js 14 application built with TypeScript and
+Prisma ORM, providing gaming services for Rise of Kingdoms players. The codebase demonstrates
+professional development practices with comprehensive security measures, proper authentication
+flows, and payment gateway integrations.
 
 **Overall Assessment: GOOD** (7.5/10)
 
 ### Key Strengths
+
 - Robust authentication system with 2FA support
 - Comprehensive error handling and validation
 - Strong TypeScript implementation with strict configuration
@@ -23,6 +26,7 @@ The rok-services project is a well-structured Next.js 14 application built with 
 - Proper logging and monitoring with Sentry integration
 
 ### Critical Areas Requiring Attention
+
 - 152 instances of `any` type usage across 46 files
 - Limited test coverage (only 7 test files)
 - Potential N+1 query issues in some API routes
@@ -35,14 +39,17 @@ The rok-services project is a well-structured Next.js 14 application built with 
 ## 1. FRONTEND AUDIT
 
 ### 1.1 Pages Structure
+
 **Status:** GOOD
 
 **Findings:**
+
 - 31 page components identified across the application
 - Well-organized directory structure following Next.js 14 app router conventions
 - Proper separation between public pages, auth pages, and protected dashboard
 
 **Page Inventory:**
+
 ```
 Public Pages (7):
 - / (Homepage)
@@ -73,14 +80,17 @@ Special (3):
 ```
 
 **Issues:**
+
 - LOW: `/diagnostics` page should be protected or removed in production
 - MEDIUM: Missing error boundary implementation on some pages
 - LOW: Inconsistent use of `"use client"` directive (91 instances found)
 
 ### 1.2 Components Organization
+
 **Status:** GOOD
 
 **Findings:**
+
 - 63 React components well-organized into logical directories
 - Clear separation of concerns with dedicated folders:
   - `/admin` - Admin-specific components (7 components)
@@ -94,6 +104,7 @@ Special (3):
   - `/ui` - Reusable UI components (2 components)
 
 **Component Health:**
+
 ```
 Total Components: 63
 With Client Directive: 52 (82%)
@@ -102,33 +113,40 @@ Export Statements: 123 across 61 files
 ```
 
 **Issues:**
+
 - LOW: Some components may be unused (need runtime analysis)
 - MEDIUM: Missing proper TypeScript prop interfaces in some components
 - LOW: Inconsistent error boundary implementation
 
 ### 1.3 UI/UX Consistency
+
 **Status:** GOOD
 
 **Findings:**
+
 - Consistent use of Tailwind CSS throughout the application
 - Custom font configuration with Inter and Poppins
 - Responsive design with mobile optimizations (`MobileStickyActions`)
 - Accessibility features implemented via `jsx-a11y` ESLint plugin
 
 **Accessibility:**
+
 - ESLint a11y rules enforced
 - Proper semantic HTML structure in reviewed components
 - ARIA attributes present in interactive components
 
 **Issues:**
+
 - MEDIUM: Need manual accessibility audit with screen readers
 - LOW: Some interactive elements may lack keyboard navigation
 - LOW: Color contrast ratios not verified
 
 ### 1.4 Root Layout Analysis
+
 **Status:** EXCELLENT
 
 **Findings:**
+
 ```typescript
 - Proper font loading with next/font/google
 - Comprehensive SEO metadata with OpenGraph and Twitter cards
@@ -140,6 +158,7 @@ Export Statements: 123 across 61 files
 ```
 
 **SEO Implementation:**
+
 - Structured data with OrganizationSchema
 - Meta tags optimized for Vietnamese market
 - Sitemap generation (sitemap.ts exists)
@@ -150,6 +169,7 @@ Export Statements: 123 across 61 files
 ## 2. BACKEND AUDIT
 
 ### 2.1 API Routes Inventory
+
 **Status:** GOOD
 
 **Total API Routes:** 34
@@ -157,6 +177,7 @@ Export Statements: 123 across 61 files
 **Routes by Category:**
 
 **Authentication (7):**
+
 - `/api/auth/[...nextauth]` - NextAuth.js handler
 - `/api/auth/signup` - User registration
 - `/api/auth/reset-password` - Password reset
@@ -168,17 +189,20 @@ Export Statements: 123 across 61 files
 - `/api/auth/ws-token` - WebSocket token generation
 
 **Payment Operations (4):**
+
 - `/api/payments/create` - Create payment
 - `/api/payments/vnpay/ipn` - VNPay webhook
 - `/api/payments/momo/webhook` - MoMo webhook
 - `/api/payments/zalopay/callback` - ZaloPay webhook
 
 **Webhook Handlers (3):**
+
 - `/api/webhooks/vnpay` - VNPay webhook processor
 - `/api/webhooks/momo` - MoMo webhook processor
 - `/api/webhooks/zalopay` - ZaloPay webhook processor
 
 **User Operations (5):**
+
 - `/api/user/profile` - User profile CRUD
 - `/api/user/payments` - User payment history
 - `/api/user/payments/[id]` - Single payment details
@@ -186,10 +210,12 @@ Export Statements: 123 across 61 files
 - `/api/user/bookings/[id]` - Single booking details
 
 **Services (2):**
+
 - `/api/services` - Services listing
 - `/api/services/[slug]` - Single service details
 
 **File Management (3):**
+
 - `/api/files` - File listing
 - `/api/files/[key]` - File download
 - `/api/upload` - Generic upload
@@ -197,6 +223,7 @@ Export Statements: 123 across 61 files
 - `/api/upload/avatar` - Avatar upload
 
 **Admin & Monitoring (4):**
+
 - `/api/admin/webhooks` - Admin webhook management
 - `/api/health` - Health check
 - `/api/health/db` - Database health
@@ -206,11 +233,13 @@ Export Statements: 123 across 61 files
 - `/api/test` - Test endpoint
 
 ### 2.2 Business Logic Implementation
+
 **Status:** GOOD
 
 **Findings:**
 
 **Payment Creation Flow** (`/api/payments/create/route.ts`):
+
 ```typescript
 STRENGTHS:
 + Proper validation with Zod schema
@@ -227,6 +256,7 @@ ISSUES:
 ```
 
 **VNPay Payment Handler** (`/lib/payments/vnpay.ts`):
+
 ```typescript
 STRENGTHS:
 + Proper HMAC signature verification
@@ -244,6 +274,7 @@ ISSUES:
 ```
 
 **Authentication Flow** (`/lib/auth.ts`):
+
 ```typescript
 STRENGTHS:
 + 2FA integration with TOTP
@@ -260,9 +291,11 @@ ISSUES:
 ```
 
 ### 2.3 Error Handling
+
 **Status:** EXCELLENT
 
 **Findings:**
+
 - Centralized error handling system in `/lib/errors.ts`
 - Custom error classes for different scenarios:
   - `ValidationError`, `AuthenticationError`, `AuthorizationError`
@@ -273,6 +306,7 @@ ISSUES:
 - Retry mechanism with exponential backoff for external services
 
 **Error Response Format:**
+
 ```typescript
 {
   success: false,
@@ -286,9 +320,11 @@ ISSUES:
 ```
 
 ### 2.4 Data Validation
+
 **Status:** EXCELLENT
 
 **Findings:**
+
 - Comprehensive validation schemas in `/lib/validation.ts`
 - Zod schemas for all major entities:
   - User registration/update
@@ -299,6 +335,7 @@ ISSUES:
 - Input sanitization functions to prevent XSS
 
 **Validation Coverage:**
+
 ```typescript
 + Email validation with format and length checks
 + Vietnamese phone number regex validation
@@ -309,15 +346,18 @@ ISSUES:
 ```
 
 **Issues:**
+
 - LOW: Sanitization could use DOMPurify library for more robust XSS prevention
 - MEDIUM: Not all API routes use validation middleware consistently
 
 ### 2.5 Authentication & Authorization
+
 **Status:** EXCELLENT
 
 **Findings:**
 
 **Authentication Mechanisms:**
+
 - NextAuth.js with Credentials and Discord providers
 - JWT-based sessions (30-day expiry)
 - 2FA with TOTP (using otplib/speakeasy)
@@ -325,6 +365,7 @@ ISSUES:
 - Password reset tokens
 
 **Authorization Patterns:**
+
 ```typescript
 + withAuth() middleware for protected routes
 + Role-based access (customer, staff, manager, admin)
@@ -334,6 +375,7 @@ ISSUES:
 ```
 
 **Security Features:**
+
 - Brute force protection (5 failed attempts = 15-minute lockout)
 - Password history (prevents reuse)
 - Rate limiting on auth endpoints
@@ -341,20 +383,24 @@ ISSUES:
 - Last login tracking
 
 **Issues:**
+
 - MEDIUM: JWT tokens can't be invalidated before expiry
 - LOW: No device fingerprinting for suspicious login detection
 - LOW: Missing email verification requirement
 
 ### 2.6 Payment Gateway Integrations
+
 **Status:** GOOD
 
 **Supported Gateways:**
+
 1. **VNPay** - Full implementation with IPN
 2. **MoMo** - Webhook integration
 3. **ZaloPay** - Callback handling
 4. **Banking Transfer** - Manual verification
 
 **VNPay Implementation:**
+
 ```
 + HMAC-SHA512 signature verification
 + IPN (Instant Payment Notification) handling
@@ -370,12 +416,14 @@ Issues:
 ```
 
 **Webhook Processing:**
+
 - Dedicated webhook processor service (`/lib/webhooks/processor.ts`)
 - Event storage in database
 - Retry mechanism with exponential backoff
 - Webhook status tracking (pending, processing, processed, failed)
 
 **Issues:**
+
 - CRITICAL: Missing replay attack prevention (no nonce/timestamp validation)
 - HIGH: Webhook endpoints not rate-limited
 - MEDIUM: No webhook signature validation middleware
@@ -386,11 +434,13 @@ Issues:
 ## 3. DATABASE AUDIT
 
 ### 3.1 Schema Completeness
+
 **Status:** EXCELLENT
 
 **Database Models:** 18 tables
 
 **Core Business Models:**
+
 1. `User` - User accounts with RoK game data
 2. `Service` - Service offerings
 3. `ServiceTier` - Service pricing tiers
@@ -399,26 +449,19 @@ Issues:
 6. `Communication` - Email/notification tracking
 7. `Lead` - Lead management
 
-**Supporting Models:**
-8. `Staff` - Staff/admin profiles
-9. `ServiceTask` - Task management
-10. `FileUpload` - File storage metadata
-11. `WebhookEvent` - Webhook event queue
+**Supporting Models:** 8. `Staff` - Staff/admin profiles 9. `ServiceTask` - Task management 10.
+`FileUpload` - File storage metadata 11. `WebhookEvent` - Webhook event queue
 
-**Authentication Models:**
-12. `Account` - OAuth accounts (NextAuth)
-13. `Session` - User sessions (NextAuth)
-14. `VerificationToken` - Email verification (NextAuth)
-15. `PasswordResetToken` - Password reset tokens
-16. `TwoFactorAuth` - 2FA secrets
-17. `PasswordHistory` - Password history tracking
+**Authentication Models:** 12. `Account` - OAuth accounts (NextAuth) 13. `Session` - User sessions
+(NextAuth) 14. `VerificationToken` - Email verification (NextAuth) 15. `PasswordResetToken` -
+Password reset tokens 16. `TwoFactorAuth` - 2FA secrets 17. `PasswordHistory` - Password history
+tracking
 
-**Logging Models:**
-18. `SystemLog` - Application logs
-19. `SecurityLog` - Security events
-20. `AuditLog` - User action audit trail
+**Logging Models:** 18. `SystemLog` - Application logs 19. `SecurityLog` - Security events 20.
+`AuditLog` - User action audit trail
 
 ### 3.2 Relationships & Foreign Keys
+
 **Status:** EXCELLENT
 
 **Key Relationships:**
@@ -448,20 +491,24 @@ Lead (1) -> (1) Booking (optional, unique)
 ```
 
 **Cascade Behaviors:**
+
 - User deletion cascades to: accounts, sessions, communications, file uploads, audit logs
 - Booking deletion cascades to: communications, service tasks
 - ServiceTier deletion cascades from Service
 
 **Issues:**
+
 - LOW: Payment doesn't cascade delete with Booking (intentional for audit trail)
 - LOW: No soft delete implementation (consider for compliance)
 
 ### 3.3 Indexes Analysis
+
 **Status:** GOOD
 
 **Index Coverage:**
 
 **Booking Indexes (4):**
+
 ```prisma
 @@index([userId, status])           // User's bookings by status
 @@index([status, createdAt])        // Admin booking queue
@@ -470,6 +517,7 @@ Lead (1) -> (1) Booking (optional, unique)
 ```
 
 **Payment Indexes (4):**
+
 ```prisma
 @@index([bookingId])                // Lookup by booking
 @@index([status])                   // Payment status queries
@@ -478,6 +526,7 @@ Lead (1) -> (1) Booking (optional, unique)
 ```
 
 **Lead Indexes (4):**
+
 ```prisma
 @@index([status, createdAt])        // Lead pipeline queries
 @@index([assignedTo, status])       // Staff assignment queries
@@ -486,6 +535,7 @@ Lead (1) -> (1) Booking (optional, unique)
 ```
 
 **Additional Indexes:**
+
 ```prisma
 SystemLog: [level, timestamp], [service, timestamp]
 SecurityLog: [event, timestamp], [userId, timestamp]
@@ -497,6 +547,7 @@ PasswordHistory: [userId, createdAt]
 ```
 
 **Missing Indexes (MEDIUM Priority):**
+
 ```prisma
 Booking.bookingNumber - Frequently used for lookups, should be indexed
 Payment.paymentNumber - Frequently used for lookups, should be indexed
@@ -507,16 +558,19 @@ Lead.phone - For duplicate detection
 ```
 
 **Issues:**
+
 - MEDIUM: Missing composite index on `Payment(status, createdAt)` for dashboard queries
 - LOW: Could benefit from partial indexes (PostgreSQL) on active records
 - LOW: No full-text search indexes for service/lead search
 
 ### 3.4 Potential N+1 Query Issues
+
 **Status:** NEEDS IMPROVEMENT
 
 **Identified N+1 Patterns:**
 
 **HIGH Priority - Payment Creation:**
+
 ```typescript
 // src/app/api/payments/create/route.ts:42
 const booking = await db.booking.findById(validatedData.bookingId)
@@ -525,27 +579,32 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 **MEDIUM Priority - User Profile:**
+
 ```typescript
 // Multiple API routes fetch user then related data separately
 // Should use include for bookings, payments in single query
 ```
 
 **MEDIUM Priority - Dashboard Queries:**
+
 ```typescript
 // Admin dashboard likely fetches bookings then iterates to get user/service data
 // Should use include or select specific fields
 ```
 
 **Recommendations:**
+
 1. Add Prisma query analysis in development
 2. Implement query result caching for expensive joins
 3. Use `include` strategically to prevent N+1
 4. Consider GraphQL or tRPC for better query control
 
 ### 3.5 Data Integrity Constraints
+
 **Status:** EXCELLENT
 
 **Unique Constraints:**
+
 ```prisma
 + User.email (unique)
 + Booking.bookingNumber (unique)
@@ -560,6 +619,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 **Non-null Constraints:**
+
 ```
 + All critical fields properly marked as required
 + Optional fields appropriately marked with ?
@@ -568,6 +628,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 **Data Type Safety:**
+
 ```
 + Decimal type for money (12,2 precision)
 + BigInt for RoK power values
@@ -577,6 +638,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 **Issues:**
+
 - LOW: Could add CHECK constraints for positive amounts (app-level validation exists)
 - LOW: Email uniqueness case-sensitivity not specified
 - LOW: No database-level validation for phone format
@@ -586,28 +648,30 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ## 4. SECURITY AUDIT
 
 ### 4.1 Authentication Security
+
 **Status:** EXCELLENT
 
 **Strengths:**
-+ **Password Security:**
+
+- **Password Security:**
   - bcrypt with 14 rounds (OWASP recommended)
   - Minimum 8 characters, complexity requirements
   - Password history tracking (prevents reuse of last 5-10)
   - Secure password reset flow with tokens
 
-+ **Multi-Factor Authentication:**
+- **Multi-Factor Authentication:**
   - TOTP-based 2FA with QR code setup
   - Backup codes for account recovery
   - 2FA verification in login flow
   - Ability to disable 2FA
 
-+ **Session Management:**
+- **Session Management:**
   - JWT-based sessions with 30-day expiry
   - Secure session token generation
   - Last login tracking
   - Session security context (IP, user agent)
 
-+ **Brute Force Protection:**
+- **Brute Force Protection:**
   - 5 failed attempts triggers 15-minute lockout
   - Exponential backoff on failed attempts
   - Account-based and IP-based limiting
@@ -616,6 +680,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 **Vulnerabilities:**
 
 **MEDIUM - Session Hijacking:**
+
 ```typescript
 // Issue: JWT tokens cannot be invalidated before expiry
 // If token is stolen, attacker has access until expiration
@@ -623,6 +688,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 **MEDIUM - In-Memory Rate Limiting:**
+
 ```typescript
 // src/lib/auth.ts:150-176
 // Issue: Rate limit state stored in memory (Map)
@@ -632,6 +698,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 **LOW - Missing Email Verification:**
+
 ```typescript
 // Users can sign up without verifying email
 // Could lead to spam accounts or typo-related issues
@@ -639,15 +706,18 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 ### 4.2 Authorization Patterns
+
 **Status:** GOOD
 
 **Strengths:**
-+ Role-based access control (customer, staff, manager, admin)
-+ `withAuth()` middleware for route protection
-+ Per-resource authorization checks
-+ Staff permission system in place
+
+- Role-based access control (customer, staff, manager, admin)
+- `withAuth()` middleware for route protection
+- Per-resource authorization checks
+- Staff permission system in place
 
 **Authorization Flow:**
+
 ```typescript
 1. withAuth() - Verifies user is authenticated
 2. getCurrentUser() - Fetches user with staff profile
@@ -658,6 +728,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 **Issues:**
 
 **MEDIUM - Inconsistent Authorization:**
+
 ```typescript
 // Some routes check user ownership, others don't
 // Need standardized authorization middleware
@@ -665,21 +736,25 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 **LOW - Permission System Not Fully Implemented:**
+
 ```typescript
 // Staff.permissions field exists but not consistently checked
 // Could implement fine-grained permissions (read, write, delete)
 ```
 
 ### 4.3 Input Validation & Sanitization
+
 **Status:** GOOD
 
 **Strengths:**
-+ Comprehensive Zod schemas for all inputs
-+ Vietnamese-specific validation (phone, names)
-+ RoK game data validation
-+ Input sanitization functions
+
+- Comprehensive Zod schemas for all inputs
+- Vietnamese-specific validation (phone, names)
+- RoK game data validation
+- Input sanitization functions
 
 **Sanitization Implementation:**
+
 ```typescript
 // src/lib/validation.ts:243-249
 + Removes <script> tags
@@ -691,6 +766,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 **Issues:**
 
 **MEDIUM - Limited Sanitization:**
+
 ```typescript
 // Current sanitization is basic regex-based
 // Could be bypassed with creative encoding
@@ -698,6 +774,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 **MEDIUM - Not Applied Universally:**
+
 ```typescript
 // Sanitization functions exist but not called on all user inputs
 // Some API routes rely only on Zod validation
@@ -705,6 +782,7 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 **LOW - No HTML Encoding in Email Templates:**
+
 ```typescript
 // Email templates use template literals without encoding
 // Could be vulnerable if user data contains special chars
@@ -712,15 +790,18 @@ const booking = await db.booking.findById(validatedData.bookingId)
 ```
 
 ### 4.4 XSS Prevention
+
 **Status:** GOOD
 
 **Strengths:**
-+ React auto-escapes JSX output
-+ No use of `dangerouslySetInnerHTML` found in search (0 instances)
-+ Input sanitization functions available
-+ CSP headers configured
+
+- React auto-escapes JSX output
+- No use of `dangerouslySetInnerHTML` found in search (0 instances)
+- Input sanitization functions available
+- CSP headers configured
 
 **CSP Analysis:**
+
 ```typescript
 // src/middleware.ts & next.config.js
 Current CSP:
@@ -733,6 +814,7 @@ Current CSP:
 **Issues:**
 
 **HIGH - CSP Uses unsafe-inline and unsafe-eval:**
+
 ```typescript
 // Issue: Required for Next.js but weakens XSS protection
 // Recommendation: Implement nonce-based CSP
@@ -740,22 +822,26 @@ Current CSP:
 ```
 
 **MEDIUM - Sanitization Not Comprehensive:**
+
 ```typescript
 // Input sanitization exists but not applied universally
 // Some components may render user input without sanitization
 ```
 
 ### 4.5 CSRF Protection
+
 **Status:** GOOD
 
 **Findings:**
-+ NextAuth.js provides built-in CSRF protection for auth routes
-+ `csrf-protection.ts` library exists in codebase
-+ SameSite cookie policy configured
+
+- NextAuth.js provides built-in CSRF protection for auth routes
+- `csrf-protection.ts` library exists in codebase
+- SameSite cookie policy configured
 
 **Issues:**
 
 **MEDIUM - CSRF Protection Not Universal:**
+
 ```typescript
 // Not all state-changing endpoints use CSRF tokens
 // Recommendation: Implement CSRF middleware for all POST/PUT/DELETE
@@ -763,11 +849,13 @@ Current CSP:
 ```
 
 ### 4.6 Rate Limiting
+
 **Status:** NEEDS IMPROVEMENT
 
 **Current Implementation:**
 
 **API Route Rate Limiting:**
+
 ```typescript
 // src/lib/auth.ts:152-176
 withRateLimit(maxRequests = 60, windowMs = 60000)
@@ -777,6 +865,7 @@ withRateLimit(maxRequests = 60, windowMs = 60000)
 ```
 
 **Multiple Rate Limit Implementations Found:**
+
 ```
 /lib/rate-limit.ts          - Upstash Redis (recommended)
 /lib/rate-limit-lru.ts      - LRU cache based
@@ -787,6 +876,7 @@ withRateLimit(maxRequests = 60, windowMs = 60000)
 **Issues:**
 
 **HIGH - Inconsistent Implementation:**
+
 ```typescript
 // Multiple rate limiting files suggest migration in progress
 // Some routes use in-memory, others use Redis
@@ -794,6 +884,7 @@ withRateLimit(maxRequests = 60, windowMs = 60000)
 ```
 
 **CRITICAL - Webhook Endpoints Not Rate Limited:**
+
 ```typescript
 // Payment webhooks have no rate limiting
 // Could be exploited for DoS
@@ -801,21 +892,25 @@ withRateLimit(maxRequests = 60, windowMs = 60000)
 ```
 
 **MEDIUM - No Rate Limit on File Uploads:**
+
 ```typescript
 // Upload endpoints could be abused
 // Recommendation: Add strict rate limits on upload routes
 ```
 
 ### 4.7 Secrets Management
+
 **Status:** GOOD
 
 **Strengths:**
-+ All secrets in environment variables
-+ `.env.example` for documentation
-+ No hardcoded secrets found in code review
-+ Sentry DSN properly configured
+
+- All secrets in environment variables
+- `.env.example` for documentation
+- No hardcoded secrets found in code review
+- Sentry DSN properly configured
 
 **Environment Variables Used:**
+
 ```
 DATABASE_URL, DIRECT_URL
 NEXTAUTH_SECRET, NEXTAUTH_URL
@@ -830,6 +925,7 @@ SENTRY_*
 **Issues:**
 
 **MEDIUM - No Runtime Validation:**
+
 ```typescript
 // src/lib/env-loader.ts exists but not comprehensive
 // Missing validation that required vars are set
@@ -837,6 +933,7 @@ SENTRY_*
 ```
 
 **LOW - Secrets in Client Bundle:**
+
 ```typescript
 // NEXT_PUBLIC_* vars are included in client bundle
 // Ensure no sensitive data in public env vars
@@ -846,14 +943,17 @@ SENTRY_*
 ### 4.8 Additional Security Findings
 
 **SQL Injection - NOT VULNERABLE:**
-+ Prisma ORM parameterizes all queries
-+ No raw SQL queries found in codebase
+
+- Prisma ORM parameterizes all queries
+- No raw SQL queries found in codebase
 
 **Command Injection - NOT VULNERABLE:**
-+ No system command execution found
-+ File operations use safe APIs
+
+- No system command execution found
+- File operations use safe APIs
 
 **Path Traversal - LOW RISK:**
+
 ```typescript
 // File upload system uses S3/R2
 // File access by key, not path
@@ -861,6 +961,7 @@ SENTRY_*
 ```
 
 **Dependency Security:**
+
 ```bash
 # Recommendation: Run npm audit regularly
 # Check for known vulnerabilities
@@ -868,6 +969,7 @@ SENTRY_*
 ```
 
 **Security Headers - EXCELLENT:**
+
 ```
 + X-Frame-Options: DENY
 + X-Content-Type-Options: nosniff
@@ -883,14 +985,17 @@ SENTRY_*
 ## 5. PERFORMANCE AUDIT
 
 ### 5.1 Bundle Size
+
 **Status:** NEEDS ANALYSIS
 
 **Findings:**
-+ `next.config.js` has `build:analyze` script available
-+ Compression enabled in next.config
-+ Image optimization configured (WebP, AVIF)
+
+- `next.config.js` has `build:analyze` script available
+- Compression enabled in next.config
+- Image optimization configured (WebP, AVIF)
 
 **Dependencies Analysis:**
+
 ```
 Large Dependencies:
 - @prisma/client (necessary)
@@ -904,6 +1009,7 @@ Potential Issues:
 ```
 
 **Recommendations:**
+
 ```
 HIGH: Run bundle analyzer to identify actual size
 MEDIUM: Implement code splitting for payment gateways
@@ -912,11 +1018,13 @@ LOW: Consider reducing discord.js footprint
 ```
 
 ### 5.2 Optimization Opportunities
+
 **Status:** GOOD
 
 **Current Optimizations:**
 
 **Image Optimization:**
+
 ```typescript
 // next.config.js:9-12
 + WebP and AVIF format support
@@ -925,6 +1033,7 @@ LOW: Consider reducing discord.js footprint
 ```
 
 **Performance Monitoring:**
+
 ```typescript
 + PerformanceMonitor component in layout
 + WebVitalsMonitor for Core Web Vitals
@@ -933,6 +1042,7 @@ LOW: Consider reducing discord.js footprint
 ```
 
 **Code Splitting:**
+
 ```typescript
 + Dynamic imports for dashboard components
 + DynamicCustomerDashboard, DynamicAdminDashboard
@@ -942,6 +1052,7 @@ LOW: Consider reducing discord.js footprint
 **Issues:**
 
 **MEDIUM - No Static Generation:**
+
 ```typescript
 // Most pages use server-side rendering
 // Could use ISR (Incremental Static Regeneration) for:
@@ -951,6 +1062,7 @@ LOW: Consider reducing discord.js footprint
 ```
 
 **LOW - Missing Resource Hints:**
+
 ```typescript
 // Could add dns-prefetch, preconnect for external services
 // Recommendation: Add link rel="preconnect" for:
@@ -960,11 +1072,13 @@ LOW: Consider reducing discord.js footprint
 ```
 
 ### 5.3 Caching Strategy
+
 **Status:** GOOD
 
 **Implementation:**
 
 **API Cache:**
+
 ```typescript
 // src/lib/api-cache.ts
 + LRU cache for API responses
@@ -973,6 +1087,7 @@ LOW: Consider reducing discord.js footprint
 ```
 
 **Database Query Cache:**
+
 ```typescript
 // src/lib/cache.ts
 + Redis-based caching available
@@ -980,6 +1095,7 @@ LOW: Consider reducing discord.js footprint
 ```
 
 **Static Asset Caching:**
+
 ```typescript
 // next.config.js
 + ETags disabled (generateEtags: false)
@@ -989,6 +1105,7 @@ LOW: Consider reducing discord.js footprint
 **Issues:**
 
 **MEDIUM - Inconsistent Cache Usage:**
+
 ```typescript
 // Cache libraries exist but not consistently used
 // Many API routes don't implement caching
@@ -999,17 +1116,20 @@ LOW: Consider reducing discord.js footprint
 ```
 
 **LOW - No CDN Configuration:**
+
 ```typescript
 // Missing Cache-Control headers for static assets
 // Recommendation: Configure CDN caching headers
 ```
 
 ### 5.4 Database Query Efficiency
+
 **Status:** NEEDS IMPROVEMENT
 
 **Issues Identified:**
 
 **HIGH - N+1 Queries:**
+
 ```typescript
 // Payment creation doesn't include related data
 // Dashboard queries likely have N+1 issues
@@ -1017,6 +1137,7 @@ LOW: Consider reducing discord.js footprint
 ```
 
 **MEDIUM - Missing Query Optimization:**
+
 ```typescript
 // No use of Prisma select to limit fields
 // Fetching entire user object when only email needed
@@ -1024,6 +1145,7 @@ LOW: Consider reducing discord.js footprint
 ```
 
 **MEDIUM - Connection Pooling:**
+
 ```typescript
 // src/lib/db.ts uses Prisma connection
 // No explicit pool size configuration
@@ -1031,6 +1153,7 @@ LOW: Consider reducing discord.js footprint
 ```
 
 **Recommendations:**
+
 ```sql
 -- Add missing indexes
 CREATE INDEX idx_booking_number ON bookings(booking_number);
@@ -1043,15 +1166,18 @@ SELECT ...;
 ```
 
 ### 5.5 Image Optimization
+
 **Status:** GOOD
 
 **Strengths:**
-+ Next.js Image component used (OptimizedImage wrapper)
-+ WebP and AVIF formats enabled
-+ Lazy loading implemented
-+ Responsive images with srcset
+
+- Next.js Image component used (OptimizedImage wrapper)
+- WebP and AVIF formats enabled
+- Lazy loading implemented
+- Responsive images with srcset
 
 **Configuration:**
+
 ```typescript
 // next.config.js:9-12
 images: {
@@ -1061,6 +1187,7 @@ images: {
 ```
 
 **Issues:**
+
 - LOW: Could add blur placeholder for better UX
 - LOW: Missing image dimension declarations (CLS prevention)
 
@@ -1069,9 +1196,11 @@ images: {
 ## 6. CODE QUALITY AUDIT
 
 ### 6.1 TypeScript Usage
+
 **Status:** GOOD
 
 **TypeScript Configuration:**
+
 ```json
 {
   "strict": true,
@@ -1082,6 +1211,7 @@ images: {
 ```
 
 **ESLint Configuration:**
+
 ```json
 {
   "@typescript-eslint/no-explicit-any": "error",
@@ -1093,6 +1223,7 @@ images: {
 **Type Safety Issues:**
 
 **HIGH - 152 Uses of `any` Type:**
+
 ```typescript
 // Found in 46 files
 // Common patterns:
@@ -1109,6 +1240,7 @@ Recommendations:
 ```
 
 **Example Files with `any`:**
+
 ```
 /lib/webhooks/vnpay/route.ts - webhook params: any
 /lib/payments/vnpay.ts - response data: any
@@ -1117,6 +1249,7 @@ Recommendations:
 ```
 
 **MEDIUM - Missing Return Types:**
+
 ```typescript
 // Many functions lack explicit return types
 // Relies on type inference
@@ -1124,9 +1257,11 @@ Recommendations:
 ```
 
 ### 6.2 Code Organization
+
 **Status:** EXCELLENT
 
 **Directory Structure:**
+
 ```
 src/
 ├── app/                 # Next.js app router
@@ -1153,16 +1288,19 @@ src/
 ```
 
 **Strengths:**
-+ Clear separation of concerns
-+ Logical grouping by feature
-+ Consistent naming conventions
-+ Good use of barrel exports
+
+- Clear separation of concerns
+- Logical grouping by feature
+- Consistent naming conventions
+- Good use of barrel exports
 
 **Issues:**
+
 - LOW: Some files could be split (vnpay.ts is 541 lines)
 - LOW: Missing index.ts in some directories
 
 ### 6.3 Code Duplication
+
 **Status:** GOOD
 
 **Findings:**
@@ -1170,6 +1308,7 @@ src/
 **Duplicated Logic Identified:**
 
 **Payment Gateway Pattern:**
+
 ```typescript
 // Similar code in vnpay.ts, momo.ts, zalopay.ts
 // - Signature generation
@@ -1182,28 +1321,33 @@ Recommendation: Create abstract PaymentGateway class
 ```
 
 **Webhook Processing:**
+
 ```typescript
 // Webhook routes have similar structure
 // Could be unified with a webhook factory
 ```
 
 **Dashboard Queries:**
+
 ```typescript
 // User and admin dashboards likely duplicate query patterns
 // Consider shared query builder
 ```
 
 ### 6.4 Error Handling Patterns
+
 **Status:** EXCELLENT
 
 **Strengths:**
-+ Centralized error handling (`/lib/errors.ts`)
-+ Custom error classes for different scenarios
-+ Consistent error response format
-+ Proper error logging with context
-+ Safe error messages (don't expose internals)
+
+- Centralized error handling (`/lib/errors.ts`)
+- Custom error classes for different scenarios
+- Consistent error response format
+- Proper error logging with context
+- Safe error messages (don't expose internals)
 
 **Pattern Used:**
+
 ```typescript
 try {
   // Operation
@@ -1213,6 +1357,7 @@ try {
 ```
 
 **Error Classes:**
+
 ```typescript
 AppError (base)
 ├── ValidationError (400)
@@ -1226,15 +1371,18 @@ AppError (base)
 ```
 
 **Issues:**
+
 - MEDIUM: Some files use `console.error` instead of logger
 - LOW: Could add error correlation IDs across services
 
 ### 6.5 Logging & Monitoring
+
 **Status:** GOOD
 
 **Implementation:**
 
 **Logging System:**
+
 ```typescript
 /lib/monitoring/logger.ts - Main logger
 /lib/monitoring/edge-logger.ts - Edge runtime logger
@@ -1243,6 +1391,7 @@ AppError (base)
 ```
 
 **Sentry Integration:**
+
 ```typescript
 + Error tracking
 + Performance monitoring
@@ -1252,6 +1401,7 @@ AppError (base)
 ```
 
 **Structured Logging:**
+
 ```typescript
 getLogger().info('message', { context })
 getLogger().error('message', error, { context })
@@ -1261,6 +1411,7 @@ getLogger().warn('message', { context })
 **Issues:**
 
 **MEDIUM - Console.log Usage:**
+
 ```typescript
 // 11 instances of console.log/console.debug found
 // Should use logger instead
@@ -1268,15 +1419,18 @@ getLogger().warn('message', { context })
 ```
 
 **LOW - No Log Aggregation:**
+
 ```typescript
 // Logs go to Sentry but no centralized log storage
 // Recommendation: Consider ELK stack or Datadog for production
 ```
 
 ### 6.6 Test Coverage
+
 **Status:** CRITICAL - INSUFFICIENT
 
 **Current State:**
+
 ```
 Total Test Files: 7
 Test Framework: Jest + React Testing Library + Playwright
@@ -1291,6 +1445,7 @@ Test Files:
 **Issues:**
 
 **CRITICAL - Very Low Test Coverage:**
+
 ```typescript
 // Only 7 test files for 221 TypeScript files
 // Coverage percentage unknown (likely < 10%)
@@ -1307,6 +1462,7 @@ Recommendations:
 ```
 
 **Missing Test Areas:**
+
 ```
 HIGH PRIORITY:
 - Payment gateway integrations
@@ -1329,9 +1485,11 @@ LOW PRIORITY:
 ## 7. INTEGRATION & CRITICAL FLOWS
 
 ### 7.1 Critical User Flows
+
 **Status:** IDENTIFIED
 
 **Flow 1: User Registration**
+
 ```
 1. User submits signup form (/auth/signup)
 2. POST /api/auth/signup
@@ -1351,6 +1509,7 @@ Risks:
 ```
 
 **Flow 2: Service Booking with Payment**
+
 ```
 1. User browses services (/services)
 2. User selects service and tier (/services/[slug])
@@ -1385,6 +1544,7 @@ Risks:
 ```
 
 **Flow 3: Two-Factor Authentication Setup**
+
 ```
 1. User navigates to /dashboard/security
 2. User clicks "Enable 2FA"
@@ -1407,9 +1567,11 @@ Risks:
 ```
 
 ### 7.2 Payment Integration Points
+
 **Status:** GOOD
 
 **VNPay Integration:**
+
 ```
 Endpoints:
 - Create: VNPayPayment.createPaymentUrl()
@@ -1427,6 +1589,7 @@ Issues:
 ```
 
 **MoMo Integration:**
+
 ```
 Endpoints:
 - Create: MoMoPayment.createPayment()
@@ -1436,6 +1599,7 @@ Status: PARTIAL (not fully audited)
 ```
 
 **ZaloPay Integration:**
+
 ```
 Endpoints:
 - Create: ZaloPayPayment.createOrder()
@@ -1445,6 +1609,7 @@ Status: PARTIAL (not fully audited)
 ```
 
 **Banking Transfer:**
+
 ```
 Process:
 - Generate transfer instructions
@@ -1455,9 +1620,11 @@ Status: FUNCTIONAL
 ```
 
 ### 7.3 Email/Notification Systems
+
 **Status:** GOOD
 
 **Email Service:**
+
 ```typescript
 /lib/email/ - Email sending
 - Resend API integration
@@ -1472,6 +1639,7 @@ Triggers:
 ```
 
 **Discord Notifications:**
+
 ```typescript
 /lib/discord/ - Discord bot integration
 - Payment notifications
@@ -1482,6 +1650,7 @@ Status: FUNCTIONAL
 ```
 
 **Database Communications:**
+
 ```typescript
 Communication model tracks:
 - Type (email, sms, discord)
@@ -1491,14 +1660,17 @@ Communication model tracks:
 ```
 
 **Issues:**
+
 - MEDIUM: Email sending failures not retried
 - LOW: No SMS integration yet
 - LOW: Push notifications not implemented
 
 ### 7.4 File Upload Flow
+
 **Status:** GOOD
 
 **Upload Endpoints:**
+
 ```
 /api/upload - Generic file upload
 /api/upload/image - Image upload with validation
@@ -1506,6 +1678,7 @@ Communication model tracks:
 ```
 
 **Storage:**
+
 ```typescript
 - Cloudflare R2 / AWS S3 compatible
 - Pre-signed URL generation
@@ -1514,14 +1687,17 @@ Communication model tracks:
 ```
 
 **Issues:**
+
 - MEDIUM: No file size limits enforced
 - MEDIUM: No malware scanning
 - LOW: No automatic cleanup of unused files
 
 ### 7.5 WebSocket Integration
+
 **Status:** FUNCTIONAL
 
 **Implementation:**
+
 ```typescript
 /lib/websocket/ - WebSocket server
 - Socket.io server
@@ -1537,6 +1713,7 @@ Components:
 ```
 
 **Issues:**
+
 - MEDIUM: WebSocket server runs separately (scalability concern)
 - LOW: No reconnection backoff strategy
 - LOW: Message ordering not guaranteed
@@ -1657,56 +1834,42 @@ Components:
 ### Phase 1: Immediate (This Sprint)
 
 **Security Critical:**
+
 1. Implement webhook replay attack prevention (1-2 days)
 2. Add database transactions to payment processing (1 day)
 3. Implement rate limiting on webhook endpoints (1 day)
 
-**Stability Critical:**
-4. Fix N+1 query in payment creation (2 hours)
-5. Add monitoring for payment flow failures (1 day)
+**Stability Critical:** 4. Fix N+1 query in payment creation (2 hours) 5. Add monitoring for payment
+flow failures (1 day)
 
 ### Phase 2: Short-term (Next Sprint)
 
-**Security:**
-6. Migrate to distributed rate limiting (Redis/Upstash) (2 days)
-7. Implement nonce-based CSP (3 days)
-8. Add email verification requirement (2 days)
-9. Implement universal input sanitization middleware (2 days)
+**Security:** 6. Migrate to distributed rate limiting (Redis/Upstash) (2 days) 7. Implement
+nonce-based CSP (3 days) 8. Add email verification requirement (2 days) 9. Implement universal input
+sanitization middleware (2 days)
 
-**Quality:**
-10. Create payment integration tests (5 days)
-11. Add API route unit tests (5 days)
-12. Replace `any` types in critical paths (3 days)
+**Quality:** 10. Create payment integration tests (5 days) 11. Add API route unit tests (5 days) 12.
+Replace `any` types in critical paths (3 days)
 
 ### Phase 3: Medium-term (Next Month)
 
-**Performance:**
-13. Add database indexes (1 day)
-14. Implement ISR for public pages (2 days)
-15. Optimize bundle size (2 days)
-16. Add database query caching (2 days)
+**Performance:** 13. Add database indexes (1 day) 14. Implement ISR for public pages (2 days) 15.
+Optimize bundle size (2 days) 16. Add database query caching (2 days)
 
-**Features:**
-17. Implement idempotency for payment webhooks (3 days)
-18. Add CSRF protection middleware (2 days)
-19. Implement device fingerprinting (3 days)
+**Features:** 17. Implement idempotency for payment webhooks (3 days) 18. Add CSRF protection
+middleware (2 days) 19. Implement device fingerprinting (3 days)
 
-**Testing:**
-20. Achieve 80% test coverage for business logic (3 weeks)
-21. Set up E2E tests for critical flows (1 week)
-22. Integrate testing into CI/CD (2 days)
+**Testing:** 20. Achieve 80% test coverage for business logic (3 weeks) 21. Set up E2E tests for
+critical flows (1 week) 22. Integrate testing into CI/CD (2 days)
 
 ### Phase 4: Long-term (Next Quarter)
 
-**Architecture:**
-23. Refactor payment gateway pattern (abstract class) (1 week)
-24. Implement proper WebSocket scaling strategy (1 week)
-25. Add comprehensive error tracking and alerting (1 week)
+**Architecture:** 23. Refactor payment gateway pattern (abstract class) (1 week) 24. Implement
+proper WebSocket scaling strategy (1 week) 25. Add comprehensive error tracking and alerting (1
+week)
 
-**Compliance:**
-26. Implement soft delete for audit compliance (1 week)
-27. Add GDPR data export/deletion (1 week)
-28. Implement comprehensive audit logging (1 week)
+**Compliance:** 26. Implement soft delete for audit compliance (1 week) 27. Add GDPR data
+export/deletion (1 week) 28. Implement comprehensive audit logging (1 week)
 
 ---
 
@@ -1720,6 +1883,7 @@ Components:
   - Return success if already processed
 
 - [ ] **CRITICAL:** Add database transaction to payment webhook handler
+
   ```typescript
   await prisma.$transaction([
     prisma.payment.update(...),
@@ -1728,6 +1892,7 @@ Components:
   ```
 
 - [ ] **CRITICAL:** Fix N+1 query in payment creation
+
   ```typescript
   const booking = await db.booking.findById(id, {
     include: { serviceTier: { include: { service: true } } }
@@ -1735,6 +1900,7 @@ Components:
   ```
 
 - [ ] **HIGH:** Add rate limiting to webhook endpoints
+
   ```typescript
   export const POST = withRateLimit(10, 60000)(webhookHandler)
   ```
@@ -1779,9 +1945,12 @@ Components:
 
 ## CONCLUSION
 
-The rok-services platform is a well-architected Next.js application with strong foundations in security, authentication, and payment processing. The codebase demonstrates professional development practices with comprehensive error handling, proper validation, and good separation of concerns.
+The rok-services platform is a well-architected Next.js application with strong foundations in
+security, authentication, and payment processing. The codebase demonstrates professional development
+practices with comprehensive error handling, proper validation, and good separation of concerns.
 
 **Key Achievements:**
+
 - Robust authentication with 2FA
 - Multiple payment gateway integrations
 - Comprehensive database schema
@@ -1789,6 +1958,7 @@ The rok-services platform is a well-architected Next.js application with strong 
 - Security-first approach
 
 **Primary Concerns:**
+
 1. **Test Coverage** is critically low and must be addressed immediately
 2. **Webhook Security** needs replay attack prevention
 3. **Database Transactions** missing in critical payment flows
@@ -1796,15 +1966,19 @@ The rok-services platform is a well-architected Next.js application with strong 
 5. **Rate Limiting** implementation inconsistent
 
 **Recommended Next Steps:**
+
 1. Address critical security issues (webhooks, transactions) immediately
 2. Develop comprehensive test suite (target 80% coverage)
 3. Migrate to distributed rate limiting
 4. Improve type safety by eliminating `any` types
 5. Implement performance optimizations (ISR, caching, indexes)
 
-With focused effort on the critical and high-priority items, this platform can achieve production-ready status within 4-6 weeks. The foundation is solid; it needs security hardening, comprehensive testing, and performance optimization.
+With focused effort on the critical and high-priority items, this platform can achieve
+production-ready status within 4-6 weeks. The foundation is solid; it needs security hardening,
+comprehensive testing, and performance optimization.
 
 **Overall Rating: 7.5/10**
+
 - Security: 7/10 (good foundation, needs hardening)
 - Code Quality: 8/10 (well-organized, needs testing)
 - Performance: 7/10 (good, can be optimized)
@@ -1813,6 +1987,5 @@ With focused effort on the critical and high-priority items, this platform can a
 
 ---
 
-**Audit Conducted By:** Claude (Anthropic)
-**Audit Date:** October 5, 2025
-**Next Review Recommended:** December 2025
+**Audit Conducted By:** Claude (Anthropic) **Audit Date:** October 5, 2025 **Next Review
+Recommended:** December 2025

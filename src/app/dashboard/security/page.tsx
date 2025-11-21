@@ -8,8 +8,8 @@ import { useSession } from 'next-auth/react'
 
 import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
-import TwoFactorSetup from '@/components/TwoFactorSetup'
 import ChangePasswordForm from '@/components/security/ChangePasswordForm'
+import TwoFactorSetup from '@/components/TwoFactorSetup'
 
 interface TwoFactorStatus {
   enabled: boolean

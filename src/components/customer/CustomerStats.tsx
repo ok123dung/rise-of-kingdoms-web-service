@@ -89,7 +89,9 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                 <p className="text-sm font-medium text-gray-600">Tổng chi tiêu</p>
                 <p className="text-2xl font-bold text-gray-900">{formatVND(stats.totalSpent)}</p>
                 <p className="mt-1 text-xs text-gray-500">
-                  Trung bình: {stats.totalBookings > 0 ? formatVND(stats.totalSpent / stats.totalBookings) : 0}/đơn
+                  Trung bình:{' '}
+                  {stats.totalBookings > 0 ? formatVND(stats.totalSpent / stats.totalBookings) : 0}
+                  /đơn
                 </p>
               </div>
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
@@ -106,7 +108,10 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
               <div>
                 <p className="text-sm font-medium text-gray-600">Tỷ lệ hoàn thành</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {stats.totalBookings > 0 ? Math.round((stats.completedServices / stats.totalBookings) * 100) : 0}%
+                  {stats.totalBookings > 0
+                    ? Math.round((stats.completedServices / stats.totalBookings) * 100)
+                    : 0}
+                  %
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
                   {stats.completedServices}/{stats.totalBookings} dịch vụ
@@ -131,8 +136,9 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                     {[1, 2, 3, 4, 5].map(star => (
                       <div
                         key={star}
-                        className={`h-4 w-4 ${star <= stats.averageRating ? 'text-yellow-400' : 'text-gray-300'
-                          }`}
+                        className={`h-4 w-4 ${
+                          star <= stats.averageRating ? 'text-yellow-400' : 'text-gray-300'
+                        }`}
                       >
                         ★
                       </div>
@@ -224,7 +230,8 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                     <p className="text-xs text-gray-600">
                       {stats.recentActivity.lastBooking ? (
                         <>
-                          {formatDate(stats.recentActivity.lastBooking)} ({getTimeSince(stats.recentActivity.lastBooking)} trước)
+                          {formatDate(stats.recentActivity.lastBooking)} (
+                          {getTimeSince(stats.recentActivity.lastBooking)} trước)
                         </>
                       ) : (
                         'Chưa có đơn hàng'
@@ -244,7 +251,8 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                     <p className="text-xs text-gray-600">
                       {stats.recentActivity.lastPayment ? (
                         <>
-                          {formatDate(stats.recentActivity.lastPayment)} ({getTimeSince(stats.recentActivity.lastPayment)} trước)
+                          {formatDate(stats.recentActivity.lastPayment)} (
+                          {getTimeSince(stats.recentActivity.lastPayment)} trước)
                         </>
                       ) : (
                         'Chưa có thanh toán'

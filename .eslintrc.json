@@ -13,9 +13,7 @@
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": [
-      "./tsconfig.eslint.json"
-    ],
+    "project": ["./tsconfig.eslint.json"],
     "ecmaVersion": "latest",
     "sourceType": "module",
     "ecmaFeatures": {
@@ -84,19 +82,13 @@
     "react/jsx-filename-extension": [
       "warn",
       {
-        "extensions": [
-          ".tsx",
-          ".jsx"
-        ]
+        "extensions": [".tsx", ".jsx"]
       }
     ],
     "react/jsx-props-no-spreading": "off",
     "react/require-default-props": "off",
     "react/no-unescaped-entities": "warn",
-    "react/jsx-boolean-value": [
-      "warn",
-      "never"
-    ],
+    "react/jsx-boolean-value": ["warn", "never"],
     "react/jsx-curly-brace-presence": [
       "warn",
       {
@@ -144,9 +136,7 @@
             "position": "after"
           }
         ],
-        "pathGroupsExcludedImportTypes": [
-          "react"
-        ],
+        "pathGroupsExcludedImportTypes": ["react"],
         "newlines-between": "always",
         "alphabetize": {
           "order": "asc",
@@ -173,11 +163,7 @@
     "no-console": [
       "error",
       {
-        "allow": [
-          "warn",
-          "error",
-          "info"
-        ]
+        "allow": ["warn", "error", "info"]
       }
     ],
     "no-debugger": "error",
@@ -207,9 +193,7 @@
       "warn",
       "always",
       {
-        "markers": [
-          "/"
-        ]
+        "markers": ["/"]
       }
     ],
     "radix": "warn",
@@ -227,17 +211,9 @@
     "jsx-a11y/anchor-is-valid": [
       "error",
       {
-        "components": [
-          "Link"
-        ],
-        "specialLink": [
-          "hrefLeft",
-          "hrefRight"
-        ],
-        "aspects": [
-          "invalidHref",
-          "preferButton"
-        ]
+        "components": ["Link"],
+        "specialLink": ["hrefLeft", "hrefRight"],
+        "aspects": ["invalidHref", "preferButton"]
       }
     ],
     "jsx-a11y/click-events-have-key-events": "warn",
@@ -253,31 +229,20 @@
   },
   "overrides": [
     {
-      "files": [
-        "*.js",
-        "*.jsx"
-      ],
+      "files": ["*.js", "*.jsx"],
       "rules": {
         "@typescript-eslint/no-var-requires": "off"
       }
     },
     {
-      "files": [
-        "*.test.ts",
-        "*.test.tsx",
-        "*.spec.ts",
-        "*.spec.tsx"
-      ],
+      "files": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"],
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "no-console": "off"
       }
     },
     {
-      "files": [
-        "src/app/**/*.tsx",
-        "src/pages/**/*.tsx"
-      ],
+      "files": ["src/app/**/*.tsx", "src/pages/**/*.tsx"],
       "rules": {
         "import/no-default-export": "off"
       }

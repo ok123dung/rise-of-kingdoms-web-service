@@ -3,6 +3,7 @@
 ## Overview
 
 The application now includes WebSocket support for real-time features:
+
 - Live chat in booking details
 - Real-time notifications
 - Booking status updates
@@ -13,11 +14,13 @@ The application now includes WebSocket support for real-time features:
 ### Development
 
 Run both Next.js and WebSocket server:
+
 ```bash
 npm run dev:all
 ```
 
 Or run them separately:
+
 ```bash
 # Terminal 1 - Next.js
 npm run dev
@@ -42,6 +45,7 @@ npm start
 ## Environment Variables
 
 Add these to your `.env.local`:
+
 ```env
 # WebSocket Configuration
 WS_PORT=3001
@@ -49,6 +53,7 @@ NEXT_PUBLIC_WS_URL=http://localhost:3001
 ```
 
 For production:
+
 ```env
 NEXT_PUBLIC_WS_URL=wss://your-domain.com
 ```
@@ -56,17 +61,20 @@ NEXT_PUBLIC_WS_URL=wss://your-domain.com
 ## Features
 
 ### 1. Live Chat
+
 - Real-time messaging in booking details
 - Typing indicators
 - Message history
 - Auto-reconnection
 
 ### 2. Real-time Notifications
+
 - Toast notifications for new events
 - Notification bell with unread count
 - Click to navigate to relevant page
 
 ### 3. Status Updates
+
 - Booking status changes
 - Payment confirmations
 - Service updates
@@ -74,34 +82,37 @@ NEXT_PUBLIC_WS_URL=wss://your-domain.com
 ## Usage in Components
 
 ### Using Booking Chat
+
 ```tsx
 import { BookingChat } from '@/components/BookingChat'
 
-<BookingChat bookingId={booking.id} />
+;<BookingChat bookingId={booking.id} />
 ```
 
 ### Using Notifications
+
 ```tsx
 import { RealtimeNotifications } from '@/components/RealtimeNotifications'
 
-<RealtimeNotifications />
+;<RealtimeNotifications />
 ```
 
 ### Custom WebSocket Hook
+
 ```tsx
 import { useWebSocket } from '@/hooks/useWebSocket'
 
 function MyComponent() {
   const { isConnected, on, emit } = useWebSocket()
-  
+
   useEffect(() => {
-    const unsubscribe = on('custom:event', (data) => {
+    const unsubscribe = on('custom:event', data => {
       console.log('Received:', data)
     })
-    
+
     return unsubscribe
   }, [on])
-  
+
   const sendData = () => {
     emit('custom:action', { message: 'Hello' })
   }
@@ -111,6 +122,7 @@ function MyComponent() {
 ## Server Events
 
 ### Emitting from API Routes
+
 ```typescript
 import { emitWebSocketEvent } from '@/lib/websocket/init'
 
@@ -131,12 +143,14 @@ emitWebSocketEvent('user', userId, 'notification:new', {
 ## Troubleshooting
 
 ### Connection Issues
+
 1. Check WebSocket server is running
 2. Verify NEXT_PUBLIC_WS_URL is correct
 3. Check browser console for errors
 4. Ensure JWT token is valid
 
 ### Message Not Sending
+
 1. Check connection status
 2. Verify user is authenticated
 3. Check booking access permissions
@@ -145,6 +159,7 @@ emitWebSocketEvent('user', userId, 'notification:new', {
 ## Deployment
 
 ### Using PM2
+
 ```bash
 # ecosystem.config.js
 module.exports = {
@@ -173,6 +188,7 @@ pm2 start ecosystem.config.js
 ```
 
 ### Using Docker
+
 ```dockerfile
 # Add to Dockerfile
 EXPOSE 3000 3001
@@ -182,6 +198,7 @@ CMD ["sh", "-c", "npm run ws:start & npm start"]
 ```
 
 ### Nginx Configuration
+
 ```nginx
 # WebSocket proxy
 location /socket.io/ {

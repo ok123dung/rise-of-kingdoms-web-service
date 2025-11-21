@@ -3,6 +3,7 @@
 ## 📋 Current Status
 
 Your Supabase project is configured with:
+
 - **Project Reference**: `inondhimzqiguvdhyjng`
 - **Project URL**: `https://inondhimzqiguvdhyjng.supabase.co`
 - **Anon Key**: `sb_publishable_Xc6vXnPpEJcxxPWCnit9zg_f71ZCiMP` ✅
@@ -10,6 +11,7 @@ Your Supabase project is configured with:
 ## ⚠️ Required Information
 
 You need to provide:
+
 1. **Database Password** - Replace `[YOUR-PASSWORD]` in connection strings
 2. **Service Role Key** - Get from Supabase dashboard (Settings → API)
 
@@ -57,23 +59,27 @@ npx prisma db push
 ## 🎯 What's Already Configured
 
 ✅ **Authentication**
+
 - NextAuth with credentials & Discord OAuth
 - 2FA support with TOTP
 - Password security (bcrypt 14 rounds + history)
 
 ✅ **Security Features**
+
 - CSRF protection
 - Rate limiting
 - CSP headers
 - Secure session management
 
 ✅ **Services Ready**
+
 - Payment webhooks (MoMo, ZaloPay, VNPay)
 - WebSocket server for real-time updates
 - File upload system (can use Supabase Storage)
 - Email service (needs Resend API key)
 
 ✅ **Monitoring**
+
 - Sentry error tracking (needs DSN)
 - Custom logging system
 - Performance monitoring
@@ -81,6 +87,7 @@ npx prisma db push
 ## 📊 Database Schema
 
 The following tables will be created:
+
 - `User` - User accounts with authentication
 - `Staff` - Staff profiles and permissions
 - `Service` - Available services
@@ -134,6 +141,7 @@ npm run test:e2e     # Run E2E tests
 ## ✅ Ready to Deploy?
 
 Once database is connected:
+
 1. Push to GitHub
 2. Deploy to Vercel/Railway/VPS
 3. Set production environment variables

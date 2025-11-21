@@ -79,18 +79,21 @@ Run in this order:
 ## ✅ What Each Migration Does
 
 ### 003_setup_encryption.sql
+
 - ✅ Enables pgcrypto extension
 - ✅ Creates vault schema
 - ✅ Encryption/decryption functions
 - ✅ Key rotation support
 
 ### 004_audit_monitoring.sql
+
 - ✅ Audit log triggers on all tables
 - ✅ Change tracking (before/after values)
 - ✅ Performance monitoring queries
 - ✅ Security event logging
 
 ### 005_fix_all_supabase_warnings.sql
+
 - ✅ Fixes function security (search_path)
 - ✅ Adds missing RLS policies (6 policies)
 - ✅ Adds foreign key indexes (6 indexes)
@@ -98,6 +101,7 @@ Run in this order:
 - ✅ Optimizes RLS performance (13 policies)
 
 ### 006_final_performance_optimization.sql
+
 - ✅ Removes duplicate index on verification_tokens
 - ✅ Consolidates multiple permissive policies (37 → 20 policies)
 - ✅ 30-50% query performance improvement
@@ -135,10 +139,12 @@ SELECT COUNT(*) FROM pg_indexes WHERE schemaname = 'public';
 ## 🔍 Troubleshooting
 
 ### Migration fails with "already exists" error
+
 - This is OK - migrations are idempotent
 - Script will skip existing objects
 
 ### Want to reset everything
+
 ```sql
 -- WARNING: This deletes all policies and data
 DROP SCHEMA public CASCADE;
@@ -147,6 +153,7 @@ CREATE SCHEMA public;
 ```
 
 ### Check what's been run
+
 ```sql
 -- Check policies
 SELECT tablename, policyname
@@ -163,8 +170,7 @@ ORDER BY tablename;
 
 ---
 
-**Last Updated:** October 10, 2025
-**Maintained by:** rok-services development team
+**Last Updated:** October 10, 2025 **Maintained by:** rok-services development team
 
 ---
 

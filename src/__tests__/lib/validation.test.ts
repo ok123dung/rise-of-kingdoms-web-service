@@ -12,11 +12,7 @@ import {
 describe('Validation Functions', () => {
   describe('validateEmail', () => {
     it('should validate correct email addresses', () => {
-      const validEmails = [
-        'test@example.com',
-        'user.name@domain.co.uk',
-        'user+tag@example.org'
-      ]
+      const validEmails = ['test@example.com', 'user.name@domain.co.uk', 'user+tag@example.org']
 
       validEmails.forEach(email => {
         const result = validateEmail(email)
@@ -26,12 +22,7 @@ describe('Validation Functions', () => {
     })
 
     it('should reject invalid email addresses', () => {
-      const invalidEmails = [
-        'invalid-email',
-        '@domain.com',
-        'user@',
-        'user space@domain.com'
-      ]
+      const invalidEmails = ['invalid-email', '@domain.com', 'user@', 'user space@domain.com']
 
       invalidEmails.forEach(email => {
         const result = validateEmail(email)
@@ -43,13 +34,7 @@ describe('Validation Functions', () => {
 
   describe('validatePhone', () => {
     it('should validate correct Vietnamese phone numbers', () => {
-      const validPhones = [
-        '0987654321',
-        '+84987654321',
-        '84987654321',
-        '0356789012',
-        '0768123456'
-      ]
+      const validPhones = ['0987654321', '+84987654321', '84987654321', '0356789012', '0768123456']
 
       validPhones.forEach(phone => {
         const result = validatePhone(phone)
@@ -59,12 +44,7 @@ describe('Validation Functions', () => {
     })
 
     it('should reject invalid phone numbers', () => {
-      const invalidPhones = [
-        '123456789',
-        '0123456789',
-        '987654321',
-        '+1234567890'
-      ]
+      const invalidPhones = ['123456789', '0123456789', '987654321', '+1234567890']
 
       invalidPhones.forEach(phone => {
         const result = validatePhone(phone)
@@ -109,12 +89,7 @@ describe('Validation Functions', () => {
         '  <script>malicious</script>  '
       ]
 
-      const expectedOutputs = [
-        'Hello',
-        'alert("xss")',
-        '<div>Click me</div>',
-        ''
-      ]
+      const expectedOutputs = ['Hello', 'alert("xss")', '<div>Click me</div>', '']
 
       dangerousInputs.forEach((input, index) => {
         const result = sanitizeInput(input)

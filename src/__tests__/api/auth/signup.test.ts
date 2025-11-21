@@ -15,7 +15,7 @@ jest.mock('@/lib/db', () => ({
     user: {
       findUnique: jest.fn(),
       findFirst: jest.fn(),
-      create: jest.fn(),
+      create: jest.fn()
     }
   }
 }))
@@ -38,7 +38,7 @@ describe('/api/auth/signup', () => {
         fullName: 'Test User',
         email: 'test@example.com',
         phone: '+84987654321',
-        createdAt: new Date(),
+        createdAt: new Date()
       })
 
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
@@ -74,7 +74,7 @@ describe('/api/auth/signup', () => {
           email: 'test@example.com',
           phone: '+84987654321',
           password: 'hashed-password',
-          emailVerified: null,
+          emailVerified: null
         },
         select: {
           id: true,
@@ -159,7 +159,7 @@ describe('/api/auth/signup', () => {
         id: '1',
         fullName: 'Clean Name',
         email: 'clean@example.com',
-        createdAt: new Date(),
+        createdAt: new Date()
       })
 
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
@@ -176,7 +176,7 @@ describe('/api/auth/signup', () => {
       expect(prisma.user.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           fullName: 'Clean Name',
-          email: 'clean@example.com',
+          email: 'clean@example.com'
         }),
         select: expect.any(Object)
       })
@@ -211,7 +211,7 @@ describe('/api/auth/signup', () => {
         id: '1',
         fullName: 'Test User',
         email: 'test@example.com',
-        createdAt: new Date(),
+        createdAt: new Date()
       })
 
       // Mock email failure
@@ -243,7 +243,7 @@ describe('/api/auth/signup', () => {
         fullName: 'Test User',
         email: 'test@example.com',
         phone: '+84356789012',
-        createdAt: new Date(),
+        createdAt: new Date()
       })
 
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {

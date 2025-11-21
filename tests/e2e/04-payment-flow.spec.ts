@@ -259,7 +259,9 @@ test.describe('Payment Flow Tests', () => {
     await expect(page.locator('[data-testid="payment-history"]')).toBeVisible()
 
     // Should show recent payment
-    await expect(page.locator('[data-testid="payment-item"]').count()).resolves.toBeGreaterThanOrEqual(1)
+    await expect(
+      page.locator('[data-testid="payment-item"]').count()
+    ).resolves.toBeGreaterThanOrEqual(1)
   })
 
   test('should show Vietnamese payment terms', async ({ page }) => {

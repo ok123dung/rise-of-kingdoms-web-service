@@ -1,18 +1,20 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/db'
+
 import { hashPassword, savePasswordToHistory, checkPasswordHistory } from '@/lib/auth'
+import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
-const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Token không hợp lệ'),
-  password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự'),
-  confirmPassword: z.string().min(1)
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Mật khẩu xác nhận không khớp",
-  path: ["confirmPassword"],
-})
+const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, 'Token không hợp lệ'),
+    password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự'),
+    confirmPassword: z.string().min(1)
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Mật khẩu xác nhận không khớp',
+    path: ['confirmPassword']
+  })
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,7 +70,7 @@ export async function POST(request: NextRequest) {
     // 4. Update password
     const hashedPassword = await hashPassword(password)
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async tx => {
       // Update user password
       await tx.user.update({
         where: { id: resetToken.userId },
@@ -93,12 +95,8 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập ngay bây giờ.'
     })
-
   } catch (error) {
     getLogger().error('Reset password error', error as Error)
-    return NextResponse.json(
-      { success: false, error: 'Đã có lỗi xảy ra' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: 'Đã có lỗi xảy ra' }, { status: 500 })
   }
 }

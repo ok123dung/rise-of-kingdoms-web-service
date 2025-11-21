@@ -153,12 +153,13 @@ export default function RecentPayments({ payments }: RecentPaymentsProps) {
 
                   <div className="ml-4 text-right">
                     <div
-                      className={`font-bold ${payment.status === 'completed'
+                      className={`font-bold ${
+                        payment.status === 'completed'
                           ? 'text-green-600'
                           : payment.status === 'failed'
                             ? 'text-red-600'
                             : 'text-gray-600'
-                        }`}
+                      }`}
                     >
                       {formatVND(payment.amount)}
                     </div>

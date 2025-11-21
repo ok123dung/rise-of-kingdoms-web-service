@@ -50,7 +50,7 @@ function ForgotPasswordContent() {
   const handleResendEmail = () => {
     setStatus('idle')
     setMessage('')
-    handleSubmit({ preventDefault: () => { } } as React.FormEvent)
+    handleSubmit({ preventDefault: () => {} } as React.FormEvent)
   }
 
   return (

@@ -16,7 +16,7 @@ const CONSOLE_PATTERNS = [
   /console\s*\.\s*time\s*\(/g,
   /console\s*\.\s*timeEnd\s*\(/g,
   /console\s*\.\s*group\s*\(/g,
-  /console\s*\.\s*groupEnd\s*\(/g,
+  /console\s*\.\s*groupEnd\s*\(/g
 ]
 
 // Directories and files to exclude
@@ -40,7 +40,7 @@ const EXCLUDE_PATTERNS = [
   '**/package.json',
   '**/package-lock.json',
   '**/tsconfig.json',
-  '**/.env*',
+  '**/.env*'
 ]
 
 // Files that are allowed to have console statements
@@ -50,7 +50,7 @@ const ALLOWED_FILES = [
   'src/lib/error-handler.ts',
   'src/app/error.tsx',
   'src/app/global-error.tsx',
-  'scripts/remove-console-logs.js',
+  'scripts/remove-console-logs.js'
 ]
 
 function removeConsoleStatements(filePath, dryRun = false) {
@@ -71,7 +71,7 @@ function removeConsoleStatements(filePath, dryRun = false) {
   CONSOLE_PATTERNS.forEach(pattern => {
     const matches = modified.match(pattern) || []
     totalRemoved += matches.length
-    
+
     // Complex regex to handle multi-line console statements
     const multilinePattern = new RegExp(
       pattern.source.replace(/\(/g, '\\s*\\([\\s\\S]*?\\)\\s*;?'),
@@ -82,7 +82,7 @@ function removeConsoleStatements(filePath, dryRun = false) {
 
   // Clean up empty lines left behind
   modified = modified.replace(/^\s*\n/gm, '')
-  
+
   // Fix double empty lines
   modified = modified.replace(/\n\n\n+/g, '\n\n')
 
@@ -99,12 +99,7 @@ function removeConsoleStatements(filePath, dryRun = false) {
 }
 
 function findFiles() {
-  const patterns = [
-    'src/**/*.ts',
-    'src/**/*.tsx',
-    'src/**/*.js',
-    'src/**/*.jsx',
-  ]
+  const patterns = ['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx']
 
   const files = []
   patterns.forEach(pattern => {
@@ -138,11 +133,11 @@ function main() {
   files.forEach(file => {
     const result = removeConsoleStatements(file, dryRun)
     results.push(result)
-    
+
     if (result.removed > 0) {
       totalRemoved += result.removed
       filesModified++
-      
+
       if (verbose) {
         console.log(`  ✓ ${result.path}: Removed ${result.removed} console statements`)
       }

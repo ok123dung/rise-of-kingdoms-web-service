@@ -8,7 +8,6 @@ async function main() {
 
   // ... (services code remains same, skipping for brevity in this tool call if possible, but replace_file_content needs context. I will target the specific block)
 
-
   // Create Services & Tiers
   const services = [
     {
@@ -43,7 +42,12 @@ async function main() {
           name: 'Nâng cao',
           slug: 'strategy-advanced',
           price: 1000000,
-          features: ['Phân tích chi tiết', '2 buổi tư vấn 45p', 'Hỗ trợ qua Discord', 'Chiến thuật KvK']
+          features: [
+            'Phân tích chi tiết',
+            '2 buổi tư vấn 45p',
+            'Hỗ trợ qua Discord',
+            'Chiến thuật KvK'
+          ]
         }
       ]
     },
@@ -79,7 +83,12 @@ async function main() {
           name: 'Premium',
           slug: 'alliance-premium',
           price: 2500000,
-          features: ['Full cấu trúc quản lý', 'Bot Discord nâng cao', 'Chiến lược ngoại giao', 'Training R4']
+          features: [
+            'Full cấu trúc quản lý',
+            'Bot Discord nâng cao',
+            'Chiến lược ngoại giao',
+            'Training R4'
+          ]
         }
       ]
     },
@@ -146,7 +155,12 @@ async function main() {
           name: 'Full Campaign',
           slug: 'kvk-full',
           price: 5000000,
-          features: ['Đồng hành suốt kỳ KvK', 'Call trận đánh lớn', 'Tracking stats', 'Họp chiến thuật hàng tuần']
+          features: [
+            'Đồng hành suốt kỳ KvK',
+            'Call trận đánh lớn',
+            'Tracking stats',
+            'Họp chiến thuật hàng tuần'
+          ]
         }
       ]
     },
@@ -182,7 +196,11 @@ async function main() {
           name: 'Monthly',
           slug: 'coaching-monthly',
           price: 1500000,
-          features: ['8 giờ coaching/tháng', 'Lộ trình phát triển riêng', 'Review account hàng tuần']
+          features: [
+            '8 giờ coaching/tháng',
+            'Lộ trình phát triển riêng',
+            'Review account hàng tuần'
+          ]
         }
       ]
     },
@@ -218,7 +236,11 @@ async function main() {
           name: 'Diamond',
           slug: 'vip-diamond',
           price: 5000000,
-          features: ['Hỗ trợ 24/7 tức thì', 'Miễn phí 2 dịch vụ bất kỳ/tháng', 'Dedicated Account Manager']
+          features: [
+            'Hỗ trợ 24/7 tức thì',
+            'Miễn phí 2 dịch vụ bất kỳ/tháng',
+            'Dedicated Account Manager'
+          ]
         }
       ]
     }

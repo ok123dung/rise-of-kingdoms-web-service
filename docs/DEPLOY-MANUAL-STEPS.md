@@ -150,6 +150,7 @@ NEXT_TELEMETRY_DISABLED=1
 ```
 
 **SAU KHI PASTE:**
+
 - Click "Save" cho từng biến
 - Vercel sẽ tự động redeploy
 
@@ -210,12 +211,14 @@ curl https://rok-services-xxx.vercel.app/api/health
 ## 🆘 NẾU GẶP LỖI
 
 ### Lỗi: "Failed to push to GitHub"
+
 ```bash
 # Xem hướng dẫn ở Bước 1 ở trên
 # Dùng GitHub Token là dễ nhất
 ```
 
 ### Lỗi: "Vercel build failed"
+
 ```bash
 # Xem logs
 vercel logs --build
@@ -225,6 +228,7 @@ vercel logs --build
 ```
 
 ### Lỗi: "Cannot read property of undefined"
+
 ```bash
 # Thiếu environment variables
 # Vào Vercel dashboard → Settings → Environment Variables
@@ -232,6 +236,7 @@ vercel logs --build
 ```
 
 ### Lỗi: "Database connection failed"
+
 ```bash
 # Check DATABASE_URL đúng chưa
 # Test connection:
@@ -243,17 +248,20 @@ npx prisma db pull
 ## 📞 CẦN HELP?
 
 **Xem logs:**
+
 ```bash
 vercel logs
 vercel logs --build
 ```
 
 **Check deployment:**
+
 ```bash
 vercel ls
 ```
 
 **Rollback nếu lỗi:**
+
 ```bash
 vercel rollback
 ```

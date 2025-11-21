@@ -25,7 +25,7 @@ global.performance = {
   getEntriesByType: jest.fn(() => []),
   getEntriesByName: jest.fn(() => []),
   mark: jest.fn(),
-  measure: jest.fn(),
+  measure: jest.fn()
 }
 
 // IntersectionObserver polyfill
@@ -56,8 +56,8 @@ if (typeof window !== 'undefined') {
       removeListener: jest.fn(), // deprecated
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
+      dispatchEvent: jest.fn()
+    }))
   })
 }
 
@@ -69,7 +69,7 @@ const localStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
-  clear: jest.fn(),
+  clear: jest.fn()
 }
 global.localStorage = localStorageMock
 global.sessionStorage = localStorageMock

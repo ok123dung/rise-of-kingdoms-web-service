@@ -10,7 +10,7 @@ describe('ClientOnly', () => {
 
   it('renders fallback initially', () => {
     const fallback = <div>Loading...</div>
-    
+
     const { container } = render(
       <ClientOnly fallback={fallback}>
         <div>Client content</div>
@@ -99,9 +99,7 @@ describe('ClientOnly', () => {
 
   it('prevents hydration mismatches for dynamic content', async () => {
     const DynamicContent = () => (
-      <div>
-        {typeof window !== 'undefined' ? 'Client-side' : 'Server-side'}
-      </div>
+      <div>{typeof window !== 'undefined' ? 'Client-side' : 'Server-side'}</div>
     )
 
     render(
@@ -140,44 +138,42 @@ describe('ClientOnly', () => {
 describe('useClientOnly hook', () => {
   it('returns false initially, then true after mount', async () => {
     const { result } = renderHook(() => useClientOnly())
-    
+
     // The hook might return true immediately in test environment
     // or false initially then true
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
-    
+
     expect(result.current).toBe(true)
   })
 
   it('can be used for conditional rendering', async () => {
     const TestComponent = () => {
       const hasMounted = useClientOnly()
-      
-      return (
-        <div>
-          {hasMounted ? 'Mounted on client' : 'Server rendering'}
-        </div>
-      )
+
+      return <div>{hasMounted ? 'Mounted on client' : 'Server rendering'}</div>
     }
 
     render(<TestComponent />)
-    
+
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
-    
+
     expect(screen.getByText('Mounted on client')).toBeInTheDocument()
   })
 
   it('prevents hydration issues with browser APIs', async () => {
     const TestComponent = () => {
       const hasMounted = useClientOnly()
-      
+
       return (
         <div>
           {hasMounted && typeof window !== 'undefined' ? (
-            <div>Window size: {window.innerWidth}x{window.innerHeight}</div>
+            <div>
+              Window size: {window.innerWidth}x{window.innerHeight}
+            </div>
           ) : (
             <div>Loading dimensions...</div>
           )}
@@ -186,11 +182,11 @@ describe('useClientOnly hook', () => {
     }
 
     render(<TestComponent />)
-    
+
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
-    
+
     expect(screen.getByText(/Window size:/)).toBeInTheDocument()
   })
 
@@ -198,7 +194,7 @@ describe('useClientOnly hook', () => {
     const TestComponent = () => {
       const hasMounted1 = useClientOnly()
       const hasMounted2 = useClientOnly()
-      
+
       return (
         <div>
           <div>Hook 1: {hasMounted1 ? 'mounted' : 'not mounted'}</div>
@@ -208,11 +204,11 @@ describe('useClientOnly hook', () => {
     }
 
     render(<TestComponent />)
-    
+
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
-    
+
     expect(screen.getByText('Hook 1: mounted')).toBeInTheDocument()
     expect(screen.getByText('Hook 2: mounted')).toBeInTheDocument()
   })
@@ -220,7 +216,7 @@ describe('useClientOnly hook', () => {
   it('maintains state after re-renders', async () => {
     const TestComponent = ({ count }: { count: number }) => {
       const hasMounted = useClientOnly()
-      
+
       return (
         <div>
           <div>Count: {count}</div>
@@ -230,16 +226,16 @@ describe('useClientOnly hook', () => {
     }
 
     const { rerender } = render(<TestComponent count={0} />)
-    
+
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0))
     })
-    
+
     expect(screen.getByText('Mounted: yes')).toBeInTheDocument()
-    
+
     // Re-render with different props
     rerender(<TestComponent count={1} />)
-    
+
     expect(screen.getByText('Count: 1')).toBeInTheDocument()
     expect(screen.getByText('Mounted: yes')).toBeInTheDocument()
   })

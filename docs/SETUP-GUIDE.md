@@ -4,20 +4,20 @@ Hướng dẫn setup chi tiết từ đầu cho dự án rok-services.
 
 ## 📋 Tổng Quan
 
-**Thời gian setup**: ~1.5 giờ
-**Độ khó**: Trung bình
-**Chi phí**: Miễn phí để bắt đầu
+**Thời gian setup**: ~1.5 giờ **Độ khó**: Trung bình **Chi phí**: Miễn phí để bắt đầu
 
 ---
 
 ## ✅ Bước 1: Chuẩn Bị Môi Trường (10 phút)
 
 ### Yêu Cầu Hệ Thống
+
 - ✅ Node.js 18+ ([Download](https://nodejs.org/))
 - ✅ Git ([Download](https://git-scm.com/))
 - ✅ Code editor (VS Code khuyến nghị)
 
 ### Kiểm Tra Cài Đặt
+
 ```bash
 node --version  # Phải >= 18.0.0
 npm --version   # Phải >= 8.0.0
@@ -29,6 +29,7 @@ git --version   # Phải có
 ## 📦 Bước 2: Clone & Install (15 phút)
 
 ### 2.1 Clone Repository
+
 ```bash
 cd /path/to/your/projects
 git clone <your-repo-url> rok-services
@@ -36,12 +37,14 @@ cd rok-services
 ```
 
 ### 2.2 Install Dependencies
+
 ```bash
 npm install
 # Đợi khoảng 2-3 phút để cài đặt tất cả packages
 ```
 
 ### 2.3 Verify Installation
+
 ```bash
 # Kiểm tra TypeScript
 npm run type-check
@@ -55,6 +58,7 @@ npm run type-check
 ### Option A: Supabase (Khuyến nghị - Miễn phí)
 
 #### 3.1 Tạo Supabase Project
+
 1. Truy cập [https://supabase.com](https://supabase.com)
 2. Sign up với GitHub
 3. Click **New Project**
@@ -65,16 +69,19 @@ npm run type-check
 5. Click **Create new project** (đợi 2-3 phút)
 
 #### 3.2 Lấy Connection Strings
+
 1. Vào **Settings** → **Database**
 2. Scroll xuống **Connection string**
 3. Copy 2 connection strings:
 
 **Pooling Connection** (cho DATABASE_URL):
+
 ```
 postgresql://postgres.[ref]:[password]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
 ```
 
 **Direct Connection** (cho DIRECT_URL):
+
 ```
 postgresql://postgres.[ref]:[password]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
 ```
@@ -104,11 +111,13 @@ sudo systemctl start postgresql
 ## 🔐 Bước 4: Configure Environment (15 phút)
 
 ### 4.1 Tạo .env.local
+
 ```bash
 cp .env.example .env.local
 ```
 
 ### 4.2 Generate Secrets
+
 ```bash
 # Generate NEXTAUTH_SECRET
 openssl rand -base64 32
@@ -167,12 +176,14 @@ SENTRY_DSN=
 ## 🔨 Bước 5: Setup Database Schema (15 phút)
 
 ### 5.1 Generate Prisma Client
+
 ```bash
 npx prisma generate
 # Tạo Prisma Client để interact với database
 ```
 
 ### 5.2 Run Database Migrations
+
 ```bash
 npx prisma migrate dev
 # Tạo tất cả tables trong database
@@ -180,12 +191,14 @@ npx prisma migrate dev
 ```
 
 ### 5.3 Seed Initial Data (Optional)
+
 ```bash
 npx tsx prisma/seed.ts
 # Tạo dữ liệu mẫu: services, users, etc.
 ```
 
 ### 5.4 Verify Database
+
 ```bash
 npx prisma studio
 # Mở Prisma Studio để xem database
@@ -197,17 +210,21 @@ npx prisma studio
 ## 🚀 Bước 6: Start Development Server (5 phút)
 
 ### 6.1 Start Server
+
 ```bash
 npm run dev
 ```
 
 ### 6.2 Verify Application
+
 Mở browser và truy cập:
+
 - **Homepage**: http://localhost:3000
 - **API Health**: http://localhost:3000/api/health
 - **Services**: http://localhost:3000/services
 
 ### 6.3 Test Features
+
 1. ✅ Homepage loads correctly
 2. ✅ Services page shows 8 services
 3. ✅ API health check returns `{"status":"healthy"}`
@@ -217,6 +234,7 @@ Mở browser và truy cập:
 ## 🔍 Bước 7: Verify Setup (10 phút)
 
 ### 7.1 Run Tests
+
 ```bash
 # TypeScript check
 npm run type-check
@@ -230,6 +248,7 @@ npm run format:check
 ```
 
 ### 7.2 Test Database Connection
+
 ```bash
 # Mở Prisma Studio
 npx prisma studio
@@ -240,6 +259,7 @@ npx prisma studio
 ```
 
 ### 7.3 Test API Endpoints
+
 ```bash
 # Health check
 curl http://localhost:3000/api/health
@@ -273,6 +293,7 @@ curl http://localhost:3000/api/health/db
 ## 🐛 Troubleshooting
 
 ### Lỗi: "Cannot connect to database"
+
 ```bash
 # Kiểm tra DATABASE_URL đúng format
 echo $DATABASE_URL
@@ -282,6 +303,7 @@ npx prisma db pull
 ```
 
 ### Lỗi: "Module not found"
+
 ```bash
 # Reinstall dependencies
 rm -rf node_modules package-lock.json
@@ -289,6 +311,7 @@ npm install
 ```
 
 ### Lỗi: "Port 3000 already in use"
+
 ```bash
 # Kill process on port 3000
 # macOS/Linux:
@@ -300,6 +323,7 @@ taskkill /PID <PID> /F
 ```
 
 ### Lỗi: Prisma migrations fail
+
 ```bash
 # Reset database (XÓA TẤT CẢ DỮ LIỆU!)
 npx prisma migrate reset
@@ -315,6 +339,7 @@ npx prisma db push
 Sau khi setup xong, bạn có thể:
 
 1. **Tạo Admin Account**
+
    ```bash
    # Chạy signup qua UI hoặc tạo user trực tiếp trong database
    ```
@@ -348,6 +373,7 @@ Sau khi setup xong, bạn có thể:
 ## 💡 Tips
 
 ### Development Workflow
+
 ```bash
 # Terminal 1: Dev server
 npm run dev
@@ -360,6 +386,7 @@ npm run type-check
 ```
 
 ### Recommended VS Code Extensions
+
 - ESLint
 - Prettier
 - Prisma
@@ -367,6 +394,7 @@ npm run type-check
 - GitLens
 
 ### Git Workflow
+
 ```bash
 # Create feature branch
 git checkout -b feature/your-feature

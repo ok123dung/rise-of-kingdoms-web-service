@@ -1,9 +1,13 @@
 # RoK Services Database Security Documentation
 
 ## Overview
-This document outlines the comprehensive security measures implemented for the RoK Services database on Supabase. The security architecture includes Row-Level Security (RLS), field-level encryption, performance optimization, and comprehensive audit logging.
+
+This document outlines the comprehensive security measures implemented for the RoK Services database
+on Supabase. The security architecture includes Row-Level Security (RLS), field-level encryption,
+performance optimization, and comprehensive audit logging.
 
 ## Table of Contents
+
 1. [Security Architecture](#security-architecture)
 2. [Row-Level Security (RLS)](#row-level-security-rls)
 3. [Field-Level Encryption](#field-level-encryption)
@@ -15,6 +19,7 @@ This document outlines the comprehensive security measures implemented for the R
 ## Security Architecture
 
 ### Multi-Layer Security Model
+
 ```
 ┌─────────────────────────────────────┐
 │         Application Layer           │
@@ -30,6 +35,7 @@ This document outlines the comprehensive security measures implemented for the R
 ```
 
 ### Key Security Features
+
 - **Row-Level Security**: Ensures users can only access their own data
 - **Field Encryption**: Protects sensitive PII data with AES-256 encryption
 - **Audit Trail**: Complete logging of all database operations
@@ -39,20 +45,22 @@ This document outlines the comprehensive security measures implemented for the R
 ## Row-Level Security (RLS)
 
 ### Implementation Status
+
 All 18 main tables have RLS policies enabled:
 
-| Table | Policy Type | Description |
-|-------|------------|-------------|
-| users | SELECT, UPDATE | Users view/edit own profile; admins manage all |
-| bookings | SELECT, INSERT, UPDATE | Users manage own bookings; staff see assigned |
-| payments | SELECT | Users view own payment history |
-| communications | SELECT, INSERT | Users see own messages; staff see related |
-| audit_logs | SELECT | Admin-only access |
-| security_logs | SELECT | Admin and security staff only |
+| Table          | Policy Type            | Description                                    |
+| -------------- | ---------------------- | ---------------------------------------------- |
+| users          | SELECT, UPDATE         | Users view/edit own profile; admins manage all |
+| bookings       | SELECT, INSERT, UPDATE | Users manage own bookings; staff see assigned  |
+| payments       | SELECT                 | Users view own payment history                 |
+| communications | SELECT, INSERT         | Users see own messages; staff see related      |
+| audit_logs     | SELECT                 | Admin-only access                              |
+| security_logs  | SELECT                 | Admin and security staff only                  |
 
 ### Policy Examples
 
 #### User Profile Access
+
 ```sql
 -- Users can only view their own profile
 CREATE POLICY "Users can view own profile" ON users
@@ -66,6 +74,7 @@ CREATE POLICY "Admins can manage users" ON users
 ```
 
 #### Booking Management
+
 ```sql
 -- Users see their own bookings
 CREATE POLICY "Users view own bookings" ON bookings
@@ -81,18 +90,20 @@ CREATE POLICY "Staff view assigned bookings" ON bookings
 ## Field-Level Encryption
 
 ### Encrypted Fields
+
 The following sensitive fields are encrypted using AES-256:
 
-| Table | Field | Classification | Encryption Status |
-|-------|-------|----------------|-------------------|
-| users | phone | Restricted (PII) | ✅ Encrypted |
-| users | discord_id | Confidential | ✅ Encrypted |
-| users | rok_player_id | Confidential | ✅ Encrypted |
-| payments | gateway_transaction_id | Restricted (Financial) | ✅ Encrypted |
-| payments | metadata | Confidential | ✅ Encrypted |
-| communications | content | Confidential | ✅ Encrypted |
+| Table          | Field                  | Classification         | Encryption Status |
+| -------------- | ---------------------- | ---------------------- | ----------------- |
+| users          | phone                  | Restricted (PII)       | ✅ Encrypted      |
+| users          | discord_id             | Confidential           | ✅ Encrypted      |
+| users          | rok_player_id          | Confidential           | ✅ Encrypted      |
+| payments       | gateway_transaction_id | Restricted (Financial) | ✅ Encrypted      |
+| payments       | metadata               | Confidential           | ✅ Encrypted      |
+| communications | content                | Confidential           | ✅ Encrypted      |
 
 ### Encryption Implementation
+
 ```sql
 -- Encrypt sensitive data
 SELECT vault.encrypt_sensitive('sensitive_data', 'main');
@@ -102,6 +113,7 @@ SELECT vault.decrypt_sensitive(encrypted_column, 'main');
 ```
 
 ### Key Management
+
 - Encryption keys stored in Supabase Vault
 - Automatic key rotation support
 - Separate keys for different data types
@@ -111,6 +123,7 @@ SELECT vault.decrypt_sensitive(encrypted_column, 'main');
 ### Strategic Index Categories
 
 #### 1. Authentication & User Management
+
 ```sql
 -- Fast user lookup
 CREATE INDEX idx_users_email ON users(email);
@@ -122,6 +135,7 @@ CREATE INDEX idx_sessions_expires ON sessions(expires);
 ```
 
 #### 2. Booking & Service Operations
+
 ```sql
 -- Booking queries
 CREATE INDEX idx_bookings_user_status_created ON bookings(user_id, status, created_at DESC);
@@ -133,6 +147,7 @@ CREATE INDEX idx_payments_reference_code ON payments(reference_code);
 ```
 
 #### 3. Full-Text Search
+
 ```sql
 -- User search
 CREATE INDEX idx_users_search ON users USING gin(
@@ -146,6 +161,7 @@ CREATE INDEX idx_services_search ON services USING gin(
 ```
 
 ### Performance Metrics
+
 - Query response time: < 100ms for 95% of queries
 - Index hit ratio: > 90%
 - Table scan reduction: 80% improvement
@@ -153,6 +169,7 @@ CREATE INDEX idx_services_search ON services USING gin(
 ## Audit & Monitoring
 
 ### Audit Log Features
+
 - **Comprehensive Tracking**: All INSERT, UPDATE, DELETE operations
 - **User Attribution**: Links actions to authenticated users
 - **Change History**: Before/after snapshots of data
@@ -161,24 +178,28 @@ CREATE INDEX idx_services_search ON services USING gin(
 ### Monitoring Views
 
 #### Active Sessions
+
 ```sql
 SELECT * FROM active_sessions_monitor;
 -- Shows all active user sessions with expiry info
 ```
 
 #### Security Threats
+
 ```sql
 SELECT * FROM security_threats_monitor;
 -- Real-time security threat dashboard
 ```
 
 #### Performance Bottlenecks
+
 ```sql
 SELECT * FROM performance_bottlenecks;
 -- Identifies slow queries needing optimization
 ```
 
 ### Automated Alerts
+
 - Failed login attempts (> 5 in 15 minutes)
 - Unusual activity patterns
 - Slow query detection (> 1 second)
@@ -187,7 +208,9 @@ SELECT * FROM performance_bottlenecks;
 ## Implementation Guide
 
 ### Step 1: Run Migration Scripts
+
 Execute in order:
+
 ```bash
 # 1. Enable Row-Level Security
 psql $DATABASE_URL -f 001_enable_rls_security.sql
@@ -203,6 +226,7 @@ psql $DATABASE_URL -f 004_audit_monitoring.sql
 ```
 
 ### Step 2: Configure Encryption Keys
+
 ```sql
 -- Generate main encryption key (Supabase Vault)
 INSERT INTO vault.encryption_keys (key_name, key_value)
@@ -210,18 +234,20 @@ VALUES ('main', encode(gen_random_bytes(32), 'base64'));
 ```
 
 ### Step 3: Migrate Existing Data
+
 ```sql
 -- Encrypt existing sensitive data
 SELECT vault.migrate_encrypt_sensitive_data();
 ```
 
 ### Step 4: Setup Monitoring
+
 ```sql
 -- Schedule monitoring jobs (via Supabase Dashboard)
-SELECT cron.schedule('collect-metrics', '*/5 * * * *', 
+SELECT cron.schedule('collect-metrics', '*/5 * * * *',
     'SELECT public.collect_database_metrics()');
-    
-SELECT cron.schedule('cleanup-logs', '0 2 * * *', 
+
+SELECT cron.schedule('cleanup-logs', '0 2 * * *',
     'SELECT public.cleanup_old_logs()');
 ```
 
@@ -230,16 +256,19 @@ SELECT cron.schedule('cleanup-logs', '0 2 * * *',
 ### Regular Tasks
 
 #### Daily
+
 - Review security threat monitor
 - Check slow query reports
 - Monitor active sessions
 
 #### Weekly
+
 - Analyze audit logs for anomalies
 - Review database growth metrics
 - Check index usage statistics
 
 #### Monthly
+
 - Update data retention policies
 - Review and rotate encryption keys
 - Performance baseline analysis
@@ -271,28 +300,31 @@ SELECT cron.schedule('cleanup-logs', '0 2 * * *',
 #### Common Issues
 
 1. **RLS Policy Blocks Access**
+
    ```sql
    -- Check current user
    SELECT auth.uid();
-   
+
    -- Test policy
    SELECT * FROM users WHERE auth.uid()::text = id;
    ```
 
 2. **Slow Query Performance**
+
    ```sql
    -- Analyze query plan
    EXPLAIN ANALYZE SELECT ...;
-   
+
    -- Check index usage
    SELECT * FROM pg_stat_user_indexes;
    ```
 
 3. **Encryption/Decryption Errors**
+
    ```sql
    -- Verify encryption key exists
    SELECT * FROM vault.encryption_keys WHERE key_name = 'main';
-   
+
    -- Test encryption
    SELECT vault.encrypt_sensitive('test', 'main');
    ```
@@ -315,12 +347,12 @@ SELECT cron.schedule('cleanup-logs', '0 2 * * *',
 
 ### A. Data Classification
 
-| Level | Description | Examples | Protection |
-|-------|-------------|----------|------------|
-| Public | Non-sensitive | Service names, prices | None required |
-| Internal | Business data | Bookings, orders | RLS policies |
-| Confidential | User data | Email, discord ID | RLS + encryption |
-| Restricted | High-risk PII | Phone, payment data | RLS + encryption + audit |
+| Level        | Description   | Examples              | Protection               |
+| ------------ | ------------- | --------------------- | ------------------------ |
+| Public       | Non-sensitive | Service names, prices | None required            |
+| Internal     | Business data | Bookings, orders      | RLS policies             |
+| Confidential | User data     | Email, discord ID     | RLS + encryption         |
+| Restricted   | High-risk PII | Phone, payment data   | RLS + encryption + audit |
 
 ### B. Compliance Checklist
 
@@ -336,11 +368,11 @@ SELECT cron.schedule('cleanup-logs', '0 2 * * *',
 ### C. Contact Information
 
 For security issues or questions:
+
 - Database Admin: admin@rokservices.com
 - Security Team: security@rokservices.com
 - Emergency: +84-XXX-XXX-XXXX
 
 ---
 
-*Last Updated: December 2024*
-*Version: 1.0*
+_Last Updated: December 2024_ _Version: 1.0_

@@ -1,9 +1,9 @@
-import { Prisma } from '@prisma/client'
+import { type Prisma } from '@prisma/client'
 import { Eye } from 'lucide-react'
 import Link from 'next/link'
 
-import { prisma } from '@/lib/db'
 import SearchInput from '@/components/admin/SearchInput'
+import { prisma } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,10 +90,11 @@ export default async function BookingsPage({
           <Link
             key={status}
             href={`/admin/bookings?status=${status}`}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium ${currentStatus === status
-              ? 'bg-blue-600 text-white'
-              : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-              }`}
+            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium ${
+              currentStatus === status
+                ? 'bg-blue-600 text-white'
+                : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+            }`}
           >
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Link>
@@ -180,10 +181,11 @@ export default async function BookingsPage({
             <Link
               key={p}
               href={`/admin/bookings?page=${p}&status=${currentStatus}`}
-              className={`rounded px-3 py-1 ${currentPage === p
-                ? 'bg-blue-600 text-white'
-                : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                }`}
+              className={`rounded px-3 py-1 ${
+                currentPage === p
+                  ? 'bg-blue-600 text-white'
+                  : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+              }`}
             >
               {p}
             </Link>

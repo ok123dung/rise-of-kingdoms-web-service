@@ -14,7 +14,7 @@ module.exports = {
         chromeFlags: '--no-sandbox --disable-dev-shm-usage',
         // Optimize for Vietnamese users
         throttling: {
-          rttMs: 150,      // Vietnam average RTT
+          rttMs: 150, // Vietnam average RTT
           throughputKbps: 1600, // 3G connection speed common in Vietnam
           cpuSlowdownMultiplier: 4,
           requestLatencyMs: 0,
@@ -37,31 +37,31 @@ module.exports = {
         'categories:accessibility': ['error', { minScore: 0.9 }],
         'categories:best-practices': ['warn', { minScore: 0.9 }],
         'categories:seo': ['error', { minScore: 0.9 }],
-        
+
         // Core Web Vitals thresholds
         'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }],
         'first-input-delay': ['warn', { maxNumericValue: 100 }],
         'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }],
-        
+
         // Mobile-specific metrics
         'speed-index': ['warn', { maxNumericValue: 3000 }],
-        'interactive': ['warn', { maxNumericValue: 5000 }],
-        
+        interactive: ['warn', { maxNumericValue: 5000 }],
+
         // Vietnamese-specific requirements
         'font-display': 'error', // Important for Vietnamese characters
         'unused-css-rules': ['warn', { maxNumericValue: 20000 }],
         'total-byte-weight': ['warn', { maxNumericValue: 1500000 }], // 1.5MB for mobile
-        
+
         // SEO requirements for Vietnamese market
         'document-title': 'error',
         'meta-description': 'error',
         'html-has-lang': 'error',
         'html-lang-valid': 'error',
-        
+
         // Accessibility for Vietnamese users
         'color-contrast': 'error',
         'heading-order': 'error',
-        'label': 'error',
+        label: 'error',
         'link-name': 'error'
       }
     },

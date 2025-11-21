@@ -88,6 +88,7 @@ NEXT_TELEMETRY_DISABLED=1
 ```
 
 **SAU KHI PASTE:**
+
 - Click "Save"
 - Vercel sẽ tự động redeploy
 
@@ -117,9 +118,8 @@ vercel logs
 
 ## 🎉 XONG! WEBSITE ĐÃ LIVE
 
-✅ Frontend: https://rok-services-xxx.vercel.app
-✅ Database: Supabase (đã có)
-✅ API Routes: Tự động deploy với frontend
+✅ Frontend: https://rok-services-xxx.vercel.app ✅ Database: Supabase (đã có) ✅ API Routes: Tự
+động deploy với frontend
 
 ---
 
@@ -198,12 +198,14 @@ vercel env ls
 ## ⚠️ QUAN TRỌNG
 
 ### 🔴 CHƯA PRODUCTION READY:
+
 - ❌ Payment gateways đang dùng SANDBOX keys
 - ❌ Email service chưa config
 - ❌ Domain chưa custom
 - ❌ WebSocket chưa deploy
 
 ### ✅ SẴN SÀNG DÙNG:
+
 - ✅ Website hoạt động đầy đủ
 - ✅ User authentication
 - ✅ Database operations
@@ -216,6 +218,7 @@ vercel env ls
 ## 🚀 NEXT STEPS
 
 ### 1. Custom Domain (nếu cần)
+
 ```bash
 # Trên Vercel dashboard:
 # Settings → Domains → Add Domain
@@ -224,12 +227,14 @@ vercel env ls
 ```
 
 ### 2. Production Payment Keys
+
 ```bash
 # Liên hệ VNPay/MoMo/ZaloPay để có production keys
 # Update environment variables trên Vercel
 ```
 
 ### 3. Email Service
+
 ```bash
 # Đăng ký Resend.com (free 100 emails/day)
 # Get API key
@@ -237,6 +242,7 @@ vercel env ls
 ```
 
 ### 4. Monitoring
+
 ```bash
 # Vercel Analytics: Tự động có
 # Sentry:
@@ -249,22 +255,26 @@ npx @sentry/wizard -i nextjs
 ## 🆘 CẦU VIỆN TRỢ?
 
 **Deployment logs:**
+
 ```bash
 vercel logs
 ```
 
 **Build errors:**
+
 ```bash
 vercel logs --build
 ```
 
 **Environment issues:**
+
 ```bash
 vercel env ls
 vercel env pull
 ```
 
 **Database:**
+
 ```bash
 # Test connection
 npx prisma db pull
@@ -294,16 +304,17 @@ npx prisma db pull
 
 ## 🎉 DONE!
 
-**Website của bạn đã LIVE tại:**
-`https://rok-services-xxx.vercel.app`
+**Website của bạn đã LIVE tại:** `https://rok-services-xxx.vercel.app`
 
 **Chi phí:**
+
 - Vercel: FREE (Hobby plan)
 - Supabase: FREE (500MB)
 - Railway: FREE tier
 - **Total: $0/month**
 
 **Khi scale lên:**
+
 - Vercel Pro: $20/month
 - Supabase Pro: $25/month
 - Railway: $5-20/month
@@ -313,4 +324,4 @@ npx prisma db pull
 
 **Good luck! 🚀**
 
-*Nếu gặp vấn đề gì, check logs hoặc hỏi tôi!*
+_Nếu gặp vấn đề gì, check logs hoặc hỏi tôi!_
