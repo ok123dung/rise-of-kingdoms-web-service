@@ -26,7 +26,7 @@ class CircuitBreaker {
     private readonly threshold = 5,
     private readonly timeout = 60000, // 1 minute
     private readonly halfOpenRequests = 3
-  ) {}
+  ) { }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === 'open') {
@@ -78,24 +78,27 @@ class EnhancedPrismaClient extends PrismaClient {
   private isHealthy = true
 
   constructor() {
-    const databaseUrl = process.env.DATABASE_URL
-    if (!databaseUrl) {
-      throw new Error('DATABASE_URL environment variable is not set')
-    }
+    let databaseUrl = process.env.DATABASE_URL
 
-    // Add connection pool parameters to URL if not present
-    const url = new URL(databaseUrl)
-    if (!url.searchParams.has('connection_limit')) {
-      url.searchParams.set('connection_limit', String(CONNECTION_POOL_CONFIG.connection_limit))
-    }
-    if (!url.searchParams.has('pool_timeout')) {
-      url.searchParams.set('pool_timeout', String(CONNECTION_POOL_CONFIG.pool_timeout / 1000))
+    if (!databaseUrl) {
+      getLogger().warn('DATABASE_URL environment variable is not set. Database functionality will be limited.')
+    } else {
+      // Add connection pool parameters to URL if not present
+      const url = new URL(databaseUrl)
+      if (!url.searchParams.has('connection_limit')) {
+        url.searchParams.set('connection_limit', String(CONNECTION_POOL_CONFIG.connection_limit))
+      }
+      if (!url.searchParams.has('pool_timeout')) {
+        url.searchParams.set('pool_timeout', String(CONNECTION_POOL_CONFIG.pool_timeout / 1000))
+      }
+      // Update the databaseUrl with the modified parameters
+      databaseUrl = url.toString()
     }
 
     super({
       datasources: {
         db: {
-          url: url.toString()
+          url: databaseUrl || 'postgresql://dummy:dummy@localhost:5432/dummy'
         }
       },
       log: [

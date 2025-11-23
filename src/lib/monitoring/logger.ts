@@ -108,6 +108,8 @@ class Logger {
       // Only persist important logs to database in production
       if (
         this.environment === 'production' &&
+        process.env.DATABASE_URL && // Only log to DB if URL is configured
+        !process.env.CI && // Skip DB logging during CI/Build
         (entry.level === LogLevel.ERROR ||
           entry.level === LogLevel.FATAL ||
           entry.level === LogLevel.WARN)
@@ -122,10 +124,10 @@ class Logger {
             context: entry.context as any,
             error: entry.error
               ? {
-                  message: entry.error.message,
-                  stack: entry.error.stack,
-                  name: entry.error.name
-                }
+                message: entry.error.message,
+                stack: entry.error.stack,
+                name: entry.error.name
+              }
               : undefined,
             timestamp: entry.timestamp
           }

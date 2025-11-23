@@ -1,6 +1,3 @@
-'use client'
-import { useEffect, useState } from 'react'
-
 import {
   BarChart3,
   Users,
@@ -12,110 +9,141 @@ import {
   Shield,
   LogOut
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { redirect } from 'next/navigation'
 
-interface DashboardStats {
-  totalRevenue: number
-  totalBookings: number
-  totalUsers: number
-  totalLeads: number
-  conversionRate: number
-  avgOrderValue: number
-  recentBookings: any[]
-  recentLeads: any[]
-  monthlyRevenue: number[]
-  topServices: any[]
-}
-export default function AdminDashboard() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    // Check authentication and admin role
-    if (status === 'loading') return // Still loading
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin?callbackUrl=/admin/dashboard')
-      return
-    }
-    if (session?.user?.role !== 'admin' && session?.user?.role !== 'superadmin') {
-      router.push('/auth/error?error=accessdenied')
-      return
-    }
-    fetchDashboardData()
-  }, [session, status, router])
-  const fetchDashboardData = async () => {
-    try {
-      // In real app, these would be API calls
-      // For now, using mock data based on our seeded database
-      const mockStats: DashboardStats = {
-        totalRevenue: 900000,
-        totalBookings: 1,
-        totalUsers: 2,
-        totalLeads: 3,
-        conversionRate: 33.33,
-        avgOrderValue: 900000,
-        monthlyRevenue: [0, 0, 0, 0, 0, 900000], // Last 6 months
-        recentBookings: [
-          {
-            id: '1',
-            bookingNumber: 'RK24010001',
-            customerName: 'Nguyễn Văn A',
-            serviceName: 'Tư vấn chiến thuật - Pro',
-            amount: 900000,
-            status: 'confirmed',
-            createdAt: new Date().toISOString()
-          }
-        ],
-        recentLeads: [
-          {
-            id: '1',
-            fullName: 'Trần Văn B',
-            email: 'lead1@example.com',
-            serviceInterest: 'strategy',
-            leadScore: 75,
-            status: 'new',
-            source: 'website'
-          },
-          {
-            id: '2',
-            fullName: 'Lê Thị C',
-            email: 'lead2@example.com',
-            serviceInterest: 'farming',
-            leadScore: 60,
-            status: 'contacted',
-            source: 'discord'
-          },
-          {
-            id: '3',
-            fullName: 'Phạm Văn D',
-            email: 'lead3@example.com',
-            serviceInterest: 'premium',
-            leadScore: 90,
-            status: 'qualified',
-            source: 'referral'
-          }
-        ],
-        topServices: [
-          { name: 'Tư vấn chiến thuật - Pro', bookings: 1, revenue: 900000 },
-          { name: 'Farm Gem - Basic', bookings: 0, revenue: 0 },
-          { name: 'KvK Support - Elite', bookings: 0, revenue: 0 }
-        ]
+import { getCurrentUser } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+
+async function getAdminDashboardData() {
+  // 1. Overall Stats
+  const totalRevenueResult = await prisma.payment.aggregate({
+    where: { status: 'completed' },
+    _sum: { amount: true }
+  })
+  const totalRevenue = Number(totalRevenueResult._sum.amount || 0)
+
+  const totalBookings = await prisma.booking.count()
+  // Count users who are customers (no staff profile)
+  const totalUsers = await prisma.user.count({
+    where: {
+      staffProfile: {
+        is: null
       }
-      setStats(mockStats)
-      setLoading(false)
-    } catch (error) {
-      // Error handled by error boundary
-      setLoading(false)
     }
+  })
+  const totalLeads = await prisma.lead.count()
+
+  // Conversion Rate: (Bookings / Leads) * 100 (Simplified proxy)
+  const conversionRate = totalLeads > 0 ? (totalBookings / totalLeads) * 100 : 0
+
+  // 2. Recent Bookings
+  const recentBookingsData = await prisma.booking.findMany({
+    take: 5,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      user: true,
+      serviceTier: {
+        include: { service: true }
+      }
+    }
+  })
+
+  const recentBookings = recentBookingsData.map(booking => ({
+    id: booking.id,
+    bookingNumber: booking.bookingNumber,
+    customerName: booking.user.fullName,
+    serviceName: booking.serviceTier.service.name,
+    amount: Number(booking.totalAmount),
+    status: booking.status,
+    createdAt: booking.createdAt.toISOString()
+  }))
+
+  // 3. Recent Leads
+  const recentLeadsData = await prisma.lead.findMany({
+    take: 5,
+    orderBy: { createdAt: 'desc' }
+  })
+
+  const recentLeads = recentLeadsData.map(lead => ({
+    id: lead.id,
+    fullName: lead.fullName,
+    email: lead.email,
+    serviceInterest: lead.serviceInterest,
+    leadScore: lead.leadScore,
+    status: lead.status,
+    source: lead.source
+  }))
+
+  // 4. Top Services (Aggregation)
+  // Prisma doesn't support complex grouping with relations easily in one go,
+  // so we might need to do some manual aggregation or raw query.
+  // For simplicity/performance, let's just count bookings per service tier for now.
+  const topServicesData = await prisma.booking.groupBy({
+    by: ['serviceTierId'],
+    _count: {
+      serviceTierId: true
+    },
+    _sum: {
+      totalAmount: true
+    },
+    orderBy: {
+      _count: {
+        serviceTierId: 'desc'
+      }
+    },
+    take: 5
+  })
+
+  // We need to fetch service names for these IDs
+  const serviceTierIds = topServicesData.map(item => item.serviceTierId)
+  const serviceTiers = await prisma.serviceTier.findMany({
+    where: { id: { in: serviceTierIds } },
+    include: { service: true }
+  })
+
+  const topServices = topServicesData.map(item => {
+    const tier = serviceTiers.find(t => t.id === item.serviceTierId)
+    return {
+      name: tier ? `${tier.service.name} - ${tier.name}` : 'Unknown Service',
+      bookings: item._count.serviceTierId,
+      revenue: Number(item._sum.totalAmount || 0)
+    }
+  })
+
+  return {
+    totalRevenue,
+    totalBookings,
+    totalUsers,
+    totalLeads,
+    conversionRate,
+    recentBookings,
+    recentLeads,
+    topServices
   }
+}
+
+export default async function AdminDashboard() {
+  const user = await getCurrentUser()
+
+  if (!user) {
+    redirect('/auth/signin?callbackUrl=/admin/dashboard')
+  }
+
+  const userRole = user.staffProfile?.role
+
+  if (userRole !== 'admin' && userRole !== 'superadmin') {
+    redirect('/auth/error?error=accessdenied')
+  }
+
+  const stats = await getAdminDashboardData()
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND'
     }).format(amount)
   }
+
   const getStatusBadge = (status: string) => {
     const statusClasses = {
       confirmed: 'bg-green-100 text-green-800',
@@ -123,7 +151,10 @@ export default function AdminDashboard() {
       cancelled: 'bg-red-100 text-red-800',
       new: 'bg-blue-100 text-blue-800',
       contacted: 'bg-purple-100 text-purple-800',
-      qualified: 'bg-green-100 text-green-800'
+      qualified: 'bg-green-100 text-green-800',
+      in_progress: 'bg-purple-100 text-purple-800',
+      completed: 'bg-green-100 text-green-800',
+      failed: 'bg-red-100 text-red-800'
     }
     return (
       <span
@@ -133,38 +164,13 @@ export default function AdminDashboard() {
       </span>
     )
   }
+
   const getLeadScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600 bg-green-100'
     if (score >= 60) return 'text-yellow-600 bg-yellow-100'
     return 'text-red-600 bg-red-100'
   }
-  // Show loading state
-  if (status === 'loading' || loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
-      </div>
-    )
-  }
-  // Don't render anything if not authenticated (redirect will happen)
-  if (status === 'unauthenticated') {
-    return null
-  }
-  // Don't render if user doesn't have admin role (redirect will happen)
-  if (session?.user?.role !== 'admin' && session?.user?.role !== 'superadmin') {
-    return null
-  }
-  if (!stats) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
-          <h2 className="text-xl font-semibold text-gray-900">Không thể tải dữ liệu</h2>
-          <p className="text-gray-600">Vui lòng thử lại sau</p>
-        </div>
-      </div>
-    )
-  }
+
   return (
     <div className="mx-auto max-w-7xl p-6">
       {/* Admin Header */}
@@ -181,22 +187,23 @@ export default function AdminDashboard() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {session?.user?.name || session?.user?.email}
+                {user.fullName || user.email}
               </p>
-              <p className="text-xs capitalize text-gray-500">{session?.user?.role} • Online</p>
+              <p className="text-xs capitalize text-gray-500">{user.staffProfile?.role} • Online</p>
             </div>
           </div>
-          {/* Logout Button */}
-          <button
+          {/* Logout Button - Client Component needed for onClick, or use Link to signout route if available. 
+              For now, let's keep it simple or use a form action if we were strictly server. 
+              But since we are in a server component, we can't use onClick. 
+              We should probably extract the Header to a client component or just link to signout.
+          */}
+          <a
+            href="/api/auth/signout"
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-800"
             title="Đăng xuất"
-            onClick={() => {
-              // Handle logout
-              window.location.href = '/auth/signin'
-            }}
           >
             <LogOut className="h-4 w-4" />
-          </button>
+          </a>
         </div>
       </div>
       {/* Stats Grid */}

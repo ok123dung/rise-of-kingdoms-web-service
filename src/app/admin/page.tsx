@@ -1,5 +1,7 @@
 import { Suspense } from 'react'
 
+export const dynamic = 'force-dynamic'
+
 import DashboardStats from '@/components/admin/DashboardStats'
 import RecentBookings from '@/components/admin/RecentBookings'
 import {
