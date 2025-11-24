@@ -1,0 +1,193 @@
+import crypto from 'crypto'
+
+import { type NextRequest } from 'next/server'
+
+import { getLogger } from './monitoring/logger'
+
+export interface CSRFValidationResult {
+  valid: boolean
+  reason?: string
+  newToken?: string
+}
+
+// Generate a cryptographically secure CSRF token
+export function generateCSRFToken(): string {
+  return crypto.randomBytes(32).toString('hex')
+}
+
+// Generate a signed CSRF token with timestamp
+export function generateSignedCSRFToken(secret: string): string {
+  const timestamp = Date.now()
+  const randomPart = crypto.randomBytes(24).toString('hex')
+  const data = `${timestamp}.${randomPart}`
+
+  const hmac = crypto.createHmac('sha256', secret)
+  hmac.update(data)
+  const signature = hmac.digest('hex')
+
+  return `${data}.${signature}`
+}
+
+// Verify a signed CSRF token
+export function verifySignedCSRFToken(token: string, secret: string, maxAge = 86400000): boolean {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return false
+
+    const [timestamp, randomPart, signature] = parts
+    const data = `${timestamp}.${randomPart}`
+
+    // Check timestamp
+    const tokenAge = Date.now() - parseInt(timestamp, 10)
+    if (tokenAge > maxAge) return false
+
+    // Verify signature
+    const hmac = crypto.createHmac('sha256', secret)
+    hmac.update(data)
+    const expectedSignature = hmac.digest('hex')
+
+    return crypto.timingSafeEqual(
+      Buffer.from(signature, 'hex'),
+      Buffer.from(expectedSignature, 'hex')
+    )
+  } catch {
+    return false
+  }
+}
+
+// Enhanced CSRF validation with multiple checks
+export function validateCSRF(req: NextRequest): CSRFValidationResult {
+  // Safe methods don't need CSRF protection
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return { valid: true }
+  }
+
+  const { pathname, origin, hostname } = req.nextUrl
+
+  // Webhook endpoints need special handling
+  const webhookEndpoints = [
+    '/api/payments/webhook',
+    '/api/payments/momo/webhook',
+    '/api/payments/vnpay/ipn',
+    '/api/payments/zalopay/callback',
+    '/api/webhooks/'
+  ]
+
+  if (webhookEndpoints.some(endpoint => pathname.startsWith(endpoint))) {
+    // Webhooks use signature verification instead of CSRF
+    return { valid: true, reason: 'webhook endpoint' }
+  }
+
+  // 1. Origin/Referer check
+  const requestOrigin = req.headers.get('origin')
+  const referer = req.headers.get('referer')
+
+  if (requestOrigin || referer) {
+    const allowedOrigins = [
+      `https://${hostname}`,
+      `http://localhost:3000`,
+      'https://rokdbot.com',
+      'https://www.rokdbot.com'
+    ]
+
+    if (process.env.ALLOWED_ORIGINS) {
+      allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(','))
+    }
+
+    const checkOrigin = requestOrigin || new URL(referer!).origin
+    if (!allowedOrigins.includes(checkOrigin)) {
+      getLogger().warn('CSRF validation failed: invalid origin', {
+        origin: checkOrigin,
+        path: pathname,
+        ip: req.ip || req.headers.get('x-forwarded-for') || undefined
+      })
+      return { valid: false, reason: 'invalid origin' }
+    }
+  }
+
+  // 2. Double-submit cookie validation
+  const headerToken = req.headers.get('x-csrf-token')
+  const cookieToken = req.cookies.get('csrf-token')?.value
+
+  if (!headerToken || !cookieToken) {
+    return { valid: false, reason: 'missing CSRF token' }
+  }
+
+  if (headerToken !== cookieToken) {
+    return { valid: false, reason: 'token mismatch' }
+  }
+
+  // 3. Token format validation (if using signed tokens)
+  const csrfSecret = process.env.CSRF_SECRET || process.env.NEXTAUTH_SECRET
+  if (csrfSecret && cookieToken.includes('.')) {
+    if (!verifySignedCSRFToken(cookieToken, csrfSecret)) {
+      return { valid: false, reason: 'invalid token signature' }
+    }
+  }
+
+  // 4. Additional checks for sensitive endpoints
+  const sensitiveEndpoints = [
+    '/api/auth/2fa/disable',
+    '/api/payments/create',
+    '/api/user/delete',
+    '/api/admin/'
+  ]
+
+  if (sensitiveEndpoints.some(endpoint => pathname.startsWith(endpoint))) {
+    // Require fresh token for sensitive operations
+    const tokenAge = getTokenAge(cookieToken)
+    if (tokenAge > 900000) {
+      // 15 minutes
+      return {
+        valid: false,
+        reason: 'token too old for sensitive operation',
+        newToken: generateSignedCSRFToken(csrfSecret || 'default')
+      }
+    }
+  }
+
+  return { valid: true }
+}
+
+// Get token age for signed tokens
+function getTokenAge(token: string): number {
+  try {
+    const parts = token.split('.')
+    if (parts.length === 3) {
+      const timestamp = parseInt(parts[0], 10)
+      return Date.now() - timestamp
+    }
+  } catch {
+    // Ignore parsing errors
+  }
+  return 0
+}
+
+// Middleware helper to generate CSRF meta tags for pages
+export function getCSRFMetaTags(token: string): string {
+  return `
+    <meta name="csrf-token" content="${token}" />
+    <meta name="csrf-param" content="authenticity_token" />
+    <meta name="csrf-header" content="X-CSRF-Token" />
+  `
+}
+
+// Client-side helper to include CSRF token in fetch requests
+export function getCSRFHeaders(): HeadersInit {
+  if (typeof window === 'undefined') return {}
+
+  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+  if (!token) {
+    // Try to get from cookie
+    const cookieToken = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('csrf-token='))
+      ?.split('=')[1]
+
+    if (cookieToken) {
+      return { 'X-CSRF-Token': cookieToken }
+    }
+  }
+
+  return token ? { 'X-CSRF-Token': token } : {}
+}

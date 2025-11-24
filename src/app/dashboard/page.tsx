@@ -205,11 +205,11 @@ export default async function CustomerDashboard() {
   return (
     <div className="space-y-6">
       {/* Welcome header */}
-      <div className="border-b border-gray-200 pb-4">
-        <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+      <div className="border-b border-white/10 pb-4">
+        <h1 className="text-2xl font-bold leading-7 text-white sm:truncate sm:text-3xl sm:tracking-tight">
           Xin chào, {user.fullName}! 👋
         </h1>
-        <p className="mt-1 text-sm text-gray-500">Quản lý dịch vụ Rise of Kingdoms của bạn</p>
+        <p className="mt-1 text-sm text-gray-400">Quản lý dịch vụ Rise of Kingdoms của bạn</p>
       </div>
 
       {/* Stats overview */}

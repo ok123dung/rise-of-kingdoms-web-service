@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-slate-50 via-blue-50/30 to-amber-50/20 text-gray-900;
+    @apply bg-background-dark text-white;
     min-height: 100vh;
   }
 
@@ -24,21 +24,21 @@
 
 @layer components {
   .btn-primary {
-    @apply relative transform rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-xl hover:shadow-amber-500/25;
+    @apply relative transform rounded-xl bg-primary px-6 py-3 font-bold text-background-dark shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/30;
   }
 
   .btn-primary::before {
     content: '';
-    @apply absolute inset-0 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 opacity-0 transition-opacity duration-300;
-    z-index: -1;
+    @apply absolute inset-0 rounded-xl bg-white/20 opacity-0 transition-opacity duration-300;
+    z-index: 1;
   }
 
   .btn-primary:hover::before {
-    @apply opacity-20;
+    @apply opacity-100;
   }
 
   .btn-secondary {
-    @apply relative transform rounded-xl border-2 border-slate-200 bg-white/80 px-6 py-3 font-semibold text-slate-700 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-amber-300 hover:bg-white hover:shadow-xl;
+    @apply relative transform rounded-xl border border-white/10 bg-white/5 px-6 py-3 font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/10 hover:shadow-xl;
   }
 
   .btn-accent {
@@ -46,15 +46,18 @@
   }
 
   .card {
-    @apply relative rounded-2xl border border-white/20 bg-white/90 p-8 shadow-xl backdrop-blur-sm transition-all duration-500 hover:bg-white/95 hover:shadow-2xl;
+    @apply relative rounded-2xl border border-white/10 bg-background-dark/50 p-8 shadow-xl backdrop-blur-sm transition-all duration-500 hover:bg-background-dark/70 hover:shadow-2xl;
   }
 
   .card-premium {
-    @apply relative rounded-2xl border-2 border-amber-200/30 bg-gradient-to-br from-amber-50/90 to-white/90 p-8 shadow-2xl backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:border-amber-300/50 hover:shadow-amber-500/20;
+    @apply relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-background-dark/90 p-8 shadow-2xl backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:border-primary/50 hover:shadow-primary/20;
   }
 
   .glassmorphism {
-    @apply rounded-2xl border border-white/20 bg-white/10 shadow-xl backdrop-blur-md;
+    background: rgba(41, 51, 71, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .input-field {

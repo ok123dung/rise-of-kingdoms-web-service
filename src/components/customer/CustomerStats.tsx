@@ -68,8 +68,8 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Tổng đơn hàng</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalBookings}</p>
+                <p className="text-sm font-medium text-gray-400">Tổng đơn hàng</p>
+                <p className="text-3xl font-bold text-white">{stats.totalBookings}</p>
                 <p className="mt-1 text-xs font-medium text-green-600">
                   +{stats.activeServices} đang hoạt động
                 </p>
@@ -86,8 +86,8 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Tổng chi tiêu</p>
-                <p className="text-2xl font-bold text-gray-900">{formatVND(stats.totalSpent)}</p>
+                <p className="text-sm font-medium text-gray-400">Tổng chi tiêu</p>
+                <p className="text-2xl font-bold text-white">{formatVND(stats.totalSpent)}</p>
                 <p className="mt-1 text-xs text-gray-500">
                   Trung bình:{' '}
                   {stats.totalBookings > 0 ? formatVND(stats.totalSpent / stats.totalBookings) : 0}
@@ -106,8 +106,8 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Tỷ lệ hoàn thành</p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Tỷ lệ hoàn thành</p>
+                <p className="text-3xl font-bold text-white">
                   {stats.totalBookings > 0
                     ? Math.round((stats.completedServices / stats.totalBookings) * 100)
                     : 0}
@@ -129,16 +129,15 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Đánh giá trung bình</p>
+                <p className="text-sm font-medium text-gray-400">Đánh giá trung bình</p>
                 <div className="flex items-center gap-2">
                   <p className="text-3xl font-bold text-gray-900">{stats.averageRating}</p>
                   <div className="flex">
                     {[1, 2, 3, 4, 5].map(star => (
                       <div
                         key={star}
-                        className={`h-4 w-4 ${
-                          star <= stats.averageRating ? 'text-yellow-400' : 'text-gray-300'
-                        }`}
+                        className={`h-4 w-4 ${star <= stats.averageRating ? 'text-yellow-400' : 'text-gray-300'
+                          }`}
                       >
                         ★
                       </div>
@@ -169,13 +168,13 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Tiến độ lên VIP Premium</span>
+                  <span className="text-gray-400">Tiến độ lên VIP Premium</span>
                   <span className="font-medium">{stats.currentTierProgress.toFixed(1)}%</span>
                 </div>
 
-                <div className="h-2 w-full rounded-full bg-gray-200">
+                <div className="h-2 w-full rounded-full bg-white/10">
                   <div
-                    className="h-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-500"
+                    className="h-2 rounded-full bg-gradient-to-r from-primary to-purple-600 transition-all duration-500"
                     style={{ width: `${stats.currentTierProgress}%` }}
                   />
                 </div>
@@ -185,8 +184,8 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                   <span>{formatVND(stats.nextTierThreshold)}</span>
                 </div>
 
-                <div className="rounded-lg bg-blue-50 p-3">
-                  <p className="text-sm text-blue-800">
+                <div className="rounded-lg bg-primary/10 p-3 border border-primary/20">
+                  <p className="text-sm text-white">
                     <strong>Còn {formatVND(stats.nextTierThreshold - stats.totalSpent)}</strong> nữa
                     để lên hạng VIP Premium và nhận được các ưu đãi đặc biệt!
                   </p>
@@ -213,7 +212,7 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Thành viên từ</p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-400">
                       {formatDate(stats.memberSince)} ({getTimeSince(stats.memberSince)} trước)
                     </p>
                   </div>
@@ -227,7 +226,7 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Đơn hàng cuối</p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-400">
                       {stats.recentActivity.lastBooking ? (
                         <>
                           {formatDate(stats.recentActivity.lastBooking)} (

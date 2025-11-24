@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cẩm Nang Game Thủ - Hướng Dẫn Rise of Kingdoms</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#f2d00d",
+              "background-light": "#f8f8f5",
+              "background-dark": "#1A1A1A",
+              "card-dark": "#282828",
+              "text-light": "#EAEAEA",
+              "text-subtle": "#A9A9A9",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full flex-col">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="flex items-center p-4 pb-2 justify-between">
+<div class="flex size-12 shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-text-light dark:text-text-light" style="font-size: 28px;">arrow_back_ios_new</span>
+</div>
+<h1 class="text-text-light text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Cẩm Nang Game Thủ</h1>
+<div class="flex size-12 shrink-0 items-center"></div>
+</div>
+</header>
+<!-- Search Bar -->
+<div class="px-4 py-3">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-text-subtle flex border-none bg-card-dark items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-text-light focus:outline-0 focus:ring-0 border-none bg-card-dark focus:border-none h-full placeholder:text-text-subtle px-4 pl-2 text-base font-normal leading-normal" placeholder="Tìm kiếm hướng dẫn (ví dụ: Richard I)..." value=""/>
+</div>
+</label>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-3 px-4 pb-3 overflow-x-auto" style="scrollbar-width: none;">
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary pl-4 pr-4">
+<p class="text-background-dark text-sm font-medium leading-normal">Mới nhất</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-card-dark pl-4 pr-4">
+<p class="text-text-light text-sm font-medium leading-normal">Phổ biến</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-card-dark pl-4 pr-4"><p class="text-text-light text-sm font-medium leading-normal">KvK</p></div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-card-dark pl-4 pr-4">
+<p class="text-text-light text-sm font-medium leading-normal">Tướng</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-card-dark pl-4 pr-4">
+<p class="text-text-light text-sm font-medium leading-normal">Sự Kiện</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-card-dark pl-4 pr-4">
+<p class="text-text-light text-sm font-medium leading-normal">Trang Bị</p>
+</div>
+</div>
+<main class="flex-grow">
+<!-- Card 1 -->
+<div class="p-4 @container">
+<div class="flex cursor-pointer flex-col items-stretch justify-start rounded-xl bg-card-dark overflow-hidden">
+<div class="w-full bg-center bg-no-repeat aspect-[16/9] bg-cover" data-alt="Hình ảnh tướng Richard I và Guan Yu trong game Rise of Kingdoms" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuANgJfVgMOysx7qemPp3McBPonob_KPP7miCvUUPj-zLuI7fleo1yVTmioOCpWO_3PTyOeJbD7672ss8fBflinO1yFH7yBgwh_UBoAknb4N88Y3KnLKGNjfjgWOx-J6v5bu73KYVlPfbRhSf2EXCBuwNC-5_XyyFInayCG8u9rKyCYUnThMh-UyP8MhCsvoyabPrnD8rf4aIABMtYklxPznDRsfvMxy3aIonOzCgD312loqxWRG95pcs6vyk4ffjEZITCNc_M9yQtQ");'></div>
+<div class="flex w-full min-w-72 grow flex-col items-stretch justify-center gap-1.5 p-4">
+<p class="text-primary text-sm font-medium leading-normal">Tướng, KvK</p>
+<p class="text-text-light text-lg font-bold leading-tight tracking-[-0.015em]">Hướng dẫn combo tướng bộ binh mạnh nhất KvK 3</p>
+<div class="flex items-end gap-3 justify-between">
+<div class="flex flex-col gap-1 mt-1">
+<p class="text-text-subtle text-sm font-normal leading-normal">
+                                    Phân tích chi tiết ưu nhược điểm của các cặp tướng bộ binh hàng đầu, giúp bạn tối ưu hóa sức mạnh...
+                                </p>
+<p class="text-text-subtle text-xs font-normal leading-normal">Bởi ROKMaster - 2 ngày trước</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-4 pt-0 @container">
+<div class="flex cursor-pointer flex-col items-stretch justify-start rounded-xl bg-card-dark overflow-hidden">
+<div class="w-full bg-center bg-no-repeat aspect-[16/9] bg-cover" data-alt="Một thành phố đang thu thập tài nguyên trong Rise of Kingdoms" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBIoiW5p11yrpBX5MAV0mnlzC5Z-eijHNgvyBPank_jchB71IzWVX2jg3hbuIhyytpNI331j7AAZSpGDfHuuIKuoqE9xhOICVXP0yqA8gDAJYPkY6iE7k8_AaiNUhfbmJ-mufZou7z--htoUD5SCT74GROJPOwCsZPjIrLp5EtDuvb_OPsvR4KVombYm2HYdRj4pg5_sXK1MgFJyKA8vxXXzfcRqQdIijj0A9OCsMSfLaKMLmBxTqXlL_hOR7tQjtrGAp0pdl07IQI");'></div>
+<div class="flex w-full min-w-72 grow flex-col items-stretch justify-center gap-1.5 p-4">
+<p class="text-primary text-sm font-medium leading-normal">Kinh Tế</p>
+<p class="text-text-light text-lg font-bold leading-tight tracking-[-0.015em]">Tối ưu hóa thu thập tài nguyên cho người mới chơi</p>
+<div class="flex items-end gap-3 justify-between">
+<div class="flex flex-col gap-1 mt-1">
+<p class="text-text-subtle text-sm font-normal leading-normal">
+                                    Các mẹo và chiến lược hiệu quả để tăng tốc độ thu thập tài nguyên và phát triển thành phố của bạn nhanh chóng.
+                                </p>
+<p class="text-text-subtle text-xs font-normal leading-normal">Bởi Jane Smith - 5 ngày trước</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="p-4 pt-0 @container">
+<div class="flex cursor-pointer flex-col items-stretch justify-start rounded-xl bg-card-dark overflow-hidden">
+<div class="w-full bg-center bg-no-repeat aspect-[16/9] bg-cover" data-alt="Tướng Scipio Prime đang chiến đấu trong một trận KvK" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCApPlIqSlQbA3h6sQgM7wBwNLLdaLAdXMm4KftVF3HGVP3M3IqxdRPMI0Qr95V6JuvXR--1J_gtJwM87EYBKZnFzu2hiee7qkrVL5cbV0H-vbyVScw6O4snZWp2bsop2Apze-lKE_F2wcnyM3Sj0sbB24VokJzKV3KJrHdxmOr0bqhodIbleRiBl3yhI82fWS978lxaSIHvO4hjyqKl3dY9aZ7NqPeBjCLEUFwfr_xdKmM3fJnuU7OrqcuGDIa5Kw8QFl4OWsFj68");'></div>
+<div class="flex w-full min-w-72 grow flex-col items-stretch justify-center gap-1.5 p-4">
+<p class="text-primary text-sm font-medium leading-normal">Sự kiện, Trang Bị</p>
+<p class="text-text-light text-lg font-bold leading-tight tracking-[-0.015em]">Cách lấy trang bị huyền thoại miễn phí từ sự kiện</p>
+<div class="flex items-end gap-3 justify-between">
+<div class="flex flex-col gap-1 mt-1">
+<p class="text-text-subtle text-sm font-normal leading-normal">
+                                    Hướng dẫn chi tiết từng bước để hoàn thành sự kiện và nhận những món trang bị huyền thoại cực mạnh mà không cần nạp.
+                                </p>
+<p class="text-text-subtle text-xs font-normal leading-normal">Bởi EagleEye - 1 tuần trước</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

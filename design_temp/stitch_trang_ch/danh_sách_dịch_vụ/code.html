@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dịch Vụ Nổi Bật - Rise of Kingdoms</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#f2d00d",
+              "background-light": "#f8f8f5",
+              "background-dark": "#181711",
+              "card-dark": "#221F10",
+              "text-muted-dark": "#bab59c"
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-10 w-full bg-background-light dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="flex items-center p-4 justify-between max-w-4xl mx-auto">
+<div class="flex size-12 shrink-0 items-center justify-start">
+<span class="material-symbols-outlined text-white text-3xl">menu</span>
+</div>
+<h1 class="text-white text-xl font-bold leading-tight tracking-tight text-center">Dịch Vụ Nổi Bật</h1>
+<div class="flex w-12 items-center justify-end">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-transparent text-white">
+<span class="material-symbols-outlined text-3xl">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 w-full max-w-4xl mx-auto px-4">
+<!-- Chips for filtering -->
+<div class="flex gap-2 p-3 overflow-x-auto whitespace-nowrap">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-4">
+<p class="text-background-dark text-sm font-bold leading-normal">Tất cả</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-card-dark px-4 hover:bg-primary/20 transition-colors">
+<p class="text-white text-sm font-medium leading-normal">Tư vấn</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-card-dark px-4 hover:bg-primary/20 transition-colors">
+<p class="text-white text-sm font-medium leading-normal">Quản lý Alliance</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-card-dark px-4 hover:bg-primary/20 transition-colors">
+<p class="text-white text-sm font-medium leading-normal">Training</p>
+</button>
+</div>
+<!-- Service Cards List -->
+<div class="flex flex-col gap-6 py-4">
+<!-- Card 1: Tư Vấn Chiến Lược 1:1 -->
+<div class="flex flex-col items-stretch justify-start rounded-xl bg-card-dark p-4 @container transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10">
+<div class="flex flex-col gap-4 @md:flex-row @md:items-start">
+<div class="flex h-32 w-full shrink-0 items-center justify-center rounded-lg bg-background-dark @md:h-40 @md:w-40">
+<span class="material-symbols-outlined text-primary text-7xl">psychology</span>
+</div>
+<div class="flex w-full min-w-0 grow flex-col items-stretch justify-center gap-3">
+<p class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Tư Vấn Chiến Lược 1:1</p>
+<p class="text-text-muted-dark text-base font-normal leading-normal">Phân tích tài khoản, Lộ trình phát triển, Tối ưu trang bị &amp; tướng.</p>
+<div class="flex items-center gap-3 justify-between mt-2">
+<p class="text-primary text-lg font-bold leading-normal">250.000 VNĐ / giờ</p>
+<button class="flex min-w-[110px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-background-dark text-sm font-bold leading-normal tracking-wide transition-transform hover:scale-105">
+<span class="truncate">Xem Chi Tiết</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Quản Lý & Lãnh Đạo Liên Minh -->
+<div class="flex flex-col items-stretch justify-start rounded-xl bg-card-dark p-4 @container transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10">
+<div class="flex flex-col gap-4 @md:flex-row @md:items-start">
+<div class="flex h-32 w-full shrink-0 items-center justify-center rounded-lg bg-background-dark @md:h-40 @md:w-40">
+<span class="material-symbols-outlined text-primary text-7xl">security</span>
+</div>
+<div class="flex w-full min-w-0 grow flex-col items-stretch justify-center gap-3">
+<p class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Quản Lý &amp; Lãnh Đạo Liên Minh</p>
+<p class="text-text-muted-dark text-base font-normal leading-normal">Điều hành sự kiện, Quản lý thành viên, Chiến thuật KvK.</p>
+<div class="flex items-center gap-3 justify-between mt-2">
+<p class="text-primary text-lg font-bold leading-normal">3.000.000 VNĐ / tháng</p>
+<button class="flex min-w-[110px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-background-dark text-sm font-bold leading-normal tracking-wide transition-transform hover:scale-105">
+<span class="truncate">Xem Chi Tiết</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Huấn Luyện Kỹ Năng -->
+<div class="flex flex-col items-stretch justify-start rounded-xl bg-card-dark p-4 @container transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10">
+<div class="flex flex-col gap-4 @md:flex-row @md:items-start">
+<div class="flex h-32 w-full shrink-0 items-center justify-center rounded-lg bg-background-dark @md:h-40 @md:w-40">
+<span class="material-symbols-outlined text-primary text-7xl">swords</span>
+</div>
+<div class="flex w-full min-w-0 grow flex-col items-stretch justify-center gap-3">
+<p class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Huấn Luyện Kỹ Năng</p>
+<p class="text-text-muted-dark text-base font-normal leading-normal">Hướng dẫn micro/macro, Kỹ năng chiến đấu, Tối ưu hóa tài nguyên.</p>
+<div class="flex items-center gap-3 justify-between mt-2">
+<p class="text-primary text-lg font-bold leading-normal">1.500.000 VNĐ / gói</p>
+<button class="flex min-w-[110px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-background-dark text-sm font-bold leading-normal tracking-wide transition-transform hover:scale-105">
+<span class="truncate">Xem Chi Tiết</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

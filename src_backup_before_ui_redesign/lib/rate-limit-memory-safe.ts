@@ -1,0 +1,177 @@
+import { Redis } from '@upstash/redis'
+
+interface RateLimitEntry {
+  count: number
+  resetTime: number
+  firstRequest: number
+}
+interface RateLimitConfig {
+  window: number // Time window in milliseconds
+  max: number // Maximum requests in window
+  prefix?: string
+  cleanupInterval?: number // Cleanup interval in ms
+  maxMemoryEntries?: number // Maximum entries before forced cleanup
+}
+// Memory-safe rate limiter with automatic cleanup
+export class MemorySafeRateLimiter {
+  private store = new Map<string, RateLimitEntry>()
+  private cleanupTimer: NodeJS.Timeout | null = null
+  private lastCleanup = Date.now()
+  private readonly maxEntries: number
+  private readonly cleanupInterval: number
+  constructor(private config: RateLimitConfig) {
+    this.maxEntries = config.maxMemoryEntries || 10000
+    this.cleanupInterval = config.cleanupInterval || 60000 // 1 minute default
+    this.startAutomaticCleanup()
+  }
+  private startAutomaticCleanup() {
+    // Cleanup every minute or configured interval
+    this.cleanupTimer = setInterval(() => {
+      this.cleanup()
+    }, this.cleanupInterval)
+    // Prevent timer from blocking process exit
+    if (this.cleanupTimer.unref) {
+      this.cleanupTimer.unref()
+    }
+  }
+  public stop() {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer)
+      this.cleanupTimer = null
+    }
+  }
+  private cleanup() {
+    const now = Date.now()
+    const cutoff = now - this.config.window * 2 // Keep entries for 2x window
+    let removed = 0
+    for (const [key, entry] of this.store.entries()) {
+      if (entry.resetTime < cutoff) {
+        this.store.delete(key)
+        removed++
+      }
+    }
+    if (removed > 0) {
+      console.log(`[RateLimiter] Cleaned up ${removed} expired entries`)
+    }
+    this.lastCleanup = now
+  }
+  private enforceMemoryLimit() {
+    // If we have too many entries, force cleanup
+    if (this.store.size >= this.maxEntries) {
+      console.warn(
+        `[RateLimiter] Memory limit reached (${this.store.size} entries), forcing cleanup`
+      )
+      // Remove oldest entries
+      const entries = Array.from(this.store.entries()).sort(
+        (a, b) => a[1].firstRequest - b[1].firstRequest
+      )
+      const toRemove = Math.floor(this.maxEntries * 0.2) // Remove 20%
+      for (let i = 0; i < toRemove; i++) {
+        this.store.delete(entries[i][0])
+      }
+    }
+  }
+  public async checkLimit(identifier: string): Promise<{
+    success: boolean
+    remaining: number
+    reset: number
+    retryAfter?: number
+  }> {
+    const now = Date.now()
+    const key = this.config.prefix ? `${this.config.prefix}:${identifier}` : identifier
+    let entry = this.store.get(key)
+    // Initialize or reset entry
+    if (!entry || now >= entry.resetTime) {
+      entry = {
+        count: 0,
+        resetTime: now + this.config.window,
+        firstRequest: now
+      }
+    }
+    entry.count++
+    this.store.set(key, entry)
+    // Enforce memory limit if needed
+    if (this.store.size >= this.maxEntries) {
+      this.enforceMemoryLimit()
+    }
+    const remaining = Math.max(0, this.config.max - entry.count)
+    const success = entry.count <= this.config.max
+    return {
+      success,
+      remaining,
+      reset: entry.resetTime,
+      retryAfter: success ? undefined : Math.ceil((entry.resetTime - now) / 1000)
+    }
+  }
+  public reset(identifier: string) {
+    const key = this.config.prefix ? `${this.config.prefix}:${identifier}` : identifier
+    this.store.delete(key)
+  }
+  public getStats() {
+    return {
+      entries: this.store.size,
+      lastCleanup: this.lastCleanup,
+      maxEntries: this.maxEntries
+    }
+  }
+}
+// Redis-backed rate limiter for production
+export class RedisRateLimiter {
+  private redis: Redis
+  constructor(
+    private config: RateLimitConfig,
+    redisUrl?: string
+  ) {
+    this.redis = new Redis({
+      url: redisUrl || process.env.UPSTASH_REDIS_REST_URL || '',
+      token: process.env.UPSTASH_REDIS_REST_TOKEN || ''
+    })
+  }
+  public async checkLimit(identifier: string): Promise<{
+    success: boolean
+    remaining: number
+    reset: number
+    retryAfter?: number
+  }> {
+    const now = Date.now()
+    const key = this.config.prefix ? `${this.config.prefix}:${identifier}` : identifier
+    const resetTime = now + this.config.window
+    try {
+      // Use Redis pipeline for atomic operations
+      const pipe = this.redis.pipeline()
+      pipe.incr(key)
+      pipe.expire(key, Math.ceil(this.config.window / 1000))
+      const results = await pipe.exec()
+      const count = ((results?.[0] as any)?.[1] as number) || 1
+      const remaining = Math.max(0, this.config.max - count)
+      const success = count <= this.config.max
+      return {
+        success,
+        remaining,
+        reset: resetTime,
+        retryAfter: success ? undefined : Math.ceil(this.config.window / 1000)
+      }
+    } catch (error) {
+      console.error('[RedisRateLimiter] Redis error, allowing request:', error)
+      // On Redis error, allow the request
+      return {
+        success: true,
+        remaining: this.config.max - 1,
+        reset: resetTime
+      }
+    }
+  }
+  public async reset(identifier: string) {
+    const key = this.config.prefix ? `${this.config.prefix}:${identifier}` : identifier
+    await this.redis.del(key)
+  }
+}
+// Factory function to create appropriate rate limiter
+export function createRateLimiter(
+  config: RateLimitConfig
+): MemorySafeRateLimiter | RedisRateLimiter {
+  if (process.env.REDIS_URL && process.env.NODE_ENV === 'production') {
+    return new RedisRateLimiter(config)
+  }
+  return new MemorySafeRateLimiter(config)
+}
