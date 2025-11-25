@@ -1,52 +1,104 @@
-import { ArrowRight, Users, Trophy, Shield } from 'lucide-react'
+import { ArrowRight, Star, Users, Trophy, Crown, Sparkles, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Hero() {
   return (
-    <section className="relative flex min-h-[600px] flex-col items-center justify-center gap-6 overflow-hidden bg-background-dark p-4 text-center">
-      {/* Background Image with Gradient Overlay */}
-      <div
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.8) 70%), linear-gradient(45deg, rgba(242, 208, 13, 0.3) 0%, rgba(15, 23, 42, 0.6) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAGGc-UZ_JN1G7xhJV_Q4nhjG7EPrwx-NTCDKuyvmCT9_Y9geIJbDlbgHLukE1TYvo8d3RvQeJ_nK6UBdC_vNF23iNG6dQfY4caKXuQZ7dN44zxEnQQUxIUWAaBMFcqlm2utMgSrC48F8fScMyKMd4kxrShvssNWpINK7DoAYojWtOFGOBLX49YGJen1tBaEyn1DQ2WZDC1VLzekgD7jvNpVL7Ls6WsNXag1avC2SckrVe6daTmlPk-Gu6hogUUrmNOps_vJNl8jWQ")`
-        }}
-      />
-
-      <div className="relative z-10 mt-16 flex max-w-3xl flex-col gap-4">
-        <h1 className="text-4xl font-black leading-tight tracking-tight text-white md:text-6xl">
-          Chinh Phục Mọi Vương Quốc Cùng Chuyên Gia Hàng Đầu
-        </h1>
-        <h2 className="text-base font-normal leading-normal text-gray-300 md:text-xl">
-          Dịch vụ kết nối bạn với các pro-players để tối ưu hóa chiến lược và giành chiến thắng.
-        </h2>
+    <section className="bg-gradient-hero section-padding relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="animate-float absolute left-10 top-20">
+          <Crown className="h-8 w-8 text-amber-400/30" />
+        </div>
+        <div className="animate-float absolute right-20 top-40" style={{ animationDelay: '2s' }}>
+          <Shield className="h-6 w-6 text-blue-400/30" />
+        </div>
+        <div className="animate-float absolute bottom-32 left-20" style={{ animationDelay: '4s' }}>
+          <Sparkles className="h-10 w-10 text-amber-300/20" />
+        </div>
+        <div className="animate-float absolute left-1/2 top-60" style={{ animationDelay: '1s' }}>
+          <Crown className="h-6 w-6 text-amber-500/20" />
+        </div>
       </div>
 
-      <div className="relative z-10 mt-4">
-        <Link
-          href="/booking"
-          className="btn-primary flex min-w-[200px] items-center justify-center gap-2 text-lg"
-        >
-          <span>Đặt Lịch Ngay</span>
-          <ArrowRight className="h-5 w-5" />
-        </Link>
-      </div>
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-slate-900/30" />
 
-      {/* Stats Section */}
-      <div className="relative z-10 mt-12 flex flex-wrap justify-center gap-4 md:mt-20">
-        <div className="glassmorphism flex min-w-[160px] flex-1 flex-col items-center gap-2 p-6 text-center">
-          <Users className="h-8 w-8 text-primary" />
-          <p className="text-base font-medium text-gray-200">Khách hàng hài lòng</p>
-          <p className="text-3xl font-bold text-white">1,200+</p>
+      <div className="container-max relative z-10">
+        <div className="animate-fadeInUp text-center">
+          <div className="mb-6">
+            <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-400 backdrop-blur-sm">
+              <Crown className="mr-2 h-4 w-4" />
+              #1 Dịch vụ RoK tại Việt Nam
+            </span>
+          </div>
+
+          <h1 className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl">
+            Dịch vụ chuyên nghiệp cho{' '}
+            <span className="text-gradient animate-glow mt-2 block">Rise of Kingdoms</span>
+          </h1>
+
+          <p className="mx-auto mt-8 max-w-4xl text-xl leading-8 text-slate-300">
+            Nâng cao trải nghiệm chơi game của bạn với các dịch vụ chuyên nghiệp từ đội ngũ
+            <span className="font-semibold text-amber-400"> top player hàng đầu Việt Nam</span>: tư
+            vấn chiến thuật, quản lý liên minh, training commander và nhiều hơn nữa.
+          </p>
+
+          <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
+            <Link
+              className="btn-primary flex items-center space-x-3 px-8 py-4 text-lg"
+              href="/services"
+            >
+              <span>Khám phá dịch vụ</span>
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+            <Link className="btn-secondary px-8 py-4 text-lg" href="/guides">
+              Hướng dẫn miễn phí
+            </Link>
+          </div>
         </div>
-        <div className="glassmorphism flex min-w-[160px] flex-1 flex-col items-center gap-2 p-6 text-center">
-          <Shield className="h-8 w-8 text-primary" />
-          <p className="text-base font-medium text-gray-200">Alliances đã hợp tác</p>
-          <p className="text-3xl font-bold text-white">150+</p>
+
+        {/* Premium Stats */}
+        <div className="mt-20 grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="group text-center">
+            <div className="glassmorphism hover-lift p-8">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 transition-transform duration-300 group-hover:scale-110">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <div className="animate-pulse-slow mb-2 text-4xl font-bold text-white">1000+</div>
+              <div className="text-lg font-medium text-slate-300">Khách hàng tin tưởng</div>
+              <div className="mt-2 text-sm text-amber-400">Đánh giá 5 sao</div>
+            </div>
+          </div>
+
+          <div className="group text-center">
+            <div className="glassmorphism hover-lift p-8">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-blue-700 transition-transform duration-300 group-hover:scale-110">
+                <Trophy className="h-8 w-8 text-white" />
+              </div>
+              <div className="animate-pulse-slow mb-2 text-4xl font-bold text-white">500+</div>
+              <div className="text-lg font-medium text-slate-300">Liên minh được hỗ trợ</div>
+              <div className="mt-2 text-sm text-blue-400">Top Kingdom</div>
+            </div>
+          </div>
+
+          <div className="group text-center">
+            <div className="glassmorphism hover-lift p-8">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 transition-transform duration-300 group-hover:scale-110">
+                <Star className="h-8 w-8 text-white" />
+              </div>
+              <div className="animate-pulse-slow mb-2 text-4xl font-bold text-white">4.9/5</div>
+              <div className="text-lg font-medium text-slate-300">Đánh giá trung bình</div>
+              <div className="mt-2 text-sm text-amber-400">Từ 2000+ reviews</div>
+            </div>
+          </div>
         </div>
-        <div className="glassmorphism flex min-w-[160px] flex-1 flex-col items-center gap-2 p-6 text-center">
-          <Trophy className="h-8 w-8 text-primary" />
-          <p className="text-base font-medium text-gray-200">Chuyên gia hàng đầu</p>
-          <p className="text-3xl font-bold text-white">50+</p>
+
+        {/* Trust Indicators */}
+        <div className="mt-16 text-center">
+          <p className="mb-4 text-sm text-slate-400">Được tin tưởng bởi các Top Alliance:</p>
+          <div className="flex flex-wrap justify-center gap-8 text-slate-500">
+            <span className="font-semibold">VN01 • VN02 • VN03 • VN04 • VN05</span>
+          </div>
         </div>
       </div>
     </section>

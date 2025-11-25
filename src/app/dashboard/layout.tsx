@@ -12,7 +12,7 @@ export default async function CustomerDashboardLayout({ children }: { children: 
   }
 
   return (
-    <div className="min-h-screen bg-background-dark">
+    <div className="min-h-screen bg-gray-50">
       <CustomerSidebar />
       <div className="lg:pl-64">
         <CustomerHeader />

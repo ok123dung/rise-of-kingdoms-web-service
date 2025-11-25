@@ -1,6 +1,6 @@
 import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
-import Testimonials from '@/components/sections/Testimonials'
+import Features from '@/components/sections/Features'
 import Hero from '@/components/sections/Hero'
 import Services from '@/components/sections/Services'
 
@@ -11,7 +11,7 @@ export default function HomePage() {
       <main>
         <Hero />
         <Services />
-        <Testimonials />
+        <Features />
       </main>
       <Footer />
     </>

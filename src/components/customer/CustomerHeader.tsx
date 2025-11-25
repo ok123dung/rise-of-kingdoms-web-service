@@ -92,7 +92,7 @@ export default function CustomerHeader({
   }
   if (loading) {
     return (
-      <header className="border-b border-white/10 bg-background-dark">
+      <header className="border-b border-gray-200 bg-white">
         <div className="container-max py-4">
           <LoadingSpinner size="sm" />
         </div>
@@ -101,32 +101,32 @@ export default function CustomerHeader({
   }
   if (!customer) {
     return (
-      <header className="border-b border-white/10 bg-background-dark">
+      <header className="border-b border-gray-200 bg-white">
         <div className="container-max py-4">
-          <div className="text-red-400">Không thể tải thông tin khách hàng</div>
+          <div className="text-red-600">Không thể tải thông tin khách hàng</div>
         </div>
       </header>
     )
   }
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-background-dark">
+    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
       <div className="container-max">
         {/* Breadcrumb */}
         {showBreadcrumb && breadcrumbItems.length > 0 && (
-          <div className="border-b border-white/10 py-2">
-            <nav className="flex items-center gap-2 text-sm text-gray-400">
-              <Link className="transition-colors hover:text-primary" href="/dashboard">
+          <div className="border-b border-gray-100 py-2">
+            <nav className="flex items-center gap-2 text-sm text-gray-600">
+              <Link className="transition-colors hover:text-blue-600" href="/dashboard">
                 Dashboard
               </Link>
               {breadcrumbItems.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <span>/</span>
                   {item.href ? (
-                    <Link className="transition-colors hover:text-primary" href={item.href}>
+                    <Link className="transition-colors hover:text-blue-600" href={item.href}>
                       {item.label}
                     </Link>
                   ) : (
-                    <span className="font-medium text-white">{item.label}</span>
+                    <span className="font-medium text-gray-900">{item.label}</span>
                   )}
                 </div>
               ))}
@@ -154,14 +154,14 @@ export default function CustomerHeader({
             {/* Customer details */}
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-white">{customer.name}</h1>
+                <h1 className="text-xl font-bold text-gray-900">{customer.name}</h1>
                 <span
                   className={`rounded-full px-2 py-1 text-xs font-semibold text-white ${getTierColor(customer.tier)}`}
                 >
                   {getTierLabel(customer.tier)}
                 </span>
               </div>
-              <div className="mt-1 flex items-center gap-4 text-sm text-gray-400">
+              <div className="mt-1 flex items-center gap-4 text-sm text-gray-600">
                 <span>{customer.totalBookings} dịch vụ</span>
                 <span>•</span>
                 <span className="font-medium text-green-600">{formatVND(customer.totalSpent)}</span>
@@ -175,7 +175,7 @@ export default function CustomerHeader({
             {/* User menu */}
             <div className="relative">
               <button
-                className="flex items-center gap-2 rounded-lg p-2 text-gray-400 transition-colors hover:bg-white/5 hover:text-primary"
+                className="flex items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
                 onClick={() => setShowUserMenu(!showUserMenu)}
               >
                 <Settings className="h-5 w-5" />
@@ -185,9 +185,9 @@ export default function CustomerHeader({
               {showUserMenu && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
-                  <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-lg border border-white/10 bg-background-dark py-2 shadow-lg">
+                  <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-2 shadow-lg">
                     <Link
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-white/5"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                       href="/dashboard/profile"
                       onClick={() => setShowUserMenu(false)}
                     >
@@ -195,7 +195,7 @@ export default function CustomerHeader({
                       Hồ sơ cá nhân
                     </Link>
                     <Link
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-white/5"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                       href="/dashboard/settings"
                       onClick={() => setShowUserMenu(false)}
                     >
@@ -204,7 +204,7 @@ export default function CustomerHeader({
                     </Link>
                     <hr className="my-2" />
                     <button
-                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-red-400 hover:bg-red-500/10"
+                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
                       onClick={handleLogout}
                     >
                       <LogOut className="h-4 w-4" />
