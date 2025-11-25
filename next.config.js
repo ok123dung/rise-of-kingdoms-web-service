@@ -51,13 +51,8 @@ const nextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload'
           },
-          // CSP is handled by middleware with nonces for better security
-          // This is a fallback CSP without unsafe-inline or unsafe-eval
-          {
-            key: 'Content-Security-Policy',
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://api.resend.com https://www.google-analytics.com https://*.sentry.io wss://rokdbot.com wss://www.rokdbot.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'; worker-src 'self' blob:;"
-          }
+          // CSP is handled by middleware
+
         ]
       }
     ]
