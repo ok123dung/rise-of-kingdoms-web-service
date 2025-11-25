@@ -43,7 +43,8 @@ export const currentCSPDirectives: CSPDirectives = {
     "'unsafe-inline'", // Will be removed in strict CSP migration
     "'unsafe-eval'", // Will be removed in strict CSP migration
     'https://www.googletagmanager.com',
-    'https://www.google-analytics.com'
+    'https://www.google-analytics.com',
+    'https://static.cloudflareinsights.com'
   ],
   'style-src': [
     "'self'",
