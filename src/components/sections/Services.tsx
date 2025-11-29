@@ -232,10 +232,11 @@ function ServiceCard({ service }: ServiceCardProps) {
       <div className="space-y-4">
         <h3
           id={`service-title-${service.id}`}
-          className={`text-2xl font-bold transition-colors duration-300 ${featured
+          className={`text-2xl font-bold transition-colors duration-300 ${
+            featured
               ? 'text-slate-900 group-hover:text-amber-700'
               : 'text-slate-900 group-hover:text-blue-600'
-            }`}
+          }`}
         >
           {title}
         </h3>
@@ -257,9 +258,10 @@ function ServiceCard({ service }: ServiceCardProps) {
             href="/contact"
             className={`
               block w-full transform rounded-xl px-6 py-4 text-center font-semibold transition-all duration-300
-              ${featured
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-amber-500/25'
-                : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25'
+              ${
+                featured
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-amber-500/25'
+                  : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25'
               }
             `}
           >

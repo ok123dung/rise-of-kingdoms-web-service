@@ -1,4 +1,3 @@
-import { type Decimal } from '@prisma/client/runtime/library'
 import {
   Client,
   GatewayIntentBits,
@@ -11,23 +10,7 @@ import {
 
 import { db } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
-
-import type { Booking, User, ServiceTier, Service, Payment } from '@prisma/client'
-
-// Extended types with relations
-interface BookingWithRelations extends Booking {
-  user: User
-  serviceTier: ServiceTierWithService
-}
-
-interface ServiceTierWithService extends ServiceTier {
-  service: Service
-}
-
-interface PaymentWithRelations extends Payment {
-  booking: BookingWithRelations
-  amount: Decimal
-}
+import type { BookingWithRelations, PaymentWithRelations } from '@/types/prisma'
 
 class RoKDiscordBot {
   private client: Client

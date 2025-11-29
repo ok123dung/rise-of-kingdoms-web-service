@@ -2,8 +2,7 @@ import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
 import { ValidationError, NotFoundError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
-
-import type { Lead } from '@prisma/client'
+import type { Lead } from '@/types/prisma'
 
 export class LeadService {
   private logger = getLogger()

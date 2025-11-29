@@ -99,15 +99,17 @@ export default function CustomerSidebar() {
                         href={item.href}
                         className={`
                           group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors
-                          ${isActive
-                            ? 'bg-primary-600 text-white'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-primary-600'
+                          ${
+                            isActive
+                              ? 'bg-primary-600 text-white'
+                              : 'text-gray-700 hover:bg-gray-50 hover:text-primary-600'
                           }
                         `}
                       >
                         <item.icon
-                          className={`h-6 w-6 shrink-0 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-primary-600'
-                            }`}
+                          className={`h-6 w-6 shrink-0 ${
+                            isActive ? 'text-white' : 'text-gray-400 group-hover:text-primary-600'
+                          }`}
                         />
                         {item.name}
                       </Link>

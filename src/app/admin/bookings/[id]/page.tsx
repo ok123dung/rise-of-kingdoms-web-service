@@ -4,8 +4,13 @@ import { notFound } from 'next/navigation'
 
 import BookingActions from '@/components/admin/BookingActions'
 import { prisma } from '@/lib/db'
+import type { BookingWithRelations } from '@/types/prisma'
 
-async function getBooking(id: string): Promise<any> {
+type BookingDetail = BookingWithRelations & {
+  convertedLead?: { id: string } | null
+}
+
+async function getBooking(id: string): Promise<BookingDetail> {
   const booking = await prisma.booking.findUnique({
     where: { id },
     include: {
@@ -19,7 +24,7 @@ async function getBooking(id: string): Promise<any> {
   })
 
   if (!booking) notFound()
-  return booking
+  return booking as BookingDetail
 }
 
 export default async function BookingDetailPage({ params }: { params: { id: string } }) {

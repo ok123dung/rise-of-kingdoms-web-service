@@ -4,7 +4,6 @@ import {
   CreditCard,
   TrendingUp,
   MessageCircle,
-  AlertCircle,
   DollarSign,
   Shield,
   LogOut
@@ -186,9 +185,7 @@ export default async function AdminDashboard() {
               <Shield className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">
-                {user.fullName || user.email}
-              </p>
+              <p className="text-sm font-medium text-gray-900">{user.fullName || user.email}</p>
               <p className="text-xs capitalize text-gray-500">{user.staffProfile?.role} • Online</p>
             </div>
           </div>
@@ -198,8 +195,8 @@ export default async function AdminDashboard() {
               We should probably extract the Header to a client component or just link to signout.
           */}
           <a
-            href="/api/auth/signout"
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-800"
+            href="/api/auth/signout"
             title="Đăng xuất"
           >
             <LogOut className="h-4 w-4" />

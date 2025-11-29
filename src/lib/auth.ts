@@ -7,8 +7,8 @@ import { z } from 'zod'
 
 import { prisma, basePrisma } from '@/lib/db'
 import { getLogger, type LogContext } from '@/lib/monitoring/logger'
+import type { User } from '@/types/prisma'
 
-import type { User } from '@prisma/client'
 import type { NextRequest } from 'next/server'
 
 // Extended user type with staff profile

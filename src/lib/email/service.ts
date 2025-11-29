@@ -2,22 +2,7 @@ import { Resend } from 'resend'
 
 import { db } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
-
-import type { User, Booking, Payment, Lead, ServiceTier, Service } from '@prisma/client'
-
-// Extended types with relations
-interface BookingWithRelations extends Booking {
-  user: User
-  serviceTier: ServiceTierWithService
-}
-
-interface ServiceTierWithService extends ServiceTier {
-  service: Service
-}
-
-interface PaymentWithRelations extends Payment {
-  booking: BookingWithRelations
-}
+import type { User, Lead, BookingWithRelations, PaymentWithRelations } from '@/types/prisma'
 
 // Lead already has all the properties we need
 

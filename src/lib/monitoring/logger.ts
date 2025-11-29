@@ -124,10 +124,10 @@ class Logger {
             context: entry.context as any,
             error: entry.error
               ? {
-                message: entry.error.message,
-                stack: entry.error.stack,
-                name: entry.error.name
-              }
+                  message: entry.error.message,
+                  stack: entry.error.stack,
+                  name: entry.error.name
+                }
               : undefined,
             timestamp: entry.timestamp
           }

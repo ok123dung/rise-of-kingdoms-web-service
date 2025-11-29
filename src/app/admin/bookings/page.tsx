@@ -1,9 +1,9 @@
-import { type Prisma } from '@prisma/client'
 import { Eye } from 'lucide-react'
 import Link from 'next/link'
 
 import SearchInput from '@/components/admin/SearchInput'
 import { prisma } from '@/lib/db'
+import type { BookingWhereInput } from '@/types/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +14,7 @@ async function getBookings(searchParams: { [key: string]: string | string[] | un
   const status = searchParams.status as string | undefined
   const query = searchParams.query as string | undefined
 
-  const where: Prisma.BookingWhereInput = {}
+  const where: BookingWhereInput = {}
 
   if (status && status !== 'all') {
     where.status = status

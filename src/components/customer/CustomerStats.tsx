@@ -136,8 +136,9 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                     {[1, 2, 3, 4, 5].map(star => (
                       <div
                         key={star}
-                        className={`h-4 w-4 ${star <= stats.averageRating ? 'text-yellow-400' : 'text-gray-300'
-                          }`}
+                        className={`h-4 w-4 ${
+                          star <= stats.averageRating ? 'text-yellow-400' : 'text-gray-300'
+                        }`}
                       >
                         ★
                       </div>

@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 
-import { type Booking } from '@prisma/client'
 import { Check, X, Play, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+
+import type { Booking } from '@/types/prisma'
 
 interface BookingActionsProps {
   booking: Pick<Booking, 'id' | 'status'>

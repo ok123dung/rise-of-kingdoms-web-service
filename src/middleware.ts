@@ -1,5 +1,5 @@
-import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import { withAuth } from 'next-auth/middleware'
 
 import {
   buildCSPHeader,
@@ -11,7 +11,7 @@ import {
 export default withAuth(
   function middleware(req) {
     const response = NextResponse.next()
-    const token = req.nextauth.token
+    const { token } = req.nextauth
 
     // Skip middleware in development for easier debugging (Optional: remove this in strict mode)
     // if (process.env.NODE_ENV === 'development') {

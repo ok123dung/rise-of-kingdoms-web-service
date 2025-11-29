@@ -26,7 +26,7 @@ class CircuitBreaker {
     private readonly threshold = 5,
     private readonly timeout = 60000, // 1 minute
     private readonly halfOpenRequests = 3
-  ) { }
+  ) {}
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === 'open') {
@@ -81,7 +81,9 @@ class EnhancedPrismaClient extends PrismaClient {
     let databaseUrl = process.env.DATABASE_URL
 
     if (!databaseUrl) {
-      getLogger().warn('DATABASE_URL environment variable is not set. Database functionality will be limited.')
+      getLogger().warn(
+        'DATABASE_URL environment variable is not set. Database functionality will be limited.'
+      )
     } else {
       // Add connection pool parameters to URL if not present
       const url = new URL(databaseUrl)

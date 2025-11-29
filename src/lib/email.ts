@@ -41,7 +41,9 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     })
 
     if (error) {
-      getLogger().error('Resend API Error', new Error(error.message), { error: JSON.stringify(error) })
+      getLogger().error('Resend API Error', new Error(error.message), {
+        error: JSON.stringify(error)
+      })
       return false
     }
 
