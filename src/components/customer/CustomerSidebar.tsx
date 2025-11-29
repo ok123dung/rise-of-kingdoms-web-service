@@ -66,7 +66,7 @@ export default function CustomerSidebar() {
       {/* Mobile menu button */}
       <div className="lg:hidden">
         <button
-          className="fixed left-4 top-4 z-40 rounded-md bg-white p-2 text-gray-400 shadow-lg"
+          className="fixed left-4 top-4 z-50 rounded-md bg-white p-2 text-gray-400 shadow-lg"
           type="button"
           onClick={() => setSidebarOpen(true)}
         >

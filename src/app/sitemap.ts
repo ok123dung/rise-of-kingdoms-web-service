@@ -1,116 +1,40 @@
 import { type MetadataRoute } from 'next'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+import { prisma } from '@/lib/db'
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'
 
-  return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1
-    },
-    {
-      url: `${baseUrl}/services`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9
-    },
-    {
-      url: `${baseUrl}/services/strategy`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8
-    },
-    {
-      url: `${baseUrl}/services/alliance`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8
-    },
-    {
-      url: `${baseUrl}/services/commander`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8
-    },
-    {
-      url: `${baseUrl}/services/kvk`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8
-    },
-    {
-      url: `${baseUrl}/services/coaching`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7
-    },
-    {
-      url: `${baseUrl}/services/analysis`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7
-    },
-    {
-      url: `${baseUrl}/services/events`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7
-    },
-    {
-      url: `${baseUrl}/services/vip`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5
-    },
-    {
-      url: `${baseUrl}/guides`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8
-    },
-    {
-      url: `${baseUrl}/alliance`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7
-    },
-    {
-      url: `${baseUrl}/auth/signin`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.4
-    },
-    {
-      url: `${baseUrl}/auth/signup`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.4
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3
-    }
-  ]
+  // Fetch all active services
+  const services = await prisma.service.findMany({
+    where: { isActive: true },
+    select: { slug: true, updatedAt: true }
+  })
+
+  const serviceUrls = services.map(service => ({
+    url: `${baseUrl}/services/${service.slug}`,
+    lastModified: service.updatedAt,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8
+  }))
+
+  const staticRoutes = [
+    '',
+    '/services',
+    '/contact',
+    '/about',
+    '/guides',
+    '/alliance',
+    '/auth/signin',
+    '/auth/signup',
+    '/terms',
+    '/privacy'
+  ].map(route => ({
+    url: `${baseUrl}${route}`,
+    lastModified: new Date(),
+    changeFrequency: route === '' ? 'daily' : ('weekly' as const),
+    priority: route === '' ? 1 : 0.7
+  }))
+
+  return [...staticRoutes, ...serviceUrls] as MetadataRoute.Sitemap
 }

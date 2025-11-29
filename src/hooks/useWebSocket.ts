@@ -33,7 +33,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           throw new Error('Failed to get WebSocket token')
         }
         // Create socket connection
-        const socket = io(process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001', {
+        const socket = io(process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3002', {
           auth: { token },
           transports: ['websocket', 'polling'],
           reconnection,
@@ -44,11 +44,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         socket.on('connect', () => {
           setIsConnected(true)
           setConnectionError(null)
-          console.log('WebSocket connected')
         })
         socket.on('disconnect', reason => {
           setIsConnected(false)
-          console.log('WebSocket disconnected:', reason)
         })
         socket.on('connect_error', error => {
           setConnectionError(error.message)
@@ -130,9 +128,7 @@ export function useBookingWebSocket(bookingId: string) {
     ws.subscribeToBooking(bookingId)
     // Set up event listeners
     const unsubscribers = [
-      ws.on('booking:subscribed', ({ bookingId: id }) => {
-        console.log('Subscribed to booking:', id)
-      }),
+      ws.on('booking:subscribed', ({ bookingId: id }) => {}),
       ws.on('chat:message', message => {
         setMessages(prev => [...prev, message])
       }),
@@ -180,7 +176,6 @@ export function useNotificationWebSocket() {
       }),
       ws.on('payment:update', payment => {
         // Handle payment updates
-        console.log('Payment update:', payment)
       })
     ]
     return () => {

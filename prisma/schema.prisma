@@ -14,6 +14,7 @@ model User {
   email               String               @unique
   password            String
   phone               String?
+  image               String?
   fullName            String               @map("full_name")
   discordUsername     String?              @map("discord_username")
   discordId           String?              @map("discord_id")
@@ -120,6 +121,7 @@ model Booking {
   @@index([status, createdAt])
   @@index([paymentStatus])
   @@index([assignedStaffId, status])
+  @@index([serviceTierId])
   @@map("bookings")
 }
 
@@ -170,6 +172,9 @@ model Communication {
   booking      Booking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([bookingId])
+  @@index([type, status])
   @@map("communications")
 }
 

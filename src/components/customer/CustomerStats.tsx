@@ -74,8 +74,8 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                   +{stats.activeServices} đang hoạt động
                 </p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
-                <ShoppingCart className="h-6 w-6 text-blue-600" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100">
+                <ShoppingCart className="h-6 w-6 text-amber-600" />
               </div>
             </div>
           </CardContent>
@@ -175,7 +175,7 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
 
                 <div className="h-2 w-full rounded-full bg-gray-200">
                   <div
-                    className="h-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-500"
+                    className="h-2 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 transition-all duration-500"
                     style={{ width: `${stats.currentTierProgress}%` }}
                   />
                 </div>
@@ -185,8 +185,8 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
                   <span>{formatVND(stats.nextTierThreshold)}</span>
                 </div>
 
-                <div className="rounded-lg bg-blue-50 p-3">
-                  <p className="text-sm text-blue-800">
+                <div className="rounded-lg bg-amber-50 p-3">
+                  <p className="text-sm text-amber-800">
                     <strong>Còn {formatVND(stats.nextTierThreshold - stats.totalSpent)}</strong> nữa
                     để lên hạng VIP Premium và nhận được các ưu đãi đặc biệt!
                   </p>
@@ -208,8 +208,8 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-                    <Calendar className="h-4 w-4 text-blue-600" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                    <Calendar className="h-4 w-4 text-amber-600" />
                   </div>
                   <div>
                     <p className="text-sm font-medium">Thành viên từ</p>

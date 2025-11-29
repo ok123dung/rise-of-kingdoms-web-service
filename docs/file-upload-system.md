@@ -106,7 +106,6 @@ DELETE /api/files/[key]
 
 ```tsx
 import { FileUpload } from '@/components/FileUpload'
-
 ;<FileUpload
   onUpload={file => console.log('Uploaded:', file)}
   onError={error => console.error(error)}
@@ -121,7 +120,6 @@ import { FileUpload } from '@/components/FileUpload'
 
 ```tsx
 import { AvatarUpload } from '@/components/AvatarUpload'
-
 ;<AvatarUpload
   currentAvatarUrl={user.image}
   size="lg"
@@ -133,7 +131,6 @@ import { AvatarUpload } from '@/components/AvatarUpload'
 
 ```tsx
 import { FileList } from '@/components/FileUpload'
-
 ;<FileList files={files} onDelete={key => handleDelete(key)} loading={loading} />
 ```
 

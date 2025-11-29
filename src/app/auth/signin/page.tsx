@@ -15,10 +15,15 @@ function SignInContent() {
   const [error, setError] = useState('')
   const [requires2FA, setRequires2FA] = useState(false)
   const [totpCode, setTotpCode] = useState('')
+  const [isMounted, setIsMounted] = useState(false)
 
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/admin/dashboard'
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     // Check if already signed in
@@ -31,6 +36,8 @@ function SignInContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!isMounted) return
+
     setIsLoading(true)
     setError('')
 
@@ -116,7 +123,7 @@ function SignInContent() {
                 <input
                   required
                   autoComplete="email"
-                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
                   id="email"
                   name="email"
                   placeholder="your@email.com"
@@ -136,7 +143,7 @@ function SignInContent() {
                 <input
                   required
                   autoComplete="current-password"
-                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 pr-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 pr-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
                   id="password"
                   name="password"
                   placeholder="••••••••"
@@ -164,7 +171,7 @@ function SignInContent() {
                   <ShieldCheck className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                   <input
                     autoComplete="one-time-code"
-                    className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                    className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
                     id="totpCode"
                     maxLength={9}
                     name="totpCode"
@@ -185,7 +192,7 @@ function SignInContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
@@ -197,7 +204,7 @@ function SignInContent() {
 
             <div className="text-sm">
               <Link
-                className="font-medium text-blue-600 hover:text-blue-500"
+                className="font-medium text-amber-600 hover:text-amber-500"
                 href="/auth/forgot-password"
               >
                 Quên mật khẩu?
@@ -207,15 +214,14 @@ function SignInContent() {
 
           <div>
             <button
-              className="group relative flex w-full transform justify-center rounded-lg border border-transparent bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:scale-105 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isLoading}
+              id="submit-login"
+              className="group relative flex w-full transform justify-center rounded-lg border border-transparent bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:scale-105 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading || !isMounted}
               type="submit"
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Đăng nhập'}
             </button>
           </div>
-
-          {/* Social login - Temporarily disabled due to missing env vars
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -239,18 +245,18 @@ function SignInContent() {
               </button>
             </div>
           </div>
-          */}
+          {/* End of comment */}
         </form>
 
         {/* Footer */}
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Bằng cách đăng nhập, bạn đồng ý với{' '}
-            <Link className="text-blue-600 hover:text-blue-500" href="/terms">
+            <Link className="text-amber-600 hover:text-amber-500" href="/terms">
               Điều khoản dịch vụ
             </Link>{' '}
             và{' '}
-            <Link className="text-blue-600 hover:text-blue-500" href="/privacy">
+            <Link className="text-amber-600 hover:text-amber-500" href="/privacy">
               Chính sách bảo mật
             </Link>
           </p>
@@ -265,7 +271,7 @@ export default function SignInPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-amber-600" />
         </div>
       }
     >

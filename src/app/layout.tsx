@@ -4,7 +4,7 @@ import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { MobileStickyActions } from '@/components/mobile/MobileOptimizations'
 import { PerformanceMonitor } from '@/components/performance/PerformanceMonitor'
-import PWAProvider from '@/components/PWAProvider'
+import Providers from '@/components/Providers'
 import { RevenueValidation } from '@/components/revenue/RevenueValidation'
 import { OrganizationSchema } from '@/components/seo/StructuredData'
 import { ConversionTesting } from '@/components/testing/ConversionTesting'
@@ -108,14 +108,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name="RoK Services"
           url={process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'}
         />
-        <PWAProvider>
+        <Providers>
           <ErrorBoundary>
             <div className="flex min-h-screen flex-col">
               {children}
               <MobileStickyActions />
             </div>
           </ErrorBoundary>
-        </PWAProvider>
+        </Providers>
       </body>
     </html>
   )

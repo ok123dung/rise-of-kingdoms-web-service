@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import { db, prisma } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface MoMoPaymentRequest {
@@ -134,7 +134,16 @@ export class MoMoPayment {
     error?: string
   }> {
     try {
-      const booking = await db.booking.findById(request.bookingId)
+      const booking = await prisma.booking.findUnique({
+        where: { id: request.bookingId },
+        include: {
+          serviceTier: {
+            include: {
+              service: true
+            }
+          }
+        }
+      })
       if (!booking) {
         return { success: false, error: 'Booking not found' }
       }
@@ -189,17 +198,20 @@ export class MoMoPayment {
         body: JSON.stringify(requestBody)
       })
 
-      const responseData: MoMoResponse = await response.json()
+      const responseData = await response.json() as MoMoResponse
 
       if (responseData.resultCode === 0) {
-        // Tạo payment record
-        await db.payment.create({
-          bookingId: request.bookingId,
-          amount: request.amount,
-          paymentMethod: 'momo',
-          paymentGateway: 'momo',
-          gatewayTransactionId: orderId,
-          gatewayOrderId: orderId
+        await prisma.payment.create({
+          data: {
+            bookingId: request.bookingId,
+            amount: request.amount,
+            paymentMethod: 'momo',
+            paymentGateway: 'momo',
+            gatewayTransactionId: orderId,
+            gatewayOrderId: orderId,
+            paymentNumber: `PAY${Date.now()}`,
+            status: 'pending'
+          }
         })
 
         return {
@@ -268,7 +280,9 @@ export class MoMoPayment {
       }
 
       // Tìm payment record
-      const payment = await db.payment.findByGatewayTransactionId(orderId)
+      const payment = await prisma.payment.findFirst({
+        where: { gatewayTransactionId: orderId }
+      })
       if (!payment) {
         getLogger().error('Payment not found for orderId', new Error('Payment not found'))
         return { success: false, message: 'Payment not found' }
@@ -277,14 +291,28 @@ export class MoMoPayment {
       // Cập nhật payment status
       if (resultCode === 0) {
         // Payment successful
-        await db.payment.updateStatus(payment.id, 'completed', {
-          transactionId: transId,
-          ...webhookData
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: 'completed',
+            updatedAt: new Date(),
+            paidAt: new Date(),
+            gatewayResponse: {
+              transactionId: transId,
+              ...webhookData
+            }
+          }
         })
 
         // Cập nhật booking status
-        await db.booking.updatePaymentStatus(payment.bookingId, 'completed')
-        await db.booking.updateStatus(payment.bookingId, 'confirmed')
+        await prisma.booking.update({
+          where: { id: payment.bookingId },
+          data: { paymentStatus: 'completed', updatedAt: new Date() }
+        })
+        await prisma.booking.update({
+          where: { id: payment.bookingId },
+          data: { status: 'confirmed', updatedAt: new Date() }
+        })
 
         // Send confirmation email
         await this.sendConfirmationEmail(payment.bookingId)
@@ -304,12 +332,22 @@ export class MoMoPayment {
         return { success: true, message: 'Payment processed successfully' }
       } else {
         // Payment failed
-        await db.payment.updateStatus(payment.id, 'failed', {
-          failureReason: message,
-          ...webhookData
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: 'failed',
+            updatedAt: new Date(),
+            gatewayResponse: {
+              failureReason: message,
+              ...webhookData
+            }
+          }
         })
 
-        await db.booking.updatePaymentStatus(payment.bookingId, 'failed')
+        await prisma.booking.update({
+          where: { id: payment.bookingId },
+          data: { paymentStatus: 'failed', updatedAt: new Date() }
+        })
 
         getLogger().warn('MoMo payment failed', { orderId, resultCode, message })
         return { success: true, message: 'Payment failure processed' }
@@ -414,7 +452,9 @@ export class MoMoPayment {
 
       if (responseData.resultCode === 0) {
         // Update payment record with refund info
-        const payment = await db.payment.findByGatewayTransactionId(orderId)
+        const payment = await prisma.payment.findFirst({
+          where: { gatewayTransactionId: orderId }
+        })
         if (payment) {
           await prisma.payment.update({
             where: { id: payment.id },

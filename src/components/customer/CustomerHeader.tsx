@@ -37,7 +37,7 @@ export default function CustomerHeader({
     try {
       setLoading(true)
       // Simulate API call - replace with real endpoint
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // await new Promise(resolve => setTimeout(resolve, 500))
       // Mock customer data
       const mockCustomer: CustomerData = {
         id: '1',

@@ -8,7 +8,7 @@ import {
   type ChatInputCommandInteraction
 } from 'discord.js'
 
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 import type { BookingWithRelations, PaymentWithRelations } from '@/types/prisma'
 
@@ -103,7 +103,7 @@ class RoKDiscordBot {
     const email = interaction.options.getString('email')
 
     try {
-      const user = await db.user.findByEmail(email!)
+      const user = await prisma.user.findUnique({ where: { email: email! } })
       if (!user) {
         await interaction.reply({
           content: 'Không tìm thấy tài khoản với email này.',
@@ -112,7 +112,17 @@ class RoKDiscordBot {
         return
       }
 
-      const bookings = await db.booking.findByUser(user.id)
+      const bookings = await prisma.booking.findMany({
+        where: { userId: user.id },
+        include: {
+          serviceTier: {
+            include: {
+              service: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      })
 
       if (bookings.length === 0) {
         await interaction.reply({
@@ -153,7 +163,16 @@ class RoKDiscordBot {
 
   private async handleServices(interaction: ChatInputCommandInteraction) {
     try {
-      const services = await db.service.findAll()
+      const services = await prisma.service.findMany({
+        where: { isActive: true },
+        include: {
+          serviceTiers: {
+            where: { isAvailable: true },
+            orderBy: { sortOrder: 'asc' }
+          }
+        },
+        orderBy: { sortOrder: 'asc' }
+      })
 
       const embed = new EmbedBuilder()
         .setTitle('🎮 Dịch vụ Rise of Kingdoms')
@@ -342,15 +361,15 @@ class RoKDiscordBot {
           },
           ...(booking.user.discordId
             ? [
-                {
-                  id: booking.user.discordId,
-                  allow: [
-                    PermissionFlagsBits.ViewChannel,
-                    PermissionFlagsBits.SendMessages,
-                    PermissionFlagsBits.ReadMessageHistory
-                  ]
-                }
-              ]
+              {
+                id: booking.user.discordId,
+                allow: [
+                  PermissionFlagsBits.ViewChannel,
+                  PermissionFlagsBits.SendMessages,
+                  PermissionFlagsBits.ReadMessageHistory
+                ]
+              }
+            ]
             : [])
         ]
       })

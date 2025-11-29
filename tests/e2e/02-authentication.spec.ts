@@ -32,7 +32,7 @@ test.describe('Authentication Tests', () => {
 
       // Check for validation errors
       await expect(
-        page.locator('.error-message, .text-red-500').count()
+        page.locator('.error-message, .text-red-500, .text-red-600').count()
       ).resolves.toBeGreaterThanOrEqual(1)
     })
 
@@ -99,7 +99,7 @@ test.describe('Authentication Tests', () => {
 
       // Check form elements
       await expect(page.locator('[name="email"]')).toBeVisible()
-      await expect(page.locator('[name="name"]')).toBeVisible()
+      await expect(page.locator('[name="fullName"]')).toBeVisible()
       await expect(page.locator('[name="password"]')).toBeVisible()
       await expect(page.locator('button[type="submit"]')).toBeVisible()
     })
@@ -123,7 +123,10 @@ test.describe('Authentication Tests', () => {
         password: 'NewPassword123!'
       }
 
-      await authPage.signUp(newUser)
+      await authPage.signUp({
+        ...newUser,
+        name: newUser.name // Map name to fullName in helper if needed, or update helper
+      })
 
       // Should redirect to dashboard or show success message
       await expect(page.locator('text=/welcome|chào mừng|success|thành công/i')).toBeVisible()
@@ -150,7 +153,7 @@ test.describe('Authentication Tests', () => {
       await helpers.login()
 
       // Find and click logout button
-      const logoutBtn = page.locator('[data-testid="logout-btn"], text=/Logout|Đăng xuất/i')
+      const logoutBtn = page.locator('[data-testid="logout-btn"]')
       await expect(logoutBtn).toBeVisible()
       await logoutBtn.click()
 

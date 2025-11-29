@@ -2,13 +2,15 @@
 
 ## 🎯 Overview
 
-This guide helps you diagnose and fix database connection issues for the ROK Services application deployed on Vercel with Supabase PostgreSQL database.
+This guide helps you diagnose and fix database connection issues for the ROK Services application
+deployed on Vercel with Supabase PostgreSQL database.
 
 ## 🔍 Common Error: 503 "Unable to connect to database"
 
 ### Root Cause Identified
 
-**Self-Signed SSL Certificate Error**: The most common cause of 503 errors is SSL certificate validation failure when connecting to Supabase.
+**Self-Signed SSL Certificate Error**: The most common cause of 503 errors is SSL certificate
+validation failure when connecting to Supabase.
 
 ```
 Error: self-signed certificate in certificate chain
@@ -25,19 +27,21 @@ Error Code: SELF_SIGNED_CERT_IN_CHAIN
    - Go to **Settings** → **Environment Variables**
 
 2. **Check DATABASE_URL** (Pooled Connection - for Serverless Functions)
+
    ```
    postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
    ```
-   
+
    ✅ **Must include**:
    - `?pgbouncer=true` - Enables connection pooling
    - `&connection_limit=1` - Limits connections per function instance
 
 3. **Check DIRECT_URL** (Direct Connection - for Migrations & Prisma)
+
    ```
    postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres?sslmode=require
    ```
-   
+
    ✅ **Must include**:
    - `?sslmode=require` - Enables SSL (required by Supabase)
 
@@ -66,6 +70,7 @@ node scripts/verify-db-connection.js
 ```
 
 Expected output:
+
 ```
 ✅ Pooled Connection (6543): PASS
 ✅ Direct Connection (5432): PASS
@@ -87,10 +92,10 @@ vercel --prod
 
 ### Step 5: Verify Production Deployment
 
-1. **Health Check Endpoint**
-   Visit: `https://your-app.vercel.app/api/health/db-diagnostic`
-   
+1. **Health Check Endpoint** Visit: `https://your-app.vercel.app/api/health/db-diagnostic`
+
    Expected response:
+
    ```json
    {
      "overallStatus": "healthy",
@@ -101,9 +106,8 @@ vercel --prod
    }
    ```
 
-2. **Debug Database Endpoint**
-   Visit: `https://your-app.vercel.app/api/debug-db`
-   
+2. **Debug Database Endpoint** Visit: `https://your-app.vercel.app/api/debug-db`
+
    Should show connection success
 
 3. **Test Signup Flow**
@@ -118,6 +122,7 @@ vercel --prod
 **Cause**: DATABASE_URL is incorrect or database is not accessible
 
 **Solutions**:
+
 - ✅ Verify DATABASE_URL format is correct
 - ✅ Check if Supabase project is paused (free tier auto-pauses after inactivity)
 - ✅ Ensure you're using the pooled connection URL (port 6543)
@@ -128,6 +133,7 @@ vercel --prod
 **Cause**: Database took too long to respond (cold start)
 
 **Solutions**:
+
 - ✅ Use connection pooling: `?pgbouncer=true`
 - ✅ Ensure Vercel region is close to Supabase region
 - ✅ Consider upgrading Supabase plan for better performance
@@ -137,6 +143,7 @@ vercel --prod
 **Cause**: SSL certificate validation failure (THE MAIN ISSUE WE FIXED)
 
 **Solutions**:
+
 - ✅ Ensure `?sslmode=require` is in DIRECT_URL
 - ✅ For some providers, try `?ssl=true` instead
 - ✅ In Node.js scripts, use `ssl: { rejectUnauthorized: false }`
@@ -146,6 +153,7 @@ vercel --prod
 **Cause**: Connection pool exhausted
 
 **Solutions**:
+
 - ✅ Add `?connection_limit=1` to DATABASE_URL
 - ✅ Enable PgBouncer: `?pgbouncer=true`
 - ✅ Ensure Prisma is using connection pooling
@@ -156,6 +164,7 @@ vercel --prod
 **Cause**: Wrong credentials in DATABASE_URL
 
 **Solutions**:
+
 - ✅ Get fresh credentials from Supabase Dashboard → Settings → Database
 - ✅ Ensure password is URL-encoded if it contains special characters
 - ✅ Verify you're using the correct user (usually `postgres`)
@@ -179,6 +188,7 @@ Before deploying, ensure:
 ### 1. Vercel Logs
 
 View real-time logs:
+
 ```bash
 vercel logs --follow
 ```
@@ -188,6 +198,7 @@ vercel logs --follow
 Visit: `/api/health/db-diagnostic`
 
 Provides detailed information about:
+
 - Environment variables configuration
 - Connection status
 - Query execution
@@ -219,6 +230,7 @@ npm run db:generate && node -e "const {PrismaClient} = require('@prisma/client')
    - Verify connection pooling is enabled
 
 3. **Test Connection from Vercel CLI**
+
    ```bash
    vercel env pull .env.vercel.local
    # Then test with local scripts

@@ -6,6 +6,8 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
+export const dynamic = 'force-dynamic'
+
 const updateProfileSchema = z.object({
   fullName: z.string().min(2).optional(),
   phone: z
@@ -17,6 +19,45 @@ const updateProfileSchema = z.object({
   rokPlayerId: z.string().optional().nullable(),
   rokKingdom: z.string().optional().nullable()
 })
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        phone: true,
+        discordUsername: true,
+        rokPlayerId: true,
+        rokKingdom: true,
+        image: true
+      }
+    })
+
+    if (!user) {
+      return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: user
+    })
+  } catch (error) {
+    getLogger().error('Error fetching user profile', error as Error)
+    return NextResponse.json(
+      { success: false, message: 'Failed to fetch profile' },
+      { status: 500 }
+    )
+  }
+}
 
 export async function PUT(request: NextRequest) {
   try {

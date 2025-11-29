@@ -99,7 +99,7 @@ export default function ActiveBookings({ bookings }: ActiveBookingsProps) {
             <AlertCircle className="mx-auto mb-2 h-12 w-12 text-gray-300" />
             <p className="text-sm">Bạn chưa có dịch vụ nào đang hoạt động</p>
             <Link
-              className="mt-3 inline-block rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+              className="mt-3 inline-block rounded bg-amber-600 px-4 py-2 text-sm text-white hover:bg-amber-700"
               href="/services"
             >
               Đặt dịch vụ mới
@@ -152,7 +152,7 @@ export default function ActiveBookings({ bookings }: ActiveBookingsProps) {
                       </div>
                       {booking.assignedStaff && (
                         <div className="flex items-center gap-2">
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-xs font-semibold text-white">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-xs font-semibold text-white">
                             {booking.assignedStaff.avatar ? (
                               <img
                                 alt={booking.assignedStaff.name}
@@ -179,7 +179,7 @@ export default function ActiveBookings({ bookings }: ActiveBookingsProps) {
                     </div>
                     <div className="h-2 w-full rounded-full bg-gray-200">
                       <div
-                        className="h-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-300"
+                        className="h-2 rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-300"
                         style={{ width: `${booking.progress}%` }}
                       />
                     </div>
@@ -188,10 +188,10 @@ export default function ActiveBookings({ bookings }: ActiveBookingsProps) {
 
                 {/* Next session info */}
                 {booking.nextSession && (
-                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800">
+                      <Clock className="h-4 w-4 text-amber-600" />
+                      <span className="text-sm font-medium text-amber-800">
                         Phiên tiếp theo: {formatDateTime(booking.nextSession)}
                       </span>
                     </div>
@@ -205,7 +205,7 @@ export default function ActiveBookings({ bookings }: ActiveBookingsProps) {
         {/* View all bookings link */}
         <div className="border-t bg-gray-50 p-4">
           <Link
-            className="block text-center text-sm font-medium text-blue-600 hover:text-blue-800"
+            className="block text-center text-sm font-medium text-amber-600 hover:text-amber-800"
             href="/dashboard/bookings"
           >
             Xem tất cả dịch vụ →

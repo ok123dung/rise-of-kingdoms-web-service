@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 import type { User, Lead, BookingWithRelations, PaymentWithRelations } from '@/types/prisma'
 
@@ -98,17 +98,19 @@ export class EmailService {
       })
 
       // Log communication
-      await db.communication.create({
-        userId: booking.user.id,
-        bookingId: booking.id,
-        type: 'email',
-        channel: booking.user.email,
-        subject: template.subject,
-        content: template.html,
-        templateId: 'booking_confirmation',
-        templateData: {
-          success: result.success,
-          error: result.error
+      await prisma.communication.create({
+        data: {
+          userId: booking.user.id,
+          bookingId: booking.id,
+          type: 'email',
+          channel: booking.user.email,
+          subject: template.subject,
+          content: template.html,
+          templateId: 'booking_confirmation',
+          templateData: {
+            success: result.success,
+            error: result.error
+          }
         }
       })
 
@@ -132,17 +134,19 @@ export class EmailService {
       })
 
       // Log communication
-      await db.communication.create({
-        userId: payment.booking.user.id,
-        bookingId: payment.booking.id,
-        type: 'email',
-        channel: payment.booking.user.email,
-        subject: template.subject,
-        content: template.html,
-        templateId: 'payment_confirmation',
-        templateData: {
-          success: result.success,
-          error: result.error
+      await prisma.communication.create({
+        data: {
+          userId: payment.booking.user.id,
+          bookingId: payment.booking.id,
+          type: 'email',
+          channel: payment.booking.user.email,
+          subject: template.subject,
+          content: template.html,
+          templateId: 'payment_confirmation',
+          templateData: {
+            success: result.success,
+            error: result.error
+          }
         }
       })
 
@@ -166,16 +170,18 @@ export class EmailService {
       })
 
       // Log communication
-      await db.communication.create({
-        userId: user.id,
-        type: 'email',
-        channel: user.email,
-        subject: template.subject,
-        content: template.html,
-        templateId: 'welcome',
-        templateData: {
-          success: result.success,
-          error: result.error
+      await prisma.communication.create({
+        data: {
+          userId: user.id,
+          type: 'email',
+          channel: user.email,
+          subject: template.subject,
+          content: template.html,
+          templateId: 'welcome',
+          templateData: {
+            success: result.success,
+            error: result.error
+          }
         }
       })
 
@@ -199,17 +205,19 @@ export class EmailService {
       })
 
       // Log communication
-      await db.communication.create({
-        userId: booking.user.id,
-        bookingId: booking.id,
-        type: 'email',
-        channel: booking.user.email,
-        subject: template.subject,
-        content: template.html,
-        templateId: 'service_reminder',
-        templateData: {
-          success: result.success,
-          error: result.error
+      await prisma.communication.create({
+        data: {
+          userId: booking.user.id,
+          bookingId: booking.id,
+          type: 'email',
+          channel: booking.user.email,
+          subject: template.subject,
+          content: template.html,
+          templateId: 'service_reminder',
+          templateData: {
+            success: result.success,
+            error: result.error
+          }
         }
       })
 
@@ -238,16 +246,18 @@ export class EmailService {
 
       // Log communication if lead is assigned
       if (lead.assignedTo) {
-        await db.communication.create({
-          userId: lead.assignedTo,
-          type: 'email',
-          channel: lead.email,
-          subject: template.subject,
-          content: template.html,
-          templateId: 'lead_followup',
-          templateData: {
-            success: result.success,
-            error: result.error
+        await prisma.communication.create({
+          data: {
+            userId: lead.assignedTo,
+            type: 'email',
+            channel: lead.email,
+            subject: template.subject,
+            content: template.html,
+            templateId: 'lead_followup',
+            templateData: {
+              success: result.success,
+              error: result.error
+            }
           }
         })
       }
@@ -494,8 +504,8 @@ export class EmailService {
     const serviceName = `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
     const daysLeft = booking.endDate
       ? Math.ceil(
-          (new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-        )
+        (new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+      )
       : 0
 
     return {

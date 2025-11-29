@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import { db, prisma } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface VNPayRequest {
@@ -127,13 +127,16 @@ export class VNPayPayment {
           .map(key => `${key}=${encodeURIComponent(vnpParams[key])}`)
           .join('&')
       // Create payment record
-      await db.payment.create({
-        bookingId: request.bookingId,
-        amount: request.amount,
-        paymentMethod: 'vnpay',
-        paymentGateway: 'vnpay',
-        gatewayTransactionId: orderId,
-        gatewayOrderId: orderId
+      await prisma.payment.create({
+        data: {
+          bookingId: request.bookingId,
+          amount: request.amount,
+          paymentMethod: 'vnpay',
+          paymentGateway: 'vnpay',
+          gatewayTransactionId: orderId,
+          gatewayOrderId: orderId,
+          paymentNumber: `PAY${Date.now()}`
+        }
       })
       getLogger().info('VNPay payment URL created', { orderId, amount: request.amount })
       return {

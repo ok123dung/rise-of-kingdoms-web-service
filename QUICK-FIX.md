@@ -26,15 +26,17 @@ vercel --prod
 3. **Click Edit (icon bút chì)**
 
 4. **Update giá trị**
-   
+
    Giá trị hiện tại (có thể):
+
    ```
    postgresql://postgres.inondhimzqiguvdhyjng:Dungvnn001*@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
    ```
-   
+
    **Thêm vào cuối**: `&sslmode=require`
-   
+
    Giá trị mới:
+
    ```
    postgresql://postgres.inondhimzqiguvdhyjng:Dungvnn001*@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&sslmode=require
    ```
@@ -43,19 +45,20 @@ vercel --prod
 
 6. **Chọn Environment**
    - ✅ Production
-   - ✅ Preview  
+   - ✅ Preview
    - ✅ Development
 
 7. **Redeploy**
-   
+
    Sau khi save, có 2 cách:
-   
+
    **Cách 1**: Click "Redeploy" ngay trên Vercel Dashboard
    - Go to: Deployments tab
    - Click latest deployment
    - Click "Redeploy" button
-   
+
    **Cách 2**: Dùng command line
+
    ```bash
    cd c:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services
    vercel --prod
@@ -64,9 +67,11 @@ vercel --prod
 ## Verify Sau Khi Deploy
 
 1. **Test Signup**
+
    ```
    https://rok-services-ovc9o5fd1-dungs-projects-d4060553.vercel.app/auth/signup
    ```
+
    Tạo account mới - should work without 503 ✅
 
 2. **Check Health** (optional)
@@ -79,6 +84,7 @@ vercel --prod
 Nếu muốn nhanh nhất, chỉ cần:
 
 1. Copy exact value này:
+
    ```
    postgresql://postgres.inondhimzqiguvdhyjng:Dungvnn001*@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&sslmode=require
    ```

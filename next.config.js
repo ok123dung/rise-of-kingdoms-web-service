@@ -50,9 +50,8 @@ const nextConfig = {
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload'
-          },
+          }
           // CSP is handled by middleware
-
         ]
       }
     ]

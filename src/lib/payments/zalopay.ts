@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 
 import { generateSecureRandomInt } from '@/lib/crypto-utils'
-import { db, prisma } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface ZaloPayRequest {
@@ -139,13 +139,16 @@ export class ZaloPayPayment {
       const responseData: ZaloPayResponse = await response.json()
       if (responseData.return_code === 1) {
         // Tạo payment record
-        await db.payment.create({
-          bookingId: request.bookingId,
-          amount: request.amount,
-          paymentMethod: 'zalopay',
-          paymentGateway: 'zalopay',
-          gatewayTransactionId: appTransId,
-          gatewayOrderId: appTransId
+        await prisma.payment.create({
+          data: {
+            bookingId: request.bookingId,
+            amount: request.amount,
+            paymentMethod: 'zalopay',
+            paymentGateway: 'zalopay',
+            gatewayTransactionId: appTransId,
+            gatewayOrderId: appTransId,
+            paymentNumber: `PAY${Date.now()}`
+          }
         })
         return {
           success: true,
@@ -185,20 +188,37 @@ export class ZaloPayPayment {
       const embedDataObj = JSON.parse(embed_data)
       const { bookingId } = embedDataObj
       // Tìm payment record
-      const payment = await db.payment.findByGatewayTransactionId(app_trans_id)
+      // Tìm payment record
+      const payment = await prisma.payment.findFirst({
+        where: { gatewayTransactionId: app_trans_id }
+      })
       if (!payment) {
         console.error('Payment not found for app_trans_id:', app_trans_id)
         return { success: false, message: 'Payment not found' }
       }
       // Cập nhật payment status
-      await db.payment.updateStatus(payment.id, 'completed', {
-        zpTransId: zp_trans_id,
-        amount,
-        ...data
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: 'completed',
+          updatedAt: new Date(),
+          paidAt: new Date(),
+          gatewayResponse: {
+            zpTransId: zp_trans_id,
+            amount,
+            ...data
+          }
+        }
       })
       // Cập nhật booking status
-      await db.booking.updatePaymentStatus(payment.bookingId, 'completed')
-      await db.booking.updateStatus(payment.bookingId, 'confirmed')
+      await prisma.booking.update({
+        where: { id: payment.bookingId },
+        data: { paymentStatus: 'completed', updatedAt: new Date() }
+      })
+      await prisma.booking.update({
+        where: { id: payment.bookingId },
+        data: { status: 'confirmed', updatedAt: new Date() }
+      })
       // Send confirmation email
       await this.sendConfirmationEmail(payment.bookingId)
       // Send Discord notification

@@ -42,7 +42,7 @@ declare global {
         event_label?: string
         value?: number
         custom_parameter_1?: string
-        [key: string]: any
+        [key: string]: unknown
       }
     ) => void
   }

@@ -2,25 +2,26 @@
 
 import { Suspense, useState, useEffect } from 'react'
 
-import { Check, ChevronRight, ChevronLeft, User, Shield, Sparkles, Loader2 } from 'lucide-react'
+import { Check, ChevronRight, ChevronLeft, User, Shield, Sparkles, Loader2, Target } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
 import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import { servicesData } from '@/data/services'
-
-const steps = [
-  { id: 1, name: 'Chọn dịch vụ', icon: Shield },
-  { id: 2, name: 'Thông tin', icon: User },
-  { id: 3, name: 'Xác nhận', icon: Check }
-]
+import { useLanguage } from '@/contexts/LanguageContext'
 
 function BookingContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { t } = useLanguage()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const steps = [
+    { id: 1, name: t.autoService.title, icon: Shield },
+    { id: 2, name: t.common.contact, icon: User },
+    { id: 3, name: t.common.bookNow, icon: Check }
+  ]
 
   const [formData, setFormData] = useState({
     serviceId: '',
@@ -36,8 +37,14 @@ function BookingContent() {
 
   useEffect(() => {
     const serviceParam = searchParams.get('service')
+    const tierParam = searchParams.get('tier')
+
     if (serviceParam) {
-      setFormData(prev => ({ ...prev, serviceId: serviceParam }))
+      setFormData(prev => ({
+        ...prev,
+        serviceId: serviceParam,
+        tierId: tierParam || ''
+      }))
     }
   }, [searchParams])
 
@@ -76,7 +83,22 @@ function BookingContent() {
     }
   }
 
-  const selectedService = Object.values(servicesData).find(s => s.slug === formData.serviceId)
+  // Helper to get service data from translations
+  const getServiceData = (slug: string) => {
+    return t.services[slug as keyof typeof t.services]
+  }
+
+  const selectedService = getServiceData(formData.serviceId)
+  // Find tier by matching slug or name since we don't have explicit slugs in translation pricing
+  const selectedTier = selectedService?.pricing.find((p: any) =>
+    p.tier.toLowerCase().replace(/\s+/g, '-') === formData.tierId ||
+    p.tier === formData.tierId
+  ) || selectedService?.pricing[0]
+
+  // Icon map
+  const iconMap: Record<string, any> = {
+    'auto-gem-farm': Target
+  }
 
   return (
     <>
@@ -95,10 +117,9 @@ function BookingContent() {
                     <div
                       className={`
                         flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-300
-                        ${
-                          isActive
-                            ? 'border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-                            : 'border-gray-300 bg-white text-gray-400'
+                        ${isActive
+                          ? 'border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-500/30'
+                          : 'border-gray-300 bg-white text-gray-400'
                         }
                       `}
                     >
@@ -131,47 +152,51 @@ function BookingContent() {
             <div className="card min-h-[500px] p-8">
               {currentStep === 1 && (
                 <div className="animate-fadeIn">
-                  <h2 className="mb-6 text-2xl font-bold text-gray-900">Chọn gói dịch vụ</h2>
+                  <h2 className="mb-6 text-2xl font-bold text-gray-900">{t.pricing.title}</h2>
                   <div className="grid gap-4 md:grid-cols-2">
-                    {Object.values(servicesData).map(service => (
-                      <div
-                        key={service.slug}
-                        className={`
-                          cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md
-                          ${
-                            formData.serviceId === service.slug
+                    {Object.entries(t.services).map(([slug, service]) => {
+                      const IconComponent = iconMap[slug] || Target
+                      return (
+                        <div
+                          key={slug}
+                          className={`
+                            cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md
+                            ${formData.serviceId === slug
                               ? 'border-amber-500 bg-amber-50 ring-1 ring-amber-500'
                               : 'border-gray-100 hover:border-amber-200'
-                          }
-                        `}
-                        onClick={() => setFormData(prev => ({ ...prev, serviceId: service.slug }))}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className={`rounded-lg p-2 ${formData.serviceId === service.slug ? 'bg-amber-200' : 'bg-gray-100'}`}
-                          >
-                            <service.icon
-                              className={`h-6 w-6 ${formData.serviceId === service.slug ? 'text-amber-700' : 'text-gray-500'}`}
-                            />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{service.name}</h3>
-                            <p className="text-sm text-gray-500">{service.pricing[0].price}</p>
+                            }
+                          `}
+                          onClick={() => setFormData(prev => ({ ...prev, serviceId: slug }))}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div
+                              className={`rounded-lg p-2 ${formData.serviceId === slug ? 'bg-amber-200' : 'bg-gray-100'}`}
+                            >
+                              <IconComponent
+                                className={`h-6 w-6 ${formData.serviceId === slug ? 'text-amber-700' : 'text-gray-500'}`}
+                              />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900">{service.name}</h3>
+                              <p className="text-sm text-gray-500">
+                                {service.pricing[0].price.toLocaleString('vi-VN')} VNĐ
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}
 
               {currentStep === 2 && (
                 <div className="animate-fadeIn">
-                  <h2 className="mb-6 text-2xl font-bold text-gray-900">Thông tin của bạn</h2>
+                  <h2 className="mb-6 text-2xl font-bold text-gray-900">{t.common.contact}</h2>
                   <div className="grid gap-6 md:grid-cols-2">
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700">
-                        Họ và tên
+                        {t.common.contact} Name
                       </label>
                       <input
                         className="input-field"
@@ -193,7 +218,7 @@ function BookingContent() {
                     </div>
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700">
-                        Số điện thoại
+                        Phone
                       </label>
                       <input
                         className="input-field"
@@ -217,7 +242,7 @@ function BookingContent() {
                     </div>
                     <div className="md:col-span-2">
                       <label className="mb-2 block text-sm font-medium text-gray-700">
-                        Ghi chú thêm
+                        Note
                       </label>
                       <textarea
                         className="input-field"
@@ -233,27 +258,32 @@ function BookingContent() {
 
               {currentStep === 3 && (
                 <div className="animate-fadeIn">
-                  <h2 className="mb-6 text-2xl font-bold text-gray-900">Xác nhận thông tin</h2>
+                  <h2 className="mb-6 text-2xl font-bold text-gray-900">{t.common.bookNow}</h2>
 
                   <div className="rounded-xl bg-gray-50 p-6">
                     <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-4">
                       <div>
-                        <p className="text-sm text-gray-500">Dịch vụ đã chọn</p>
+                        <p className="text-sm text-gray-500">{t.autoService.title}</p>
                         <p className="text-lg font-bold text-amber-600">
                           {selectedService?.name || 'Chưa chọn'}
                         </p>
+                        {selectedTier && (
+                          <p className="text-sm font-medium text-gray-600">
+                            {selectedTier.tier} ({selectedTier.duration})
+                          </p>
+                        )}
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-gray-500">Giá dự kiến</p>
+                        <p className="text-sm text-gray-500">{t.pricing.title}</p>
                         <p className="text-lg font-bold text-gray-900">
-                          {selectedService?.pricing[0].price}
+                          {selectedTier?.price.toLocaleString('vi-VN')} VNĐ
                         </p>
                       </div>
                     </div>
 
                     <div className="grid gap-4 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Họ tên:</span>
+                        <span className="text-gray-500">Name:</span>
                         <span className="font-medium">{formData.fullName}</span>
                       </div>
                       <div className="flex justify-between">
@@ -261,7 +291,7 @@ function BookingContent() {
                         <span className="font-medium">{formData.email}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">SĐT:</span>
+                        <span className="text-gray-500">Phone:</span>
                         <span className="font-medium">{formData.phone}</span>
                       </div>
                       {formData.kingdom && (
@@ -276,8 +306,7 @@ function BookingContent() {
                   <div className="mt-6 flex items-start space-x-3 rounded-lg bg-blue-50 p-4 text-sm text-blue-700">
                     <Sparkles className="mt-0.5 h-5 w-5 flex-shrink-0" />
                     <p>
-                      Sau khi gửi yêu cầu, đội ngũ tư vấn sẽ liên hệ với bạn qua Zalo/Discord trong
-                      vòng 30 phút để xác nhận và hướng dẫn thanh toán.
+                      {t.features.time.desc}
                     </p>
                   </div>
                 </div>
@@ -290,16 +319,15 @@ function BookingContent() {
                 disabled={currentStep === 1}
                 className={`
                   flex items-center space-x-2 rounded-xl px-6 py-3 font-medium transition-colors
-                  ${
-                    currentStep === 1
-                      ? 'cursor-not-allowed text-gray-300'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  ${currentStep === 1
+                    ? 'cursor-not-allowed text-gray-300'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   }
                 `}
                 onClick={handleBack}
               >
                 <ChevronLeft className="h-5 w-5" />
-                <span>Quay lại</span>
+                <span>Back</span>
               </button>
 
               {currentStep < 3 ? (
@@ -311,7 +339,7 @@ function BookingContent() {
                   `}
                   onClick={handleNext}
                 >
-                  <span>Tiếp tục</span>
+                  <span>Next</span>
                   <ChevronRight className="h-5 w-5" />
                 </button>
               ) : (
@@ -325,7 +353,7 @@ function BookingContent() {
                   ) : (
                     <Check className="h-5 w-5" />
                   )}
-                  <span>{isSubmitting ? 'Đang xử lý...' : 'Xác nhận đặt lịch'}</span>
+                  <span>{isSubmitting ? 'Processing...' : t.common.bookNow}</span>
                 </button>
               )}
             </div>

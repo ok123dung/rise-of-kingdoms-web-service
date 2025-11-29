@@ -1,9 +1,14 @@
+'use client'
+
 import { ArrowRight, Star, Users, Trophy, Crown, Sparkles, Shield } from 'lucide-react'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Hero() {
+  const { t } = useLanguage()
+
   return (
-    <section className="bg-gradient-hero section-padding relative overflow-hidden">
+    <section className="bg-gradient-hero section-padding relative overflow-hidden" data-testid="hero-section">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
         <div className="animate-float absolute left-10 top-20">
@@ -28,31 +33,30 @@ export default function Hero() {
           <div className="mb-6">
             <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-400 backdrop-blur-sm">
               <Crown className="mr-2 h-4 w-4" />
-              #1 Dịch vụ RoK tại Việt Nam
+              {t.hero.badge}
             </span>
           </div>
 
           <h1 className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl">
-            Dịch vụ chuyên nghiệp cho{' '}
+            {t.hero.title}{' '}
             <span className="text-gradient animate-glow mt-2 block">Rise of Kingdoms</span>
           </h1>
 
           <p className="mx-auto mt-8 max-w-4xl text-xl leading-8 text-slate-300">
-            Nâng cao trải nghiệm chơi game của bạn với các dịch vụ chuyên nghiệp từ đội ngũ
-            <span className="font-semibold text-amber-400"> top player hàng đầu Việt Nam</span>: tư
-            vấn chiến thuật, quản lý liên minh, training commander và nhiều hơn nữa.
+            {t.hero.subtitle}
           </p>
 
           <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
             <Link
               className="btn-primary flex items-center space-x-3 px-8 py-4 text-lg"
               href="/services"
+              data-testid="primary-cta"
             >
-              <span>Khám phá dịch vụ</span>
+              <span>{t.hero.ctaPrimary}</span>
               <ArrowRight className="h-5 w-5" />
             </Link>
             <Link className="btn-secondary px-8 py-4 text-lg" href="/guides">
-              Hướng dẫn miễn phí
+              {t.hero.ctaSecondary}
             </Link>
           </div>
         </div>
@@ -65,7 +69,7 @@ export default function Hero() {
                 <Users className="h-8 w-8 text-white" />
               </div>
               <div className="animate-pulse-slow mb-2 text-4xl font-bold text-white">1000+</div>
-              <div className="text-lg font-medium text-slate-300">Khách hàng tin tưởng</div>
+              <div className="text-lg font-medium text-slate-300">{t.hero.stats.customers}</div>
               <div className="mt-2 text-sm text-amber-400">Đánh giá 5 sao</div>
             </div>
           </div>
@@ -76,7 +80,7 @@ export default function Hero() {
                 <Trophy className="h-8 w-8 text-white" />
               </div>
               <div className="animate-pulse-slow mb-2 text-4xl font-bold text-white">500+</div>
-              <div className="text-lg font-medium text-slate-300">Liên minh được hỗ trợ</div>
+              <div className="text-lg font-medium text-slate-300">{t.hero.stats.alliances}</div>
               <div className="mt-2 text-sm text-blue-400">Top Kingdom</div>
             </div>
           </div>
@@ -87,7 +91,7 @@ export default function Hero() {
                 <Star className="h-8 w-8 text-white" />
               </div>
               <div className="animate-pulse-slow mb-2 text-4xl font-bold text-white">4.9/5</div>
-              <div className="text-lg font-medium text-slate-300">Đánh giá trung bình</div>
+              <div className="text-lg font-medium text-slate-300">{t.hero.stats.rating}</div>
               <div className="mt-2 text-sm text-amber-400">Từ 2000+ reviews</div>
             </div>
           </div>

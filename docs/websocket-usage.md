@@ -85,7 +85,6 @@ NEXT_PUBLIC_WS_URL=wss://your-domain.com
 
 ```tsx
 import { BookingChat } from '@/components/BookingChat'
-
 ;<BookingChat bookingId={booking.id} />
 ```
 
@@ -93,7 +92,6 @@ import { BookingChat } from '@/components/BookingChat'
 
 ```tsx
 import { RealtimeNotifications } from '@/components/RealtimeNotifications'
-
 ;<RealtimeNotifications />
 ```
 

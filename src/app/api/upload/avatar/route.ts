@@ -72,12 +72,12 @@ export async function POST(request: NextRequest) {
     // Update user avatar URL
     // Note: User model doesn't have 'image' field in current schema
     // Avatar URL is stored in CloudinaryUpload model instead
-    // TODO: If needed, add 'avatarUrl' field to User schema via migration
+    // Saved avatar URL to user profile
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        // image: result.url // Field doesn't exist in schema
-        updatedAt: new Date() // Touch updatedAt for now
+        image: result.url,
+        updatedAt: new Date()
       }
     })
 

@@ -12,8 +12,8 @@ declare module 'express' {
 
   interface Response {
     setHeader: (name: string, value: string) => void
-    end: (chunk?: any, encoding?: string) => void
+    end: (chunk?: string | Buffer | Uint8Array, encoding?: string) => void
   }
 }
 
-export {}
+export { }

@@ -16,7 +16,7 @@ test.describe('Booking Flow Tests', () => {
     await helpers.waitForPageLoad()
 
     // Select a service
-    await page.click('[data-testid="service-card"]:first-child .book-now-btn, text=Đặt ngay')
+    await page.locator('[data-testid="service-card"]').first().locator('.book-now-btn').click()
     await helpers.waitForPageLoad()
 
     // Fill booking form
@@ -47,7 +47,7 @@ test.describe('Booking Flow Tests', () => {
 
     // Should show validation errors
     await expect(
-      page.locator('.error-message, .text-red-500').count()
+      page.locator('.error-message, .text-red-500, .text-red-600').count()
     ).resolves.toBeGreaterThanOrEqual(2)
 
     // Check specific field errors

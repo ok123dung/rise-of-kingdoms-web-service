@@ -1,20 +1,29 @@
 'use client'
 
 import { useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 import { Menu, X, Crown, Shield, Users, BookOpen, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import UserMenu from './UserMenu'
 
-const navigation = [
-  { name: 'Trang chủ', href: '/', icon: Crown },
-  { name: 'Dịch vụ', href: '/services', icon: Shield },
-  { name: 'Hướng dẫn', href: '/guides', icon: BookOpen },
-  { name: 'Liên minh', href: '/alliance', icon: Users }
-]
+
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { t, language, setLanguage } = useLanguage()
+
+  const navigation = [
+    { name: t.common.home, href: '/', icon: Crown },
+    { name: t.common.services, href: '/services', icon: Shield },
+    { name: t.common.guides, href: '/guides', icon: BookOpen },
+    { name: t.common.alliance, href: '/alliance', icon: Users }
+  ]
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'vi' ? 'en' : 'vi')
+  }
 
   return (
     <header className="nav-glassmorphism sticky top-0 z-50 transition-all duration-300">
@@ -70,17 +79,25 @@ export default function Header() {
         </div>
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
-          <Link
-            className="rounded-xl px-4 py-2 text-sm font-semibold leading-6 text-slate-700 transition-colors duration-200 hover:bg-white/50 hover:text-amber-600"
-            href="/auth/signin"
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              toggleLanguage()
+            }}
+            className="relative z-50 flex items-center space-x-1 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-white/50"
           >
-            Đăng nhập
-          </Link>
+            <span>{language === 'vi' ? '🇻🇳 VI' : '🇺🇸 EN'}</span>
+          </button>
+
+          <UserMenu />
+
           <Link
             className="rounded-full bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-500/30"
             href="/booking"
           >
-            Đặt dịch vụ ngay
+            {t.common.bookNow}
           </Link>
         </div>
       </nav>
@@ -121,6 +138,16 @@ export default function Header() {
                       <span>{item.name}</span>
                     </Link>
                   ))}
+                  <button
+                    onClick={() => {
+                      toggleLanguage()
+                      setMobileMenuOpen(false)
+                    }}
+                    className="-mx-3 flex w-full items-center space-x-4 rounded-2xl px-4 py-3 text-base font-semibold leading-7 text-slate-800 transition-all duration-300 hover:bg-white/20"
+                  >
+                    <span className="text-xl">{language === 'vi' ? '🇻🇳' : '🇺🇸'}</span>
+                    <span>{language === 'vi' ? 'Tiếng Việt' : 'English'}</span>
+                  </button>
                 </div>
                 <div className="space-y-3 py-6">
                   <Link
@@ -128,14 +155,14 @@ export default function Header() {
                     href="/auth/signin"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Đăng nhập
+                    {t.common.login}
                   </Link>
                   <Link
                     className="-mx-3 block rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-center text-base font-semibold leading-7 text-white transition-all duration-300 hover:from-amber-600 hover:to-amber-700"
                     href="/auth/signup"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Đăng ký ngay
+                    {t.common.bookNow}
                   </Link>
                 </div>
               </div>

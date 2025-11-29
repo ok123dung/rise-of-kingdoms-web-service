@@ -69,8 +69,8 @@ function ForgotPasswordContent() {
 
         {/* Header */}
         <div className="text-center">
-          <div className="mb-6 inline-flex rounded-full bg-blue-100 p-4">
-            <Shield className="h-8 w-8 text-blue-600" />
+          <div className="mb-6 inline-flex rounded-full bg-amber-100 p-4">
+            <Shield className="h-8 w-8 text-amber-600" />
           </div>
 
           <h2 className="mb-2 text-3xl font-bold text-gray-900">Quên mật khẩu?</h2>
@@ -143,7 +143,7 @@ function ForgotPasswordContent() {
                   <input
                     required
                     autoComplete="email"
-                    className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                    className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
                     disabled={isLoading}
                     id="email"
                     name="email"
@@ -203,12 +203,12 @@ function ForgotPasswordContent() {
         </div>
 
         {/* Security Notice */}
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
           <div className="flex items-start gap-3">
-            <Shield className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />
+            <Shield className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
             <div className="text-sm">
-              <p className="mb-1 font-medium text-blue-900">Bảo mật thông tin</p>
-              <p className="text-blue-700">
+              <p className="mb-1 font-medium text-amber-900">Bảo mật thông tin</p>
+              <p className="text-amber-700">
                 Chúng tôi không bao giờ gửi mật khẩu qua email. Link reset sẽ hết hạn sau 1 giờ và
                 chỉ có thể sử dụng một lần.
               </p>
@@ -239,7 +239,7 @@ export default function ForgotPasswordPage() {
       <Suspense
         fallback={
           <div className="flex min-h-screen items-center justify-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
+            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-amber-600" />
           </div>
         }
       >

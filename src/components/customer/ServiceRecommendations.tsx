@@ -33,7 +33,7 @@ export default function ServiceRecommendations({ recommendations }: ServiceRecom
         return {
           icon: <TrendingUp className="h-3 w-3" />,
           text: 'Phổ biến',
-          color: 'bg-blue-100 text-blue-800'
+          color: 'bg-amber-100 text-amber-800'
         }
       case 'similar_customers':
         return {
@@ -80,7 +80,7 @@ export default function ServiceRecommendations({ recommendations }: ServiceRecom
             <Target className="mx-auto mb-2 h-12 w-12 text-gray-300" />
             <p className="text-sm">Không có gợi ý dịch vụ phù hợp</p>
             <Link
-              className="mt-3 inline-block rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+              className="mt-3 inline-block rounded bg-amber-600 px-4 py-2 text-sm text-white hover:bg-amber-700"
               href="/services"
             >
               Khám phá dịch vụ
@@ -108,11 +108,11 @@ export default function ServiceRecommendations({ recommendations }: ServiceRecom
 
             return (
               <Link key={service.id} className="group block" href={`/services/${service.slug}`}>
-                <div className="rounded-lg border border-gray-200 p-4 transition-all duration-200 hover:border-blue-300 hover:shadow-md">
+                <div className="rounded-lg border border-gray-200 p-4 transition-all duration-200 hover:border-amber-300 hover:shadow-md">
                   <div className="mb-3 flex items-start justify-between">
                     <div className="flex-1">
                       <div className="mb-1 flex items-center gap-2">
-                        <h4 className="font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
+                        <h4 className="font-semibold text-gray-900 transition-colors group-hover:text-amber-600">
                           {service.name}
                         </h4>
                         {service.isFeatured && <Crown className="h-4 w-4 text-yellow-500" />}
@@ -157,7 +157,7 @@ export default function ServiceRecommendations({ recommendations }: ServiceRecom
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1 text-sm font-medium text-blue-600 group-hover:text-blue-700">
+                    <div className="flex items-center gap-1 text-sm font-medium text-amber-600 group-hover:text-amber-700">
                       <span>Xem chi tiết</span>
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </div>
@@ -171,7 +171,7 @@ export default function ServiceRecommendations({ recommendations }: ServiceRecom
         {/* View all services link */}
         <div className="border-t bg-gray-50 p-4">
           <Link
-            className="block text-center text-sm font-medium text-blue-600 hover:text-blue-800"
+            className="block text-center text-sm font-medium text-amber-600 hover:text-amber-800"
             href="/services"
           >
             Khám phá tất cả dịch vụ →

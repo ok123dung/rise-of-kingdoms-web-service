@@ -65,6 +65,7 @@ export default function BookingDetailPage() {
   const router = useRouter()
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [cancelling, setCancelling] = useState(false)
   useEffect(() => {
     if (session?.user && params.id) {
       fetchBookingDetail()
@@ -83,6 +84,33 @@ export default function BookingDetailPage() {
       console.error('Error fetching booking:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCancelBooking = async () => {
+    if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) {
+      return
+    }
+
+    setCancelling(true)
+    try {
+      const response = await fetch(`/api/user/bookings/${booking?.id}/cancel`, {
+        method: 'POST'
+      })
+      const data = await response.json()
+
+      if (response.ok) {
+        // Refresh booking data
+        fetchBookingDetail()
+        alert('Đã hủy đơn hàng thành công')
+      } else {
+        alert(data.message || 'Không thể hủy đơn hàng')
+      }
+    } catch (error) {
+      console.error('Error cancelling booking:', error)
+      alert('Có lỗi xảy ra khi hủy đơn hàng')
+    } finally {
+      setCancelling(false)
     }
   }
   if (loading) {
@@ -191,7 +219,7 @@ export default function BookingDetailPage() {
             </div>
           )}
           {/* Live Chat */}
-          <div className="rounded-lg bg-white p-6 shadow">
+          <div id="booking-chat" className="rounded-lg bg-white p-6 shadow">
             <h2 className="mb-4 text-lg font-medium text-gray-900">Chat với nhân viên</h2>
             <BookingChat bookingId={booking.id} />
           </div>
@@ -265,17 +293,30 @@ export default function BookingDetailPage() {
           <div className="rounded-lg bg-white p-6 shadow">
             <h2 className="mb-4 text-lg font-medium text-gray-900">Hành động</h2>
             <div className="space-y-3">
-              <button className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+              <button
+                onClick={() => {
+                  document.getElementById('booking-chat')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+              >
                 <ChatBubbleLeftRightIcon className="mr-2 h-4 w-4" />
                 Liên hệ hỗ trợ
               </button>
-              <button className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+              <Link
+                href={`/dashboard/bookings/${booking.id}/invoice`}
+                target="_blank"
+                className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+              >
                 <DocumentTextIcon className="mr-2 h-4 w-4" />
                 Xuất hóa đơn
-              </button>
+              </Link>
               {booking.status === 'pending' && (
-                <button className="inline-flex w-full items-center justify-center rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50">
-                  Hủy đơn hàng
+                <button
+                  className="inline-flex w-full items-center justify-center rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50 disabled:opacity-50"
+                  disabled={cancelling}
+                  onClick={handleCancelBooking}
+                >
+                  {cancelling ? 'Đang hủy...' : 'Hủy đơn hàng'}
                 </button>
               )}
             </div>

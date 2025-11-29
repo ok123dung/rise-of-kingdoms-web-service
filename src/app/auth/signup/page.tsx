@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import {
   Eye,
@@ -30,8 +30,13 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   const router = useRouter()
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -68,6 +73,8 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!isMounted) return
+
     setIsLoading(true)
     setError('')
 
@@ -152,7 +159,7 @@ export default function SignUpPage() {
             <p className="mb-4 text-gray-600">
               Tài khoản của bạn đã được tạo thành công. Đang chuyển hướng...
             </p>
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-amber-600" />
           </div>
         </div>
       </div>
@@ -160,14 +167,14 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-bold text-gray-900">Tạo tài khoản RoK Services</h2>
           <p className="mt-2 text-sm text-gray-600">
             Đã có tài khoản?{' '}
-            <Link className="font-medium text-blue-600 hover:text-blue-500" href="/auth/signin">
+            <Link className="font-medium text-amber-600 hover:text-amber-500" href="/auth/signin">
               Đăng nhập ngay
             </Link>
           </p>
@@ -192,7 +199,7 @@ export default function SignUpPage() {
                 <input
                   required
                   autoComplete="name"
-                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
                   id="fullName"
                   name="fullName"
                   placeholder="Nguyễn Văn A"
@@ -212,7 +219,7 @@ export default function SignUpPage() {
                 <input
                   required
                   autoComplete="email"
-                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
                   id="email"
                   name="email"
                   placeholder="your@email.com"
@@ -231,7 +238,7 @@ export default function SignUpPage() {
                 <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                 <input
                   autoComplete="tel"
-                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
                   id="phone"
                   name="phone"
                   placeholder="0987654321"
@@ -251,7 +258,7 @@ export default function SignUpPage() {
                 <input
                   required
                   autoComplete="new-password"
-                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 pr-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 pr-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
                   id="password"
                   name="password"
                   placeholder="••••••••"
@@ -282,7 +289,7 @@ export default function SignUpPage() {
                 <input
                   required
                   autoComplete="new-password"
-                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 pr-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 pr-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
                   id="confirmPassword"
                   name="confirmPassword"
                   placeholder="••••••••"
@@ -308,18 +315,18 @@ export default function SignUpPage() {
           <div className="flex items-center">
             <input
               required
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
               id="agree-terms"
               name="agree-terms"
               type="checkbox"
             />
             <label className="ml-2 block text-sm text-gray-900" htmlFor="agree-terms">
               Tôi đồng ý với{' '}
-              <Link className="text-blue-600 hover:text-blue-500" href="/terms">
+              <Link className="text-amber-600 hover:text-amber-500" href="/terms">
                 Điều khoản dịch vụ
               </Link>{' '}
               và{' '}
-              <Link className="text-blue-600 hover:text-blue-500" href="/privacy">
+              <Link className="text-amber-600 hover:text-amber-500" href="/privacy">
                 Chính sách bảo mật
               </Link>
             </label>
@@ -327,8 +334,9 @@ export default function SignUpPage() {
 
           <div>
             <button
-              className="group relative flex w-full justify-center rounded-lg border border-transparent bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isLoading}
+              id="submit-signup"
+              className="group relative flex w-full justify-center rounded-lg border border-transparent bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:scale-105 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading || !isMounted}
               type="submit"
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Tạo tài khoản'}

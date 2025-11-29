@@ -1,7 +1,7 @@
 import { type Page, expect } from '@playwright/test'
 
 export class TestHelpers {
-  constructor(private page: Page) {}
+  constructor(private page: Page) { }
 
   /**
    * Wait for page to be fully loaded including network requests
@@ -231,7 +231,7 @@ export const TestData = {
  * Page Object Models
  */
 export class HomePage {
-  constructor(private page: Page) {}
+  constructor(private page: Page) { }
 
   async goto() {
     await this.page.goto('/')
@@ -248,7 +248,7 @@ export class HomePage {
 }
 
 export class AuthPage {
-  constructor(private page: Page) {}
+  constructor(private page: Page) { }
 
   async gotoSignIn() {
     await this.page.goto('/auth/signin')
@@ -267,7 +267,7 @@ export class AuthPage {
 
   async signUp(userData: { email: string; name: string; password: string }) {
     await this.page.fill('[name="email"]', userData.email)
-    await this.page.fill('[name="name"]', userData.name)
+    await this.page.fill('[name="fullName"]', userData.name)
     await this.page.fill('[name="password"]', userData.password)
     await this.page.click('button[type="submit"]')
     await new TestHelpers(this.page).waitForPageLoad()
@@ -275,7 +275,7 @@ export class AuthPage {
 }
 
 export class ServicesPage {
-  constructor(private page: Page) {}
+  constructor(private page: Page) { }
 
   async goto() {
     await this.page.goto('/services')

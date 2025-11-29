@@ -1,4 +1,4 @@
-import { db, prisma } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { getEmailService } from '@/lib/email/service'
 import { getLogger } from '@/lib/monitoring/logger'
 import type { Booking, PaymentWithBooking } from '@/types/database'
@@ -57,7 +57,19 @@ export class BankingTransfer {
     error?: string
   }> {
     try {
-      const booking = await db.booking.findById(request.bookingId)
+      const booking = await prisma.booking.findUnique({
+        where: { id: request.bookingId },
+        include: {
+          user: true,
+          serviceTier: {
+            include: {
+              service: true
+            }
+          },
+          payments: true,
+          communications: true
+        }
+      })
       if (!booking) {
         return { success: false, error: 'Booking not found' }
       }
@@ -67,13 +79,16 @@ export class BankingTransfer {
       const expireTime = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
       // Create payment record
-      await db.payment.create({
-        bookingId: request.bookingId,
-        amount: request.amount,
-        paymentMethod: 'banking',
-        paymentGateway: 'manual_banking',
-        gatewayTransactionId: transferCode,
-        gatewayOrderId: transferCode
+      await prisma.payment.create({
+        data: {
+          bookingId: request.bookingId,
+          amount: request.amount,
+          paymentMethod: 'banking',
+          paymentGateway: 'manual_banking',
+          gatewayTransactionId: transferCode,
+          gatewayOrderId: transferCode,
+          paymentNumber: `PAY${Date.now()}` // Simple generation
+        }
       })
 
       // Send banking instructions email
@@ -122,7 +137,9 @@ export class BankingTransfer {
   }> {
     try {
       // Find payment record
-      const payment = await db.payment.findByGatewayTransactionId(transferCode)
+      const payment = await prisma.payment.findFirst({
+        where: { gatewayTransactionId: transferCode }
+      })
       if (!payment) {
         return { success: false, message: 'Transfer not found' }
       }
@@ -132,15 +149,29 @@ export class BankingTransfer {
       }
 
       // Update payment status
-      await db.payment.updateStatus(payment.id, 'completed', {
-        confirmedAt: new Date(),
-        adminNotes,
-        confirmationMethod: 'manual_verification'
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: 'completed',
+          updatedAt: new Date(),
+          paidAt: new Date(),
+          gatewayResponse: {
+            confirmedAt: new Date(),
+            adminNotes,
+            confirmationMethod: 'manual_verification'
+          }
+        }
       })
 
       // Update booking status
-      await db.booking.updatePaymentStatus(payment.bookingId, 'completed')
-      await db.booking.updateStatus(payment.bookingId, 'confirmed')
+      await prisma.booking.update({
+        where: { id: payment.bookingId },
+        data: { paymentStatus: 'completed', updatedAt: new Date() }
+      })
+      await prisma.booking.update({
+        where: { id: payment.bookingId },
+        data: { status: 'confirmed', updatedAt: new Date() }
+      })
 
       // Send confirmation email
       const paymentWithRelations = await prisma.payment.findUnique({
@@ -231,23 +262,47 @@ export class BankingTransfer {
   }> {
     try {
       // Find payment record
-      const payment = await db.payment.findByGatewayTransactionId(transferCode)
+      const payment = await prisma.payment.findFirst({
+        where: { gatewayTransactionId: transferCode }
+      })
       if (!payment) {
         return { success: false, message: 'Transfer not found' }
       }
 
       // Update payment status
-      await db.payment.updateStatus(payment.id, 'failed', {
-        failureReason: reason,
-        rejectedAt: new Date(),
-        rejectionReason: reason
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: 'failed',
+          updatedAt: new Date(),
+          gatewayResponse: {
+            failureReason: reason,
+            rejectedAt: new Date(),
+            rejectionReason: reason
+          }
+        }
       })
 
       // Update booking status
-      await db.booking.updatePaymentStatus(payment.bookingId, 'failed')
+      await prisma.booking.update({
+        where: { id: payment.bookingId },
+        data: { paymentStatus: 'failed', updatedAt: new Date() }
+      })
 
       // Send rejection email
-      const booking = await db.booking.findById(payment.bookingId)
+      const booking = await prisma.booking.findUnique({
+        where: { id: payment.bookingId },
+        include: {
+          user: true,
+          serviceTier: {
+            include: {
+              service: true
+            }
+          },
+          payments: true,
+          communications: true
+        }
+      })
       if (booking) {
         await this.sendRejectionEmail({
           email: booking.user.email,

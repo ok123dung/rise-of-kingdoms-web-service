@@ -7,6 +7,11 @@ export async function GET() {
   const dbUrl = process.env.DATABASE_URL
   const directUrl = process.env.DIRECT_URL
 
+  console.log('Database URL:', process.env.DATABASE_URL ? 'Set' : 'Not set')
+  console.log('Direct URL:', process.env.DIRECT_URL ? 'Set' : 'Not set')
+  console.log('NextAuth Secret:', process.env.NEXTAUTH_SECRET ? 'Set' : 'Not set')
+  console.log('NextAuth URL:', process.env.NEXTAUTH_URL ? 'Set' : 'Not set')
+
   const response: any = {
     timestamp: new Date().toISOString(),
     environment: {
@@ -14,6 +19,8 @@ export async function GET() {
       VERCEL: process.env.VERCEL,
       DATABASE_URL_SET: !!dbUrl,
       DIRECT_URL_SET: !!directUrl,
+      NEXTAUTH_SECRET_SET: !!process.env.NEXTAUTH_SECRET,
+      NEXTAUTH_URL_SET: !!process.env.NEXTAUTH_URL,
       DATABASE_URL_FORMAT: dbUrl ? 'postgresql://...' : 'NOT_SET',
       DATABASE_URL_LENGTH: dbUrl?.length || 0,
       DATABASE_URL_MASKED: dbUrl?.replace(/:[^:]*@/, ':****@').substring(0, 100) || 'NOT_SET'

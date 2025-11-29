@@ -177,7 +177,7 @@ export default function RecentPayments({ payments }: RecentPaymentsProps) {
         {/* View all payments link */}
         <div className="border-t bg-gray-50 p-4">
           <Link
-            className="block text-center text-sm font-medium text-blue-600 hover:text-blue-800"
+            className="block text-center text-sm font-medium text-amber-600 hover:text-amber-800"
             href="/dashboard/payments"
           >
             Xem tất cả giao dịch →

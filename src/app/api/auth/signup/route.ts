@@ -1,7 +1,7 @@
 import { hash } from 'bcryptjs'
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { prisma } from '@/lib/db'
+import { basePrisma as prisma } from '@/lib/db'
 import { sendWelcomeEmail } from '@/lib/email'
 import {
   ConflictError,
@@ -64,13 +64,13 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
           errorInfo.hint = 'Try adding ?sslmode=require to your DATABASE_URL.'
         }
 
-        // In production, log full error but return sanitized message
-        if (process.env.NODE_ENV !== 'production') {
-          errorInfo.debug = {
-            error: dbError.message,
-            hasDbUrl: !!process.env.DATABASE_URL,
-            urlFormat: process.env.DATABASE_URL ? 'postgresql://...' : 'not set'
-          }
+        // TEMPORARY DEBUG: Always return debug info
+        errorInfo.debug = {
+          error: dbError.message,
+          code: (dbError as any).code,
+          meta: (dbError as any).meta,
+          hasDbUrl: !!process.env.DATABASE_URL,
+          urlFormat: process.env.DATABASE_URL ? 'postgresql://...' : 'not set'
         }
       }
 

@@ -48,7 +48,7 @@ export const currentCSPDirectives: CSPDirectives = {
   ],
   'style-src': [
     "'self'",
-    "'unsafe-inline'", // TODO: Remove after implementing nonce-based CSP
+    "'unsafe-inline'", // Note: Required for Next.js development mode
     'https://fonts.googleapis.com'
   ],
   'img-src': ["'self'", 'data:', 'https:', 'blob:'],

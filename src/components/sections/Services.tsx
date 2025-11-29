@@ -105,7 +105,7 @@ const services: Service[] = [
 
 export default function Services() {
   return (
-    <section className="section-padding relative overflow-hidden">
+    <section className="section-padding relative overflow-hidden" data-testid="services-section">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-amber-50/20" />
       <div className="animate-float absolute right-10 top-20 opacity-10">
@@ -191,6 +191,7 @@ function ServiceCard({ service }: ServiceCardProps) {
         ${cardClass} hover-lift group relative cursor-pointer
         ${featured ? 'border-2 border-amber-200 shadow-2xl' : ''}
       `}
+      data-testid="service-card"
     >
       {/* Featured Badge */}
       {featured && (
@@ -245,7 +246,7 @@ function ServiceCard({ service }: ServiceCardProps) {
 
         <div className="border-t border-slate-100 pt-4">
           <div className="mb-6">
-            <span className={`text-3xl font-bold ${featured ? 'text-gradient' : 'text-blue-600'}`}>
+            <span className={`text-3xl font-bold price ${featured ? 'text-gradient' : 'text-blue-600'}`}>
               {price}
             </span>
             <span className="ml-2 text-sm text-slate-500">

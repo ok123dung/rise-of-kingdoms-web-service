@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { NotFoundError, ValidationError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
 import type { Booking, ServiceTier } from '@/types/database'
+import { BookingStatus, PaymentStatus } from '@/types/enums'
 
 export class BookingService {
   private logger = getLogger()
@@ -19,52 +20,64 @@ export class BookingService {
     scheduledDate?: Date
     notes?: string
   }): Promise<Booking> {
-    // Validate service tier exists
-    const serviceTier = await this.getServiceTier(data.serviceTierId)
+    return await prisma.$transaction(async (tx) => {
+      // Validate service tier exists
+      const serviceTier = await this.getServiceTier(data.serviceTierId)
 
-    // Check if user has active booking for same service
-    const existingBooking = await this.checkExistingBooking(data.userId, serviceTier.serviceId)
-    if (existingBooking) {
-      throw new ConflictError('User already has an active booking for this service')
-    }
-
-    // Generate booking number
-    const bookingNumber = await this.generateBookingNumber()
-
-    // Create booking
-    const booking = await prisma.booking.create({
-      data: {
-        bookingNumber,
-        userId: data.userId,
-        serviceTierId: data.serviceTierId,
-        status: 'pending',
-        paymentStatus: 'pending',
-        totalAmount: new Prisma.Decimal(
-          typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()
-        ),
-        finalAmount: new Prisma.Decimal(
-          typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()
-        ),
-        currency: 'VND',
-        customerRequirements: data.customerRequirements,
-        startDate: data.scheduledDate,
-        internalNotes: data.notes
-      },
-      include: {
-        user: true,
-        serviceTier: {
-          include: { service: true }
+      // Check if user has active booking for same service
+      // Note: We use the transaction client 'tx' here to ensure consistency
+      const existingBookingCount = await tx.booking.count({
+        where: {
+          userId: data.userId,
+          serviceTier: { serviceId: serviceTier.serviceId },
+          status: {
+            in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.IN_PROGRESS]
+          }
         }
+      })
+
+      if (existingBookingCount > 0) {
+        throw new ConflictError('User already has an active booking for this service')
       }
-    })
 
-    this.logger.info('Booking created', {
-      bookingId: booking.id,
-      userId: data.userId,
-      serviceTierId: data.serviceTierId
-    })
+      // Generate booking number
+      const bookingNumber = await this.generateBookingNumber()
 
-    return booking
+      // Create booking
+      const booking = await tx.booking.create({
+        data: {
+          bookingNumber,
+          userId: data.userId,
+          serviceTierId: data.serviceTierId,
+          status: BookingStatus.PENDING,
+          paymentStatus: PaymentStatus.PENDING,
+          totalAmount: new Prisma.Decimal(
+            typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()
+          ),
+          finalAmount: new Prisma.Decimal(
+            typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()
+          ),
+          currency: 'VND',
+          customerRequirements: data.customerRequirements,
+          startDate: data.scheduledDate,
+          internalNotes: data.notes
+        },
+        include: {
+          user: true,
+          serviceTier: {
+            include: { service: true }
+          }
+        }
+      })
+
+      this.logger.info('Booking created', {
+        bookingId: booking.id,
+        userId: data.userId,
+        serviceTierId: data.serviceTierId
+      })
+
+      return booking
+    })
   }
 
   /**
@@ -175,14 +188,14 @@ export class BookingService {
     const booking = await this.getBookingById(bookingId, userId)
 
     // Check if booking can be cancelled
-    if (['completed', 'cancelled'].includes(booking.status)) {
+    if ([BookingStatus.COMPLETED, BookingStatus.CANCELLED].includes(booking.status as BookingStatus)) {
       throw new ValidationError('Booking cannot be cancelled')
     }
 
     const updated = await prisma.booking.update({
       where: { id: bookingId },
       data: {
-        status: 'cancelled',
+        status: BookingStatus.CANCELLED,
         internalNotes: reason ? `Cancelled: ${reason}` : 'Booking cancelled'
       },
       include: {
@@ -222,19 +235,7 @@ export class BookingService {
     return serviceTier
   }
 
-  private async checkExistingBooking(userId: string, serviceId: string): Promise<boolean> {
-    const count = await prisma.booking.count({
-      where: {
-        userId,
-        serviceTier: { serviceId },
-        status: {
-          in: ['pending', 'confirmed', 'in_progress']
-        }
-      }
-    })
-
-    return count > 0
-  }
+  // checkExistingBooking method is removed as it's now integrated into the transaction within createBooking
 
   private async generateBookingNumber(): Promise<string> {
     const date = new Date()

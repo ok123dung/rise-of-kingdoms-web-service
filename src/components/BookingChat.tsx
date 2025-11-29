@@ -7,26 +7,72 @@ import { Send, Loader2 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 
 import { useBookingWebSocket } from '@/hooks/useWebSocket'
+import { CommunicationType } from '@/types/enums'
 
 interface BookingChatProps {
   bookingId: string
   className?: string
 }
 
+interface Message {
+  id: string
+  content: string
+  senderId: string
+  createdAt: string | Date
+  sender?: {
+    fullName: string
+  }
+}
+
 export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
   const { data: session } = useSession()
-  const { isConnected, connectionError, messages, typingUsers, sendMessage, sendTypingIndicator } =
+  const { isConnected, connectionError, messages: wsMessages, typingUsers, sendMessage, sendTypingIndicator } =
     useBookingWebSocket(bookingId)
 
   const [newMessage, setNewMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [historyMessages, setHistoryMessages] = useState<Message[]>([])
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout>()
+
+  // Fetch history on mount
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch(`/api/communications?bookingId=${bookingId}`)
+        if (res.ok) {
+          const data = await res.json()
+          // Filter only chat messages
+          const chats = data.history.filter((msg: any) => msg.type === CommunicationType.CHAT)
+          // Sort by date asc
+          chats.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+          setHistoryMessages(chats)
+        }
+      } catch (error) {
+        console.error('Failed to fetch chat history:', error)
+      } finally {
+        setIsLoadingHistory(false)
+      }
+    }
+
+    if (bookingId) {
+      fetchHistory()
+    }
+  }, [bookingId])
+
+  // Combine history and WS messages, removing duplicates
+  const allMessages = [...historyMessages]
+  wsMessages.forEach(wsMsg => {
+    if (!allMessages.some(m => m.id === wsMsg.id)) {
+      allMessages.push(wsMsg)
+    }
+  })
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [allMessages.length, isLoadingHistory])
 
   // Handle typing indicator
   const handleInputChange = (value: string) => {
@@ -52,13 +98,36 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
     }, 1000)
   }
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!newMessage.trim() || !isConnected) return
+    if (!newMessage.trim()) return
 
-    sendMessage(bookingId, newMessage.trim())
+    const content = newMessage.trim()
     setNewMessage('')
+
+    // 1. Send via WebSocket for realtime
+    if (isConnected) {
+      sendMessage(bookingId, content)
+    }
+
+    // 2. Persist via API (Critical for history)
+    try {
+      await fetch('/api/communications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId,
+          type: CommunicationType.CHAT,
+          content
+        })
+      })
+      // Note: We don't manually add to historyMessages here because 
+      // ideally the WS server broadcasts it back, or we rely on WS for immediate feedback.
+      // If WS is down, we might want to optimistically add it.
+    } catch (error) {
+      console.error('Failed to persist message:', error)
+    }
 
     // Stop typing indicator
     if (isTyping) {
@@ -90,13 +159,17 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
 
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
-        {messages.length === 0 ? (
+        {isLoadingHistory ? (
+          <div className="flex justify-center py-4">
+            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+          </div>
+        ) : allMessages.length === 0 ? (
           <div className="mt-8 text-center text-gray-500">
             <p className="text-sm">Chưa có tin nhắn nào</p>
             <p className="mt-1 text-xs">Hãy bắt đầu cuộc trò chuyện!</p>
           </div>
         ) : (
-          messages.map((message, index) => {
+          allMessages.map((message, index) => {
             const isOwnMessage = message.senderId === session?.user?.id
 
             return (
@@ -105,9 +178,8 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
                 className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[70%] rounded-lg px-3 py-2 ${
-                    isOwnMessage ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'
-                  }`}
+                  className={`max-w-[70%] rounded-lg px-3 py-2 ${isOwnMessage ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'
+                    }`}
                 >
                   {!isOwnMessage && (
                     <p className="mb-1 text-xs font-medium opacity-70">
@@ -150,7 +222,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
         <div className="flex gap-2">
           <input
             className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
-            disabled={!isConnected}
+            disabled={!isConnected && !historyMessages.length} // Allow typing if history loaded even if WS down (will fallback to API)
             placeholder="Nhập tin nhắn..."
             type="text"
             value={newMessage}
@@ -158,13 +230,13 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
           />
           <button
             className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-            disabled={!isConnected || !newMessage.trim()}
+            disabled={!newMessage.trim()}
             type="submit"
           >
             {isConnected ? (
               <Send className="h-4 w-4" />
             ) : (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Send className="h-4 w-4" /> // Show send icon even if WS down, as we try API
             )}
           </button>
         </div>

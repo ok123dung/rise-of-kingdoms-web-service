@@ -8,24 +8,21 @@ import {
   Award,
   UserCheck,
   Phone,
+  Target,
   MessageCircle
 } from 'lucide-react'
 import Link from 'next/link'
-
-import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
 import { VietnameseGamingSchema } from '@/components/seo/VietnameseGamingSEO'
-import { servicesData } from '@/data/services'
-
-const services = Object.values(servicesData)
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const testimonials = [
   {
-    name: 'Nguyễn Văn Anh',
-    kingdom: 'Kingdom 2847',
+    name: 'Nguyễn Văn Nam',
+    kingdom: 'Kingdom 1001',
     rating: 5,
-    comment:
-      'Dịch vụ tư vấn chiến thuật rất chuyên nghiệp. Power tăng từ 50M lên 120M chỉ trong 2 tháng!',
+    comment: 'Dịch vụ tư vấn chiến thuật rất chuyên nghiệp. Power tăng từ 50M lên 120M chỉ trong 2 tháng!',
     service: 'Tư vấn chiến thuật',
     result: '+140% Power tăng',
     timeframe: '2 tháng',
@@ -84,6 +81,8 @@ const testimonials = [
 ]
 
 export default function ServicesPage() {
+  const { t } = useLanguage()
+
   return (
     <>
       <Header />
@@ -170,20 +169,25 @@ export default function ServicesPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {services.map(service => {
-                const IconComponent = service.icon
-                const lowestPrice = Math.min(...service.pricing.map(p => p.price))
-                const popularTier = service.pricing.find((_, index) => index === 1) // Middle tier is popular
+              {Object.entries(t.services).map(([slug, service]) => {
+                // Map slug to icon (since icons are not in translations)
+                const iconMap: Record<string, any> = {
+                  'auto-gem-farm': Target
+                }
+                const IconComponent = iconMap[slug] || Target
+
+                // Find lowest price
+                const lowestPrice = Math.min(...service.pricing.map((p: any) => p.price))
 
                 return (
                   <div
-                    key={service.slug}
+                    key={slug}
                     className="card group relative transition-all duration-300 hover:shadow-xl"
                   >
-                    {service.slug === 'strategy-consulting' && (
+                    {slug === 'strategy-consulting' && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 transform">
                         <span className="rounded-full bg-primary-600 px-4 py-1 text-sm font-semibold text-white">
-                          Phổ biến nhất
+                          {t.pricing.popular}
                         </span>
                       </div>
                     )}
@@ -205,7 +209,7 @@ export default function ServicesPage() {
                     </div>
 
                     <ul className="mb-8 space-y-3">
-                      {service.features.slice(0, 5).map((feature, index) => (
+                      {service.features.slice(0, 5).map((feature: string, index: number) => (
                         <li key={index} className="flex items-start space-x-3">
                           <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
                           <span className="text-sm text-gray-600">{feature}</span>
@@ -216,15 +220,15 @@ export default function ServicesPage() {
                     <div className="space-y-3">
                       <Link
                         className="block w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
-                        href={`/booking?service=${service.slug}`}
+                        href={`/booking?service=${slug}`}
                       >
-                        Đặt lịch ngay
+                        {t.common.bookNow}
                       </Link>
                       <Link
                         className="btn-secondary block w-full text-center text-sm"
-                        href={`/services/${service.slug}`}
+                        href={`/services/${slug}`}
                       >
-                        Xem chi tiết dịch vụ
+                        {t.hero.ctaPrimary}
                       </Link>
                     </div>
                   </div>

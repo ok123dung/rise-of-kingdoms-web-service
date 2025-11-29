@@ -1,11 +1,12 @@
 'use client'
-import { useState, useEffect } from 'react'
 
+import { useState, useEffect } from 'react'
 import {
   UserCircleIcon,
   PhoneIcon,
   EnvelopeIcon,
-  GlobeAsiaAustraliaIcon
+  GlobeAsiaAustraliaIcon,
+  LockClosedIcon
 } from '@heroicons/react/24/outline'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSession } from 'next-auth/react'
@@ -13,6 +14,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { AvatarUpload } from '@/components/AvatarUpload'
+import TwoFactorAuth from '@/components/profile/TwoFactorAuth'
 
 const profileSchema = z.object({
   fullName: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự'),
@@ -26,11 +28,25 @@ const profileSchema = z.object({
   rokKingdom: z.string().optional()
 })
 type ProfileFormData = z.infer<typeof profileSchema>
+
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Vui lòng nhập mật khẩu hiện tại'),
+    newPassword: z.string().min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự'),
+    confirmPassword: z.string().min(6, 'Vui lòng xác nhận mật khẩu mới')
+  })
+  .refine(data => data.newPassword === data.confirmPassword, {
+    message: 'Mật khẩu xác nhận không khớp',
+    path: ['confirmPassword']
+  })
+type PasswordFormData = z.infer<typeof passwordSchema>
+
 export default function ProfilePage() {
   const { data: session, update } = useSession()
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [profileData, setProfileData] = useState<any>(null)
+
   const {
     register,
     handleSubmit,
@@ -39,6 +55,16 @@ export default function ProfilePage() {
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema)
   })
+
+  const {
+    register: registerPassword,
+    handleSubmit: handleSubmitPassword,
+    formState: { errors: passwordErrors },
+    reset: resetPassword
+  } = useForm<PasswordFormData>({
+    resolver: zodResolver(passwordSchema)
+  })
+
   // Fetch user profile data
   useEffect(() => {
     if (session?.user) {
@@ -61,6 +87,7 @@ export default function ProfilePage() {
         })
     }
   }, [session, reset])
+
   const onSubmit = async (data: ProfileFormData) => {
     setLoading(true)
     setMessage(null)
@@ -84,6 +111,30 @@ export default function ProfilePage() {
       setLoading(false)
     }
   }
+
+  const onChangePassword = async (data: PasswordFormData) => {
+    setLoading(true)
+    setMessage(null)
+    try {
+      const response = await fetch('/api/user/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      const result = await response.json()
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Đổi mật khẩu thành công!' })
+        resetPassword()
+      } else {
+        setMessage({ type: 'error', text: result.message || 'Có lỗi xảy ra' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Không thể đổi mật khẩu' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (!session?.user) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -91,6 +142,7 @@ export default function ProfilePage() {
       </div>
     )
   }
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div>
@@ -99,15 +151,16 @@ export default function ProfilePage() {
           Quản lý thông tin cá nhân và cài đặt tài khoản của bạn
         </p>
       </div>
+
       {message && (
         <div
-          className={`rounded-md p-4 ${
-            message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-          }`}
+          className={`rounded-md p-4 ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+            }`}
         >
           <p className="text-sm">{message.text}</p>
         </div>
       )}
+
       <div className="rounded-lg bg-white shadow">
         <div className="px-4 py-5 sm:p-6">
           <div className="md:grid md:grid-cols-3 md:gap-6">
@@ -147,6 +200,7 @@ export default function ProfilePage() {
                   </div>
                   <p className="mt-1 text-xs text-gray-500">Email không thể thay đổi</p>
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="fullName">
                     Họ và tên
@@ -157,7 +211,7 @@ export default function ProfilePage() {
                     </div>
                     <input
                       {...register('fullName')}
-                      className="focus:ring-rok-gold focus:border-rok-gold block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
                       id="fullName"
                       type="text"
                     />
@@ -166,6 +220,7 @@ export default function ProfilePage() {
                     <p className="mt-1 text-sm text-red-600">{errors.fullName.message}</p>
                   )}
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="phone">
                     Số điện thoại
@@ -176,7 +231,7 @@ export default function ProfilePage() {
                     </div>
                     <input
                       {...register('phone')}
-                      className="focus:ring-rok-gold focus:border-rok-gold block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
                       id="phone"
                       placeholder="0901234567"
                       type="tel"
@@ -186,6 +241,7 @@ export default function ProfilePage() {
                     <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
                   )}
                 </div>
+
                 <div className="border-t border-gray-200 pt-6">
                   <h4 className="mb-4 text-sm font-medium text-gray-900">Thông tin game</h4>
                   <div className="space-y-4">
@@ -198,7 +254,7 @@ export default function ProfilePage() {
                       </label>
                       <input
                         {...register('discordUsername')}
-                        className="focus:ring-rok-gold focus:border-rok-gold mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none sm:text-sm"
+                        className="focus:ring-amber-500 focus:border-amber-500 mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none sm:text-sm"
                         id="discordUsername"
                         placeholder="username#1234"
                         type="text"
@@ -213,7 +269,7 @@ export default function ProfilePage() {
                       </label>
                       <input
                         {...register('rokPlayerId')}
-                        className="focus:ring-rok-gold focus:border-rok-gold mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none sm:text-sm"
+                        className="focus:ring-amber-500 focus:border-amber-500 mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none sm:text-sm"
                         id="rokPlayerId"
                         placeholder="12345678"
                         type="text"
@@ -232,7 +288,7 @@ export default function ProfilePage() {
                         </div>
                         <input
                           {...register('rokKingdom')}
-                          className="focus:ring-rok-gold focus:border-rok-gold block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                          className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
                           id="rokKingdom"
                           placeholder="1234"
                           type="text"
@@ -241,9 +297,10 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 </div>
+
                 <div className="flex justify-end">
                   <button
-                    className="bg-rok-gold hover:bg-rok-gold-dark focus:ring-rok-gold inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="bg-amber-600 hover:bg-amber-700 focus:ring-amber-500 inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={loading}
                     type="submit"
                   >
@@ -255,6 +312,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
       {/* Account Info */}
       <div className="rounded-lg bg-white shadow">
         <div className="px-4 py-5 sm:p-6">
@@ -281,6 +339,108 @@ export default function ProfilePage() {
           </dl>
         </div>
       </div>
+
+      {/* Change Password */}
+      <div className="rounded-lg bg-white shadow">
+        <div className="px-4 py-5 sm:p-6">
+          <div className="md:grid md:grid-cols-3 md:gap-6">
+            <div className="md:col-span-1">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">Đổi mật khẩu</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Đảm bảo sử dụng mật khẩu mạnh để bảo vệ tài khoản của bạn.
+              </p>
+            </div>
+            <div className="mt-5 md:col-span-2 md:mt-0">
+              <form className="space-y-6" onSubmit={handleSubmitPassword(onChangePassword)}>
+                <div>
+                  <label
+                    className="block text-sm font-medium text-gray-700"
+                    htmlFor="currentPassword"
+                  >
+                    Mật khẩu hiện tại
+                  </label>
+                  <div className="relative mt-1 rounded-md shadow-sm">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                      <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      {...registerPassword('currentPassword')}
+                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      id="currentPassword"
+                      type="password"
+                    />
+                  </div>
+                  {passwordErrors.currentPassword && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {passwordErrors.currentPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="newPassword">
+                    Mật khẩu mới
+                  </label>
+                  <div className="relative mt-1 rounded-md shadow-sm">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                      <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      {...registerPassword('newPassword')}
+                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      id="newPassword"
+                      type="password"
+                    />
+                  </div>
+                  {passwordErrors.newPassword && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {passwordErrors.newPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    className="block text-sm font-medium text-gray-700"
+                    htmlFor="confirmPassword"
+                  >
+                    Xác nhận mật khẩu mới
+                  </label>
+                  <div className="relative mt-1 rounded-md shadow-sm">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                      <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      {...registerPassword('confirmPassword')}
+                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      id="confirmPassword"
+                      type="password"
+                    />
+                  </div>
+                  {passwordErrors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {passwordErrors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    className="bg-amber-600 hover:bg-amber-700 focus:ring-amber-500 inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={loading}
+                    type="submit"
+                  >
+                    {loading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Two Factor Auth */}
+      <TwoFactorAuth />
     </div>
   )
 }
