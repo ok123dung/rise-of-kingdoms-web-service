@@ -341,10 +341,10 @@ export async function sendTestEmail(
 }
 
 // Email health check
-export async function checkEmailService(): Promise<{
+export function checkEmailService(): {
   healthy: boolean
   error?: string
-}> {
+} {
   try {
     if (!process.env.RESEND_API_KEY) {
       return { healthy: false, error: 'RESEND_API_KEY not configured' }

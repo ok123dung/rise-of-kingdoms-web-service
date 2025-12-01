@@ -109,14 +109,16 @@ export function ConversionTesting() {
     setTimeout(runTests, 1000)
   }, [])
 
-  // Only show in development
-  if (process.env.NODE_ENV === 'production') {
+  // Only show in development (not in tests)
+  if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test') {
     return null
   }
 
   return (
-    <div className="fixed right-4 top-4 z-50 max-w-xs rounded-lg bg-black bg-opacity-90 p-4 text-xs text-white">
-      <h3 className="mb-2 font-bold">🧪 Conversion Tests</h3>
+    <div className="pointer-events-none fixed right-4 top-4 z-50 max-w-xs rounded-lg bg-black bg-opacity-90 p-4 text-xs text-white">
+      <div aria-level={3} className="mb-2 font-bold" role="heading">
+        🧪 Conversion Tests
+      </div>
       <div className="space-y-1">
         {testResults.map((result, index) => (
           <div key={index} className="text-xs">
@@ -128,8 +130,8 @@ export function ConversionTesting() {
   )
 }
 
-// CTA click tracking
-export function trackCTAClicks() {
+// CTA click tracking hook
+export function useTrackCTAClicks() {
   useEffect(() => {
     const handleCTAClick = (event: Event) => {
       const target = event.target as HTMLElement
@@ -162,8 +164,8 @@ export function trackCTAClicks() {
   }, [])
 }
 
-// Form submission tracking
-export function trackFormSubmissions() {
+// Form submission tracking hook
+export function useTrackFormSubmissions() {
   useEffect(() => {
     const handleFormSubmit = (event: Event) => {
       const form = event.target as HTMLFormElement
@@ -176,6 +178,7 @@ export function trackFormSubmissions() {
       event.preventDefault()
 
       // Show success message
+      // eslint-disable-next-line no-alert
       alert('🎉 Form submitted successfully! In production, this would send to our team.')
     }
 
@@ -194,8 +197,8 @@ export function trackFormSubmissions() {
 
 // Conversion rate optimization hooks
 export function useConversionOptimization() {
-  trackCTAClicks()
-  trackFormSubmissions()
+  useTrackCTAClicks()
+  useTrackFormSubmissions()
 
   useEffect(() => {
     // Add urgency to CTAs after page load
@@ -227,8 +230,8 @@ export function useConversionOptimization() {
   }, [])
 }
 
-// Revenue tracking
-export function trackRevenuePotential() {
+// Revenue tracking hook
+export function useTrackRevenuePotential() {
   useEffect(() => {
     const calculateRevenue = () => {
       const pricing = {

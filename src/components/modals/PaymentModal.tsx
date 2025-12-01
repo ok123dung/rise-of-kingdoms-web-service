@@ -3,12 +3,20 @@ import { useState } from 'react'
 
 import { X } from 'lucide-react'
 
+interface PaymentData {
+  bookingId: string
+  amount: number
+  method: 'momo' | 'vnpay' | 'zalopay'
+  transactionId: string
+  status: string
+}
+
 interface PaymentModalProps {
   isOpen: boolean
   onClose: () => void
   amount: number
   bookingId: string
-  onPaymentSuccess?: (paymentData: any) => void
+  onPaymentSuccess?: (paymentData: PaymentData) => void
 }
 export default function PaymentModal({
   isOpen,
@@ -61,9 +69,9 @@ export default function PaymentModal({
         </div>
         {/* Payment Methods */}
         <div className="mb-6">
-          <label className="mb-3 block text-sm font-medium text-gray-700">
+          <p className="mb-3 block text-sm font-medium text-gray-700">
             Chọn phương thức thanh toán
-          </label>
+          </p>
           <div className="space-y-3">
             {/* MoMo */}
             <button
@@ -133,7 +141,7 @@ export default function PaymentModal({
           <button
             className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
             disabled={!selectedMethod || isProcessing}
-            onClick={handlePayment}
+            onClick={() => void handlePayment()}
           >
             {isProcessing ? 'Đang xử lý...' : 'Thanh toán'}
           </button>

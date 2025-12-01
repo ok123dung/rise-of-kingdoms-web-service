@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
+import type { MoMoWebhookData } from '@/lib/payments/momo'
 import { MoMoPayment } from '@/lib/payments/momo'
 
 export async function POST(request: NextRequest) {
   try {
-    const webhookData = await request.json()
-    const signature = request.headers.get('momo-signature') || webhookData.signature
+    const webhookData = (await request.json()) as MoMoWebhookData
+    const signature = request.headers.get('momo-signature') ?? webhookData.signature
 
     const { getLogger } = await import('@/lib/monitoring/logger')
     getLogger().info('MoMo webhook received', {
@@ -18,8 +19,8 @@ export async function POST(request: NextRequest) {
 
     // CRITICAL: Verify webhook signature to prevent fake callbacks
     if (!signature || !momoPayment.verifyWebhookSignature(webhookData, signature)) {
-      const { getLogger } = await import('@/lib/monitoring/logger')
-      getLogger().error('MoMo webhook signature verification failed')
+      const { getLogger: getLoggerInner } = await import('@/lib/monitoring/logger')
+      getLoggerInner().error('MoMo webhook signature verification failed')
       return NextResponse.json(
         {
           success: false,

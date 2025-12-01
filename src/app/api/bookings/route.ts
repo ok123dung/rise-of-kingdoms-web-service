@@ -3,9 +3,9 @@ import { z } from 'zod'
 
 import { prisma } from '@/lib/db'
 import { sendAccountCreatedEmail, sendBookingReceivedEmail } from '@/lib/email'
+import { NotFoundError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
 import { BookingService } from '@/services/booking.service'
-import { NotFoundError, ConflictError } from '@/lib/errors'
 
 // Stricter Schema validation
 const bookingSchema = z.object({
@@ -18,7 +18,7 @@ const bookingSchema = z.object({
   email: z.string().email('Invalid email address'),
   phone: z.string().regex(/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/, 'Invalid Vietnamese phone number'),
   kingdom: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().optional()
   // Add gameId validation if it's part of the form, previous tests showed it might be
   // If not in schema, we can't validate it. Assuming it's passed in metadata or notes for now based on previous code structure
   // or if it was missing from the previous schema but present in tests.
@@ -26,11 +26,20 @@ const bookingSchema = z.object({
   // For now, keeping it consistent with previous schema but stricter on existing fields.
 })
 
+interface CreateBookingRequest {
+  serviceId: string
+  fullName: string
+  email: string
+  phone: string
+  kingdom?: string
+  notes?: string
+}
+
 const bookingService = new BookingService()
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = (await request.json()) as CreateBookingRequest
     const data = bookingSchema.parse(body)
 
     // 1. Find or Create User
@@ -57,8 +66,11 @@ export async function POST(request: NextRequest) {
       })
 
       // Send account created email
-      sendAccountCreatedEmail(data.email, data.fullName, password).catch(err =>
-        getLogger().error('Failed to send account created email', err)
+      sendAccountCreatedEmail(data.email, data.fullName, password).catch((err: unknown) =>
+        getLogger().error(
+          'Failed to send account created email',
+          err instanceof Error ? err : new Error(String(err))
+        )
       )
       getLogger().info(`Created new user for booking: ${user.email}`)
     }
@@ -85,7 +97,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       serviceTierId: serviceTier.id,
       customerRequirements: data.notes,
-      notes: `Kingdom: ${data.kingdom || 'N/A'}`
+      notes: `Kingdom: ${data.kingdom ?? 'N/A'}`
     })
 
     // 4. Create Lead (for tracking)
@@ -109,17 +121,24 @@ export async function POST(request: NextRequest) {
       data.fullName,
       booking.bookingNumber,
       serviceTier.service.name
-    ).catch(err => getLogger().error('Failed to send booking received email', err))
+    ).catch((err: unknown) =>
+      getLogger().error(
+        'Failed to send booking received email',
+        err instanceof Error ? err : new Error(String(err))
+      )
+    )
 
     return NextResponse.json({
       success: true,
       bookingId: booking.id,
       message: 'Booking created successfully'
     })
-
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ success: false, error: 'Validation failed', details: error.errors }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: 'Validation failed', details: error.errors },
+        { status: 400 }
+      )
     }
     if (error instanceof NotFoundError) {
       return NextResponse.json({ success: false, error: error.message }, { status: 404 })

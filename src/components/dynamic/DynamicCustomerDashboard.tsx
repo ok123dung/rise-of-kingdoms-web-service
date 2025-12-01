@@ -30,7 +30,7 @@ export const DynamicCustomerSidebar = dynamic(
     loading: () => (
       <aside className="w-64 bg-white shadow-sm">
         <div className="space-y-2 p-4">
-          {[...Array(6)].map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="h-10 animate-pulse rounded bg-gray-200" />
           ))}
         </div>
@@ -43,7 +43,7 @@ export const DynamicCustomerSidebar = dynamic(
 export const DynamicCustomerStats = dynamic(() => import('@/components/customer/CustomerStats'), {
   loading: () => (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-      {[...Array(3)].map((_, i) => (
+      {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="animate-pulse rounded-lg bg-white p-6 shadow">
           <div className="mb-2 h-5 w-24 rounded bg-gray-300" />
           <div className="h-8 w-16 rounded bg-gray-300" />
@@ -62,7 +62,7 @@ export const DynamicActiveBookings = dynamic(() => import('@/components/customer
       </div>
       <div className="p-6">
         <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
+          {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="animate-pulse rounded-lg border p-4">
               <div className="mb-2 flex items-start justify-between">
                 <div className="h-5 w-32 rounded bg-gray-300" />
@@ -87,7 +87,7 @@ export const DynamicRecentPayments = dynamic(() => import('@/components/customer
       </div>
       <div className="p-6">
         <div className="space-y-3">
-          {[...Array(4)].map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
               className="flex animate-pulse items-center justify-between border-b py-3 last:border-b-0"
@@ -122,7 +122,7 @@ export const DynamicServiceRecommendations = dynamic(
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {[...Array(4)].map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="animate-pulse rounded-lg border p-4">
                 <div className="mb-2 h-5 w-32 rounded bg-gray-300" />
                 <div className="mb-2 h-4 w-full rounded bg-gray-300" />
@@ -157,7 +157,7 @@ export const DynamicBookingModal = dynamic(() => import('@/components/modals/Boo
       <div className="w-full max-w-2xl rounded-lg bg-white p-6">
         <div className="mb-4 h-6 w-48 rounded bg-gray-300" />
         <div className="space-y-4">
-          {[...Array(4)].map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <div key={i}>
               <div className="mb-2 h-4 w-24 rounded bg-gray-300" />
               <div className="h-10 rounded bg-gray-200" />

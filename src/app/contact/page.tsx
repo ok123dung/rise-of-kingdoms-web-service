@@ -103,7 +103,7 @@ export default function ContactPage() {
                   </div>
                 )}
 
-                <form className="space-y-6" onSubmit={handleSubmit}>
+                <form className="space-y-6" onSubmit={e => void handleSubmit(e)}>
                   <div className="grid gap-6 md:grid-cols-2">
                     <div>
                       <label
@@ -304,18 +304,18 @@ export default function ContactPage() {
                   Kết nối với 1000+ game thủ RoK, chia sẻ kinh nghiệm và nhận tips miễn phí\!
                 </p>
                 <div className="space-y-3">
-                  <a
+                  <button
                     className="block w-full rounded-lg bg-white/20 px-6 py-3 text-center transition-colors duration-300 hover:bg-white/30"
-                    href="#"
+                    type="button"
                   >
                     🔗 Tham gia Discord Server
-                  </a>
-                  <a
+                  </button>
+                  <button
                     className="block w-full rounded-lg bg-white/20 px-6 py-3 text-center transition-colors duration-300 hover:bg-white/30"
-                    href="#"
+                    type="button"
                   >
                     📱 Follow Facebook Page
-                  </a>
+                  </button>
                 </div>
               </div>
 
@@ -323,30 +323,30 @@ export default function ContactPage() {
               <div className="card">
                 <h3 className="mb-4 text-xl font-bold text-slate-900">❓ Câu hỏi thường gặp</h3>
                 <div className="space-y-3">
-                  <a
-                    className="block text-amber-600 transition-colors hover:text-amber-700"
-                    href="#"
+                  <button
+                    className="block text-left text-amber-600 transition-colors hover:text-amber-700"
+                    type="button"
                   >
                     → Dịch vụ có an toàn không?
-                  </a>
-                  <a
-                    className="block text-amber-600 transition-colors hover:text-amber-700"
-                    href="#"
+                  </button>
+                  <button
+                    className="block text-left text-amber-600 transition-colors hover:text-amber-700"
+                    type="button"
                   >
                     → Thời gian hoàn thành dịch vụ?
-                  </a>
-                  <a
-                    className="block text-amber-600 transition-colors hover:text-amber-700"
-                    href="#"
+                  </button>
+                  <button
+                    className="block text-left text-amber-600 transition-colors hover:text-amber-700"
+                    type="button"
                   >
                     → Chính sách hoàn tiền?
-                  </a>
-                  <a
-                    className="block text-amber-600 transition-colors hover:text-amber-700"
-                    href="#"
+                  </button>
+                  <button
+                    className="block text-left text-amber-600 transition-colors hover:text-amber-700"
+                    type="button"
                   >
                     → Cách thức thanh toán?
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

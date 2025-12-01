@@ -34,9 +34,13 @@ export function loadEnvironment() {
     }
 
     // In development, show helpful error message
+    // eslint-disable-next-line no-console
     console.error('\n⚠️  Environment Configuration Error\n')
+    // eslint-disable-next-line no-console
     console.error((error as Error).message)
+    // eslint-disable-next-line no-console
     console.error('\nPlease check your .env.local file and ensure all required variables are set.')
+    // eslint-disable-next-line no-console
     console.error('See .env.example for reference.\n')
   }
 }
@@ -70,14 +74,16 @@ export function createSecureEnvProxy(): typeof process.env {
 
       // Warn when accessing sensitive values directly
       if (isSensitiveKey(prop) && process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
         console.warn(`⚠️  Accessing sensitive environment variable: ${prop}`)
+        // eslint-disable-next-line no-console
         console.trace()
       }
 
       return value
     },
 
-    set(target, prop: string, value) {
+    set(target, prop: string, value: string | undefined) {
       // Prevent setting environment variables at runtime
       if (process.env.NODE_ENV === 'production') {
         throw new Error(`Cannot set environment variable ${prop} at runtime`)
@@ -90,8 +96,8 @@ export function createSecureEnvProxy(): typeof process.env {
 }
 
 // Helper to log environment variables safely
-export function logEnvironmentInfo() {
-  const info: Record<string, any> = {
+export function logEnvironmentInfo(): Record<string, unknown> {
+  const info: Record<string, unknown> = {
     nodeEnv: process.env.NODE_ENV,
     hasRequiredVars: true,
     features: {

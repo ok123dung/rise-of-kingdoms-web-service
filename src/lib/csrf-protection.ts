@@ -62,7 +62,7 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
     return { valid: true }
   }
 
-  const { pathname, origin, hostname } = req.nextUrl
+  const { pathname, hostname } = req.nextUrl
 
   // Webhook endpoints need special handling
   const webhookEndpoints = [

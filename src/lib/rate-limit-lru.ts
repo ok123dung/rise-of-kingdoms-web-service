@@ -26,12 +26,12 @@ export class LRURateLimiter {
     this.maxEntries = config.maxMemoryEntries || 10000
   }
 
-  public async checkLimit(identifier: string): Promise<{
+  public checkLimit(identifier: string): {
     success: boolean
     remaining: number
     reset: number
     retryAfter?: number
-  }> {
+  } {
     const now = Date.now()
     const key = this.config.prefix ? `${this.config.prefix}:${identifier}` : identifier
 
@@ -146,12 +146,12 @@ export class SlidingWindowRateLimiter {
     this.maxEntries = config.maxMemoryEntries || 10000
   }
 
-  public async checkLimit(identifier: string): Promise<{
+  public checkLimit(identifier: string): {
     success: boolean
     remaining: number
     reset: number
     retryAfter?: number
-  }> {
+  } {
     const now = Date.now()
     const key = this.config.prefix ? `${this.config.prefix}:${identifier}` : identifier
     const windowStart = now - this.config.window

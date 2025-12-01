@@ -13,6 +13,12 @@ const updateBookingSchema = z.object({
   internalNotes: z.string().optional()
 })
 
+interface UpdateBookingRequest {
+  status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'refunded'
+  paymentStatus?: 'pending' | 'completed' | 'failed' | 'refunded'
+  internalNotes?: string
+}
+
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Check auth
@@ -21,7 +27,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    const body = await request.json()
+    const body = (await request.json()) as UpdateBookingRequest
     const data = updateBookingSchema.parse(body)
 
     const booking = await prisma.booking.update({

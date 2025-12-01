@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Verify MAC
     const dataStr = data.toString()
     const reqMac = crypto
-      .createHmac('sha256', process.env.ZALOPAY_KEY2 || '')
+      .createHmac('sha256', process.env.ZALOPAY_KEY2 ?? '')
       .update(dataStr)
       .digest('hex')
 
@@ -39,8 +39,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse data
-    const jsonData = JSON.parse(dataStr)
-    const { app_trans_id, zp_trans_id, server_time, amount, discount_amount, status } = jsonData
+    interface ZaloPayWebhookData {
+      app_trans_id: string
+      zp_trans_id: string
+      server_time: number
+      amount: number
+      discount_amount: number
+      status: number
+    }
+
+    const jsonData = JSON.parse(dataStr) as ZaloPayWebhookData
+    const { app_trans_id, zp_trans_id, server_time } = jsonData
 
     // Replay protection: validate timestamp and check for duplicates
     const eventId = `zalopay_${app_trans_id}_${zp_trans_id}`
@@ -65,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Store webhook event for processing
-    await webhookService.storeWebhookEvent('zalopay', 'payment_notification', eventId, jsonData)
+    await webhookService.storeWebhookEvent('zalopay', 'payment_notification', eventId, jsonData as unknown as Record<string, unknown>)
 
     // Process immediately
     const processed = await webhookService.processWebhookEvent(eventId)

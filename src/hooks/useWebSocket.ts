@@ -10,6 +10,29 @@ interface UseWebSocketOptions {
   reconnectionAttempts?: number
   reconnectionDelay?: number
 }
+
+interface WsTokenResponse {
+  token?: string
+}
+
+interface Message {
+  id: string
+  content: string
+  senderId: string
+  createdAt: string | Date
+  type?: string
+  sender?: { fullName: string }
+}
+
+interface WsNotification {
+  id: string
+  type: string
+  title: string
+  message: string
+  createdAt: string
+  read: boolean
+  link?: string
+}
 export function useWebSocket(options: UseWebSocketOptions = {}) {
   const { data: session } = useSession()
   const [isConnected, setIsConnected] = useState(false)
@@ -28,7 +51,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       try {
         // Get WebSocket token from API
         const response = await fetch('/api/auth/ws-token')
-        const { token } = await response.json()
+        const { token } = (await response.json()) as WsTokenResponse
         if (!token) {
           throw new Error('Failed to get WebSocket token')
         }
@@ -45,7 +68,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           setIsConnected(true)
           setConnectionError(null)
         })
-        socket.on('disconnect', reason => {
+        socket.on('disconnect', _reason => {
           setIsConnected(false)
         })
         socket.on('connect_error', error => {
@@ -58,7 +81,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         setConnectionError('Failed to connect to real-time updates')
       }
     }
-    initSocket()
+    void initSocket()
     // Cleanup on unmount
     return () => {
       if (socketRef.current) {
@@ -68,16 +91,19 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     }
   }, [session, autoConnect, reconnection, reconnectionAttempts, reconnectionDelay])
   // Subscribe to events
-  const on = useCallback((event: string, handler: (...args: any[]) => void) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const on = useCallback((event: string, handler: (...args: unknown[]) => void) => {
     if (!socketRef.current) return
-    socketRef.current.on(event, handler)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    socketRef.current.on(event, handler as (...args: any[]) => void)
     // Return unsubscribe function
     return () => {
-      socketRef.current?.off(event, handler)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      socketRef.current?.off(event, handler as (...args: any[]) => void)
     }
   }, [])
   // Emit events
-  const emit = useCallback((event: string, ...args: any[]) => {
+  const emit = useCallback((event: string, ...args: unknown[]) => {
     if (!socketRef.current) {
       console.warn('Socket not connected, cannot emit event:', event)
       return
@@ -119,7 +145,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 // Hook for booking-specific WebSocket events
 export function useBookingWebSocket(bookingId: string) {
   const ws = useWebSocket()
-  const [messages, setMessages] = useState<any[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [bookingStatus, setBookingStatus] = useState<string | null>(null)
   useEffect(() => {
@@ -128,14 +154,17 @@ export function useBookingWebSocket(bookingId: string) {
     ws.subscribeToBooking(bookingId)
     // Set up event listeners
     const unsubscribers = [
-      ws.on('booking:subscribed', ({ bookingId: id }) => {}),
-      ws.on('chat:message', message => {
-        setMessages(prev => [...prev, message])
+      ws.on('booking:subscribed', (_data: unknown) => {
+        // Handle subscription acknowledgement
       }),
-      ws.on('chat:typing', ({ userId, isTyping }) => {
+      ws.on('chat:message', (message: unknown) => {
+        setMessages(prev => [...prev, message as Message])
+      }),
+      ws.on('chat:typing', (data: unknown) => {
+        const { userId, isTyping: typing } = data as { userId: string; isTyping: boolean }
         setTypingUsers(prev => {
           const newSet = new Set(prev)
-          if (isTyping) {
+          if (typing) {
             newSet.add(userId)
           } else {
             newSet.delete(userId)
@@ -143,10 +172,12 @@ export function useBookingWebSocket(bookingId: string) {
           return newSet
         })
       }),
-      ws.on('booking:statusUpdate', ({ status }) => {
+      ws.on('booking:statusUpdate', (data: unknown) => {
+        const { status } = data as { status: string }
         setBookingStatus(status)
       }),
-      ws.on('error', ({ message }) => {
+      ws.on('error', (data: unknown) => {
+        const { message } = data as { message: string }
         console.error('Booking WebSocket error:', message)
       })
     ]
@@ -165,16 +196,16 @@ export function useBookingWebSocket(bookingId: string) {
 // Hook for notification WebSocket events
 export function useNotificationWebSocket() {
   const ws = useWebSocket()
-  const [notifications, setNotifications] = useState<any[]>([])
+  const [notifications, setNotifications] = useState<WsNotification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   useEffect(() => {
     if (!ws.isConnected) return
     const unsubscribers = [
-      ws.on('notification:new', notification => {
-        setNotifications(prev => [notification, ...prev])
+      ws.on('notification:new', (notification: unknown) => {
+        setNotifications(prev => [notification as WsNotification, ...prev])
         setUnreadCount(prev => prev + 1)
       }),
-      ws.on('payment:update', payment => {
+      ws.on('payment:update', (_payment: unknown) => {
         // Handle payment updates
       })
     ]

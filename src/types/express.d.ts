@@ -16,4 +16,4 @@ declare module 'express' {
   }
 }
 
-export { }
+export {}

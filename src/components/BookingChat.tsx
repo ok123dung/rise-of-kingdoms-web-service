@@ -19,15 +19,26 @@ interface Message {
   content: string
   senderId: string
   createdAt: string | Date
+  type?: string
   sender?: {
     fullName: string
   }
 }
 
+interface ChatHistoryResponse {
+  history: Message[]
+}
+
 export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
   const { data: session } = useSession()
-  const { isConnected, connectionError, messages: wsMessages, typingUsers, sendMessage, sendTypingIndicator } =
-    useBookingWebSocket(bookingId)
+  const {
+    isConnected,
+    connectionError,
+    messages: wsMessages,
+    typingUsers,
+    sendMessage,
+    sendTypingIndicator
+  } = useBookingWebSocket(bookingId)
 
   const [newMessage, setNewMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -42,11 +53,14 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
       try {
         const res = await fetch(`/api/communications?bookingId=${bookingId}`)
         if (res.ok) {
-          const data = await res.json()
+          const data = (await res.json()) as ChatHistoryResponse
           // Filter only chat messages
-          const chats = data.history.filter((msg: any) => msg.type === CommunicationType.CHAT)
+          const chats = data.history.filter((msg: Message) => msg.type === CommunicationType.CHAT)
           // Sort by date asc
-          chats.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+          chats.sort(
+            (a: Message, b: Message) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          )
           setHistoryMessages(chats)
         }
       } catch (error) {
@@ -57,7 +71,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
     }
 
     if (bookingId) {
-      fetchHistory()
+      void fetchHistory()
     }
   }, [bookingId])
 
@@ -122,7 +136,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
           content
         })
       })
-      // Note: We don't manually add to historyMessages here because 
+      // Note: We don't manually add to historyMessages here because
       // ideally the WS server broadcasts it back, or we rely on WS for immediate feedback.
       // If WS is down, we might want to optimistically add it.
     } catch (error) {
@@ -178,12 +192,13 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
                 className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[70%] rounded-lg px-3 py-2 ${isOwnMessage ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'
-                    }`}
+                  className={`max-w-[70%] rounded-lg px-3 py-2 ${
+                    isOwnMessage ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'
+                  }`}
                 >
                   {!isOwnMessage && (
                     <p className="mb-1 text-xs font-medium opacity-70">
-                      {message.sender?.fullName || 'Nhân viên'}
+                      {message.sender?.fullName ?? 'Nhân viên'}
                     </p>
                   )}
                   <p className="text-sm">{message.content}</p>
@@ -218,7 +233,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
       </div>
 
       {/* Message input */}
-      <form className="border-t p-4" onSubmit={handleSendMessage}>
+      <form className="border-t p-4" onSubmit={e => void handleSendMessage(e)}>
         <div className="flex gap-2">
           <input
             className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"

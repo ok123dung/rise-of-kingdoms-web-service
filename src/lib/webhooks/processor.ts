@@ -19,11 +19,11 @@ export function startWebhookProcessor(intervalMs = 60000) {
   }
 
   // Process immediately on start
-  webhookService.processPendingWebhooks()
+  void webhookService.processPendingWebhooks()
 
   // Set up interval
   processorInterval = setInterval(() => {
-    webhookService.processPendingWebhooks()
+    void webhookService.processPendingWebhooks()
   }, intervalMs)
 
   getLogger().info(`Webhook processor started with ${intervalMs}ms interval`)
@@ -45,11 +45,11 @@ export function startWebhookCleanup(intervalMs = 86400000) {
   }
 
   // Cleanup immediately on start
-  webhookService.cleanupOldWebhooks(30)
+  void webhookService.cleanupOldWebhooks(30)
 
   // Set up interval
   cleanupInterval = setInterval(() => {
-    webhookService.cleanupOldWebhooks(30)
+    void webhookService.cleanupOldWebhooks(30)
   }, intervalMs)
 
   getLogger().info(`Webhook cleanup started with ${intervalMs}ms interval`)

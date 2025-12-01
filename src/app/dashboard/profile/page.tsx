@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import {
   UserCircleIcon,
   PhoneIcon,
@@ -45,7 +46,6 @@ export default function ProfilePage() {
   const { data: session, update } = useSession()
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [profileData, setProfileData] = useState<any>(null)
 
   const {
     register,
@@ -65,20 +65,32 @@ export default function ProfilePage() {
     resolver: zodResolver(passwordSchema)
   })
 
+  interface ProfileData {
+    fullName: string
+    phone: string
+    discordUsername: string
+    rokPlayerId: string
+    rokKingdom: string
+  }
+
+  interface ProfileResponse {
+    success: boolean
+    data?: ProfileData
+  }
+
   // Fetch user profile data
   useEffect(() => {
     if (session?.user) {
-      fetch('/api/user/profile')
-        .then(res => res.json())
+      void fetch('/api/user/profile')
+        .then(res => res.json() as Promise<ProfileResponse>)
         .then(data => {
           if (data.success && data.data) {
-            setProfileData(data.data)
             reset({
-              fullName: data.data.fullName || '',
-              phone: data.data.phone || '',
-              discordUsername: data.data.discordUsername || '',
-              rokPlayerId: data.data.rokPlayerId || '',
-              rokKingdom: data.data.rokKingdom || ''
+              fullName: data.data.fullName ?? '',
+              phone: data.data.phone ?? '',
+              discordUsername: data.data.discordUsername ?? '',
+              rokPlayerId: data.data.rokPlayerId ?? '',
+              rokKingdom: data.data.rokKingdom ?? ''
             })
           }
         })
@@ -87,6 +99,12 @@ export default function ProfilePage() {
         })
     }
   }, [session, reset])
+
+  interface ApiResponse {
+    success?: boolean
+    message?: string
+    error?: string
+  }
 
   const onSubmit = async (data: ProfileFormData) => {
     setLoading(true)
@@ -97,15 +115,15 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       })
-      const result = await response.json()
+      const result = (await response.json()) as ApiResponse
       if (response.ok) {
         setMessage({ type: 'success', text: 'Cập nhật thông tin thành công!' })
         // Update session
         await update()
       } else {
-        setMessage({ type: 'error', text: result.message || 'Có lỗi xảy ra' })
+        setMessage({ type: 'error', text: result.message ?? 'Có lỗi xảy ra' })
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage({ type: 'error', text: 'Không thể cập nhật thông tin' })
     } finally {
       setLoading(false)
@@ -121,14 +139,14 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       })
-      const result = await response.json()
+      const result = (await response.json()) as ApiResponse
       if (response.ok) {
         setMessage({ type: 'success', text: 'Đổi mật khẩu thành công!' })
         resetPassword()
       } else {
-        setMessage({ type: 'error', text: result.message || 'Có lỗi xảy ra' })
+        setMessage({ type: 'error', text: result.message ?? 'Có lỗi xảy ra' })
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage({ type: 'error', text: 'Không thể đổi mật khẩu' })
     } finally {
       setLoading(false)
@@ -154,8 +172,9 @@ export default function ProfilePage() {
 
       {message && (
         <div
-          className={`rounded-md p-4 ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-            }`}
+          className={`rounded-md p-4 ${
+            message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+          }`}
         >
           <p className="text-sm">{message.text}</p>
         </div>
@@ -174,14 +193,14 @@ export default function ProfilePage() {
                 <AvatarUpload
                   currentAvatarUrl={session?.user?.image}
                   size="lg"
-                  onUploadComplete={url => {
+                  onUploadComplete={(_url: string) => {
                     setMessage({ type: 'success', text: 'Ảnh đại diện đã được cập nhật' })
                   }}
                 />
               </div>
             </div>
             <div className="mt-5 md:col-span-2 md:mt-0">
-              <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+              <form className="space-y-6" onSubmit={e => void handleSubmit(onSubmit)(e)}>
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="email">
                     Email
@@ -211,7 +230,7 @@ export default function ProfilePage() {
                     </div>
                     <input
                       {...register('fullName')}
-                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
                       id="fullName"
                       type="text"
                     />
@@ -231,7 +250,7 @@ export default function ProfilePage() {
                     </div>
                     <input
                       {...register('phone')}
-                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
                       id="phone"
                       placeholder="0901234567"
                       type="tel"
@@ -254,7 +273,7 @@ export default function ProfilePage() {
                       </label>
                       <input
                         {...register('discordUsername')}
-                        className="focus:ring-amber-500 focus:border-amber-500 mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none sm:text-sm"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
                         id="discordUsername"
                         placeholder="username#1234"
                         type="text"
@@ -269,7 +288,7 @@ export default function ProfilePage() {
                       </label>
                       <input
                         {...register('rokPlayerId')}
-                        className="focus:ring-amber-500 focus:border-amber-500 mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none sm:text-sm"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
                         id="rokPlayerId"
                         placeholder="12345678"
                         type="text"
@@ -288,7 +307,7 @@ export default function ProfilePage() {
                         </div>
                         <input
                           {...register('rokKingdom')}
-                          className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                          className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
                           id="rokKingdom"
                           placeholder="1234"
                           type="text"
@@ -300,7 +319,7 @@ export default function ProfilePage() {
 
                 <div className="flex justify-end">
                   <button
-                    className="bg-amber-600 hover:bg-amber-700 focus:ring-amber-500 inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={loading}
                     type="submit"
                   >
@@ -351,7 +370,10 @@ export default function ProfilePage() {
               </p>
             </div>
             <div className="mt-5 md:col-span-2 md:mt-0">
-              <form className="space-y-6" onSubmit={handleSubmitPassword(onChangePassword)}>
+              <form
+                className="space-y-6"
+                onSubmit={e => void handleSubmitPassword(onChangePassword)(e)}
+              >
                 <div>
                   <label
                     className="block text-sm font-medium text-gray-700"
@@ -365,7 +387,7 @@ export default function ProfilePage() {
                     </div>
                     <input
                       {...registerPassword('currentPassword')}
-                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
                       id="currentPassword"
                       type="password"
                     />
@@ -387,7 +409,7 @@ export default function ProfilePage() {
                     </div>
                     <input
                       {...registerPassword('newPassword')}
-                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
                       id="newPassword"
                       type="password"
                     />
@@ -412,7 +434,7 @@ export default function ProfilePage() {
                     </div>
                     <input
                       {...registerPassword('confirmPassword')}
-                      className="focus:ring-amber-500 focus:border-amber-500 block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:outline-none sm:text-sm"
+                      className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
                       id="confirmPassword"
                       type="password"
                     />
@@ -426,7 +448,7 @@ export default function ProfilePage() {
 
                 <div className="flex justify-end">
                   <button
-                    className="bg-amber-600 hover:bg-amber-700 focus:ring-amber-500 inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={loading}
                     type="submit"
                   >

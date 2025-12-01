@@ -2,7 +2,16 @@
 
 import { useState, useRef, useCallback } from 'react'
 
-import { Upload, X, FileText, Image, Film, File, Loader2, CheckCircle } from 'lucide-react'
+import {
+  Upload,
+  X,
+  FileText,
+  Image as ImageIcon,
+  Film,
+  File,
+  Loader2,
+  CheckCircle
+} from 'lucide-react'
 
 interface FileUploadProps {
   onUpload: (file: UploadedFile) => void
@@ -48,23 +57,6 @@ export function FileUpload({
     }
   }, [])
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0])
-    }
-  }, [])
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0])
-    }
-  }
-
   const handleFile = async (file: File) => {
     // Validate file size
     if (file.size > maxSize) {
@@ -87,11 +79,11 @@ export function FileUpload({
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Upload failed')
+        const errorData = (await response.json()) as { error?: string }
+        throw new Error(errorData.error ?? 'Upload failed')
       }
 
-      const data = await response.json()
+      const data = (await response.json()) as { file: UploadedFile }
 
       onUpload({
         ...data.file,
@@ -114,6 +106,27 @@ export function FileUpload({
     }
   }
 
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setDragActive(false)
+
+      if (e.dataTransfer.files?.[0]) {
+        void handleFile(e.dataTransfer.files[0])
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [maxSize, folder, isPublic, onUpload, onError]
+  )
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    if (e.target.files?.[0]) {
+      void handleFile(e.target.files[0])
+    }
+  }
+
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return bytes + ' B'
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
@@ -130,7 +143,13 @@ export function FileUpload({
           type="file"
           onChange={handleChange}
         />
-        <div onClick={() => inputRef.current?.click()}>{children}</div>
+        <button
+          className="w-full text-left"
+          type="button"
+          onClick={() => inputRef.current?.click()}
+        >
+          {children}
+        </button>
       </div>
     )
   }
@@ -151,10 +170,11 @@ export function FileUpload({
         onChange={handleChange}
       />
 
-      <div
+      <button
+        type="button"
         className={`
-          relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed
-          p-8 transition-all
+          relative w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed
+          p-8 text-left transition-all
           ${
             dragActive
               ? 'border-blue-500 bg-blue-50'
@@ -189,7 +209,7 @@ export function FileUpload({
           <p className="mb-1 text-sm font-medium text-gray-900">Click to upload or drag and drop</p>
           <p className="text-xs text-gray-500">Maximum file size: {formatFileSize(maxSize)}</p>
         </div>
-      </div>
+      </button>
     </div>
   )
 }
@@ -211,7 +231,7 @@ interface FileListProps {
 
 export function FileList({ files, onDelete, loading }: FileListProps) {
   const getFileIcon = (mimeType: string) => {
-    if (mimeType.startsWith('image/')) return <Image className="h-5 w-5" />
+    if (mimeType.startsWith('image/')) return <ImageIcon className="h-5 w-5" />
     if (mimeType.startsWith('video/')) return <Film className="h-5 w-5" />
     if (mimeType.includes('pdf')) return <FileText className="h-5 w-5" />
     return <File className="h-5 w-5" />

@@ -19,7 +19,7 @@ function SignInContent() {
 
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard'
 
   useEffect(() => {
     setIsMounted(true)
@@ -27,7 +27,7 @@ function SignInContent() {
 
   useEffect(() => {
     // Check if already signed in
-    getSession().then(session => {
+    void getSession().then(session => {
       if (session) {
         router.push(callbackUrl)
       }
@@ -50,7 +50,7 @@ function SignInContent() {
           body: JSON.stringify({ email, password })
         })
 
-        const checkData = await checkResponse.json()
+        const checkData = (await checkResponse.json()) as { error?: string; requires2FA?: boolean }
 
         if (checkData.error) {
           setError('Email hoặc mật khẩu không đúng')
@@ -79,7 +79,9 @@ function SignInContent() {
       } else {
         router.push(callbackUrl)
       }
-    } catch (error) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      console.error('Sign in error:', message)
       setError('Có lỗi xảy ra. Vui lòng thử lại.')
     } finally {
       setIsLoading(false)
@@ -87,7 +89,11 @@ function SignInContent() {
   }
 
   const handleDiscordSignIn = () => {
-    signIn('discord', { callbackUrl })
+    void signIn('discord', { callbackUrl })
+  }
+
+  const onFormSubmit = (e: React.FormEvent) => {
+    void handleSubmit(e)
   }
 
   return (
@@ -105,7 +111,7 @@ function SignInContent() {
         </div>
 
         {/* Sign in form */}
-        <form className="mt-8 space-y-6 rounded-xl bg-white p-8 shadow-lg" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6 rounded-xl bg-white p-8 shadow-lg" onSubmit={onFormSubmit}>
           {error && (
             <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600">
               <AlertCircle className="h-4 w-4" />
@@ -214,9 +220,9 @@ function SignInContent() {
 
           <div>
             <button
-              id="submit-login"
               className="group relative flex w-full transform justify-center rounded-lg border border-transparent bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:scale-105 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isLoading || !isMounted}
+              id="submit-login"
               type="submit"
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Đăng nhập'}

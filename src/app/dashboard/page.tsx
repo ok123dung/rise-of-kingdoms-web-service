@@ -11,7 +11,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { dashboardService } from '@/services/dashboard.service'
 
 async function getDashboardData(userId: string) {
-  return await dashboardService.getCustomerDashboardData(userId)
+  return dashboardService.getCustomerDashboardData(userId)
 }
 
 export default async function CustomerDashboard() {

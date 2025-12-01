@@ -120,14 +120,16 @@ export function RevenueValidation() {
   const allMetricsPassed = Object.values(metrics).every(metric => metric)
   const readinessScore = Object.values(metrics).filter(metric => metric).length
 
-  // Only show in development
-  if (process.env.NODE_ENV === 'production') {
+  // Only show in development (not in tests)
+  if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test') {
     return null
   }
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 max-w-sm rounded-lg border-2 border-gray-300 bg-white p-4 text-xs shadow-lg">
-      <h3 className="mb-3 font-bold text-green-600">💰 Revenue Readiness</h3>
+    <div className="pointer-events-none fixed bottom-4 left-4 z-50 max-w-sm rounded-lg border-2 border-gray-300 bg-white p-4 text-xs shadow-lg">
+      <div aria-level={3} className="mb-3 font-bold text-green-600" role="heading">
+        💰 Revenue Readiness
+      </div>
 
       <div className="mb-4 space-y-2">
         <div
@@ -199,8 +201,8 @@ export function RevenueValidation() {
   )
 }
 
-// Revenue tracking utilities
-export function trackRevenueMetrics() {
+// Revenue tracking utilities - hook for tracking revenue metrics
+export function useTrackRevenueMetrics() {
   useEffect(() => {
     // Track pricing page views
     const trackPricingViews = () => {
@@ -213,8 +215,8 @@ export function trackRevenueMetrics() {
       }
     }
 
-    // Track service interest
-    const trackServiceInterest = (serviceType: string) => {
+    // Track service interest (reserved for future use)
+    const _trackServiceInterest = (serviceType: string) => {
       if (window.gtag) {
         window.gtag('event', 'service_interest', {
           event_category: 'revenue',
@@ -223,6 +225,9 @@ export function trackRevenueMetrics() {
         })
       }
     }
+
+    // Suppress unused variable warning
+    void _trackServiceInterest
 
     // Track high-value actions
     const trackHighValueActions = () => {

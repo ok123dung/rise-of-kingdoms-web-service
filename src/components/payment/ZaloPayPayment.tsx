@@ -68,7 +68,7 @@ export default function ZaloPayPayment({
           <button
             className="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
             disabled={isProcessing}
-            onClick={handlePayment}
+            onClick={() => void handlePayment()}
           >
             {isProcessing ? 'Đang tạo QR...' : 'Tạo mã QR ZaloPay'}
           </button>

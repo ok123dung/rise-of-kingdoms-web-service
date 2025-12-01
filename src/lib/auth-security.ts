@@ -45,14 +45,14 @@ setInterval(() => {
 export class AccountLockoutManager {
   constructor(private config: AccountLockoutConfig = DEFAULT_LOCKOUT_CONFIG) {}
 
-  async recordFailedAttempt(
+  recordFailedAttempt(
     identifier: string,
-    metadata?: Record<string, any>
-  ): Promise<{
+    metadata?: Record<string, unknown>
+  ): {
     isLocked: boolean
     remainingAttempts: number
     lockedUntil?: Date
-  }> {
+  } {
     const now = Date.now()
     let attempt = failedAttempts.get(identifier)
 
@@ -98,11 +98,11 @@ export class AccountLockoutManager {
     }
   }
 
-  async checkLockout(identifier: string): Promise<{
+  checkLockout(identifier: string): {
     isLocked: boolean
     lockedUntil?: Date
     message?: string
-  }> {
+  } {
     const attempt = failedAttempts.get(identifier)
     if (!attempt) {
       return { isLocked: false }
@@ -123,11 +123,11 @@ export class AccountLockoutManager {
     return { isLocked: false }
   }
 
-  async clearFailedAttempts(identifier: string): Promise<void> {
+  clearFailedAttempts(identifier: string): void {
     failedAttempts.delete(identifier)
   }
 
-  async unlockAccount(identifier: string): Promise<void> {
+  unlockAccount(identifier: string): void {
     const attempt = failedAttempts.get(identifier)
     if (attempt) {
       delete attempt.lockedUntil
@@ -159,14 +159,14 @@ export class SessionTokenManager {
     return Date.now() - tokenIssuedAt > this.ROTATION_INTERVAL
   }
 
-  static async rotateToken(
+  static rotateToken(
     oldToken: string,
     userId: string
-  ): Promise<{
+  ): {
     token: string
     sessionId: string
     expiresAt: Date
-  }> {
+  } {
     const newToken = this.generateToken()
     const sessionId = this.generateSessionId(userId)
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days

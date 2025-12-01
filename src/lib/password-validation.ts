@@ -1,3 +1,5 @@
+import * as nodeCrypto from 'crypto'
+
 import { z } from 'zod'
 
 // Password strength requirements
@@ -160,24 +162,23 @@ export function generateSecurePassword(length = 16): string {
   const special = '!@#$%^&*()_+-=[]{}|;:,.<>?'
 
   const allChars = uppercase + lowercase + numbers + special
-  const crypto = require('crypto')
 
   let password = ''
 
   // Ensure at least one of each required character type
-  password += uppercase[crypto.randomInt(uppercase.length)]
-  password += lowercase[crypto.randomInt(lowercase.length)]
-  password += numbers[crypto.randomInt(numbers.length)]
-  password += special[crypto.randomInt(special.length)]
+  password += uppercase[nodeCrypto.randomInt(uppercase.length)]
+  password += lowercase[nodeCrypto.randomInt(lowercase.length)]
+  password += numbers[nodeCrypto.randomInt(numbers.length)]
+  password += special[nodeCrypto.randomInt(special.length)]
 
   // Fill the rest randomly
   for (let i = password.length; i < length; i++) {
-    password += allChars[crypto.randomInt(allChars.length)]
+    password += allChars[nodeCrypto.randomInt(allChars.length)]
   }
 
   // Shuffle the password
   return password
     .split('')
-    .sort(() => crypto.randomInt(3) - 1)
+    .sort(() => nodeCrypto.randomInt(3) - 1)
     .join('')
 }

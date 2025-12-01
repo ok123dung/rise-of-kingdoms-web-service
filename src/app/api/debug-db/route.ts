@@ -3,27 +3,44 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+interface DebugDbResponse {
+  timestamp: string
+  environment: {
+    NODE_ENV: string | undefined
+    DATABASE_URL_SET: boolean
+    DIRECT_URL_SET: boolean
+  }
+  success?: boolean
+  message?: string
+  error?: string
+}
+
+export async function GET(): Promise<NextResponse<DebugDbResponse>> {
+  // Block access in production
+  if (process.env.NODE_ENV === 'production' && process.env.VERCEL) {
+    return NextResponse.json(
+      {
+        timestamp: new Date().toISOString(),
+        environment: {
+          NODE_ENV: process.env.NODE_ENV,
+          DATABASE_URL_SET: false,
+          DIRECT_URL_SET: false
+        },
+        error: 'Debug endpoint disabled in production'
+      },
+      { status: 404 }
+    )
+  }
+
   const dbUrl = process.env.DATABASE_URL
   const directUrl = process.env.DIRECT_URL
 
-  console.log('Database URL:', process.env.DATABASE_URL ? 'Set' : 'Not set')
-  console.log('Direct URL:', process.env.DIRECT_URL ? 'Set' : 'Not set')
-  console.log('NextAuth Secret:', process.env.NEXTAUTH_SECRET ? 'Set' : 'Not set')
-  console.log('NextAuth URL:', process.env.NEXTAUTH_URL ? 'Set' : 'Not set')
-
-  const response: any = {
+  const response: DebugDbResponse = {
     timestamp: new Date().toISOString(),
     environment: {
       NODE_ENV: process.env.NODE_ENV,
-      VERCEL: process.env.VERCEL,
       DATABASE_URL_SET: !!dbUrl,
-      DIRECT_URL_SET: !!directUrl,
-      NEXTAUTH_SECRET_SET: !!process.env.NEXTAUTH_SECRET,
-      NEXTAUTH_URL_SET: !!process.env.NEXTAUTH_URL,
-      DATABASE_URL_FORMAT: dbUrl ? 'postgresql://...' : 'NOT_SET',
-      DATABASE_URL_LENGTH: dbUrl?.length || 0,
-      DATABASE_URL_MASKED: dbUrl?.replace(/:[^:]*@/, ':****@').substring(0, 100) || 'NOT_SET'
+      DIRECT_URL_SET: !!directUrl
     }
   }
 
@@ -37,38 +54,24 @@ export async function GET() {
       db: {
         url: dbUrl
       }
-    },
-    log: ['query', 'info', 'warn', 'error']
+    }
   })
 
   try {
-    console.log('[DEBUG-DB] Attempting connection...')
     await prisma.$connect()
-    console.log('[DEBUG-DB] Connection successful')
-
-    const result =
-      await prisma.$queryRaw`SELECT 1 as result, current_database() as db, version() as version`
-    console.log('[DEBUG-DB] Query successful:', result)
-
+    await prisma.$queryRaw`SELECT 1 as result`
     await prisma.$disconnect()
 
     response.success = true
     response.message = 'Connection successful'
-    response.result = result
 
     return NextResponse.json(response)
-  } catch (error: any) {
-    console.error('[DEBUG-DB] Connection failed:', error)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     response.success = false
     response.message = 'Connection failed'
-    response.error = {
-      name: error.name,
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-      stack: error.stack?.split('\n').slice(0, 5)
-    }
+    response.error = errorMessage
 
     return NextResponse.json(response, { status: 500 })
   }

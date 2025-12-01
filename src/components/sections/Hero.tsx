@@ -2,13 +2,17 @@
 
 import { ArrowRight, Star, Users, Trophy, Crown, Sparkles, Shield } from 'lucide-react'
 import Link from 'next/link'
+
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Hero() {
   const { t } = useLanguage()
 
   return (
-    <section className="bg-gradient-hero section-padding relative overflow-hidden" data-testid="hero-section">
+    <section
+      className="bg-gradient-hero section-padding relative overflow-hidden"
+      data-testid="hero-section"
+    >
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
         <div className="animate-float absolute left-10 top-20">
@@ -49,8 +53,8 @@ export default function Hero() {
           <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
             <Link
               className="btn-primary flex items-center space-x-3 px-8 py-4 text-lg"
-              href="/services"
               data-testid="primary-cta"
+              href="/services"
             >
               <span>{t.hero.ctaPrimary}</span>
               <ArrowRight className="h-5 w-5" />

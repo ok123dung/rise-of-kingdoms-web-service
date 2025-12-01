@@ -113,20 +113,20 @@ const TierBadge = memo(({ tier }: { tier: string }) => {
       regular: 'Thường'
     }
 
-    let icon: JSX.Element
+    let tierIcon: JSX.Element
     switch (tier) {
       case 'vip':
-        icon = <Crown className="h-4 w-4 text-yellow-500" />
+        tierIcon = <Crown className="h-4 w-4 text-yellow-500" />
         break
       case 'premium':
-        icon = <TrendingUp className="h-4 w-4 text-purple-500" />
+        tierIcon = <TrendingUp className="h-4 w-4 text-purple-500" />
         break
       default:
-        icon = <User className="h-4 w-4 text-gray-500" />
+        tierIcon = <User className="h-4 w-4 text-gray-500" />
     }
 
     return {
-      icon,
+      icon: tierIcon,
       style: styles[tier as keyof typeof styles] || styles.regular,
       label: labels[tier as keyof typeof labels] || labels.regular
     }
@@ -238,7 +238,7 @@ export default function TopCustomers() {
   }, [])
 
   useEffect(() => {
-    fetchTopCustomers()
+    void fetchTopCustomers()
   }, [fetchTopCustomers])
 
   if (loading) {
@@ -265,7 +265,7 @@ export default function TopCustomers() {
             <p>{error}</p>
             <button
               className="mt-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-              onClick={fetchTopCustomers}
+              onClick={() => void fetchTopCustomers()}
             >
               Thử lại
             </button>

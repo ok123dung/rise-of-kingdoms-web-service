@@ -88,9 +88,9 @@ export default function CustomerSidebar() {
           </Link>
         </div>
         <nav className="flex flex-1 flex-col">
-          <ul className="flex flex-1 flex-col gap-y-7" role="list">
+          <ul className="flex flex-1 flex-col gap-y-7">
             <li>
-              <ul className="-mx-2 space-y-1" role="list">
+              <ul className="-mx-2 space-y-1">
                 {navigation.map(item => {
                   const isActive = pathname === item.href
                   return (
@@ -122,7 +122,7 @@ export default function CustomerSidebar() {
             {/* Quick links */}
             <li>
               <div className="text-xs font-semibold leading-6 text-gray-400">Liên kết nhanh</div>
-              <ul className="-mx-2 mt-2 space-y-1" role="list">
+              <ul className="-mx-2 mt-2 space-y-1">
                 <li>
                   <Link
                     className="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-primary-600"

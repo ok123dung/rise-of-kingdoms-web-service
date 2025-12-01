@@ -1,15 +1,16 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { getLogger } from '@/lib/monitoring/logger'
+import type { ZaloPayCallbackData } from '@/lib/payments/zalopay'
 import { ZaloPayPayment } from '@/lib/payments/zalopay'
 
 export async function POST(request: NextRequest) {
   try {
-    const callbackData = await request.json()
+    const callbackData = (await request.json()) as ZaloPayCallbackData
 
     getLogger().info('ZaloPay callback received', {
       data: callbackData.data ? 'present' : 'missing',
-      mac: callbackData.mac ? callbackData.mac.substring(0, 10) + '...' : 'missing'
+      mac: callbackData.mac ? String(callbackData.mac).substring(0, 10) + '...' : 'missing'
     })
 
     const zaloPayment = new ZaloPayPayment()

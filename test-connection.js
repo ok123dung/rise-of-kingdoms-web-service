@@ -1,3 +1,4 @@
+/* eslint-disable no-console, @typescript-eslint/no-unsafe-member-access */
 const { PrismaClient } = require('@prisma/client')
 
 async function testConnection() {
@@ -30,4 +31,4 @@ async function testConnection() {
   }
 }
 
-testConnection()
+testConnection().catch(console.error)

@@ -12,8 +12,9 @@ import {
   MessageCircle
 } from 'lucide-react'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
+
 import Footer from '@/components/layout/Footer'
+import Header from '@/components/layout/Header'
 import { VietnameseGamingSchema } from '@/components/seo/VietnameseGamingSEO'
 import { useLanguage } from '@/contexts/LanguageContext'
 
@@ -22,7 +23,8 @@ const testimonials = [
     name: 'Nguyễn Văn Nam',
     kingdom: 'Kingdom 1001',
     rating: 5,
-    comment: 'Dịch vụ tư vấn chiến thuật rất chuyên nghiệp. Power tăng từ 50M lên 120M chỉ trong 2 tháng!',
+    comment:
+      'Dịch vụ tư vấn chiến thuật rất chuyên nghiệp. Power tăng từ 50M lên 120M chỉ trong 2 tháng!',
     service: 'Tư vấn chiến thuật',
     result: '+140% Power tăng',
     timeframe: '2 tháng',
@@ -171,13 +173,18 @@ export default function ServicesPage() {
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {Object.entries(t.services).map(([slug, service]) => {
                 // Map slug to icon (since icons are not in translations)
-                const iconMap: Record<string, any> = {
+                const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
                   'auto-gem-farm': Target
                 }
-                const IconComponent = iconMap[slug] || Target
+                const IconComponent = iconMap[slug] ?? Target
 
                 // Find lowest price
-                const lowestPrice = Math.min(...service.pricing.map((p: any) => p.price))
+                interface PricingItem {
+                  price: number
+                }
+                const lowestPrice = Math.min(
+                  ...(service.pricing as PricingItem[]).map((p: PricingItem) => p.price)
+                )
 
                 return (
                   <div
@@ -411,7 +418,7 @@ function TestimonialCard({ testimonial }: TestimonialCardProps) {
         <div className="mr-3 text-2xl">{testimonial.avatar}</div>
         <div className="flex-1">
           <div className="mb-1 flex text-yellow-400">
-            {[...Array(testimonial.rating)].map((_, i) => (
+            {Array.from({ length: testimonial.rating }).map((_, i) => (
               <Star key={i} className="h-4 w-4 fill-current" />
             ))}
           </div>

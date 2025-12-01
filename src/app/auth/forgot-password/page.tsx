@@ -15,7 +15,7 @@ function ForgotPasswordContent() {
   const [message, setMessage] = useState('')
 
   const searchParams = useSearchParams()
-  const returnUrl = searchParams.get('callbackUrl') || '/auth/signin'
+  const returnUrl = searchParams.get('callbackUrl') ?? '/auth/signin'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,16 +30,22 @@ function ForgotPasswordContent() {
         body: JSON.stringify({ email })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as {
+        success?: boolean
+        message?: string
+        error?: string
+      }
 
       if (data.success) {
         setStatus('success')
-        setMessage(data.message)
+        setMessage(data.message ?? 'Email đã được gửi thành công')
       } else {
         setStatus('error')
-        setMessage(data.error || 'Có lỗi xảy ra. Vui lòng thử lại sau.')
+        setMessage(data.error ?? 'Có lỗi xảy ra. Vui lòng thử lại sau.')
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.error('Forgot password error:', errorMessage)
       setStatus('error')
       setMessage('Lỗi kết nối đến máy chủ. Vui lòng thử lại sau.')
     } finally {
@@ -50,7 +56,7 @@ function ForgotPasswordContent() {
   const handleResendEmail = () => {
     setStatus('idle')
     setMessage('')
-    handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+    void handleSubmit({ preventDefault: () => {} } as React.FormEvent)
   }
 
   return (
@@ -126,7 +132,7 @@ function ForgotPasswordContent() {
             </div>
           ) : (
             /* Form State */
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-6" onSubmit={e => void handleSubmit(e)}>
               {status === 'error' && (
                 <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600">
                   <AlertCircle className="h-4 w-4" />

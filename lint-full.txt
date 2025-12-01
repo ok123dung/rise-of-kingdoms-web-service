@@ -1,0 +1,1015 @@
+
+> rise-of-kingdoms-services@1.0.0 lint
+> eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0
+
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\prisma\seed.ts
+   92:21  warning  Unexpected `await` inside a loop  no-await-in-loop
+  101:7   warning  Unexpected `await` inside a loop  no-await-in-loop
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\about\page.tsx
+  180:21  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  180:76  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\admin\bookings\[id]\page.tsx
+  104:47  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\admin\dashboard\page.tsx
+   22:62  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  108:45  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\api\admin\webhooks\route.ts
+  33:19  warning  Missing radix parameter  radix
+  34:20  warning  Missing radix parameter  radix
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\api\health\db-diagnostic\route.ts
+  61:63  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\api\leads\route.ts
+  81:22  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  84:37  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  84:55  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  87:60  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  88:89  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\api\upload\avatar\route.ts
+  52:9   warning  Unexpected `await` inside a loop                                                                           no-await-in-loop
+  69:54  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\api\upload\image\route.ts
+  23:43  warning  Missing radix parameter                                                                                    radix
+  24:45  warning  Missing radix parameter                                                                                    radix
+  25:47  warning  Missing radix parameter                                                                                    radix
+  64:54  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\auth\signup\page.tsx
+  124:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\booking\page.tsx
+  186:25  warning  Visible, non-interactive elements with click handlers must have at least one keyboard listener                                                                                                     jsx-a11y/click-events-have-key-events
+  186:25  warning  Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element  jsx-a11y/no-static-element-interactions
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\dashboard\files\page.tsx
+   93:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  112:39  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\dashboard\security\page.tsx
+  100:9  warning  Replace `!confirm('Are·you·sure·you·want·to·regenerate·backup·codes?·Your·old·codes·will·no·longer·work.')` with `␍⏎······!confirm(␍⏎········'Are·you·sure·you·want·to·regenerate·backup·codes?·Your·old·codes·will·no·longer·work.'␍⏎······)␍⏎····`  prettier/prettier
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\diagnostics\page.tsx
+  119:9   warning  Unexpected `await` inside a loop                                 no-await-in-loop
+  124:11  warning  Unexpected `await` inside a loop                                 no-await-in-loop
+  217:34  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  217:64  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  220:68  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  220:84  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\error.tsx
+   29:30   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  120:102  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\global-error.tsx
+  103:115  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  115:69   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\layout.tsx
+   51:58  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  116:49  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\robots.ts
+  4:52  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\services\[slug]\page.tsx
+  15:1   warning  `@/lib/db` import should occur before import of `./ServiceDetailClient`                                    import/order
+  31:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  34:40  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  34:68  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  52:52  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\services\page.tsx
+  429:64  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  429:86  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\services\strategy\page.tsx
+  698:9   warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  698:29  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\sitemap.ts
+  6:52  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\app\terms\page.tsx
+  66:33  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  66:46  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  66:70  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  66:80  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  71:33  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  71:44  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  71:68  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  71:72  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  75:33  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  75:41  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\AvatarUpload.tsx
+  97:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\ErrorBoundary.tsx
+  276:7   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  319:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  327:48  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\ErrorBoundaryWrapper.tsx
+   27:77  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  117:40  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\FileUpload.tsx
+  111:5   warning  React Hook useCallback has a missing dependency: 'handleFile'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  225:47  error    Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images      jsx-a11y/alt-text
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\TwoFactorSetup.tsx
+  188:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\TwoFactorVerify.tsx
+  60:13  error  The autoFocus prop should not be used, as it can reduce usability and accessibility for users  jsx-a11y/no-autofocus
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\admin\DashboardStats.tsx
+   95:41  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  105:48  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\admin\TopCustomers.optimized.tsx
+  64:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\admin\TopCustomers.tsx
+  64:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\analytics\GoogleAnalytics.tsx
+  38:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:7   error  Unsafe assignment of an `any` value       @typescript-eslint/no-unsafe-assignment
+  43:7   error  Unsafe assignment of an `any` value       @typescript-eslint/no-unsafe-assignment
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\booking\PaymentMethods.tsx
+    9:12  error    Unexpected any. Specify a different type                                                                                                                                                           @typescript-eslint/no-explicit-any
+   25:11  error    Unsafe assignment of an `any` value                                                                                                                                                                @typescript-eslint/no-unsafe-assignment
+   25:30  error    Unsafe member access .id on an `any` value                                                                                                                                                         @typescript-eslint/no-unsafe-member-access
+   26:11  error    Unsafe assignment of an `any` value                                                                                                                                                                @typescript-eslint/no-unsafe-assignment
+   26:27  error    Unsafe member access .finalAmount on an `any` value                                                                                                                                                @typescript-eslint/no-unsafe-member-access
+   34:9   error    Unexpected alert                                                                                                                                                                                   no-alert
+   38:7   error    Unexpected alert                                                                                                                                                                                   no-alert
+   71:11  warning  Visible, non-interactive elements with click handlers must have at least one keyboard listener                                                                                                     jsx-a11y/click-events-have-key-events
+   71:11  warning  Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element  jsx-a11y/no-static-element-interactions
+  114:19  error    Promise-returning function provided to attribute where a void return was expected                                                                                                                  @typescript-eslint/no-misused-promises
+  122:42  error    Unsafe member access .finalAmount on an `any` value                                                                                                                                                @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\customer\ActiveBookings.tsx
+  157:31  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\customer\CustomerHeader.tsx
+  145:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  187:19  warning  Visible, non-interactive elements with click handlers must have at least one keyboard listener                                                                                                                                                                  jsx-a11y/click-events-have-key-events
+  187:19  warning  Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element                                                               jsx-a11y/no-static-element-interactions
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\customer\CustomerSidebar.tsx
+  156:60  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\layout\UserMenu.tsx
+  34:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\mobile\MobileOptimizations.tsx
+  171:68  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  171:78  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  237:15  error    Unsafe assignment of an `any` value                              @typescript-eslint/no-unsafe-assignment
+  237:45  error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  239:22  error    Unsafe member access .effectiveType on an `any` value            @typescript-eslint/no-unsafe-member-access
+  239:59  error    Unsafe member access .effectiveType on an `any` value            @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\payment\MoMoPayment.tsx
+  74:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\payment\QRCodeGenerator.tsx
+  14:7  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\payment\ZaloPayPayment.tsx
+  79:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\profile\TwoFactorAuth.tsx
+   28:6   warning  React Hook useEffect has a missing dependency: 'fetchStatus'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  177:31  error    Promise-returning function provided to attribute where a void return was expected                               @typescript-eslint/no-misused-promises
+  201:23  error    A form label must be associated with a control                                                                  jsx-a11y/label-has-associated-control
+  215:35  error    Promise-returning function provided to attribute where a void return was expected                               @typescript-eslint/no-misused-promises
+  293:23  error    A form label must be associated with a control                                                                  jsx-a11y/label-has-associated-control
+  306:35  error    Promise-returning function provided to attribute where a void return was expected                               @typescript-eslint/no-misused-promises
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\revenue\RevenueValidation.tsx
+   69:85  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                   @typescript-eslint/prefer-nullish-coalescing
+  206:3   error    React Hook "useEffect" is called in function "trackRevenueMetrics" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+  219:11  error    'trackServiceInterest' is assigned a value but never used. Allowed unused vars must match /^_/u                                                                                                                                                             @typescript-eslint/no-unused-vars
+  219:11  warning  'trackServiceInterest' is assigned a value but never used. Allowed unused vars must match /^_/u                                                                                                                                                             unused-imports/no-unused-vars
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\security\ChangePasswordForm.tsx
+   49:13  error  Unsafe assignment of an `any` value                                                     @typescript-eslint/no-unsafe-assignment
+   51:18  error  Unsafe member access .success on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+   55:24  error  Unsafe argument of type `any` assigned to a parameter of type `SetStateAction<string>`  @typescript-eslint/no-unsafe-argument
+   55:31  error  Unsafe member access .error on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+   88:44  error  Promise-returning function provided to attribute where a void return was expected       @typescript-eslint/no-misused-promises
+   90:11  error  A form label must be associated with a control                                          jsx-a11y/label-has-associated-control
+  102:11  error  A form label must be associated with a control                                          jsx-a11y/label-has-associated-control
+  114:11  error  A form label must be associated with a control                                          jsx-a11y/label-has-associated-control
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\testing\ConversionTesting.tsx
+  135:3   error    React Hook "useEffect" is called in function "trackCTAClicks" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"         react-hooks/rules-of-hooks
+  139:48  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                     @typescript-eslint/prefer-nullish-coalescing
+  169:3   error    React Hook "useEffect" is called in function "trackFormSubmissions" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"   react-hooks/rules-of-hooks
+  181:7   error    Unexpected alert                                                                                                                                                                                                                                              no-alert
+  234:3   error    React Hook "useEffect" is called in function "trackRevenuePotential" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\ui\Button.tsx
+  90:30  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\components\ui\LoadingSpinner.tsx
+  25:26  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\hooks\useWebSocket.ts
+  59:58  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  71:33  error    'reason' is defined but never used. Allowed unused args must match /^_/u                                   @typescript-eslint/no-unused-vars
+  71:33  warning  'reason' is defined but never used. Allowed unused args must match /^_/u                                   unused-imports/no-unused-vars
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\api-cache.ts
+   15:41  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+   18:67  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+   40:54  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   48:15  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+   70:15  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+   84:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+   88:23  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   94:78  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  141:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  148:64  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  149:65  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  165:68  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\api\db-middleware.ts
+  16:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\auth-enhanced.ts
+   76:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   91:88  warning  Replace `·string` with `␍⏎················|·string␍⏎···············`                                       prettier/prettier
+  104:88  warning  Replace `·string` with `␍⏎················|·string␍⏎···············`                                       prettier/prettier
+  150:47  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  151:55  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  179:30  error    'account' is defined but never used. Allowed unused args must match /^_/u                                  @typescript-eslint/no-unused-vars
+  179:30  warning  'account' is defined but never used. Allowed unused args must match /^_/u                                  unused-imports/no-unused-vars
+  196:15  error    'user' is already declared in the upper scope on line 179 column 24                                        @typescript-eslint/no-shadow
+  202:48  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  209:5   error    Async method 'session' has no 'await' expression                                                           @typescript-eslint/require-await
+  209:37  error    'user' is defined but never used. Allowed unused args must match /^_/u                                     @typescript-eslint/no-unused-vars
+  209:37  warning  'user' is defined but never used. Allowed unused args must match /^_/u                                     unused-imports/no-unused-vars
+  225:20  error    'user' is defined but never used. Allowed unused args must match /^_/u                                     @typescript-eslint/no-unused-vars
+  225:20  warning  'user' is defined but never used. Allowed unused args must match /^_/u                                     unused-imports/no-unused-vars
+  229:17  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  229:45  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  234:22  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  234:44  error    Unsafe member access .email on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  234:55  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  234:81  error    Unsafe member access .id on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  238:47  error    Unsafe member access .email on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  242:17  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  242:39  error    Unsafe member access .email on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  243:17  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  243:42  error    Unsafe member access .global_name on an `any` value                                                        @typescript-eslint/no-unsafe-member-access
+  243:72  error    Unsafe member access .username on an `any` value                                                           @typescript-eslint/no-unsafe-member-access
+  244:17  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  244:43  error    Unsafe member access .id on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  245:17  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  245:49  error    Unsafe member access .username on an `any` value                                                           @typescript-eslint/no-unsafe-member-access
+  255:17  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  255:43  error    Unsafe member access .id on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  256:17  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  256:49  error    Unsafe member access .username on an `any` value                                                           @typescript-eslint/no-unsafe-member-access
+  264:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  264:39  error    Unsafe member access .id on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  277:5   error    Async method 'signIn' has no 'await' expression                                                            @typescript-eslint/require-await
+  285:5   error    Async method 'signOut' has no 'await' expression                                                           @typescript-eslint/require-await
+  288:9   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  288:32  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  288:38  error    Unsafe member access .security on an `any` value                                                           @typescript-eslint/no-unsafe-member-access
+  292:5   error    Async method 'session' has no 'await' expression                                                           @typescript-eslint/require-await
+  296:9   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  296:32  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  296:38  error    Unsafe member access .security on an `any` value                                                           @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\auth-security.ts
+   48:3   error    Async method 'recordFailedAttempt' has no 'await' expression                                               @typescript-eslint/require-await
+   50:31  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  101:3   error    Async method 'checkLockout' has no 'await' expression                                                      @typescript-eslint/require-await
+  126:3   error    Async method 'clearFailedAttempts' has no 'await' expression                                               @typescript-eslint/require-await
+  130:3   error    Async method 'unlockAccount' has no 'await' expression                                                     @typescript-eslint/require-await
+  162:3   error    Static async method 'rotateToken' has no 'await' expression                                                @typescript-eslint/require-await
+  222:33  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  223:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  224:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  225:32  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  226:41  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\auth.ts
+   57:10  error    Redundant use of `await` on a return value                                                                 no-return-await
+   73:21  warning  Unexpected `await` inside a loop                                                                           no-await-in-loop
+  108:10  error    Redundant use of `await` on a return value                                                                 no-return-await
+  115:10  error    Redundant use of `await` on a return value                                                                 no-return-await
+  156:31  error    'maxRequests' is assigned a value but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+  156:31  warning  'maxRequests' is assigned a value but never used. Allowed unused vars must match /^_/u                     unused-imports/no-unused-vars
+  156:49  error    'windowMs' is assigned a value but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+  156:49  warning  'windowMs' is assigned a value but never used. Allowed unused vars must match /^_/u                        unused-imports/no-unused-vars
+  167:62  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  167:72  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  265:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  269:19  error    'getLogger' is already declared in the upper scope on line 9 column 10                                     @typescript-eslint/no-shadow
+  281:47  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  282:55  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  326:58  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  330:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  332:59  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  352:5   error    Async method 'session' has no 'await' expression                                                           @typescript-eslint/require-await
+  360:5   error    Async method 'redirect' has no 'await' expression                                                          @typescript-eslint/require-await
+  371:35  error    'profile' is defined but never used. Allowed unused args must match /^_/u                                  @typescript-eslint/no-unused-vars
+  371:35  warning  'profile' is defined but never used. Allowed unused args must match /^_/u                                  unused-imports/no-unused-vars
+  372:15  error    'getLogger' is already declared in the upper scope on line 9 column 10                                     @typescript-eslint/no-shadow
+  380:15  error    'getLogger' is already declared in the upper scope on line 9 column 10                                     @typescript-eslint/no-shadow
+  387:33  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  402:86  error    Async arrow function 'logSecurityEvent' has no 'await' expression                                          @typescript-eslint/require-await
+  441:91  error    Async arrow function 'enhanceSession' has no 'await' expression                                            @typescript-eslint/require-await
+  448:52  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  503:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\auth\jwt.ts
+   5:48  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  19:8   error    Async function 'verifyToken' has no 'await' expression                                                     @typescript-eslint/require-await
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\auth\two-factor.ts
+    9:50  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   10:46  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  232:37  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\cache.ts
+   19:46  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+   30:3   error    Async method 'get' has no 'await' expression                                                                                                                        @typescript-eslint/require-await
+   40:5   error    Unsafe return of an `any` typed value                                                                                                                               @typescript-eslint/no-unsafe-return
+   43:3   error    Async method 'set' has no 'await' expression                                                                                                                        @typescript-eslint/require-await
+   63:3   error    Async method 'del' has no 'await' expression                                                                                                                        @typescript-eslint/require-await
+   67:3   error    Async method 'flush' has no 'await' expression                                                                                                                      @typescript-eslint/require-await
+   92:21  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+   92:59  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+   93:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  158:11  error    'cached' is already declared in the upper scope on line 255 column 17                                                                                               @typescript-eslint/no-shadow
+  169:34  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  169:53  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  182:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  185:7   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  192:3   error    Async method 'revalidateInBackground' has no 'await' expression                                                                                                     @typescript-eslint/require-await
+  203:18  error    Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
+  206:30  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  206:49  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  219:26  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  219:45  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  228:3   error    Async method 'invalidate' has no 'await' expression                                                                                                                 @typescript-eslint/require-await
+  228:20  error    'pattern' is defined but never used. Allowed unused args must match /^_/u                                                                                           @typescript-eslint/no-unused-vars
+  228:20  warning  'pattern' is defined but never used. Allowed unused args must match /^_/u                                                                                           unused-imports/no-unused-vars
+  256:28  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  257:11  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  259:49  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  260:56  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  262:21  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  262:34  error    Unsafe member access .constructor on an `any` value                                                                                                                 @typescript-eslint/no-unsafe-member-access
+  266:18  error    Async arrow function has no 'await' expression                                                                                                                      @typescript-eslint/require-await
+  267:11  error    Unsafe return of an `any` typed value                                                                                                                               @typescript-eslint/no-unsafe-return
+  267:18  error    Unsafe call of an `any` typed value                                                                                                                                 @typescript-eslint/no-unsafe-call
+  267:33  error    Unsafe member access .apply on an `any` value                                                                                                                       @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\client-env.ts
+  4:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\client-logger.ts
+  14:7  error  Unexpected console statement  no-console
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\csrf-protection.ts
+   65:21  error    'origin' is assigned a value but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+   65:21  warning  'origin' is assigned a value but never used. Allowed unused vars must match /^_/u                          unused-imports/no-unused-vars
+   85:21  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   97:39  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  102:20  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  102:58  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  121:46  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  144:54  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\db.ts
+    3:1   warning  Dependency cycle detected                                                                                                                import/no-cycle
+   10:21  warning  Missing radix parameter                                                                                                                  radix
+   10:68  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                @typescript-eslint/prefer-nullish-coalescing
+   12:17  warning  Missing radix parameter                                                                                                                  radix
+   12:60  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                @typescript-eslint/prefer-nullish-coalescing
+   14:40  warning  Missing radix parameter                                                                                                                  radix
+   14:83  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                @typescript-eslint/prefer-nullish-coalescing
+   16:22  warning  Missing radix parameter                                                                                                                  radix
+   16:70  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                @typescript-eslint/prefer-nullish-coalescing
+  103:28  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                @typescript-eslint/prefer-nullish-coalescing
+  119:36  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  120:13  error    Unsafe member access .duration on an `any` value                                                                                         @typescript-eslint/no-unsafe-member-access
+  121:52  error    Unsafe member access .query on an `any` value                                                                                            @typescript-eslint/no-unsafe-member-access
+  121:64  error    Unsafe member access .duration on an `any` value                                                                                         @typescript-eslint/no-unsafe-member-access
+  126:36  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  127:53  error    Unsafe argument of type `any` assigned to a parameter of type `string | undefined`                                                       @typescript-eslint/no-unsafe-argument
+  127:55  error    Unsafe member access .message on an `any` value                                                                                          @typescript-eslint/no-unsafe-member-access
+  128:9   error    Unsafe assignment of an `any` value                                                                                                      @typescript-eslint/no-unsafe-assignment
+  128:19  error    Unsafe member access .target on an `any` value                                                                                           @typescript-eslint/no-unsafe-member-access
+  129:9   error    Unsafe assignment of an `any` value                                                                                                      @typescript-eslint/no-unsafe-assignment
+  129:22  error    Unsafe member access .timestamp on an `any` value                                                                                        @typescript-eslint/no-unsafe-member-access
+  135:35  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  137:9   error    Unsafe assignment of an `any` value                                                                                                      @typescript-eslint/no-unsafe-assignment
+  137:20  error    Unsafe member access .message on an `any` value                                                                                          @typescript-eslint/no-unsafe-member-access
+  138:9   error    Unsafe assignment of an `any` value                                                                                                      @typescript-eslint/no-unsafe-assignment
+  138:22  error    Unsafe member access .timestamp on an `any` value                                                                                        @typescript-eslint/no-unsafe-member-access
+  216:47  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  230:26  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  230:36  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  230:51  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  231:11  error    Unsafe assignment of an `any` value                                                                                                      @typescript-eslint/no-unsafe-assignment
+  237:5   error    Unsafe return of type `Promise<any>` from function with return type `Promise<UnwrapTuple<P>>`                                            @typescript-eslint/no-unsafe-return
+  240:11  error    Unsafe return of an `any` typed value                                                                                                    @typescript-eslint/no-unsafe-return
+  240:49  error    Unsafe argument of type `any` assigned to a parameter of type `{ isolationLevel?: TransactionIsolationLevel | undefined; } | undefined`  @typescript-eslint/no-unsafe-argument
+  240:62  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  242:11  error    Unsafe return of an `any` typed value                                                                                                    @typescript-eslint/no-unsafe-return
+  242:44  error    Unsafe argument of type `any` assigned to a parameter of type `PrismaPromise<any>[]`                                                     @typescript-eslint/no-unsafe-argument
+  242:49  error    Unsafe argument of type `any` assigned to a parameter of type `{ isolationLevel?: TransactionIsolationLevel | undefined; } | undefined`  @typescript-eslint/no-unsafe-argument
+  242:69  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  247:11  error    Unsafe assignment of an `any` value                                                                                                      @typescript-eslint/no-unsafe-assignment
+  284:7   error    Unsafe return of an `any` typed value                                                                                                    @typescript-eslint/no-unsafe-return
+  286:17  error    Unsafe assignment of an `any` value                                                                                                      @typescript-eslint/no-unsafe-assignment
+  288:36  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  290:15  error    Unsafe return of an `any` typed value                                                                                                    @typescript-eslint/no-unsafe-return
+  290:22  error    Unsafe call of an `any` typed value                                                                                                      @typescript-eslint/no-unsafe-call
+  290:28  error    Unsafe member access .apply on an `any` value                                                                                            @typescript-eslint/no-unsafe-member-access
+  293:11  error    Unsafe return of an `any` typed value                                                                                                    @typescript-eslint/no-unsafe-return
+  300:13  error    Unsafe assignment of an `any` value                                                                                                      @typescript-eslint/no-unsafe-assignment
+  302:32  error    Unexpected any. Specify a different type                                                                                                 @typescript-eslint/no-explicit-any
+  304:11  error    Unsafe return of an `any` typed value                                                                                                    @typescript-eslint/no-unsafe-return
+  304:18  error    Unsafe call of an `any` typed value                                                                                                      @typescript-eslint/no-unsafe-call
+  304:24  error    Unsafe member access .apply on an `any` value                                                                                            @typescript-eslint/no-unsafe-member-access
+  309:5   error    Unsafe return of an `any` typed value                                                                                                    @typescript-eslint/no-unsafe-return
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\discord.ts
+  131:27  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  134:37  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  134:69  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  184:34  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  189:31  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  194:31  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  199:41  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  204:32  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  237:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  237:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\discord\bot.ts
+   33:31  error    Promise returned in function argument where a void return was expected                                     @typescript-eslint/no-misused-promises
+   34:15  error    'getLogger' is already declared in the upper scope on line 12 column 10                                    @typescript-eslint/no-shadow
+   47:41  error    Promise returned in function argument where a void return was expected                                     @typescript-eslint/no-misused-promises
+  189:46  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  189:88  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  226:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\email.ts
+   12:1    warning  `resend` import should occur before import of `@/lib/monitoring/logger`                                    import/order
+   25:50   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   36:36   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  157:47   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  179:63   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  179:117  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  213:48   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  218:39   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  225:10   error    Redundant use of `await` on a return value                                                                 no-return-await
+  235:48   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  347:10   error    Redundant use of `await` on a return value                                                                 no-return-await
+  361:48   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  403:10   error    Redundant use of `await` on a return value                                                                 no-return-await
+  418:9    error    'paymentUrl' is assigned a value but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+  418:9    warning  'paymentUrl' is assigned a value but never used. Allowed unused vars must match /^_/u                      unused-imports/no-unused-vars
+  418:50   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  447:10   error    Redundant use of `await` on a return value                                                                 no-return-await
+  492:75   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  502:10   error    Redundant use of `await` on a return value                                                                 no-return-await
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\email\index.ts
+   56:26  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  344:8   error    Async function 'checkEmailService' has no 'await' expression                                               @typescript-eslint/require-await
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\email\service.ts
+   47:52  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   64:28  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  594:68  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  598:94  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  638:34  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  640:77  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\email\templates.ts
+  564:20  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  572:26  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\env-loader.ts
+  74:9   error  Unexpected console statement              no-console
+  86:7   error  Unsafe assignment of an `any` value       @typescript-eslint/no-unsafe-assignment
+  94:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\env-validation.ts
+   97:44  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   97:66  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  169:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  176:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\error-handler.ts
+    6:1  warning  There should be no empty line within import group                              import/order
+   26:1  warning  `@/lib/errors` import should occur before import of `@/lib/monitoring/logger`  import/order
+  141:8  error    Async function 'apiErrorHandler' has no 'await' expression                     @typescript-eslint/require-await
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\errors.ts
+  173:63  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  189:45  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  246:14  warning  Unexpected `await` inside a loop                                                                           no-await-in-loop
+  257:9   warning  Unexpected `await` inside a loop                                                                           no-await-in-loop
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\monitoring.ts
+   46:11  error    'startTime' is assigned a value but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   46:11  warning  'startTime' is assigned a value but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                unused-imports/no-unused-vars
+   74:52  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  144:3   error    Async method 'checkRedis' has no 'await' expression                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/require-await
+  223:3   error    Async method 'checkDiskSpace' has no 'await' expression                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/require-await
+  242:3   error    Async method 'checkMemory' has no 'await' expression                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/require-await
+  328:9   warning  Missing radix parameter                                                                                                                                                                                                                                                                                                                                                                                             radix
+  336:5   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                  @typescript-eslint/no-floating-promises
+  356:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  367:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  374:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  402:20  error    Don't use `Function` as a type. The `Function` type accepts any function-like value.
+It provides no type safety when calling the function, which can be a common source of bugs.
+It also accepts things like class declarations, which will throw at runtime as they will not be called with `new`.
+If you are expecting the function to accept certain arguments, you should explicitly define the function shape  @typescript-eslint/ban-types
+  406:15  error    Unsafe assignment of an `any` value                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  409:9   error    Unsafe return of an `any` typed value                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unsafe-return
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\monitoring\edge-logger.ts
+   3:37  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   4:44  error  'unknown' overrides all other types in this union type  @typescript-eslint/no-redundant-type-constituents
+   4:63  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   5:37  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   6:38  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  10:68  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  10:81  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  26:39  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  27:7   error  Unexpected console statement                            no-console
+  30:46  error  'unknown' overrides all other types in this union type  @typescript-eslint/no-redundant-type-constituents
+  30:65  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  34:39  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  38:40  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  40:9   error  Unexpected console statement                            no-console
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\monitoring\logger.ts
+   23:17  error    Unexpected any. Specify a different type                                                                                                                                                                        @typescript-eslint/no-explicit-any
+  117:34  warning  Dependency cycle detected                                                                                                                                                                                       import/no-cycle
+  124:13  error    Unsafe assignment of an `any` value                                                                                                                                                                             @typescript-eslint/no-unsafe-assignment
+  124:39  error    Unexpected any. Specify a different type                                                                                                                                                                        @typescript-eslint/no-explicit-any
+  146:5   error    Unexpected console statement                                                                                                                                                                                    no-console
+  170:5   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                              @typescript-eslint/no-floating-promises
+  186:5   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                              @typescript-eslint/no-floating-promises
+  196:34  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                       @typescript-eslint/prefer-nullish-coalescing
+  209:5   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                              @typescript-eslint/no-floating-promises
+  221:34  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                       @typescript-eslint/prefer-nullish-coalescing
+  369:24  error    Promise returned in function argument where a void return was expected                                                                                                                                          @typescript-eslint/no-misused-promises
+  369:24  error    Promise executor functions should not be async                                                                                                                                                                  no-async-promise-executor
+  398:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                       @typescript-eslint/prefer-nullish-coalescing
+  423:18  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                       @typescript-eslint/prefer-nullish-coalescing
+  433:20  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                       @typescript-eslint/prefer-nullish-coalescing
+  434:18  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                       @typescript-eslint/prefer-nullish-coalescing
+  434:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                       @typescript-eslint/prefer-nullish-coalescing
+  435:24  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                       @typescript-eslint/prefer-nullish-coalescing
+  441:22  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                       @typescript-eslint/prefer-nullish-coalescing
+  533:7   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                              @typescript-eslint/no-floating-promises
+  539:34  error    Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead  @typescript-eslint/unbound-method
+  540:31  error    Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead  @typescript-eslint/unbound-method
+  541:39  error    Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead  @typescript-eslint/unbound-method
+  542:36  error    Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead  @typescript-eslint/unbound-method
+  543:32  error    Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead  @typescript-eslint/unbound-method
+  548:24  warning  Unexpected `await` inside a loop                                                                                                                                                                                no-await-in-loop
+  575:3   error    Async method 'checkDatabase' has no 'await' expression                                                                                                                                                          @typescript-eslint/require-await
+  587:3   error    Async method 'checkRedis' has no 'await' expression                                                                                                                                                             @typescript-eslint/require-await
+  635:3   error    Async method 'checkDiskSpace' has no 'await' expression                                                                                                                                                         @typescript-eslint/require-await
+  638:44  warning  Prefer using an optional chain expression instead, as it's more concise and easier to read                                                                                                                      @typescript-eslint/prefer-optional-chain
+  659:3   error    Async method 'checkMemory' has no 'await' expression                                                                                                                                                            @typescript-eslint/require-await
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\monitoring\sentry.ts
+   26:65  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   31:55  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   35:5   error    Unsafe assignment of an `any` value                                                                                  @typescript-eslint/no-unsafe-assignment
+   41:69  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   95:28  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  100:31  error    Unsafe argument of type `any` assigned to a parameter of type `Context | null`                                       @typescript-eslint/no-unsafe-argument
+  113:28  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  237:3   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  238:22  error    Unsafe member access .showReportDialog on an `any` value                                                             @typescript-eslint/no-unsafe-member-access
+  239:5   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  240:5   error    Unsafe call of an `any` typed value                                                                                  @typescript-eslint/no-unsafe-call
+  240:19  error    Unsafe member access .showReportDialog on an `any` value                                                             @typescript-eslint/no-unsafe-member-access
+  242:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator            @typescript-eslint/prefer-nullish-coalescing
+  243:31  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator            @typescript-eslint/prefer-nullish-coalescing
+  245:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator            @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\password-validation.ts
+   85:56  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  163:9   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  163:18  error    Require statement not part of import statement                                                             @typescript-eslint/no-var-requires
+  168:25  error    Computed name [crypto.randomInt(uppercase.length)] resolves to an any value                                @typescript-eslint/no-unsafe-member-access
+  168:25  error    Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  168:32  error    Unsafe member access .randomInt on an `any` value                                                          @typescript-eslint/no-unsafe-member-access
+  169:25  error    Computed name [crypto.randomInt(lowercase.length)] resolves to an any value                                @typescript-eslint/no-unsafe-member-access
+  169:25  error    Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  169:32  error    Unsafe member access .randomInt on an `any` value                                                          @typescript-eslint/no-unsafe-member-access
+  170:23  error    Computed name [crypto.randomInt(numbers.length)] resolves to an any value                                  @typescript-eslint/no-unsafe-member-access
+  170:23  error    Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  170:30  error    Unsafe member access .randomInt on an `any` value                                                          @typescript-eslint/no-unsafe-member-access
+  171:23  error    Computed name [crypto.randomInt(special.length)] resolves to an any value                                  @typescript-eslint/no-unsafe-member-access
+  171:23  error    Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  171:30  error    Unsafe member access .randomInt on an `any` value                                                          @typescript-eslint/no-unsafe-member-access
+  175:26  error    Computed name [crypto.randomInt(allChars.length)] resolves to an any value                                 @typescript-eslint/no-unsafe-member-access
+  175:26  error    Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  175:33  error    Unsafe member access .randomInt on an `any` value                                                          @typescript-eslint/no-unsafe-member-access
+  181:17  error    Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  181:24  error    Unsafe member access .randomInt on an `any` value                                                          @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\payments\banking.ts
+  223:87   warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  224:111  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\payments\momo.ts
+  103:33  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  158:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  160:24  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  161:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  250:13  error    'orderId' is assigned a value but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+  250:13  warning  'orderId' is assigned a value but never used. Allowed unused vars must match /^_/u                         unused-imports/no-unused-vars
+  250:27  error    'requestId' is assigned a value but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+  250:27  warning  'requestId' is assigned a value but never used. Allowed unused vars must match /^_/u                       unused-imports/no-unused-vars
+  254:9   error    'orderId' is already declared in the upper scope on line 250 column 13                                     @typescript-eslint/no-shadow
+  255:9   error    'requestId' is already declared in the upper scope on line 250 column 27                                   @typescript-eslint/no-shadow
+  428:41  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  437:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  439:24  error    Unsafe member access .resultCode on an `any` value                                                         @typescript-eslint/no-unsafe-member-access
+  440:33  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  442:34  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  442:54  error    Unsafe member access .message on an `any` value                                                            @typescript-eslint/no-unsafe-member-access
+  486:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  495:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  497:24  error    Unsafe member access .resultCode on an `any` value                                                         @typescript-eslint/no-unsafe-member-access
+  514:33  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  516:34  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  516:54  error    Unsafe member access .message on an `any` value                                                            @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\payments\vnpay.ts
+   14:11  error    'VNPayResponse' is defined but never used. Allowed unused vars must match /^_/u                            @typescript-eslint/no-unused-vars
+   14:11  warning  'VNPayResponse' is defined but never used. Allowed unused vars must match /^_/u                            unused-imports/no-unused-vars
+   73:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  106:36  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  107:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  108:36  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  223:42  warning  Missing radix parameter                                                                                    radix
+  230:64  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  263:46  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  284:28  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  313:67  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  389:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  390:24  error    Unsafe member access .vnp_ResponseCode on an `any` value                                                   @typescript-eslint/no-unsafe-member-access
+  391:33  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  393:34  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  393:54  error    Unsafe member access .vnp_Message on an `any` value                                                        @typescript-eslint/no-unsafe-member-access
+  452:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  453:24  error    Unsafe member access .vnp_ResponseCode on an `any` value                                                   @typescript-eslint/no-unsafe-member-access
+  469:33  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  471:34  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  471:54  error    Unsafe member access .vnp_Message on an `any` value                                                        @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\payments\zalopay.ts
+   74:50  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  112:17  warning  Missing radix parameter                                                                                    radix
+  122:31  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  145:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  191:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  192:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  194:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  194:39  error    Unsafe argument of type `any` assigned to a parameter of type `string`                                     @typescript-eslint/no-unsafe-argument
+  195:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  195:15  error    'bookingId' is assigned a value but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+  195:15  warning  'bookingId' is assigned a value but never used. Allowed unused vars must match /^_/u                       unused-imports/no-unused-vars
+  199:18  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  202:78  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  212:11  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  213:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  214:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  232:9   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  233:9   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  234:9   error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  239:55  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  239:69  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  239:82  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  267:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  268:24  error    Unsafe member access .return_code on an `any` value                                                        @typescript-eslint/no-unsafe-member-access
+  269:33  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  271:34  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  271:54  error    Unsafe member access .return_message on an `any` value                                                     @typescript-eslint/no-unsafe-member-access
+  314:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  315:24  error    Unsafe member access .return_code on an `any` value                                                        @typescript-eslint/no-unsafe-member-access
+  336:33  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  338:34  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  338:54  error    Unsafe member access .return_message on an `any` value                                                     @typescript-eslint/no-unsafe-member-access
+  373:13  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  374:24  error    Unsafe member access .return_code on an `any` value                                                        @typescript-eslint/no-unsafe-member-access
+  375:33  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  377:34  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  377:54  error    Unsafe member access .return_message on an `any` value                                                     @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\rate-limit-edge.ts
+  66:36  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  73:3   error    Async method 'checkLimit' has no 'await' expression                                                        @typescript-eslint/require-await
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\rate-limit-lru.ts
+   26:47  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   29:3   error    Async method 'checkLimit' has no 'await' expression                                                        @typescript-eslint/require-await
+  146:47  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  149:3   error    Async method 'checkLimit' has no 'await' expression                                                        @typescript-eslint/require-await
+  160:42  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\rate-limit-memory-safe.ts
+   23:47  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   24:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   54:7   error    Unexpected console statement                                                                               no-console
+   74:3   error    Async method 'checkLimit' has no 'await' expression                                                        @typescript-eslint/require-await
+  126:21  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  126:59  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  127:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  145:39  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  145:46  error    Unsafe member access [1] on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\rate-limit.ts
+   31:39  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   31:49  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   31:67  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  196:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\security.ts
+  115:22  error    Unexpected control character(s) in regular expression: \x08, \x09, \x1a                                    no-control-regex
+  115:46  error    Unnecessary escape character: \%                                                                           no-useless-escape
+  220:13  error    Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  231:11  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  234:17  error    Unsafe member access .exp on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  234:32  error    Unsafe member access .exp on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  238:27  error    Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  268:27  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  277:9   error    'verifyHash' is already declared in the upper scope on line 275 column 17                                  @typescript-eslint/no-shadow
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\security\csp-config.ts
+  113:47  error  Unsafe return of an `any` typed value            @typescript-eslint/no-unsafe-return
+  113:47  error  Unsafe call of an `any` typed value              @typescript-eslint/no-unsafe-call
+  113:49  error  Unsafe member access .replace on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\storage\r2-client.ts
+   9:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  20:35  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  21:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  66:50  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\storage\upload-service.ts
+   61:38  error    Unsafe argument of type `any` assigned to a parameter of type `"image" | "video" | "avatar" | "document" | "screenshot"`  @typescript-eslint/no-unsafe-argument
+   61:54  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+   78:43  error    Unsafe argument of type `any` assigned to a parameter of type `"default" | "image" | "video" | "avatar" | "document"`     @typescript-eslint/no-unsafe-argument
+   78:59  error    Unexpected any. Specify a different type                                                                                  @typescript-eslint/no-explicit-any
+  113:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                 @typescript-eslint/prefer-nullish-coalescing
+  114:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                 @typescript-eslint/prefer-nullish-coalescing
+  157:25  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                 @typescript-eslint/prefer-nullish-coalescing
+  167:36  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                 @typescript-eslint/prefer-nullish-coalescing
+  407:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                 @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\supabase.ts
+   79:41  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   81:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  142:27  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  143:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\sw-registration.ts
+   31:5   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   76:9   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  151:3   error    Async method 'updateApp' has no 'await' expression                                                                                                                  @typescript-eslint/require-await
+  166:50  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  169:13  error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  169:78  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+  171:7   error    Unsafe call of an `any` typed value                                                                                                                                 @typescript-eslint/no-unsafe-call
+  171:21  error    Unsafe member access .push on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  174:9   error    Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  185:19  error    Unsafe call of an `any` typed value                                                                                                                                 @typescript-eslint/no-unsafe-call
+  185:36  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  185:41  error    Unsafe member access .sync on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  351:44  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  356:53  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  356:58  error    Unsafe member access .gtag on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  357:8   error    Unsafe call of an `any` typed value                                                                                                                                 @typescript-eslint/no-unsafe-call
+  357:19  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  357:24  error    Unsafe member access .gtag on an `any` value                                                                                                                        @typescript-eslint/no-unsafe-member-access
+  370:15  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  370:20  error    Unsafe member access .swManager on an `any` value                                                                                                                   @typescript-eslint/no-unsafe-member-access
+  380:48  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\utils\validation.ts
+  61:24  error  Unnecessary escape character: \[  no-useless-escape
+  61:41  error  Unnecessary escape character: \/  no-useless-escape
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\webhooks\processor.ts
+  22:3  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  26:5  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  48:3  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  52:5  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\webhooks\replay-protection.ts
+   31:55  warning  Missing radix parameter  radix
+  140:23  warning  Missing radix parameter  radix
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\webhooks\retry-service.ts
+   27:90  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+   45:11  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  136:43  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  138:21  error    Unsafe member access .provider on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  147:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  147:29  error    Unsafe member access .provider on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  158:42  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  160:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  163:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  163:35  error    'amount' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  163:35  warning  'amount' is assigned a value but never used. Allowed unused vars must match /^_/u      unused-imports/no-unused-vars
+  166:51  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  166:60  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  173:11  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  187:11  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  199:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  201:15  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  202:15  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  203:15  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  222:52  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  222:61  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  231:45  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  233:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  235:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  235:50  error    'amount' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  235:50  warning  'amount' is assigned a value but never used. Allowed unused vars must match /^_/u      unused-imports/no-unused-vars
+  238:54  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  244:11  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  258:11  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  269:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  271:15  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  272:15  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  273:15  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  291:55  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  291:69  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  300:43  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  302:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  304:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  304:64  error    'vnp_Amount' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  304:64  warning  'vnp_Amount' is assigned a value but never used. Allowed unused vars must match /^_/u  unused-imports/no-unused-vars
+  307:52  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  313:11  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  327:11  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  338:13  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  340:15  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  341:15  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  342:15  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  360:53  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  360:65  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  369:38  error    Unexpected any. Specify a different type                                               @typescript-eslint/no-explicit-any
+  370:11  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  370:28  error    Unsafe member access .attempts on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  379:16  error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  379:26  error    Unsafe member access .id on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+  382:9   error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  389:7   error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  389:22  error    Unsafe member access .eventId on an `any` value                                        @typescript-eslint/no-unsafe-member-access
+  390:7   error    Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\webhooks\timestamp-utils.ts
+  23:18  warning  Missing radix parameter                                                              radix
+  24:19  warning  Missing radix parameter                                                              radix
+  25:17  warning  Missing radix parameter                                                              radix
+  26:18  warning  Missing radix parameter                                                              radix
+  27:20  warning  Missing radix parameter                                                              radix
+  28:20  warning  Missing radix parameter                                                              radix
+  35:11  error    'vtOffset' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  35:11  warning  'vtOffset' is assigned a value but never used. Allowed unused vars must match /^_/u  unused-imports/no-unused-vars
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\websocket\init.ts
+  51:9  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\websocket\secure-server.ts
+   38:60  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+   39:46  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+   64:39  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+   78:17  error    Promise returned in function argument where a void return was expected                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-misused-promises
+   94:17  error    Promise returned in function argument where a void return was expected                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-misused-promises
+  104:43  error    Unsafe argument of type `any` assigned to a parameter of type `string`                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unsafe-argument
+  117:70  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  123:15  error    Unsafe assignment of an `any` value                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  128:9   error    Unsafe assignment of an `any` value                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  151:28  error    Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+If your function does not access `this`, you can annotate it with `this: void`, or consider using an arrow function instead                                                                                                                                                                                                      @typescript-eslint/unbound-method
+  152:40  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  154:63  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  176:9   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                  @typescript-eslint/no-floating-promises
+  180:11  error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                  @typescript-eslint/no-floating-promises
+  185:58  error    Don't use `Function` as a type. The `Function` type accepts any function-like value.
+It provides no type safety when calling the function, which can be a common source of bugs.
+It also accepts things like class declarations, which will throw at runtime as they will not be called with `new`.
+If you are expecting the function to accept certain arguments, you should explicitly define the function shape  @typescript-eslint/ban-types
+  186:46  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  215:27  error    Unsafe spread of an `any` array type                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unsafe-argument
+  251:11  error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                  @typescript-eslint/no-floating-promises
+  371:50  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  414:58  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  418:64  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  422:56  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\lib\websocket\server.ts
+   21:49  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+   33:17  error    Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
+   42:43  error    Unsafe argument of type `any` assigned to a parameter of type `string`                                                                                              @typescript-eslint/no-unsafe-argument
+   72:9   error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   76:11  error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   92:13  error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  178:58  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  182:56  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  186:64  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  195:57  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  199:57  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  208:47  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\middleware\admin.ts
+  139:9   error    Unexpected lexical declaration in case block                                                                                                                                                                                                                                                                                                                                                                        no-case-declarations
+  146:9   error    Unexpected lexical declaration in case block                                                                                                                                                                                                                                                                                                                                                                        no-case-declarations
+  170:29  error    Don't use `Function` as a type. The `Function` type accepts any function-like value.
+It provides no type safety when calling the function, which can be a common source of bugs.
+It also accepts things like class declarations, which will throw at runtime as they will not be called with `new`.
+If you are expecting the function to accept certain arguments, you should explicitly define the function shape  @typescript-eslint/ban-types
+  180:14  error    Redundant use of `await` on a return value                                                                                                                                                                                                                                                                                                                                                                          no-return-await
+  183:9   error    Unsafe return of an `any` typed value                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unsafe-return
+  183:16  error    Redundant use of `await` on a return value                                                                                                                                                                                                                                                                                                                                                                          no-return-await
+  216:52  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  232:52  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  251:27  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  252:28  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                           @typescript-eslint/prefer-nullish-coalescing
+  280:9   error    Unsafe assignment of an `any` value                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  280:23  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  314:9   error    Unsafe assignment of an `any` value                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  314:29  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\middleware\auth.ts
+   73:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   74:56  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  100:21  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  100:59  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  108:50  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  111:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  125:51  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  155:18  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\middleware\error-handler.ts
+  15:59  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\middleware\upload-protection.ts
+  15:8   error    Async function 'uploadProtectionMiddleware' has no 'await' expression                                      @typescript-eslint/require-await
+  43:24  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  43:66  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  57:59  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  69:59  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  83:31  warning  Unexpected `await` inside a loop                                                                           no-await-in-loop
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\services\booking.service.ts
+  44:29  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\src\websocket-server.ts
+  9:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\tests\global-setup.ts
+  19:43  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\tests\utils\test-helpers.ts
+   96:7   warning  Unexpected `await` inside a loop                                                                           no-await-in-loop
+  142:94  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+✖ 780 problems (459 errors, 321 warnings)
+  0 errors and 3 warnings potentially fixable with the `--fix` option.
+

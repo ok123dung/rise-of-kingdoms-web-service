@@ -7,9 +7,18 @@ import { leadValidationSchema, sanitizeUserInput, sanitizePhoneNumber } from '@/
 
 // POST /api/leads - Tạo lead mới từ contact form
 
+interface LeadRequestBody {
+  fullName?: string
+  phone?: string
+  notes?: string
+  email?: string
+  serviceInterest?: string
+  source?: string
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = (await request.json()) as LeadRequestBody
 
     // Sanitize input data
     const sanitizedData = {
@@ -181,7 +190,12 @@ export async function GET(request: NextRequest) {
     const source = searchParams.get('source')
     const assignedTo = searchParams.get('assignedTo')
 
-    const filters: any = {}
+    interface LeadFilters {
+      status?: string
+      source?: string
+      assignedTo?: string
+    }
+    const filters: LeadFilters = {}
     if (status) filters.status = status
     if (source) filters.source = source
     if (assignedTo) filters.assignedTo = assignedTo

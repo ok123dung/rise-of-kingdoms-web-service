@@ -80,14 +80,20 @@ export class PaymentService {
   /**
    * Verify payment callback
    */
-  async verifyPaymentCallback(paymentMethod: string, callbackData: Record<string, any>) {
+  async verifyPaymentCallback(paymentMethod: string, callbackData: Record<string, unknown>) {
     switch (paymentMethod) {
       case 'momo':
-        return await this.momoPayment.handleWebhook(callbackData as any)
+        return this.momoPayment.handleWebhook(
+          callbackData as unknown as Parameters<typeof this.momoPayment.handleWebhook>[0]
+        )
       case 'vnpay':
-        return await this.vnpayPayment.verifyReturnUrl(callbackData)
+        return this.vnpayPayment.verifyReturnUrl(
+          callbackData as Parameters<typeof this.vnpayPayment.verifyReturnUrl>[0]
+        )
       case 'zalopay':
-        return await this.zalopayPayment.handleCallback(callbackData as any)
+        return this.zalopayPayment.handleCallback(
+          callbackData as unknown as Parameters<typeof this.zalopayPayment.handleCallback>[0]
+        )
       default:
         throw new ValidationError('Invalid payment method')
     }
@@ -134,7 +140,12 @@ export class PaymentService {
       offset?: number
     }
   ) {
-    const where: any = {
+    interface PaymentWhereInput {
+      booking: { userId: string }
+      status?: string
+    }
+
+    const where: PaymentWhereInput = {
       booking: { userId }
     }
 
@@ -155,8 +166,8 @@ export class PaymentService {
           }
         },
         orderBy: { createdAt: 'desc' },
-        take: options?.limit || 10,
-        skip: options?.offset || 0
+        take: options?.limit ?? 10,
+        skip: options?.offset ?? 0
       }),
       prisma.payment.count({ where })
     ])
@@ -290,7 +301,7 @@ export class PaymentService {
 
     switch (paymentMethod) {
       case 'momo':
-        return await this.momoPayment.createPayment({
+        return this.momoPayment.createPayment({
           bookingId: booking.id,
           amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
           orderInfo: `Payment for ${booking.bookingNumber}`,
@@ -298,15 +309,15 @@ export class PaymentService {
         })
 
       case 'vnpay':
-        return await this.vnpayPayment.createPaymentUrl({
+        return this.vnpayPayment.createPaymentUrl({
           bookingId: booking.id,
           amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
           orderInfo: `Payment for booking ${booking.bookingNumber}`,
-          returnUrl: returnUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/payment/callback`
+          returnUrl: returnUrl ?? `${process.env.NEXT_PUBLIC_SITE_URL}/payment/callback`
         })
 
       case 'zalopay':
-        return await this.zalopayPayment.createOrder({
+        return this.zalopayPayment.createOrder({
           bookingId: booking.id,
           amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
           description: `Payment for ${booking.bookingNumber}`,
@@ -314,12 +325,12 @@ export class PaymentService {
         })
 
       case 'banking':
-        return await this.bankingTransfer.createTransferOrder({
+        return this.bankingTransfer.createTransferOrder({
           bookingId: booking.id,
           amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
           customerName: booking.user.fullName,
           customerEmail: booking.user.email,
-          customerPhone: booking.user.phone || undefined
+          customerPhone: booking.user.phone ?? undefined
         })
 
       default:
@@ -332,7 +343,7 @@ export class PaymentService {
     status: string,
     data?: {
       failureReason?: string
-      gatewayResponse?: any
+      gatewayResponse?: Record<string, unknown>
     }
   ) {
     await prisma.payment.update({
@@ -340,7 +351,9 @@ export class PaymentService {
       data: {
         status,
         failureReason: data?.failureReason,
-        gatewayResponse: data?.gatewayResponse
+        gatewayResponse: data?.gatewayResponse as Parameters<
+          typeof prisma.payment.update
+        >[0]['data']['gatewayResponse']
       }
     })
   }

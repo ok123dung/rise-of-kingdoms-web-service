@@ -11,7 +11,7 @@ interface VNPayRequest {
   ipnUrl?: string
   locale?: string
 }
-interface VNPayResponse {
+interface VNPayCreateResponse {
   vnp_Url?: string
   vnp_ResponseCode?: string
   vnp_Message?: string
@@ -147,7 +147,10 @@ export class VNPayPayment {
         }
       }
     } catch (error) {
-      console.error('VNPay payment creation error:', error)
+      getLogger().error(
+        'VNPay payment creation error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -188,7 +191,10 @@ export class VNPayPayment {
         } as VNPayReturnData
       }
     } catch (error) {
-      console.error('VNPay return URL verification error:', error)
+      getLogger().error(
+        'VNPay return URL verification error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Verification failed'
@@ -202,6 +208,12 @@ export class VNPayPayment {
     responseCode?: string
   }> {
     try {
+      // Check signature exists before processing
+      if (!query.vnp_SecureHash) {
+        getLogger().error('VNPay IPN missing signature', new Error('Missing vnp_SecureHash'))
+        return { success: false, message: 'Missing signature', responseCode: '97' }
+      }
+
       // Verify signature first
       const verifyResult = this.verifyReturnUrl(query)
       if (!verifyResult.success) {
@@ -213,6 +225,17 @@ export class VNPayPayment {
       const transactionNo = verifyResult.data?.vnp_TransactionNo
       const bankCode = verifyResult.data?.vnp_BankCode
       const payDate = verifyResult.data?.vnp_PayDate
+
+      // Idempotency check - prevent duplicate webhook processing
+      const webhookEventId = `vnpay_${orderId}_${transactionNo || responseCode}`
+      const existingEvent = await prisma.webhookEvent.findUnique({
+        where: { eventId: webhookEventId }
+      })
+      if (existingEvent) {
+        getLogger().info('VNPay webhook already processed', { eventId: webhookEventId })
+        return { success: true, message: 'Webhook already processed', responseCode: '00' }
+      }
+
       // Find payment record
       const payment = await prisma.payment.findFirst({
         where: { gatewayTransactionId: orderId }
@@ -230,27 +253,29 @@ export class VNPayPayment {
       }
       // Process payment based on response code
       if (responseCode === '00') {
-        // Payment successful
-        await prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: 'completed',
-            gatewayResponse: {
-              transactionNo: transactionNo || '',
-              bankCode,
-              payDate,
-              responseCode,
-              ...query
+        // Payment successful - use transaction for atomic updates
+        await prisma.$transaction(async tx => {
+          await tx.payment.update({
+            where: { id: payment.id },
+            data: {
+              status: 'completed',
+              gatewayResponse: {
+                transactionNo: transactionNo || '',
+                bankCode,
+                payDate,
+                responseCode,
+                ...query
+              }
             }
-          }
-        })
-        // Update booking status
-        await prisma.booking.update({
-          where: { id: payment.bookingId },
-          data: {
-            paymentStatus: 'completed',
-            status: 'confirmed'
-          }
+          })
+          // Update booking status
+          await tx.booking.update({
+            where: { id: payment.bookingId },
+            data: {
+              paymentStatus: 'completed',
+              status: 'confirmed'
+            }
+          })
         })
         // Send confirmation email
         await this.sendConfirmationEmail(payment.bookingId)
@@ -263,30 +288,61 @@ export class VNPayPayment {
         })
         // Trigger service delivery workflow
         await this.triggerServiceDelivery(payment.bookingId)
+
+        // Record webhook event for idempotency
+        await prisma.webhookEvent.create({
+          data: {
+            provider: 'vnpay',
+            eventType: 'payment_ipn',
+            eventId: webhookEventId,
+            payload: query,
+            status: 'processed',
+            processedAt: new Date()
+          }
+        })
+
         getLogger().info('VNPay payment completed', { orderId, transactionNo, amount })
         return { success: true, message: 'Payment processed successfully', responseCode: '00' }
       } else {
-        // Payment failed
-        await prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: 'failed',
-            failureReason: this.getResponseMessage(responseCode || '99'),
-            gatewayResponse: {
-              responseCode,
-              ...query
+        // Payment failed - use transaction for atomic updates
+        await prisma.$transaction(async tx => {
+          await tx.payment.update({
+            where: { id: payment.id },
+            data: {
+              status: 'failed',
+              failureReason: this.getResponseMessage(responseCode || '99'),
+              gatewayResponse: {
+                responseCode,
+                ...query
+              }
             }
+          })
+          await tx.booking.update({
+            where: { id: payment.bookingId },
+            data: { paymentStatus: 'failed' }
+          })
+        })
+
+        // Record webhook event for idempotency
+        await prisma.webhookEvent.create({
+          data: {
+            provider: 'vnpay',
+            eventType: 'payment_ipn_failed',
+            eventId: webhookEventId,
+            payload: query,
+            status: 'processed',
+            processedAt: new Date()
           }
         })
-        await prisma.booking.update({
-          where: { id: payment.bookingId },
-          data: { paymentStatus: 'failed' }
-        })
+
         getLogger().warn('VNPay payment failed', { orderId, responseCode })
         return { success: true, message: 'Payment failure processed', responseCode: '00' }
       }
     } catch (error) {
-      console.error('VNPay IPN processing error:', error)
+      getLogger().error(
+        'VNPay IPN processing error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return { success: false, message: 'IPN processing failed', responseCode: '99' }
     }
   }
@@ -330,14 +386,17 @@ export class VNPayPayment {
         },
         body: JSON.stringify(requestBody)
       })
-      const responseData = await response.json()
+      const responseData = (await response.json()) as VNPayQueryResponse
       if (responseData.vnp_ResponseCode === '00') {
         return { success: true, data: responseData }
       } else {
-        return { success: false, error: responseData.vnp_Message }
+        return { success: false, error: responseData.vnp_Message ?? 'Query failed' }
       }
     } catch (error) {
-      console.error('VNPay query error:', error)
+      getLogger().error(
+        'VNPay query error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Query failed'
@@ -390,7 +449,7 @@ export class VNPayPayment {
         },
         body: JSON.stringify(requestBody)
       })
-      const responseData = await response.json()
+      const responseData = (await response.json()) as VNPayRefundResponse
       if (responseData.vnp_ResponseCode === '00') {
         // Update payment record with refund info
         const payment = await prisma.payment.findFirst({
@@ -409,10 +468,13 @@ export class VNPayPayment {
         }
         return { success: true, data: responseData }
       } else {
-        return { success: false, error: responseData.vnp_Message }
+        return { success: false, error: responseData.vnp_Message ?? 'Refund failed' }
       }
     } catch (error) {
-      console.error('VNPay refund error:', error)
+      getLogger().error(
+        'VNPay refund error',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Refund failed'
@@ -469,7 +531,9 @@ export class VNPayPayment {
         })
       }
     } catch (error) {
-      console.error('Failed to send confirmation email:', error)
+      getLogger().warn(
+        `Failed to send confirmation email: ${error instanceof Error ? error.message : String(error)}`
+      )
     }
   }
   // Send Discord notification
@@ -499,7 +563,9 @@ export class VNPayPayment {
         })
       }
     } catch (error) {
-      console.error('Failed to send Discord notification:', error)
+      getLogger().warn(
+        `Failed to send Discord notification: ${error instanceof Error ? error.message : String(error)}`
+      )
     }
   }
   // Trigger service delivery workflow
@@ -539,7 +605,9 @@ export class VNPayPayment {
         })
       }
     } catch (error) {
-      console.error('Failed to trigger service delivery:', error)
+      getLogger().warn(
+        `Failed to trigger service delivery: ${error instanceof Error ? error.message : String(error)}`
+      )
     }
   }
 }

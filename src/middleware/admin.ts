@@ -3,6 +3,8 @@ import { getToken } from 'next-auth/jwt'
 
 import { getLogger } from '@/lib/monitoring/logger'
 
+import type { Prisma } from '@prisma/client'
+
 // JWT Token interface
 interface AuthToken {
   userId: string
@@ -39,7 +41,7 @@ export async function withAdminAuth(
     }
 
     // User is authenticated and has admin role
-    return await handler(request, token as AuthToken)
+    return handler(request, token as AuthToken)
   } catch (error) {
     getLogger().error(
       'Admin auth middleware error',
@@ -68,7 +70,7 @@ export async function withSuperAdminAuth(
       return NextResponse.json({ error: 'Super admin access required' }, { status: 403 })
     }
 
-    return await handler(request, token as AuthToken)
+    return handler(request, token as AuthToken)
   } catch (error) {
     getLogger().error(
       'Super admin auth middleware error',
@@ -99,7 +101,7 @@ export async function withCustomerAuth(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
-    return await handler(request, token as AuthToken)
+    return handler(request, token as AuthToken)
   } catch (error) {
     getLogger().error(
       'Customer auth middleware error',
@@ -135,19 +137,21 @@ export async function checkResourceOwnership(
     const { prisma } = await import('@/lib/db')
 
     switch (resourceType) {
-      case 'booking':
+      case 'booking': {
         const booking = await prisma.booking.findUnique({
           where: { id: resourceId },
           select: { userId: true }
         })
         return booking?.userId === userId
+      }
 
-      case 'payment':
+      case 'payment': {
         const payment = await prisma.payment.findUnique({
           where: { id: resourceId },
           include: { booking: { select: { userId: true } } }
         })
         return payment?.booking?.userId === userId
+      }
 
       case 'user':
         return resourceId === userId
@@ -167,7 +171,12 @@ export async function checkResourceOwnership(
 
 // API endpoint protection wrapper
 export function protectApiRoute(requiredRole: 'admin' | 'superadmin' | 'customer' = 'customer') {
-  return function (handler: Function) {
+  return function (
+    handler: (
+      request: NextRequest & { user?: AuthToken },
+      context?: unknown
+    ) => Promise<NextResponse>
+  ) {
     return async function (request: NextRequest, context?: unknown) {
       const middlewareMap = {
         admin: withAdminAuth,
@@ -177,10 +186,10 @@ export function protectApiRoute(requiredRole: 'admin' | 'superadmin' | 'customer
 
       const middleware = middlewareMap[requiredRole]
 
-      return await middleware(request, async (req, user) => {
+      return middleware(request, (req, user) => {
         // Add user info to request context
         const requestWithUser = Object.assign(req, { user })
-        return await handler(requestWithUser, context)
+        return handler(requestWithUser, context)
       })
     }
   }
@@ -277,7 +286,7 @@ async function logSecurityEvent(event: string, data: Record<string, unknown>) {
         ip: data.ip as string | undefined,
         userAgent: data.userAgent as string | undefined,
         url: data.url as string | undefined,
-        data: data as any,
+        data: data as Prisma.InputJsonValue,
         timestamp: new Date()
       }
     })
@@ -311,7 +320,7 @@ export async function logAdminAction(
         action,
         resource,
         resourceId,
-        details: details as any,
+        details: details as Prisma.InputJsonValue,
         ip: details?.ip as string | undefined,
         userAgent: details?.userAgent as string | undefined,
         timestamp: new Date()

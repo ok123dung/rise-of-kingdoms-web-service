@@ -24,7 +24,7 @@ export class WebhookRetryService {
   }
 
   // Store webhook event for processing
-  async storeWebhookEvent(provider: string, eventType: string, eventId: string, payload: any) {
+  async storeWebhookEvent(provider: string, eventType: string, eventId: string, payload: Record<string, unknown>) {
     try {
       // Check if event already exists
       const existingEvent = await prisma.webhookEvent.findUnique({
@@ -42,7 +42,7 @@ export class WebhookRetryService {
           provider,
           eventType,
           eventId,
-          payload,
+          payload: JSON.parse(JSON.stringify(payload)),
           status: 'pending',
           attempts: 0
         }
@@ -133,15 +133,16 @@ export class WebhookRetryService {
   }
 
   // Handle specific webhook event
-  private async handleWebhookEvent(event: any): Promise<boolean> {
+  private async handleWebhookEvent(event: { provider: string; payload: unknown; id: string; eventId: string; attempts: number }): Promise<boolean> {
+    const eventWithPayload = { payload: event.payload as Record<string, unknown> }
     try {
       switch (event.provider) {
         case 'momo':
-          return await this.handleMoMoWebhook(event)
+          return await this.handleMoMoWebhook(eventWithPayload)
         case 'zalopay':
-          return await this.handleZaloPayWebhook(event)
+          return await this.handleZaloPayWebhook(eventWithPayload)
         case 'vnpay':
-          return await this.handleVNPayWebhook(event)
+          return await this.handleVNPayWebhook(eventWithPayload)
         default:
           getLogger().error('Unknown webhook provider', new Error('Unknown provider'), {
             provider: event.provider
@@ -155,12 +156,17 @@ export class WebhookRetryService {
   }
 
   // Handle MoMo webhook
-  private async handleMoMoWebhook(event: any): Promise<boolean> {
+  private async handleMoMoWebhook(event: { payload: Record<string, unknown> }): Promise<boolean> {
     try {
       const { payload } = event
 
       // Extract payment info
-      const { orderId, requestId, amount, resultCode, message, transId } = payload
+      const orderId = payload.orderId as string
+      const requestId = payload.requestId as string
+      const _amount = payload.amount as number
+      const resultCode = payload.resultCode as number
+      const message = payload.message as string
+      const transId = payload.transId as string
 
       if (resultCode !== 0) {
         getLogger().warn('MoMo payment failed', { orderId, message })
@@ -228,11 +234,14 @@ export class WebhookRetryService {
   }
 
   // Handle ZaloPay webhook
-  private async handleZaloPayWebhook(event: any): Promise<boolean> {
+  private async handleZaloPayWebhook(event: { payload: Record<string, unknown> }): Promise<boolean> {
     try {
       const { payload } = event
 
-      const { app_trans_id, zp_trans_id, status, amount } = payload
+      const app_trans_id = payload.app_trans_id as string
+      const zp_trans_id = payload.zp_trans_id as string
+      const status = payload.status as number
+      const _amount = payload.amount as number
 
       if (status !== 1) {
         getLogger().warn('ZaloPay payment failed', { app_trans_id })
@@ -297,11 +306,14 @@ export class WebhookRetryService {
   }
 
   // Handle VNPay webhook
-  private async handleVNPayWebhook(event: any): Promise<boolean> {
+  private async handleVNPayWebhook(event: { payload: Record<string, unknown> }): Promise<boolean> {
     try {
       const { payload } = event
 
-      const { vnp_TxnRef, vnp_TransactionNo, vnp_ResponseCode, vnp_Amount } = payload
+      const vnp_TxnRef = payload.vnp_TxnRef as string
+      const vnp_TransactionNo = payload.vnp_TransactionNo as string
+      const vnp_ResponseCode = payload.vnp_ResponseCode as string
+      const _vnp_Amount = payload.vnp_Amount as number
 
       if (vnp_ResponseCode !== '00') {
         getLogger().warn('VNPay payment failed', { vnp_TxnRef })
@@ -366,7 +378,7 @@ export class WebhookRetryService {
   }
 
   // Schedule retry for failed webhook
-  private async scheduleRetry(event: any) {
+  private async scheduleRetry(event: { id: string; eventId: string; attempts: number }) {
     const attempts = event.attempts + 1
     const delay = Math.min(
       this.config.initialDelay * Math.pow(this.config.backoffMultiplier, attempts - 1),

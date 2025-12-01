@@ -46,13 +46,13 @@ export default function ChangePasswordForm() {
         body: JSON.stringify(data)
       })
 
-      const result = await response.json()
+      const result = (await response.json()) as { success?: boolean; error?: string }
 
       if (result.success) {
         setSuccessMessage('Đổi mật khẩu thành công!')
         reset()
       } else {
-        setServerError(result.error || 'Đã có lỗi xảy ra')
+        setServerError(result.error ?? 'Đã có lỗi xảy ra')
       }
     } catch (error) {
       setServerError('Lỗi kết nối đến máy chủ')
@@ -85,10 +85,13 @@ export default function ChangePasswordForm() {
         </div>
       )}
 
-      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <form className="space-y-4" onSubmit={e => void handleSubmit(onSubmit)(e)}>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Mật khẩu hiện tại</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="currentPassword">
+            Mật khẩu hiện tại
+          </label>
           <input
+            id="currentPassword"
             type="password"
             {...register('currentPassword')}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
@@ -99,8 +102,11 @@ export default function ChangePasswordForm() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Mật khẩu mới</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="newPassword">
+            Mật khẩu mới
+          </label>
           <input
+            id="newPassword"
             type="password"
             {...register('newPassword')}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
@@ -111,10 +117,11 @@ export default function ChangePasswordForm() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="confirmPassword">
             Xác nhận mật khẩu mới
           </label>
           <input
+            id="confirmPassword"
             type="password"
             {...register('confirmPassword')}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"

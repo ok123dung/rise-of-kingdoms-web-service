@@ -91,7 +91,7 @@ export class UserService {
    * Get user by ID
    */
   async getUserById(userId: string): Promise<User | null> {
-    return await prisma.user.findUnique({
+    return prisma.user.findUnique({
       where: { id: userId }
     })
   }
@@ -100,7 +100,7 @@ export class UserService {
    * Get user by email
    */
   async getUserByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findUnique({
+    return prisma.user.findUnique({
       where: { email: email.toLowerCase() }
     })
   }
@@ -127,12 +127,12 @@ export class UserService {
     const updated = await prisma.user.update({
       where: { id: userId },
       data: {
-        fullName: data.fullName || user.fullName,
-        phone: data.phone || user.phone,
-        rokPlayerId: data.rokPlayerId || user.rokPlayerId,
-        rokKingdom: data.rokKingdom || user.rokKingdom,
-        rokPower: data.rokPower || user.rokPower,
-        discordUsername: data.discordUsername || user.discordUsername
+        fullName: data.fullName ?? user.fullName,
+        phone: data.phone ?? user.phone,
+        rokPlayerId: data.rokPlayerId ?? user.rokPlayerId,
+        rokKingdom: data.rokKingdom ?? user.rokKingdom,
+        rokPower: data.rokPower ?? user.rokPower,
+        discordUsername: data.discordUsername ?? user.discordUsername
       }
     })
 
@@ -212,7 +212,7 @@ export class UserService {
       totalBookings,
       activeBookings,
       completedBookings,
-      totalSpent: totalSpent._sum.amount?.toNumber() || 0,
+      totalSpent: totalSpent._sum.amount?.toNumber() ?? 0,
       lastBookingDate: lastBooking?.createdAt,
       memberSince: user?.createdAt
     }
@@ -228,7 +228,12 @@ export class UserService {
     limit?: number
     offset?: number
   }) {
-    const where: any = {}
+    interface UserSearchWhere {
+      OR?: Array<Record<string, unknown>>
+      status?: string
+    }
+
+    const where: UserSearchWhere = {}
 
     if (query.search) {
       where.OR = [
@@ -255,8 +260,8 @@ export class UserService {
           lastLogin: true
         },
         orderBy: { createdAt: 'desc' },
-        take: query.limit || 20,
-        skip: query.offset || 0
+        take: query.limit ?? 20,
+        skip: query.offset ?? 0
       }),
       prisma.user.count({ where })
     ])

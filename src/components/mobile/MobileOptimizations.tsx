@@ -5,7 +5,17 @@ import { useEffect, useState } from 'react'
 import { Phone, MessageCircle, Zap } from 'lucide-react'
 import Link from 'next/link'
 
-// Mobile-first sticky action bar
+/**
+ * MobileStickyActions - Thanh hành động dính ở bottom màn hình mobile
+ *
+ * Features:
+ * - Chỉ hiển thị sau khi scroll 300px
+ * - Ẩn trên desktop (md:hidden)
+ * - Touch targets >= 48px (WCAG 2.1 compliant)
+ * - Safe area padding cho iPhone notch
+ *
+ * @see https://www.w3.org/WAI/WCAG21/Understanding/target-size.html
+ */
 export function MobileStickyActions() {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -19,34 +29,54 @@ export function MobileStickyActions() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  if (!isVisible) return null
+  // Return empty div instead of null for SSR consistency
+  if (!isVisible) {
+    return <div aria-hidden="true" className="hidden" />
+  }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-3 shadow-lg md:hidden">
-      <div className="flex space-x-2">
+    <div
+      aria-label="Liên hệ nhanh"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white px-4 pb-[env(safe-area-inset-bottom,12px)] pt-3 shadow-lg md:hidden"
+      data-testid="mobile-sticky-actions"
+      role="navigation"
+    >
+      {/* Action buttons - min touch target 48px (WCAG compliant) */}
+      <div className="flex gap-2">
+        {/* Phone button */}
         <Link
-          className="flex flex-1 items-center justify-center space-x-2 rounded-lg bg-green-600 px-4 py-3 text-center font-semibold text-white transition-colors hover:bg-green-700"
+          aria-label="Gọi điện thoại ngay"
+          className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-3 py-3 text-center font-semibold text-white shadow-md transition-all active:scale-95"
           href="tel:+84123456789"
         >
-          <Phone className="h-4 w-4" />
-          <span>Gọi ngay</span>
+          <Phone className="h-5 w-5" />
+          <span className="text-sm">Gọi ngay</span>
         </Link>
+
+        {/* Discord button */}
         <Link
-          className="flex flex-1 items-center justify-center space-x-2 rounded-lg bg-primary-600 px-4 py-3 text-center font-semibold text-white transition-colors hover:bg-primary-700"
+          aria-label="Tham gia Discord"
+          className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-primary-600 px-3 py-3 text-center font-semibold text-white shadow-md transition-all active:scale-95"
           href="https://discord.gg/rokservices"
+          rel="noopener noreferrer"
           target="_blank"
         >
-          <MessageCircle className="h-4 w-4" />
-          <span>Discord</span>
+          <MessageCircle className="h-5 w-5" />
+          <span className="text-sm">Discord</span>
         </Link>
+
+        {/* Consultation button */}
         <Link
-          className="flex flex-1 items-center justify-center space-x-2 rounded-lg bg-accent-600 px-4 py-3 text-center font-semibold text-white transition-colors hover:bg-accent-700"
+          aria-label="Yêu cầu tư vấn"
+          className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-accent-600 px-3 py-3 text-center font-semibold text-white shadow-md transition-all active:scale-95"
           href="/contact"
         >
-          <Zap className="h-4 w-4" />
-          <span>Tư vấn</span>
+          <Zap className="h-5 w-5" />
+          <span className="text-sm">Tư vấn</span>
         </Link>
       </div>
+
+      {/* Response time indicator */}
       <p className="mt-2 text-center text-xs text-gray-500">⚡ Phản hồi trong 5 phút</p>
     </div>
   )
@@ -141,7 +171,7 @@ export function MobileTestimonial({
       <blockquote className="italic leading-relaxed text-gray-600">"{comment}"</blockquote>
 
       <div className="mt-4 flex text-yellow-400">
-        {[...Array(5)].map((_, i) => (
+        {Array.from({ length: 5 }).map((_, i) => (
           <svg key={i} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
             <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
           </svg>
@@ -204,9 +234,9 @@ export function useMobileOptimization() {
     // Detect slow connection
     const checkConnection = () => {
       if ('connection' in navigator) {
-        const { connection } = navigator as any
+        const { connection } = navigator as { connection?: { effectiveType?: string } }
         setIsSlowConnection(
-          connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g'
+          connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g'
         )
       }
     }

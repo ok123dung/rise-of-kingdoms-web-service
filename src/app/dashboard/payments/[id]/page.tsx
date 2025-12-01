@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import {
   ArrowLeftIcon,
@@ -24,7 +24,7 @@ interface PaymentDetail {
   paymentGateway: string
   gatewayTransactionId: string | null
   gatewayOrderId: string | null
-  gatewayResponse: any
+  gatewayResponse: Record<string, unknown> | null
   createdAt: string
   paidAt: string | null
   booking: {
@@ -44,6 +44,10 @@ interface PaymentDetail {
       email: string
     }
   }
+}
+
+interface PaymentDetailResponse {
+  payment: PaymentDetail
 }
 const statusConfig = {
   pending: {
@@ -81,16 +85,12 @@ export default function PaymentDetailPage() {
   const [payment, setPayment] = useState<PaymentDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
-  useEffect(() => {
-    if (session?.user && params.id) {
-      fetchPaymentDetail()
-    }
-  }, [session, params.id])
-  const fetchPaymentDetail = async () => {
+
+  const fetchPaymentDetail = useCallback(async () => {
     try {
-      const response = await fetch(`/api/user/payments/${params.id}`)
+      const response = await fetch(`/api/user/payments/${String(params.id)}`)
       if (response.ok) {
-        const data = await response.json()
+        const data = (await response.json()) as PaymentDetailResponse
         setPayment(data.payment)
       } else if (response.status === 404) {
         router.push('/dashboard/payments')
@@ -100,9 +100,15 @@ export default function PaymentDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id, router])
+
+  useEffect(() => {
+    if (session?.user && params.id) {
+      void fetchPaymentDetail()
+    }
+  }, [session, params.id, fetchPaymentDetail])
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
+    void navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

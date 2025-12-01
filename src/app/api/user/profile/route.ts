@@ -20,7 +20,7 @@ const updateProfileSchema = z.object({
   rokKingdom: z.string().optional().nullable()
 })
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = (await request.json()) as Record<string, unknown>
 
     // Validate input
     const validatedData = updateProfileSchema.parse(body)
@@ -79,15 +79,15 @@ export async function PUT(request: NextRequest) {
       },
       data: {
         ...(validatedData.fullName && { fullName: validatedData.fullName }),
-        ...(validatedData.phone !== undefined && { phone: validatedData.phone || null }),
+        ...(validatedData.phone !== undefined && { phone: validatedData.phone ?? null }),
         ...(validatedData.discordUsername !== undefined && {
-          discordUsername: validatedData.discordUsername || null
+          discordUsername: validatedData.discordUsername ?? null
         }),
         ...(validatedData.rokPlayerId !== undefined && {
-          rokPlayerId: validatedData.rokPlayerId || null
+          rokPlayerId: validatedData.rokPlayerId ?? null
         }),
         ...(validatedData.rokKingdom !== undefined && {
-          rokKingdom: validatedData.rokKingdom || null
+          rokKingdom: validatedData.rokKingdom ?? null
         })
       }
     })

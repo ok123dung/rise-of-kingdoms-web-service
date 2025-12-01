@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { prisma } from '@/lib/db'
 
 async function getRecentBookings() {
-  return await prisma.booking.findMany({
+  return prisma.booking.findMany({
     take: 10,
     orderBy: { createdAt: 'desc' },
     include: {
@@ -79,7 +79,7 @@ export default async function RecentBookings() {
         </div>
 
         <div className="flow-root">
-          <ul className="-my-5 divide-y divide-gray-200" role="list">
+          <ul className="-my-5 divide-y divide-gray-200">
             {bookings.length === 0 ? (
               <li className="py-4">
                 <div className="text-center text-gray-500">

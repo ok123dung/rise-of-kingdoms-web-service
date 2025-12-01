@@ -25,9 +25,9 @@ const ERROR_MESSAGES = {
 
 function AuthErrorContent() {
   const searchParams = useSearchParams()
-  const error = (searchParams.get('error') as keyof typeof ERROR_MESSAGES) || 'default'
+  const error = (searchParams.get('error') as keyof typeof ERROR_MESSAGES) ?? 'default'
 
-  const errorMessage = ERROR_MESSAGES[error] || ERROR_MESSAGES.default
+  const _errorMessage = ERROR_MESSAGES[error] ?? ERROR_MESSAGES.default
 
   const getErrorDetails = (errorType: string) => {
     switch (errorType) {

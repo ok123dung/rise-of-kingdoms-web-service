@@ -5,7 +5,37 @@ import { prisma } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
+interface DiagnosticCheck {
+  status?: string
+  configured?: boolean
+  hasPooling?: boolean
+  hasConnectionLimit?: boolean
+  provider?: string
+  connectionTimeMs?: number
+  isHealthy?: boolean
+  queryTimeMs?: number
+  error?: string
+  errorCode?: string
+  totalTables?: number
+  missingTables?: string[]
+  existingTables?: string[]
+  activeConnections?: number
+  note?: string
+  NEXTAUTH_URL?: boolean
+  NEXTAUTH_SECRET?: boolean
+  NODE_ENV?: string
+}
+
+interface DiagnosticsResult {
+  timestamp: string
+  environment: string
+  checks: Record<string, DiagnosticCheck>
+  overallStatus?: string
+  recommendations?: string[]
+  quickFixUrl?: string
+}
+
+export async function GET(_request: NextRequest) {
   const headersList = headers()
   const authHeader = headersList.get('authorization')
 
@@ -17,17 +47,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const diagnostics: any = {
+  const diagnostics: DiagnosticsResult = {
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'unknown',
+    environment: process.env.NODE_ENV ?? 'unknown',
     checks: {}
   }
 
   // 1. Check DATABASE_URL exists
   diagnostics.checks.databaseUrl = {
     configured: !!process.env.DATABASE_URL,
-    hasPooling: process.env.DATABASE_URL?.includes('pgbouncer=true') || false,
-    hasConnectionLimit: process.env.DATABASE_URL?.includes('connection_limit=') || false,
+    hasPooling: process.env.DATABASE_URL?.includes('pgbouncer=true') ?? false,
+    hasConnectionLimit: process.env.DATABASE_URL?.includes('connection_limit=') ?? false,
     provider: detectDatabaseProvider(process.env.DATABASE_URL || '')
   }
 
@@ -119,7 +149,7 @@ export async function GET(request: NextRequest) {
         connectionError instanceof Error ? connectionError.message : 'Unknown connection error',
       errorCode:
         connectionError instanceof Error && 'code' in connectionError
-          ? connectionError.code
+          ? String((connectionError as Error & { code?: unknown }).code)
           : undefined
     }
 
@@ -190,17 +220,22 @@ function getRecommendations(errorMessage: string): string[] {
   return recommendations
 }
 
-function determineOverallStatus(checks: any): string {
+function determineOverallStatus(checks: Record<string, DiagnosticCheck>): string {
   // Critical checks
   if (!checks.databaseUrl?.configured) return 'critical'
   if (checks.connection?.status !== 'connected') return 'unhealthy'
   if (checks.query?.status !== 'success') return 'unhealthy'
-  if (checks.schema?.status === 'incomplete' && checks.schema?.missingTables?.length > 0)
+  if (
+    checks.schema?.status === 'incomplete' &&
+    checks.schema?.missingTables &&
+    checks.schema.missingTables.length > 0
+  )
     return 'warning'
 
   // Performance checks
-  if (checks.connection?.connectionTimeMs > 10000) return 'degraded'
-  if (checks.query?.queryTimeMs > 2000) return 'degraded'
+  if (checks.connection?.connectionTimeMs && checks.connection.connectionTimeMs > 10000)
+    return 'degraded'
+  if (checks.query?.queryTimeMs && checks.query.queryTimeMs > 2000) return 'degraded'
 
   return 'healthy'
 }

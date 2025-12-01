@@ -11,9 +11,14 @@ const checkSchema = z.object({
   password: z.string()
 })
 
+interface Check2FARequest {
+  email: string
+  password: string
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = (await request.json()) as Check2FARequest
     const { email, password } = checkSchema.parse(body)
 
     // Find user

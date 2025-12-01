@@ -93,9 +93,9 @@ export default function AdminSidebar() {
           </Link>
         </div>
         <nav className="flex flex-1 flex-col">
-          <ul className="flex flex-1 flex-col gap-y-7" role="list">
+          <ul className="flex flex-1 flex-col gap-y-7">
             <li>
-              <ul className="-mx-2 space-y-1" role="list">
+              <ul className="-mx-2 space-y-1">
                 {navigation.map(item => {
                   const isActive = pathname === item.href
                   return (

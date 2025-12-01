@@ -5,6 +5,10 @@ import { authOptions, isAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
+interface RetryWebhookRequest {
+  eventId: string
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -24,10 +28,10 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = request.nextUrl
-    const status = searchParams.get('status') || undefined
-    const provider = searchParams.get('provider') || undefined
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const status = searchParams.get('status') ?? undefined
+    const provider = searchParams.get('provider') ?? undefined
+    const limit = parseInt(searchParams.get('limit') ?? '20')
+    const offset = parseInt(searchParams.get('offset') ?? '0')
 
     const where = {
       ...(status && { status }),
@@ -95,7 +99,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { eventId } = await request.json()
+    const body = (await request.json()) as RetryWebhookRequest
+    const { eventId } = body
 
     if (!eventId) {
       return NextResponse.json({ error: 'Event ID required' }, { status: 400 })

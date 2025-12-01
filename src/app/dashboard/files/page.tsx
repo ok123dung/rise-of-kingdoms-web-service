@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import { Folder, Grid, List } from 'lucide-react'
 
@@ -7,22 +7,35 @@ import { FileUpload, FileList } from '@/components/FileUpload'
 import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
 
+interface FileItem {
+  id: string
+  key: string
+  filename: string
+  size: number
+  mimeType: string
+  url: string
+  createdAt: string
+}
+
+interface FilesResponse {
+  success: boolean
+  files: FileItem[]
+}
+
 export default function FilesPage() {
-  const [files, setFiles] = useState<any[]>([])
+  const [files, setFiles] = useState<FileItem[]>([])
   const [loading, setLoading] = useState(true)
   const [currentFolder, setCurrentFolder] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const [uploadSuccess, setUploadSuccess] = useState(false)
-  useEffect(() => {
-    fetchFiles()
-  }, [currentFolder])
-  const fetchFiles = async () => {
+
+  const fetchFiles = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
       if (currentFolder) params.append('folder', currentFolder)
-      const response = await fetch(`/api/files?${params}`)
-      const data = await response.json()
+      const response = await fetch(`/api/files?${params.toString()}`)
+      const data = (await response.json()) as FilesResponse
       if (data.success) {
         setFiles(data.files)
       }
@@ -31,20 +44,26 @@ export default function FilesPage() {
     } finally {
       setLoading(false)
     }
-  }
-  const handleUpload = (file: any) => {
+  }, [currentFolder])
+
+  useEffect(() => {
+    void fetchFiles()
+  }, [fetchFiles])
+
+  const handleUpload = () => {
     setUploadSuccess(true)
     setTimeout(() => setUploadSuccess(false), 3000)
-    fetchFiles() // Refresh file list
+    void fetchFiles() // Refresh file list
   }
   const handleDelete = async (key: string) => {
-    if (!confirm('Are you sure you want to delete this file?')) return
+    // eslint-disable-next-line no-alert
+    if (!window.confirm('Are you sure you want to delete this file?')) return
     try {
       const response = await fetch(`/api/files/${encodeURIComponent(key)}`, {
         method: 'DELETE'
       })
       if (response.ok) {
-        fetchFiles() // Refresh file list
+        void fetchFiles() // Refresh file list
       }
     } catch (error) {
       console.error('Error deleting file:', error)
@@ -130,7 +149,11 @@ export default function FilesPage() {
               )}
               {/* File List */}
               <div className="p-6">
-                <FileList files={files} loading={loading} onDelete={handleDelete} />
+                <FileList
+                  files={files}
+                  loading={loading}
+                  onDelete={key => void handleDelete(key)}
+                />
               </div>
             </div>
           </div>

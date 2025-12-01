@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -111,7 +112,7 @@ async function main() {
         create: {
           ...tierData,
           serviceId: service.id,
-          features: tierData.features, // Explicitly map features to Json
+          features: tierData.features // Explicitly map features to Json
         }
       })
     }
@@ -120,11 +121,11 @@ async function main() {
   console.log('Seeding finished.')
 }
 
-main()
-  .catch((e) => {
+void main()
+  .catch(e => {
     console.error(e)
     process.exit(1)
   })
-  .finally(async () => {
-    await prisma.$disconnect()
+  .finally(() => {
+    void prisma.$disconnect()
   })

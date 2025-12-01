@@ -1,13 +1,18 @@
 // Edge-compatible logger for middleware
 export interface EdgeLogger {
-  info: (message: string, context?: any) => void
-  error: (message: string, error?: Error | unknown, context?: any) => void
-  warn: (message: string, context?: any) => void
-  debug: (message: string, context?: any) => void
+  info: (message: string, context?: Record<string, unknown>) => void
+  error: (message: string, error?: Error, context?: Record<string, unknown>) => void
+  warn: (message: string, context?: Record<string, unknown>) => void
+  debug: (message: string, context?: Record<string, unknown>) => void
 }
 
 export function getEdgeLogger(): EdgeLogger {
-  const formatMessage = (level: string, message: string, context?: any, error?: any): string => {
+  const formatMessage = (
+    level: string,
+    message: string,
+    context?: Record<string, unknown>,
+    error?: unknown
+  ): string => {
     const timestamp = new Date().toISOString()
     let log = `[${timestamp}] ${level.toUpperCase()}: ${message}`
 
@@ -23,20 +28,24 @@ export function getEdgeLogger(): EdgeLogger {
   }
 
   return {
-    info: (message: string, context?: any) => {
+    info: (message: string, context?: Record<string, unknown>) => {
+      // eslint-disable-next-line no-console
       console.log(formatMessage('info', message, context))
     },
 
-    error: (message: string, error?: Error | unknown, context?: any) => {
+    error: (message: string, error?: Error, context?: Record<string, unknown>) => {
+      // eslint-disable-next-line no-console
       console.error(formatMessage('error', message, context, error))
     },
 
-    warn: (message: string, context?: any) => {
+    warn: (message: string, context?: Record<string, unknown>) => {
+      // eslint-disable-next-line no-console
       console.warn(formatMessage('warn', message, context))
     },
 
-    debug: (message: string, context?: any) => {
+    debug: (message: string, context?: Record<string, unknown>) => {
       if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
         console.debug(formatMessage('debug', message, context))
       }
     }

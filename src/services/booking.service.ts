@@ -20,7 +20,7 @@ export class BookingService {
     scheduledDate?: Date
     notes?: string
   }): Promise<Booking> {
-    return await prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async tx => {
       // Validate service tier exists
       const serviceTier = await this.getServiceTier(data.serviceTierId)
 
@@ -118,7 +118,12 @@ export class BookingService {
       offset?: number
     }
   ) {
-    const where: any = { userId }
+    interface BookingWhereInput {
+      userId: string
+      status?: string
+    }
+
+    const where: BookingWhereInput = { userId }
 
     if (options?.status) {
       where.status = options.status
@@ -134,8 +139,8 @@ export class BookingService {
           payments: true
         },
         orderBy: { createdAt: 'desc' },
-        take: options?.limit || 10,
-        skip: options?.offset || 0
+        take: options?.limit ?? 10,
+        skip: options?.offset ?? 0
       }),
       prisma.booking.count({ where })
     ])
@@ -188,7 +193,9 @@ export class BookingService {
     const booking = await this.getBookingById(bookingId, userId)
 
     // Check if booking can be cancelled
-    if ([BookingStatus.COMPLETED, BookingStatus.CANCELLED].includes(booking.status as BookingStatus)) {
+    if (
+      [BookingStatus.COMPLETED, BookingStatus.CANCELLED].includes(booking.status as BookingStatus)
+    ) {
       throw new ValidationError('Booking cannot be cancelled')
     }
 
@@ -237,7 +244,7 @@ export class BookingService {
 
   // checkExistingBooking method is removed as it's now integrated into the transaction within createBooking
 
-  private async generateBookingNumber(): Promise<string> {
+  private generateBookingNumber(): string {
     const date = new Date()
     const year = date.getFullYear().toString().slice(-2)
     const month = (date.getMonth() + 1).toString().padStart(2, '0')

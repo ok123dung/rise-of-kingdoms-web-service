@@ -1,4 +1,11 @@
 // Database model type definitions based on Prisma schema
+import type { Decimal, JsonValue } from '@prisma/client/runtime/library'
+
+// Utility type for Prisma Decimal values
+export type DecimalLike = number | Decimal | { toNumber: () => number }
+
+// Re-export JsonValue from Prisma for consistency
+export type { JsonValue }
 
 export interface User {
   id: string
@@ -23,7 +30,7 @@ export interface Service {
   slug: string
   description?: string | null
   shortDescription?: string | null
-  basePrice: number | { toNumber: () => number }
+  basePrice: DecimalLike
   currency: string
 }
 
@@ -32,10 +39,10 @@ export interface ServiceTier {
   serviceId: string
   name: string
   slug: string
-  price: number | { toNumber: () => number }
-  originalPrice?: number | { toNumber: () => number } | null
-  features: string[] | any
-  limitations?: string[] | any | null
+  price: DecimalLike
+  originalPrice?: DecimalLike | null
+  features: JsonValue
+  limitations?: JsonValue | null
   service: Service
 }
 
@@ -46,11 +53,11 @@ export interface Booking {
   serviceTierId: string
   status: string
   paymentStatus: string
-  totalAmount: number | { toNumber: () => number }
-  discountAmount: number | { toNumber: () => number }
-  finalAmount: number | { toNumber: () => number }
+  totalAmount: DecimalLike
+  discountAmount: DecimalLike
+  finalAmount: DecimalLike
   currency: string
-  bookingDetails?: any | null
+  bookingDetails?: JsonValue | null
   customerRequirements?: string | null
   startDate?: Date | null
   endDate?: Date | null
@@ -69,7 +76,7 @@ export interface Payment {
   id: string
   bookingId: string
   paymentNumber: string
-  amount: number | { toNumber: () => number }
+  amount: DecimalLike
   currency: string
   paymentMethod: string
   paymentGateway: string
@@ -77,10 +84,10 @@ export interface Payment {
   gatewayOrderId?: string | null
   status: string
   failureReason?: string | null
-  gatewayResponse?: any | null
+  gatewayResponse?: JsonValue | null
   paidAt?: Date | null
   refundedAt?: Date | null
-  refundAmount: number | { toNumber: () => number }
+  refundAmount: DecimalLike
   refundReason?: string | null
   createdAt: Date
   updatedAt: Date
@@ -98,7 +105,7 @@ export interface ServiceTask {
   assignedTo?: string | null
   dueDate?: Date | null
   completedAt?: Date | null
-  metadata?: any | null
+  metadata?: JsonValue | null
   createdAt: Date
   updatedAt: Date
 }
@@ -112,4 +119,22 @@ export interface BookingWithRelations extends Booking {
 
 export interface PaymentWithBooking extends Payment {
   booking: BookingWithRelations
+}
+
+// Utility function to convert Decimal to number
+export function toNumber(value: DecimalLike | null | undefined): number {
+  if (value === null || value === undefined) return 0
+  if (typeof value === 'number') return value
+  if (typeof value === 'object' && 'toNumber' in value) return value.toNumber()
+  return 0
+}
+
+// Type guards for JSON fields
+export function isStringArray(value: JsonValue | null | undefined): value is string[] {
+  return Array.isArray(value) && value.every(item => typeof item === 'string')
+}
+
+export function parseFeatures(value: JsonValue | null | undefined): string[] {
+  if (isStringArray(value)) return value
+  return []
 }

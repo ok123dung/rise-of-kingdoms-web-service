@@ -48,6 +48,25 @@ interface ZaloPayRefundStatusResponse {
     status: number
   }>
 }
+
+export interface ZaloPayCallbackData {
+  data: string
+  mac: string
+}
+
+// Parsed callback data interface
+interface ZaloPayParsedData {
+  app_trans_id: string
+  zp_trans_id: string
+  amount: number
+  embed_data: string
+}
+
+// Embed data interface
+interface ZaloPayEmbedData {
+  bookingId: string
+}
+
 export class ZaloPayPayment {
   private appId: string
   private key1: string
@@ -136,7 +155,7 @@ export class ZaloPayPayment {
           Object.entries(requestBody).map(([k, v]) => [k, String(v)])
         ).toString()
       })
-      const responseData: ZaloPayResponse = await response.json()
+      const responseData = (await response.json()) as ZaloPayResponse
       if (responseData.return_code === 1) {
         // Tạo payment record
         await prisma.payment.create({
@@ -155,14 +174,14 @@ export class ZaloPayPayment {
           data: responseData
         }
       } else {
-        console.error('ZaloPay order creation failed:', responseData)
+        getLogger().error('ZaloPay order creation failed', undefined, { returnCode: String(responseData.return_code), returnMessage: responseData.return_message })
         return {
           success: false,
           error: responseData.return_message || 'Order creation failed'
         }
       }
     } catch (error) {
-      console.error('ZaloPay payment error:', error)
+      getLogger().error('ZaloPay payment error', error as Error)
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -170,7 +189,7 @@ export class ZaloPayPayment {
     }
   }
   // Xử lý callback từ ZaloPay
-  async handleCallback(callbackData: { data: string; mac: string }): Promise<{
+  async handleCallback(callbackData: ZaloPayCallbackData): Promise<{
     success: boolean
     message: string
   }> {
@@ -179,21 +198,21 @@ export class ZaloPayPayment {
       // Verify MAC
       const expectedMac = crypto.createHmac('sha256', this.key2).update(dataStr).digest('hex')
       if (receivedMac !== expectedMac) {
-        console.error('ZaloPay callback MAC verification failed')
+        getLogger().error('ZaloPay callback MAC verification failed')
         return { success: false, message: 'Invalid MAC' }
       }
-      const data = JSON.parse(dataStr)
+      const data = JSON.parse(dataStr) as ZaloPayParsedData
       const { app_trans_id, zp_trans_id, amount, embed_data } = data
       // Parse embed data
-      const embedDataObj = JSON.parse(embed_data)
-      const { bookingId } = embedDataObj
+      const embedDataObj = JSON.parse(embed_data) as ZaloPayEmbedData
+      const { bookingId: _bookingId } = embedDataObj
       // Tìm payment record
       // Tìm payment record
       const payment = await prisma.payment.findFirst({
         where: { gatewayTransactionId: app_trans_id }
       })
       if (!payment) {
-        console.error('Payment not found for app_trans_id:', app_trans_id)
+        getLogger().error('Payment not found for app_trans_id', undefined, { app_trans_id })
         return { success: false, message: 'Payment not found' }
       }
       // Cập nhật payment status
@@ -204,9 +223,9 @@ export class ZaloPayPayment {
           updatedAt: new Date(),
           paidAt: new Date(),
           gatewayResponse: {
+            ...data,
             zpTransId: zp_trans_id,
-            amount,
-            ...data
+            callbackAmount: amount
           }
         }
       })
@@ -233,7 +252,7 @@ export class ZaloPayPayment {
       getLogger().info('ZaloPay payment completed', { app_trans_id, zp_trans_id, amount })
       return { success: true, message: 'Payment processed successfully' }
     } catch (error) {
-      console.error('ZaloPay callback processing error:', error)
+      getLogger().error('ZaloPay callback processing error', error as Error)
       return { success: false, message: 'Callback processing failed' }
     }
   }
@@ -258,14 +277,14 @@ export class ZaloPayPayment {
         },
         body: new URLSearchParams(requestBody).toString()
       })
-      const responseData = await response.json()
+      const responseData = (await response.json()) as ZaloPayQueryResponse
       if (responseData.return_code === 1) {
         return { success: true, data: responseData }
       } else {
-        return { success: false, error: responseData.return_message }
+        return { success: false, error: responseData.return_message ?? 'Query failed' }
       }
     } catch (error) {
-      console.error('ZaloPay query error:', error)
+      getLogger().error('ZaloPay query error', error as Error)
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Query failed'
@@ -305,7 +324,7 @@ export class ZaloPayPayment {
           Object.entries(requestBody).map(([k, v]) => [k, String(v)])
         ).toString()
       })
-      const responseData = await response.json()
+      const responseData = (await response.json()) as ZaloPayRefundResponse
       if (responseData.return_code === 1) {
         // Update payment record with refund info
         const payment = await prisma.payment.findFirst({
@@ -329,10 +348,10 @@ export class ZaloPayPayment {
         }
         return { success: true, data: responseData }
       } else {
-        return { success: false, error: responseData.return_message }
+        return { success: false, error: responseData.return_message ?? 'Refund failed' }
       }
     } catch (error) {
-      console.error('ZaloPay refund error:', error)
+      getLogger().error('ZaloPay refund error', error as Error)
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Refund failed'
@@ -364,14 +383,14 @@ export class ZaloPayPayment {
           Object.entries(requestBody).map(([k, v]) => [k, String(v)])
         ).toString()
       })
-      const responseData = await response.json()
+      const responseData = (await response.json()) as ZaloPayRefundStatusResponse
       if (responseData.return_code === 1) {
         return { success: true, data: responseData }
       } else {
-        return { success: false, error: responseData.return_message }
+        return { success: false, error: responseData.return_message ?? 'Refund status query failed' }
       }
     } catch (error) {
-      console.error('ZaloPay refund status error:', error)
+      getLogger().error('ZaloPay refund status error', error as Error)
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Query failed'
@@ -410,7 +429,7 @@ export class ZaloPayPayment {
         })
       }
     } catch (error) {
-      console.error('Failed to send confirmation email:', error)
+      getLogger().error('Failed to send confirmation email', error as Error)
     }
   }
   // Send Discord notification
@@ -440,7 +459,7 @@ export class ZaloPayPayment {
         })
       }
     } catch (error) {
-      console.error('Failed to send Discord notification:', error)
+      getLogger().error('Failed to send Discord notification', error as Error)
     }
   }
   // Trigger service delivery workflow
@@ -480,7 +499,7 @@ export class ZaloPayPayment {
         })
       }
     } catch (error) {
-      console.error('Failed to trigger service delivery:', error)
+      getLogger().error('Failed to trigger service delivery', error as Error)
     }
   }
 }

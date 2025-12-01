@@ -63,7 +63,7 @@ export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: M
           <button
             className="rounded-lg bg-pink-500 px-6 py-3 text-white hover:bg-pink-600 disabled:cursor-not-allowed disabled:bg-gray-400"
             disabled={isProcessing}
-            onClick={handlePayment}
+            onClick={() => void handlePayment()}
           >
             {isProcessing ? 'Đang tạo QR...' : 'Tạo mã QR MoMo'}
           </button>

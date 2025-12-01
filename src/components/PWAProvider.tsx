@@ -7,10 +7,10 @@ import { swManager, useServiceWorker } from '@/lib/sw-registration'
 
 export default function PWAProvider({ children }: { children: React.ReactNode }) {
   const {
-    isInstallAvailable,
-    isUpdateAvailable,
-    installApp,
-    updateApp,
+    isInstallAvailable: _isInstallAvailable,
+    isUpdateAvailable: _isUpdateAvailable,
+    installApp: _installApp,
+    updateApp: _updateApp,
     requestNotificationPermission
   } = useServiceWorker()
 
@@ -40,7 +40,7 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
         await requestNotificationPermission()
       }
 
-      requestPermissions()
+      void requestPermissions()
     }
 
     // Handle offline/online events
@@ -49,7 +49,7 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
       hideOfflineIndicator()
 
       // Process any queued actions
-      swManager?.queueOfflineAction('sync', { timestamp: Date.now() })
+      void swManager?.queueOfflineAction('sync', { timestamp: Date.now() })
     }
 
     const handleOffline = () => {

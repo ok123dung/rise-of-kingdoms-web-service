@@ -1,7 +1,7 @@
 import { type Page, expect } from '@playwright/test'
 
 export class TestHelpers {
-  constructor(private page: Page) { }
+  constructor(private page: Page) {}
 
   /**
    * Wait for page to be fully loaded including network requests
@@ -59,8 +59,8 @@ export class TestHelpers {
     expect(unlabeledInputs.length).toBe(0)
 
     // Check for heading hierarchy
-    const headings = await this.page.$$eval('h1, h2, h3, h4, h5, h6', headings =>
-      headings.map(h => parseInt(h.tagName.substring(1)))
+    const headings = await this.page.$$eval('h1, h2, h3, h4, h5, h6', els =>
+      els.map(h => parseInt(h.tagName.substring(1), 10))
     )
     if (headings.length > 0) {
       expect(headings[0]).toBe(1) // First heading should be h1
@@ -231,7 +231,7 @@ export const TestData = {
  * Page Object Models
  */
 export class HomePage {
-  constructor(private page: Page) { }
+  constructor(private page: Page) {}
 
   async goto() {
     await this.page.goto('/')
@@ -248,7 +248,7 @@ export class HomePage {
 }
 
 export class AuthPage {
-  constructor(private page: Page) { }
+  constructor(private page: Page) {}
 
   async gotoSignIn() {
     await this.page.goto('/auth/signin')
@@ -275,7 +275,7 @@ export class AuthPage {
 }
 
 export class ServicesPage {
-  constructor(private page: Page) { }
+  constructor(private page: Page) {}
 
   async goto() {
     await this.page.goto('/services')

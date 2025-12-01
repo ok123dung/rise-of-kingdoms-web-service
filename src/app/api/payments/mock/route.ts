@@ -4,9 +4,15 @@ import { prisma } from '@/lib/db'
 import { sendOrderConfirmationEmail } from '@/lib/email'
 import { getLogger } from '@/lib/monitoring/logger'
 
+interface MockPaymentBody {
+  bookingId: string
+  amount: number
+  method: string
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = (await request.json()) as MockPaymentBody
     const { bookingId, amount, method } = body
 
     // Simulate processing delay
@@ -60,7 +66,12 @@ export async function POST(request: NextRequest) {
         amount: Number(amount),
         currency: 'VND',
         paymentMethod: method
-      }).catch(err => getLogger().error('Failed to send order confirmation email', err))
+      }).catch((err: unknown) =>
+        getLogger().error(
+          'Failed to send order confirmation email',
+          err instanceof Error ? err : new Error(String(err))
+        )
+      )
     }
 
     getLogger().info(`Mock payment successful for booking ${bookingId}`, {

@@ -74,7 +74,7 @@ function ResetPasswordForm() {
         body: JSON.stringify({ token, password })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as { error?: string }
 
       if (response.ok) {
         setSuccess(true)
@@ -82,9 +82,11 @@ function ResetPasswordForm() {
           router.push('/auth/signin')
         }, 3000)
       } else {
-        setError(data.error || 'Có lỗi xảy ra')
+        setError(data.error ?? 'Có lỗi xảy ra')
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      console.error('Reset password error:', message)
       setError('Không thể kết nối đến server')
     } finally {
       setIsSubmitting(false)
@@ -138,7 +140,7 @@ function ResetPasswordForm() {
           )}
 
           {token && (
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-6" onSubmit={e => void handleSubmit(e)}>
               {error && (
                 <div className="rounded-lg bg-red-50 p-4">
                   <p className="text-sm text-red-800">{error}</p>
@@ -147,12 +149,15 @@ function ResetPasswordForm() {
 
               {/* New Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Mật khẩu mới</label>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="new-password">
+                  Mật khẩu mới
+                </label>
                 <div className="relative mt-1">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <input
                     required
                     className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    id="new-password"
                     placeholder="Nhập mật khẩu mới"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -210,12 +215,18 @@ function ResetPasswordForm() {
 
               {/* Confirm Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
+                <label
+                  className="block text-sm font-medium text-gray-700"
+                  htmlFor="confirm-password"
+                >
+                  Xác nhận mật khẩu
+                </label>
                 <div className="relative mt-1">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <input
                     required
                     className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    id="confirm-password"
                     placeholder="Nhập lại mật khẩu mới"
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}

@@ -18,7 +18,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
 
-    const whereClause: any = {
+    interface PaymentWhereClause {
+      booking: {
+        userId: string
+      }
+      status?: string
+    }
+
+    const whereClause: PaymentWhereClause = {
       booking: {
         userId: session.user.id
       }

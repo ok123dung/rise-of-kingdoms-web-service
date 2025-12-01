@@ -24,13 +24,13 @@ export async function GET(request: NextRequest) {
 
     if (result.success) {
       return NextResponse.json({
-        RspCode: result.responseCode || '00',
+        RspCode: result.responseCode ?? '00',
         Message: result.message
       })
     } else {
       getLogger().error('VNPay IPN processing failed', undefined, { message: result.message })
       return NextResponse.json({
-        RspCode: result.responseCode || '99',
+        RspCode: result.responseCode ?? '99',
         Message: result.message
       })
     }

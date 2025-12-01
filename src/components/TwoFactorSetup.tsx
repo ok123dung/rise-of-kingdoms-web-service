@@ -31,15 +31,21 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
         method: 'POST'
       })
 
-      const data = await response.json()
+      interface SetupResponse {
+        qrCode?: string
+        secret?: string
+        backupCodes?: string[]
+        error?: string
+      }
+      const data = (await response.json()) as SetupResponse
 
       if (response.ok) {
-        setQrCode(data.qrCode)
-        setSecret(data.secret)
-        setBackupCodes(data.backupCodes)
+        setQrCode(data.qrCode ?? '')
+        setSecret(data.secret ?? '')
+        setBackupCodes(data.backupCodes ?? [])
         setStep('setup')
       } else {
-        setError(data.error || 'Failed to start 2FA setup')
+        setError(data.error ?? 'Failed to start 2FA setup')
       }
     } catch (err) {
       setError('Network error. Please try again.')
@@ -65,12 +71,16 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
         body: JSON.stringify({ token: verificationCode })
       })
 
-      const data = await response.json()
+      interface VerifyResponse {
+        verified?: boolean
+        message?: string
+      }
+      const data = (await response.json()) as VerifyResponse
 
       if (response.ok && data.verified) {
         setStep('backup')
       } else {
-        setError(data.message || 'Invalid verification code')
+        setError(data.message ?? 'Invalid verification code')
       }
     } catch (err) {
       setError('Network error. Please try again.')
@@ -81,7 +91,7 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
 
   // Copy backup code
   const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code)
+    void navigator.clipboard.writeText(code)
     setCopiedCode(code)
     setTimeout(() => setCopiedCode(null), 2000)
   }
@@ -89,7 +99,7 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
   // Copy all backup codes
   const handleCopyAllCodes = () => {
     const allCodes = backupCodes.join('\n')
-    navigator.clipboard.writeText(allCodes)
+    void navigator.clipboard.writeText(allCodes)
     setCopiedCode('all')
     setTimeout(() => setCopiedCode(null), 2000)
   }
@@ -149,7 +159,7 @@ If you lose access to your authenticator app, you can use one of these codes to 
             <button
               className="flex-1 rounded-lg bg-blue-600 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
               disabled={loading}
-              onClick={handleStartSetup}
+              onClick={() => void handleStartSetup()}
             >
               {loading ? 'Đang xử lý...' : 'Bắt Đầu Cài Đặt'}
             </button>
@@ -195,11 +205,12 @@ If you lose access to your authenticator app, you can use one of these codes to 
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium">
+            <label className="mb-2 block text-sm font-medium" htmlFor="verification-code">
               Nhập mã xác thực 6 số từ ứng dụng
             </label>
             <input
               className="w-full rounded-lg border px-4 py-3 text-center text-2xl tracking-widest"
+              id="verification-code"
               maxLength={6}
               placeholder="000000"
               type="text"
@@ -213,7 +224,7 @@ If you lose access to your authenticator app, you can use one of these codes to 
           <button
             className="w-full rounded-lg bg-blue-600 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
             disabled={loading || verificationCode.length !== 6}
-            onClick={handleVerify}
+            onClick={() => void handleVerify()}
           >
             {loading ? 'Đang xác thực...' : 'Xác Thực & Kích Hoạt'}
           </button>

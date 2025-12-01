@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const folder = (formData.get('folder') as string) || 'general'
+    const folder = (formData.get('folder') as string | null) ?? 'general'
     const isPublic = formData.get('isPublic') === 'true'
 
     if (!file) {
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error || 'Upload failed' }, { status: 400 })
+      return NextResponse.json({ error: result.error ?? 'Upload failed' }, { status: 400 })
     }
 
     return NextResponse.json({
@@ -78,8 +78,8 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = request.nextUrl
     const filename = searchParams.get('filename')
-    const folder = searchParams.get('folder') || 'general'
-    const mimeType = searchParams.get('mimeType') || 'application/octet-stream'
+    const folder = searchParams.get('folder') ?? 'general'
+    const mimeType = searchParams.get('mimeType') ?? 'application/octet-stream'
 
     if (!filename) {
       return NextResponse.json({ error: 'Filename is required' }, { status: 400 })

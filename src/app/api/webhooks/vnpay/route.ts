@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     const signData = new URLSearchParams(sortedParams).toString()
 
     // Verify signature
-    const hmac = crypto.createHmac('sha512', process.env.VNPAY_HASH_SECRET || '')
+    const hmac = crypto.createHmac('sha512', process.env.VNPAY_HASH_SECRET ?? '')
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex')
 
     if (secureHash !== signed) {

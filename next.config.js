@@ -13,6 +13,12 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: false,
+  // Tree-shaking for lucide-react icons - reduces bundle by 50-100KB
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}'
+    }
+  },
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client'],
     instrumentationHook: true

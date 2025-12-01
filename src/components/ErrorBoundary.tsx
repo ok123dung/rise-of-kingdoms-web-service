@@ -190,18 +190,18 @@ export class ErrorBoundary extends Component<Props, State> {
 
 // Hook version for functional components
 export function withErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
+  WrappedComponentType: React.ComponentType<P>,
   errorBoundaryProps?: Omit<Props, 'children'>
 ) {
-  const WrappedComponent = (props: P) => (
+  const WithErrorBoundaryComponent = (props: P) => (
     <ErrorBoundary {...errorBoundaryProps}>
-      <Component {...props} />
+      <WrappedComponentType {...props} />
     </ErrorBoundary>
   )
 
-  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`
+  WithErrorBoundaryComponent.displayName = `withErrorBoundary(${WrappedComponentType.displayName ?? WrappedComponentType.name})`
 
-  return WrappedComponent
+  return WithErrorBoundaryComponent
 }
 
 // Specific error boundary for RSC hydration issues
@@ -267,12 +267,13 @@ export class AsyncErrorBoundary extends Component<Props, State> {
   }
 
   handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-    const error = new Error(event.reason?.message || 'Unhandled promise rejection')
+    const reason = event.reason as { message?: string } | undefined
+    const error = new Error(reason?.message ?? 'Unhandled promise rejection')
     const errorId = Math.random().toString(36).substring(7)
 
     // Log the error
     getLogger().error('Unhandled promise rejection', error, {
-      reason: event.reason,
+      reason: String(event.reason),
       errorId,
       url: window.location.href
     })
@@ -339,9 +340,9 @@ export class AsyncErrorBoundary extends Component<Props, State> {
 
 // Hook for handling errors in functional components
 export function useErrorHandler() {
-  return (error: Error, errorInfo?: any) => {
+  return (error: Error, errorInfo?: { componentStack?: string }) => {
     logError(error, {
-      componentStack: errorInfo.componentStack ?? undefined
+      componentStack: errorInfo?.componentStack ?? undefined
     })
 
     // In development, re-throw to trigger error boundary

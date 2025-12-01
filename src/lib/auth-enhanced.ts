@@ -67,7 +67,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
           const { email, password, fingerprint } = loginSchema.parse(credentials)
 
           // Check account lockout first
-          const lockoutStatus = await accountLockout.checkLockout(email)
+          const lockoutStatus = accountLockout.checkLockout(email)
           if (lockoutStatus.isLocked) {
             getLogger().logSecurityEvent('login_attempt_while_locked', {
               email,
@@ -86,22 +86,26 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
           if (!user) {
             // Record failed attempt
-            await accountLockout.recordFailedAttempt(email, {
+            accountLockout.recordFailedAttempt(email, {
               reason: 'user_not_found',
-              ip: req?.headers?.['x-forwarded-for'] || req?.headers?.['x-real-ip']
+              ip: (req?.headers?.['x-forwarded-for'] ?? req?.headers?.['x-real-ip']) as
+                | string
+                | undefined
             })
             return null
           }
 
           // Verify password with timing attack protection
-          const isValidPassword = await bcrypt.compare(password, user.password || '')
+          const isValidPassword = await bcrypt.compare(password, user.password ?? '')
 
           if (!isValidPassword) {
             // Record failed attempt
-            const lockResult = await accountLockout.recordFailedAttempt(email, {
+            const lockResult = accountLockout.recordFailedAttempt(email, {
               reason: 'invalid_password',
               userId: user.id,
-              ip: req?.headers?.['x-forwarded-for'] || req?.headers?.['x-real-ip']
+              ip: (req?.headers?.['x-forwarded-for'] ?? req?.headers?.['x-real-ip']) as
+                | string
+                | undefined
             })
 
             getLogger().logSecurityEvent('login_failed', {
@@ -115,7 +119,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
           }
 
           // Clear failed attempts on successful login
-          await accountLockout.clearFailedAttempts(email)
+          accountLockout.clearFailedAttempts(email)
 
           // Update user login info
           await prisma.user.update({
@@ -129,7 +133,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
           getLogger().logSecurityEvent('login_success', {
             userId: user.id,
             email: user.email,
-            role: user.staffProfile?.role || 'customer',
+            role: user.staffProfile?.role ?? 'customer',
             fingerprint
           })
 
@@ -138,7 +142,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
             email: user.email,
             name: user.fullName,
             image: null,
-            role: user.staffProfile?.role || 'customer'
+            role: user.staffProfile?.role ?? 'customer'
           }
         } catch (error) {
           getLogger().error('Auth error', error as Error)
@@ -176,7 +180,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user, account, trigger }) {
+    async jwt({ token, user, trigger }) {
       // Initial sign in
       if (user) {
         token.userId = user.id
@@ -187,26 +191,26 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
       // Token rotation on role change or periodic rotation
       if (trigger === 'update' || sessionTokenManager.shouldRotate(token.tokenIssuedAt)) {
-        const rotated = await sessionTokenManager.rotateToken(token.sessionId, token.userId)
+        const rotated = sessionTokenManager.rotateToken(token.sessionId, token.userId)
 
         token.sessionId = rotated.sessionId
         token.tokenIssuedAt = Date.now()
 
         // Re-fetch user role in case it changed
-        const user = await prisma.user.findUnique({
+        const currentUser = await prisma.user.findUnique({
           where: { id: token.userId },
           include: { staffProfile: true }
         })
 
-        if (user) {
-          token.role = user.staffProfile?.role || 'customer'
+        if (currentUser) {
+          token.role = currentUser.staffProfile?.role || 'customer'
         }
       }
 
       return token
     },
 
-    async session({ session, token, user }) {
+    session({ session, token }) {
       if (token) {
         session.user.id = token.userId
         session.user.role = token.role
@@ -222,16 +226,21 @@ export const authOptionsEnhanced: NextAuthOptions = {
       return session
     },
 
-    async signIn({ user, account, profile }) {
+    async signIn({ account, profile }) {
       // Additional security checks during sign in
       if (account?.provider === 'discord' && profile) {
         try {
-          const discordProfile = profile as any
+          const discordProfile = profile as {
+            email?: string
+            id?: string
+            global_name?: string
+            username?: string
+          }
 
           // Check if Discord account exists or create/update
           let existingUser = await prisma.user.findFirst({
             where: {
-              OR: [{ email: discordProfile.email }, { discordId: discordProfile.id }]
+              OR: [{ email: discordProfile.email ?? '' }, { discordId: discordProfile.id ?? '' }]
             }
           })
 
@@ -240,9 +249,9 @@ export const authOptionsEnhanced: NextAuthOptions = {
             existingUser = await prisma.user.create({
               data: {
                 email: discordProfile.email,
-                fullName: discordProfile.global_name || discordProfile.username,
-                discordId: discordProfile.id,
-                discordUsername: discordProfile.username,
+                fullName: discordProfile.global_name ?? discordProfile.username ?? '',
+                discordId: discordProfile.id ?? '',
+                discordUsername: discordProfile.username ?? '',
                 password: '', // No password for OAuth users
                 lastLogin: new Date()
               }
@@ -252,8 +261,8 @@ export const authOptionsEnhanced: NextAuthOptions = {
             await prisma.user.update({
               where: { id: existingUser.id },
               data: {
-                discordId: discordProfile.id,
-                discordUsername: discordProfile.username
+                discordId: discordProfile.id ?? '',
+                discordUsername: discordProfile.username ?? ''
               }
             })
           }
@@ -261,7 +270,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
           getLogger().logSecurityEvent('oauth_login', {
             provider: 'discord',
             userId: existingUser?.id,
-            discordId: discordProfile.id
+            discordId: discordProfile.id ?? ''
           })
         } catch (error) {
           getLogger().error('Discord sign in error', error as Error)
@@ -274,7 +283,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
   },
 
   events: {
-    async signIn({ user, account, isNewUser }) {
+    signIn({ user, account, isNewUser }) {
       getLogger().logSecurityEvent('signin', {
         userId: user.id,
         provider: account?.provider,
@@ -282,18 +291,18 @@ export const authOptionsEnhanced: NextAuthOptions = {
       })
     },
 
-    async signOut({ session, token }) {
+    signOut({ token }) {
       getLogger().logSecurityEvent('signout', {
         userId: token?.sub,
-        sessionId: (session as any)?.security?.sessionId
+        sessionId: token?.sessionId
       })
     },
 
-    async session({ session, token }) {
+    session({ token }) {
       // Track active sessions
       getLogger().debug('Session accessed', {
         userId: token?.sub,
-        sessionId: (session as any)?.security?.sessionId
+        sessionId: token?.sessionId
       })
     }
   },

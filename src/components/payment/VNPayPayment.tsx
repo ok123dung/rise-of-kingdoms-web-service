@@ -21,7 +21,7 @@ export default function VNPayPayment({ amount, bookingId, onSuccess, onError }: 
       await new Promise(resolve => setTimeout(resolve, 1500))
 
       // Redirect to VNPay gateway (mock)
-      const paymentUrl = `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=${amount * 100}&vnp_OrderInfo=Payment for booking ${bookingId}`
+      const _paymentUrl = `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=${amount * 100}&vnp_OrderInfo=Payment for booking ${bookingId}`
 
       // In real implementation, you would redirect to VNPay
       // window.location.href = paymentUrl
@@ -65,7 +65,7 @@ export default function VNPayPayment({ amount, bookingId, onSuccess, onError }: 
         <button
           className="rounded-lg bg-blue-500 px-6 py-3 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-400"
           disabled={isProcessing}
-          onClick={handlePayment}
+          onClick={() => void handlePayment()}
         >
           {isProcessing ? 'Đang chuyển hướng...' : 'Thanh toán VNPay'}
         </button>

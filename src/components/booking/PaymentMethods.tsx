@@ -5,8 +5,15 @@ import { useState } from 'react'
 import { QrCode, CreditCard, Smartphone, Loader2, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+import type { Decimal } from '@prisma/client/runtime/library'
+
+interface BookingData {
+  id: string
+  finalAmount: number | Decimal
+}
+
 interface PaymentMethodsProps {
-  booking: any
+  booking: BookingData
 }
 
 export default function PaymentMethods({ booking }: PaymentMethodsProps) {
@@ -31,10 +38,12 @@ export default function PaymentMethods({ booking }: PaymentMethodsProps) {
       if (res.ok) {
         router.push('/booking/success')
       } else {
+        // eslint-disable-next-line no-alert
         alert('Thanh toán thất bại. Vui lòng thử lại.')
       }
     } catch (error) {
       console.error(error)
+      // eslint-disable-next-line no-alert
       alert('Có lỗi xảy ra.')
     } finally {
       setIsProcessing(false)
@@ -68,9 +77,10 @@ export default function PaymentMethods({ booking }: PaymentMethodsProps) {
 
       <div className="mt-4 space-y-3">
         {methods.map(method => (
-          <div
+          <button
             key={method.id}
-            className={`relative flex cursor-pointer items-center rounded-xl border p-4 transition-all ${
+            type="button"
+            className={`relative flex w-full cursor-pointer items-center rounded-xl border p-4 text-left transition-all ${
               selectedMethod === method.id
                 ? 'border-amber-500 bg-amber-50 ring-1 ring-amber-500'
                 : 'border-gray-200 hover:border-amber-200 hover:bg-gray-50'
@@ -99,7 +109,7 @@ export default function PaymentMethods({ booking }: PaymentMethodsProps) {
                 <Check className="h-5 w-5" />
               </div>
             )}
-          </div>
+          </button>
         ))}
       </div>
 
@@ -111,7 +121,7 @@ export default function PaymentMethods({ booking }: PaymentMethodsProps) {
         <button
           className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-4 py-3 text-center font-semibold text-white shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-500/30 disabled:cursor-not-allowed disabled:opacity-70"
           disabled={isProcessing}
-          onClick={handlePayment}
+          onClick={() => void handlePayment()}
         >
           {isProcessing ? (
             <span className="flex items-center justify-center">

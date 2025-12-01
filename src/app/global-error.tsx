@@ -21,8 +21,19 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     })
 
     // Send to error tracking service
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      ;(window as any).Sentry.captureException(error, {
+    if (
+      typeof window !== 'undefined' &&
+      (
+        window as unknown as {
+          Sentry?: { captureException: (error: Error, options: unknown) => void }
+        }
+      ).Sentry
+    ) {
+      ;(
+        window as unknown as {
+          Sentry: { captureException: (error: Error, options: unknown) => void }
+        }
+      ).Sentry.captureException(error, {
         level: 'fatal',
         tags: {
           component: 'GlobalErrorBoundary',
@@ -33,7 +44,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   }, [error])
 
   return (
-    <html>
+    <html lang="vi">
       <body>
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-orange-100 px-4 py-12 sm:px-6 lg:px-8">
           <div className="w-full max-w-md space-y-8">

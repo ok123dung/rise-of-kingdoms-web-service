@@ -12,6 +12,10 @@ const regenerateSchema = z.object({
   password: z.string().min(1)
 })
 
+interface RegenerateBackupCodesRequest {
+  password: string
+}
+
 // Regenerate backup codes
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +25,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = (await request.json()) as RegenerateBackupCodesRequest
     const { password } = regenerateSchema.parse(body)
 
     // Verify password

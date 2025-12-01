@@ -4,14 +4,43 @@ import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
 
+interface DiagnosticInfo {
+  userAgent: string
+  onLine: boolean
+  cookieEnabled: boolean
+  language: string
+  platform: string
+  serviceWorker: boolean
+  localStorage: boolean
+  sessionStorage: boolean
+  serviceWorkerRegistrations?: number
+  serviceWorkerDetails?: Array<{
+    scope: string
+    active?: string
+    waiting?: string
+    installing?: string
+  }>
+  serviceWorkerError?: string
+  caches?: string[]
+  cacheError?: string
+  location?: {
+    href: string
+    pathname: string
+    hostname: string
+    port: string
+    protocol: string
+  }
+  consoleErrors?: string[]
+}
+
 export default function DiagnosticsPage() {
-  const [diagnostics, setDiagnostics] = useState<any>({})
+  const [diagnostics, setDiagnostics] = useState<DiagnosticInfo | null>(null)
   const [navigationTest, setNavigationTest] = useState<string>('')
 
   useEffect(() => {
     // Collect diagnostic information
     const runDiagnostics = async () => {
-      const diag: any = {
+      const diag: DiagnosticInfo = {
         userAgent: navigator.userAgent,
         onLine: navigator.onLine,
         cookieEnabled: navigator.cookieEnabled,
@@ -69,7 +98,7 @@ export default function DiagnosticsPage() {
       setDiagnostics(diag)
     }
 
-    runDiagnostics()
+    void runDiagnostics()
   }, [])
 
   const testNavigation = async (url: string) => {
@@ -146,13 +175,13 @@ export default function DiagnosticsPage() {
               <div className="space-x-2">
                 <button
                   className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                  onClick={() => testNavigation('/services')}
+                  onClick={() => void testNavigation('/services')}
                 >
                   Test /services
                 </button>
                 <button
                   className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                  onClick={() => testNavigation('/api/health')}
+                  onClick={() => void testNavigation('/api/health')}
                 >
                   Test /api/health
                 </button>
@@ -173,7 +202,7 @@ export default function DiagnosticsPage() {
           <h2 className="mb-4 text-xl font-semibold">Actions</h2>
           <button
             className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-            onClick={clearServiceWorker}
+            onClick={() => void clearServiceWorker()}
           >
             Clear Service Worker & Caches
           </button>

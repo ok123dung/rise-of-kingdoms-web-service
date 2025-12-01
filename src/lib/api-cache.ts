@@ -12,18 +12,18 @@ interface CacheOptions {
 
 // Cache wrapper for API route handlers
 export function withCache(
-  handler: (req: NextRequest, context?: any) => Promise<Response>,
+  handler: (req: NextRequest, context?: unknown) => Response | Promise<Response>,
   options: CacheOptions = {}
 ) {
-  return async function cachedHandler(req: NextRequest, context?: any): Promise<Response> {
+  return async function cachedHandler(req: NextRequest, context?: unknown): Promise<Response> {
     // Check if caching should be applied
     if (options.condition && !options.condition(req)) {
-      return handler(req, context)
+      return Promise.resolve(handler(req, context))
     }
 
     // Only cache GET requests by default
     if (req.method !== 'GET') {
-      return handler(req, context)
+      return Promise.resolve(handler(req, context))
     }
 
     const cache = getCache('api')
@@ -45,7 +45,7 @@ export function withCache(
     try {
       // Try to get from cache
       const cached = await cache.get<{
-        body: any
+        body: unknown
         headers: Record<string, string>
         status: number
       }>(cacheKey)
@@ -62,12 +62,12 @@ export function withCache(
       }
 
       // Execute handler
-      const response = await handler(req, context)
+      const response = await Promise.resolve(handler(req, context))
 
       // Only cache successful responses
       if (response.ok) {
         const clonedResponse = response.clone()
-        const body = await clonedResponse.json()
+        const body = (await clonedResponse.json()) as unknown
 
         // Extract headers we want to cache
         const headers: Record<string, string> = {}
@@ -98,7 +98,7 @@ export function withCache(
     } catch (error) {
       getLogger().error('API cache error', error as Error, { cacheKey })
       // On error, execute handler without caching
-      return handler(req, context)
+      return Promise.resolve(handler(req, context))
     }
   }
 }
@@ -108,7 +108,7 @@ export async function invalidateApiCache(pattern?: string) {
   const cache = getCache('api')
 
   if (pattern) {
-    await cache.invalidate(pattern)
+    cache.invalidate(pattern)
   } else {
     await cache.flush()
   }
@@ -145,9 +145,9 @@ export const CacheConfigs = {
 }
 
 // ETags support for conditional requests
-export function withETag(handler: (req: NextRequest, context?: any) => Promise<Response>) {
-  return async function etagHandler(req: NextRequest, context?: any): Promise<Response> {
-    const response = await handler(req, context)
+export function withETag(handler: (req: NextRequest, context?: unknown) => Response | Promise<Response>) {
+  return async function etagHandler(req: NextRequest, context?: unknown): Promise<Response> {
+    const response = await Promise.resolve(handler(req, context))
 
     if (response.ok && req.method === 'GET') {
       // Generate ETag from response body

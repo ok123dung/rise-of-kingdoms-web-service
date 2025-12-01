@@ -23,12 +23,16 @@ export function clearUser() {
 }
 
 // Set custom context
-export function setContext(key: string, context: Record<string, any>) {
+export function setContext(key: string, context: Record<string, unknown>) {
   Sentry.setContext(key, context)
 }
 
 // Add breadcrumb
-export function addBreadcrumb(message: string, data?: any, level: Sentry.SeverityLevel = 'info') {
+export function addBreadcrumb(
+  message: string,
+  data?: Record<string, unknown>,
+  level: Sentry.SeverityLevel = 'info'
+) {
   Sentry.addBreadcrumb({
     message,
     level,
@@ -38,11 +42,23 @@ export function addBreadcrumb(message: string, data?: any, level: Sentry.Severit
 }
 
 // Track custom events
-export function trackEvent(eventName: string, data?: Record<string, any>) {
+export function trackEvent(eventName: string, data?: Record<string, unknown>) {
   addBreadcrumb(`Event: ${eventName}`, data, 'info')
 
-  // Also log to our system
-  getLogger().info(`Event tracked: ${eventName}`, data)
+  // Also log to our system - convert data to primitive values for LogContext
+  if (data) {
+    const context: Record<string, string | number | boolean | null | undefined> = {}
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null || value === undefined) {
+        context[key] = value
+      } else {
+        context[key] = String(value)
+      }
+    }
+    getLogger().info(`Event tracked: ${eventName}`, context)
+  } else {
+    getLogger().info(`Event tracked: ${eventName}`)
+  }
 }
 
 // Performance monitoring
@@ -92,7 +108,7 @@ export function measurePerformance<T>(name: string, fn: () => T | Promise<T>): T
 export function captureMessage(
   message: string,
   level: Sentry.SeverityLevel = 'info',
-  context?: Record<string, any>
+  context?: Record<string, Record<string, unknown>>
 ) {
   Sentry.withScope(scope => {
     if (context) {
@@ -110,7 +126,7 @@ export function captureException(
   context?: {
     user?: { id: string; email?: string }
     tags?: Record<string, string>
-    extra?: Record<string, any>
+    extra?: Record<string, unknown>
     level?: Sentry.SeverityLevel
   }
 ) {
@@ -230,14 +246,20 @@ export function maskSensitiveData() {
   })
 }
 
+// Extend Window interface for Sentry
+interface WindowWithSentry extends Window {
+  Sentry?: {
+    showReportDialog: (options: Record<string, unknown>) => void
+  }
+}
+
 // Create feedback widget
 export function showFeedbackDialog(options?: { name?: string; email?: string; title?: string }) {
   const user = Sentry.getCurrentScope().getUser()
+  const windowWithSentry = window as WindowWithSentry
 
-  // @ts-ignore - Sentry feedback API
-  if (window.Sentry?.showReportDialog) {
-    // @ts-ignore
-    window.Sentry.showReportDialog({
+  if (windowWithSentry.Sentry?.showReportDialog) {
+    windowWithSentry.Sentry.showReportDialog({
       user: {
         name: options?.name || user?.username,
         email: options?.email || user?.email

@@ -55,26 +55,33 @@ export function AvatarUpload({
         body: formData
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Upload failed')
+      interface UploadResponse {
+        avatarUrl?: string
+        error?: string
       }
 
-      const data = await response.json()
-      setAvatarUrl(data.avatarUrl)
+      if (!response.ok) {
+        const data = (await response.json()) as UploadResponse
+        throw new Error(data.error ?? 'Upload failed')
+      }
 
-      // Update session
-      await update({
-        ...session,
-        user: {
-          ...session?.user,
-          image: data.avatarUrl
-        }
-      })
+      const data = (await response.json()) as UploadResponse
+      if (data.avatarUrl) {
+        setAvatarUrl(data.avatarUrl)
 
-      onUploadComplete?.(data.avatarUrl)
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Upload failed')
+        // Update session
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            image: data.avatarUrl
+          }
+        })
+
+        onUploadComplete?.(data.avatarUrl)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
       setIsUploading(false)
     }
@@ -118,7 +125,7 @@ export function AvatarUpload({
           disabled={isUploading}
           id="avatar-upload"
           type="file"
-          onChange={handleFileChange}
+          onChange={e => void handleFileChange(e)}
         />
       </div>
 

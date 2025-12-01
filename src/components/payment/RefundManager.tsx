@@ -10,26 +10,35 @@ export default function RefundManager() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium">Payment ID</label>
+              <label className="mb-2 block text-sm font-medium" htmlFor="refund-payment-id">
+                Payment ID
+              </label>
               <input
                 className="w-full rounded-lg border px-3 py-2"
+                id="refund-payment-id"
                 placeholder="PAY_123456"
                 type="text"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium">Số tiền hoàn</label>
+              <label className="mb-2 block text-sm font-medium" htmlFor="refund-amount">
+                Số tiền hoàn
+              </label>
               <input
                 className="w-full rounded-lg border px-3 py-2"
+                id="refund-amount"
                 placeholder="100000"
                 type="number"
               />
             </div>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium">Lý do hoàn tiền</label>
+            <label className="mb-2 block text-sm font-medium" htmlFor="refund-reason">
+              Lý do hoàn tiền
+            </label>
             <textarea
               className="w-full rounded-lg border px-3 py-2"
+              id="refund-reason"
               placeholder="Nhập lý do..."
               rows={3}
             />

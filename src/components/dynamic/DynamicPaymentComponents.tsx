@@ -84,7 +84,7 @@ export const DynamicPaymentHistory = dynamic(() => import('@/components/payment/
       </div>
       <div className="p-6">
         <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
               className="flex animate-pulse items-center justify-between rounded-lg border p-4"
@@ -125,7 +125,7 @@ export const DynamicPaymentAnalytics = dynamic(
 
         {/* Payment method breakdown */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
+          {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="animate-pulse rounded-lg border p-4 text-center">
               <div className="mx-auto mb-3 h-16 w-16 rounded-full bg-gray-300" />
               <div className="mx-auto mb-2 h-4 w-20 rounded bg-gray-300" />
@@ -184,7 +184,7 @@ export const DynamicPaymentSecurity = dynamic(
           <div className="h-5 w-32 rounded bg-gray-300" />
         </div>
         <div className="space-y-2">
-          {[...Array(3)].map((_, i) => (
+          {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center space-x-2">
               <div className="h-4 w-4 rounded-full bg-green-300" />
               <div className="h-4 w-48 rounded bg-gray-300" />
@@ -205,7 +205,7 @@ export const DynamicAdvancedPaymentSelector = dynamic(
       <div className="space-y-4">
         <div className="mb-6 h-6 w-48 rounded bg-gray-300" />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
+          {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="animate-pulse rounded-lg border-2 border-gray-300 p-6">
               <div className="mx-auto mb-4 h-16 w-16 rounded bg-gray-300" />
               <div className="mx-auto mb-2 h-5 w-24 rounded bg-gray-300" />

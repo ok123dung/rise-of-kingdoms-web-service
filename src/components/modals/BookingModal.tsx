@@ -6,12 +6,27 @@ import { X, Calendar, Clock, User, MessageSquare } from 'lucide-react'
 
 import { clientLogger } from '@/lib/client-logger'
 
+interface BookingData {
+  id: string
+  serviceId: string
+  serviceName?: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  scheduledDate: string
+  scheduledTime: string
+  notes: string
+  status: string
+  amount: number
+  createdAt: string
+}
+
 interface BookingModalProps {
   isOpen: boolean
   onClose: () => void
   serviceId?: string
   serviceName?: string
-  onBookingSuccess?: (bookingData: any) => void
+  onBookingSuccess?: (bookingData: BookingData) => void
 }
 
 const services = [
@@ -25,10 +40,10 @@ const BookingModal = memo(function BookingModal({
   isOpen,
   onClose,
   serviceId,
-  serviceName,
+  serviceName: _serviceName,
   onBookingSuccess
 }: BookingModalProps) {
-  const [selectedService, setSelectedService] = useState(serviceId || '')
+  const [selectedService, setSelectedService] = useState(serviceId ?? '')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [customerName, setCustomerName] = useState('')
@@ -36,8 +51,6 @@ const BookingModal = memo(function BookingModal({
   const [customerPhone, setCustomerPhone] = useState('')
   const [notes, setNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  if (!isOpen) return null
 
   const selectedServiceData = useMemo(
     () => services.find(s => s.id === selectedService),
@@ -64,7 +77,7 @@ const BookingModal = memo(function BookingModal({
           scheduledTime: selectedTime,
           notes,
           status: 'confirmed',
-          amount: selectedServiceData?.price || 0,
+          amount: selectedServiceData?.price ?? 0,
           createdAt: new Date().toISOString()
         }
 
@@ -90,6 +103,8 @@ const BookingModal = memo(function BookingModal({
     ]
   )
 
+  if (!isOpen) return null
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="mx-4 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6">
@@ -101,13 +116,19 @@ const BookingModal = memo(function BookingModal({
           </button>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={e => void handleSubmit(e)}>
           {/* Service Selection */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">Chọn dịch vụ *</label>
+            <label
+              className="mb-2 block text-sm font-medium text-gray-700"
+              htmlFor="booking-service"
+            >
+              Chọn dịch vụ *
+            </label>
             <select
               required
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+              id="booking-service"
               value={selectedService}
               onChange={e => setSelectedService(e.target.value)}
             >
@@ -142,13 +163,17 @@ const BookingModal = memo(function BookingModal({
           {/* Customer Information */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label
+                className="mb-2 block text-sm font-medium text-gray-700"
+                htmlFor="booking-name"
+              >
                 <User className="mr-1 inline h-4 w-4" />
                 Họ tên *
               </label>
               <input
                 required
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                id="booking-name"
                 placeholder="Nhập họ tên của bạn"
                 type="text"
                 value={customerName}
@@ -156,10 +181,16 @@ const BookingModal = memo(function BookingModal({
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">Email *</label>
+              <label
+                className="mb-2 block text-sm font-medium text-gray-700"
+                htmlFor="booking-email"
+              >
+                Email *
+              </label>
               <input
                 required
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                id="booking-email"
                 placeholder="your@email.com"
                 type="email"
                 value={customerEmail}
@@ -169,10 +200,13 @@ const BookingModal = memo(function BookingModal({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">Số điện thoại *</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="booking-phone">
+              Số điện thoại *
+            </label>
             <input
               required
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+              id="booking-phone"
               placeholder="0912345678"
               type="tel"
               value={customerPhone}
@@ -183,13 +217,17 @@ const BookingModal = memo(function BookingModal({
           {/* Schedule */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label
+                className="mb-2 block text-sm font-medium text-gray-700"
+                htmlFor="booking-date"
+              >
                 <Calendar className="mr-1 inline h-4 w-4" />
                 Ngày mong muốn *
               </label>
               <input
                 required
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                id="booking-date"
                 min={new Date().toISOString().split('T')[0]}
                 type="date"
                 value={selectedDate}
@@ -197,13 +235,17 @@ const BookingModal = memo(function BookingModal({
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label
+                className="mb-2 block text-sm font-medium text-gray-700"
+                htmlFor="booking-time"
+              >
                 <Clock className="mr-1 inline h-4 w-4" />
                 Giờ mong muốn *
               </label>
               <select
                 required
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                id="booking-time"
                 value={selectedTime}
                 onChange={e => setSelectedTime(e.target.value)}
               >
@@ -223,12 +265,13 @@ const BookingModal = memo(function BookingModal({
 
           {/* Notes */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
+            <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="booking-notes">
               <MessageSquare className="mr-1 inline h-4 w-4" />
               Ghi chú thêm
             </label>
             <textarea
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+              id="booking-notes"
               placeholder="Mô tả chi tiết yêu cầu của bạn, tình trạng tài khoản hiện tại, mục tiêu mong muốn..."
               rows={3}
               value={notes}

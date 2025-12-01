@@ -30,6 +30,7 @@ export class WebSocketServer {
 
   private setupMiddleware() {
     // Authentication middleware
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.io.use(async (socket: AuthenticatedSocket, next) => {
       try {
         const { token } = socket.handshake.auth
@@ -39,7 +40,7 @@ export class WebSocketServer {
         }
 
         // Verify JWT token
-        const decoded = await verifyToken(token)
+        const decoded = verifyToken(token)
 
         if (!decoded?.userId) {
           return next(new Error('Invalid token'))
@@ -175,15 +176,15 @@ export class WebSocketServer {
   }
 
   // Public methods for server-side events
-  public emitToUser(userId: string, event: string, data: any) {
+  public emitToUser(userId: string, event: string, data: Record<string, unknown>) {
     this.io.to(`user:${userId}`).emit(event, data)
   }
 
-  public emitToRole(role: string, event: string, data: any) {
+  public emitToRole(role: string, event: string, data: Record<string, unknown>) {
     this.io.to(`role:${role}`).emit(event, data)
   }
 
-  public emitToBooking(bookingId: string, event: string, data: any) {
+  public emitToBooking(bookingId: string, event: string, data: Record<string, unknown>) {
     this.io.to(`booking:${bookingId}`).emit(event, data)
   }
 
@@ -192,11 +193,11 @@ export class WebSocketServer {
     this.emitToUser(userId, 'booking:statusUpdate', { bookingId, status })
   }
 
-  public emitPaymentUpdate(userId: string, paymentData: any) {
+  public emitPaymentUpdate(userId: string, paymentData: Record<string, unknown>) {
     this.emitToUser(userId, 'payment:update', paymentData)
   }
 
-  public emitNotification(userId: string, notification: any) {
+  public emitNotification(userId: string, notification: Record<string, unknown>) {
     this.emitToUser(userId, 'notification:new', notification)
   }
 

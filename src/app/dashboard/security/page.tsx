@@ -16,8 +16,25 @@ interface TwoFactorStatus {
   backupCodesRemaining: number
 }
 
+interface TwoFactorStatusResponse {
+  success: boolean
+  status?: TwoFactorStatus
+  error?: string
+}
+
+interface DisableResponse {
+  success: boolean
+  error?: string
+}
+
+interface BackupCodesResponse {
+  success: boolean
+  backupCodes?: string[]
+  error?: string
+}
+
 export default function SecurityPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const [twoFactorStatus, setTwoFactorStatus] = useState<TwoFactorStatus | null>(null)
   const [showSetup, setShowSetup] = useState(false)
@@ -34,17 +51,17 @@ export default function SecurityPage() {
   }, [status, router])
 
   useEffect(() => {
-    fetchTwoFactorStatus()
+    void fetchTwoFactorStatus()
   }, [])
 
   const fetchTwoFactorStatus = async () => {
     try {
       const response = await fetch('/api/auth/2fa/setup')
-      const data = await response.json()
-      if (data.success) {
+      const data = (await response.json()) as TwoFactorStatusResponse
+      if (data.success && data.status) {
         setTwoFactorStatus(data.status)
       }
-    } catch (error) {
+    } catch (_err) {
       setError('Failed to fetch 2FA status')
     }
   }
@@ -61,17 +78,17 @@ export default function SecurityPage() {
         body: JSON.stringify({ password })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as DisableResponse
 
       if (data.success) {
         setSuccess('2FA has been disabled successfully')
         setShowDisable(false)
         setPassword('')
-        fetchTwoFactorStatus()
+        void fetchTwoFactorStatus()
       } else {
-        setError(data.error || 'Failed to disable 2FA')
+        setError(data.error ?? 'Failed to disable 2FA')
       }
-    } catch (error) {
+    } catch (_err) {
       setError('An error occurred')
     } finally {
       setLoading(false)
@@ -79,6 +96,7 @@ export default function SecurityPage() {
   }
 
   const handleRegenerateBackupCodes = async () => {
+    // eslint-disable-next-line no-alert
     if (
       !confirm(
         'Are you sure you want to regenerate backup codes? Your old codes will no longer work.'
@@ -91,6 +109,7 @@ export default function SecurityPage() {
     setError('')
     setSuccess('')
 
+    // eslint-disable-next-line no-alert
     const passwordInput = prompt('Please enter your password to regenerate backup codes:')
     if (!passwordInput) return
 
@@ -101,19 +120,20 @@ export default function SecurityPage() {
         body: JSON.stringify({ password: passwordInput })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as BackupCodesResponse
 
-      if (data.success) {
+      if (data.success && data.backupCodes) {
         // Show backup codes to user
+        // eslint-disable-next-line no-alert
         alert(
           `New backup codes:\n\n${data.backupCodes.join('\n')}\n\nPlease save these codes in a secure location!`
         )
         setSuccess('Backup codes regenerated successfully')
-        fetchTwoFactorStatus()
+        void fetchTwoFactorStatus()
       } else {
-        setError(data.error || 'Failed to regenerate backup codes')
+        setError(data.error ?? 'Failed to regenerate backup codes')
       }
-    } catch (error) {
+    } catch (_err) {
       setError('An error occurred')
     } finally {
       setLoading(false)
@@ -203,7 +223,7 @@ export default function SecurityPage() {
                   </div>
                   <button
                     className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
-                    onClick={handleRegenerateBackupCodes}
+                    onClick={() => void handleRegenerateBackupCodes()}
                   >
                     <RefreshCw className="h-4 w-4" />
                     Tạo mã mới
@@ -222,7 +242,7 @@ export default function SecurityPage() {
                   onCancel={() => setShowSetup(false)}
                   onComplete={() => {
                     setShowSetup(false)
-                    fetchTwoFactorStatus()
+                    void fetchTwoFactorStatus()
                     setSuccess('2FA has been enabled successfully!')
                   }}
                 />
@@ -260,7 +280,7 @@ export default function SecurityPage() {
                   <button
                     className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
                     disabled={!password || loading}
-                    onClick={handleDisable2FA}
+                    onClick={() => void handleDisable2FA()}
                   >
                     {loading ? 'Đang xử lý...' : 'Tắt 2FA'}
                   </button>

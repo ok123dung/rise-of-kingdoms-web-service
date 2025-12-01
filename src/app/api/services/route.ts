@@ -119,7 +119,7 @@ const staticServices = [
 // GET /api/services - Lấy danh sách tất cả services
 export const GET = withETag(
   withCache(
-    async function handler(request: NextRequest) {
+    function handler(_request: NextRequest) {
       try {
         // Sort services by featured first, then sort order
         const sortedServices = staticServices
@@ -150,7 +150,7 @@ export const GET = withETag(
   )
 )
 // POST /api/services - Create new service (admin only)
-export async function POST(request: NextRequest) {
+export function POST(_request: NextRequest) {
   return NextResponse.json(
     {
       success: false,

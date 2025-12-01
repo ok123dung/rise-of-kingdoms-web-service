@@ -31,10 +31,10 @@ export default function RenewalsPage() {
   const [loading, setLoading] = useState(true)
   useEffect(() => {
     if (session?.user) {
-      fetchRenewals()
+      void fetchRenewals()
     }
   }, [session])
-  const fetchRenewals = async () => {
+  const fetchRenewals = () => {
     try {
       // Simulate API call - in real app, fetch from backend
       const mockRenewals: Renewal[] = [

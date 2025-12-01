@@ -1,5 +1,7 @@
 import crypto from 'crypto'
 
+import { type Prisma } from '@prisma/client'
+
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
@@ -25,7 +27,7 @@ interface MoMoResponse {
   qrCodeUrl?: string
 }
 
-interface MoMoWebhookData {
+export interface MoMoWebhookData {
   partnerCode: string
   orderId: string
   requestId: string
@@ -198,7 +200,7 @@ export class MoMoPayment {
         body: JSON.stringify(requestBody)
       })
 
-      const responseData = await response.json() as MoMoResponse
+      const responseData = (await response.json()) as MoMoResponse
 
       if (responseData.resultCode === 0) {
         await prisma.payment.create({
@@ -245,7 +247,6 @@ export class MoMoPayment {
     success: boolean
     message: string
   }> {
-    const { orderId = '', requestId = '' } = webhookData
     try {
       const {
         partnerCode,
@@ -279,6 +280,16 @@ export class MoMoPayment {
         return { success: false, message: 'Invalid signature' }
       }
 
+      // Idempotency check - prevent duplicate webhook processing
+      const webhookEventId = `momo_${orderId}_${transId}`
+      const existingEvent = await prisma.webhookEvent.findUnique({
+        where: { eventId: webhookEventId }
+      })
+      if (existingEvent) {
+        getLogger().info('MoMo webhook already processed', { eventId: webhookEventId })
+        return { success: true, message: 'Webhook already processed' }
+      }
+
       // Tìm payment record
       const payment = await prisma.payment.findFirst({
         where: { gatewayTransactionId: orderId }
@@ -290,28 +301,30 @@ export class MoMoPayment {
 
       // Cập nhật payment status
       if (resultCode === 0) {
-        // Payment successful
-        await prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: 'completed',
-            updatedAt: new Date(),
-            paidAt: new Date(),
-            gatewayResponse: {
-              transactionId: transId,
-              ...webhookData
+        // Payment successful - use transaction for atomic updates
+        await prisma.$transaction(async tx => {
+          await tx.payment.update({
+            where: { id: payment.id },
+            data: {
+              status: 'completed',
+              updatedAt: new Date(),
+              paidAt: new Date(),
+              gatewayResponse: {
+                transactionId: transId,
+                ...webhookData
+              }
             }
-          }
-        })
+          })
 
-        // Cập nhật booking status
-        await prisma.booking.update({
-          where: { id: payment.bookingId },
-          data: { paymentStatus: 'completed', updatedAt: new Date() }
-        })
-        await prisma.booking.update({
-          where: { id: payment.bookingId },
-          data: { status: 'confirmed', updatedAt: new Date() }
+          // Cập nhật booking status (merged into single update)
+          await tx.booking.update({
+            where: { id: payment.bookingId },
+            data: {
+              paymentStatus: 'completed',
+              status: 'confirmed',
+              updatedAt: new Date()
+            }
+          })
         })
 
         // Send confirmation email
@@ -328,25 +341,51 @@ export class MoMoPayment {
         // Trigger service delivery workflow
         await this.triggerServiceDelivery(payment.bookingId)
 
-        getLogger().info('MoMo payment completed', { orderId, transId, amount })
-        return { success: true, message: 'Payment processed successfully' }
-      } else {
-        // Payment failed
-        await prisma.payment.update({
-          where: { id: payment.id },
+        // Record webhook event for idempotency
+        await prisma.webhookEvent.create({
           data: {
-            status: 'failed',
-            updatedAt: new Date(),
-            gatewayResponse: {
-              failureReason: message,
-              ...webhookData
-            }
+            provider: 'momo',
+            eventType: 'payment_callback',
+            eventId: webhookEventId,
+            payload: webhookData as unknown as Prisma.InputJsonValue,
+            status: 'processed',
+            processedAt: new Date()
           }
         })
 
-        await prisma.booking.update({
-          where: { id: payment.bookingId },
-          data: { paymentStatus: 'failed', updatedAt: new Date() }
+        getLogger().info('MoMo payment completed', { orderId, transId, amount })
+        return { success: true, message: 'Payment processed successfully' }
+      } else {
+        // Payment failed - use transaction for atomic updates
+        await prisma.$transaction(async tx => {
+          await tx.payment.update({
+            where: { id: payment.id },
+            data: {
+              status: 'failed',
+              updatedAt: new Date(),
+              gatewayResponse: {
+                failureReason: message,
+                ...webhookData
+              }
+            }
+          })
+
+          await tx.booking.update({
+            where: { id: payment.bookingId },
+            data: { paymentStatus: 'failed', updatedAt: new Date() }
+          })
+        })
+
+        // Record webhook event for idempotency
+        await prisma.webhookEvent.create({
+          data: {
+            provider: 'momo',
+            eventType: 'payment_callback_failed',
+            eventId: webhookEventId,
+            payload: webhookData as unknown as Prisma.InputJsonValue,
+            status: 'processed',
+            processedAt: new Date()
+          }
         })
 
         getLogger().warn('MoMo payment failed', { orderId, resultCode, message })
@@ -384,7 +423,9 @@ export class MoMoPayment {
         lang: 'vi'
       }
 
-      const response = await fetch('https://test-payment.momo.vn/v2/gateway/api/query', {
+      const queryEndpoint =
+        process.env.MOMO_QUERY_ENDPOINT || 'https://test-payment.momo.vn/v2/gateway/api/query'
+      const response = await fetch(queryEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -392,12 +433,12 @@ export class MoMoPayment {
         body: JSON.stringify(requestBody)
       })
 
-      const responseData = await response.json()
+      const responseData = (await response.json()) as MoMoQueryResponse
 
       if (responseData.resultCode === 0) {
         return { success: true, data: responseData }
       } else {
-        return { success: false, error: responseData.message }
+        return { success: false, error: responseData.message ?? 'Query failed' }
       }
     } catch (error) {
       getLogger().error(
@@ -440,7 +481,9 @@ export class MoMoPayment {
         lang: 'vi'
       }
 
-      const response = await fetch('https://test-payment.momo.vn/v2/gateway/api/refund', {
+      const refundEndpoint =
+        process.env.MOMO_REFUND_ENDPOINT || 'https://test-payment.momo.vn/v2/gateway/api/refund'
+      const response = await fetch(refundEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -448,7 +491,7 @@ export class MoMoPayment {
         body: JSON.stringify(requestBody)
       })
 
-      const responseData = await response.json()
+      const responseData = (await response.json()) as MoMoRefundResponse
 
       if (responseData.resultCode === 0) {
         // Update payment record with refund info
@@ -469,7 +512,7 @@ export class MoMoPayment {
 
         return { success: true, data: responseData }
       } else {
-        return { success: false, error: responseData.message }
+        return { success: false, error: responseData.message ?? 'Refund failed' }
       }
     } catch (error) {
       getLogger().error(

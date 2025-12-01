@@ -9,7 +9,7 @@ export default function DashboardLoading() {
 
       {/* Stats Grid Skeleton */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
             className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
@@ -27,7 +27,7 @@ export default function DashboardLoading() {
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="mb-4 h-6 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
         <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-4">
               <div className="h-12 w-12 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
               <div className="flex-1 space-y-2">

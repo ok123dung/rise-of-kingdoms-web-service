@@ -10,9 +10,13 @@ const forgotPasswordSchema = z.object({
   email: z.string().email('Email không hợp lệ')
 })
 
+interface ForgotPasswordRequest {
+  email: string
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = (await request.json()) as ForgotPasswordRequest
     const result = forgotPasswordSchema.safeParse(body)
 
     if (!result.success) {

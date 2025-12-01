@@ -178,7 +178,7 @@ interface RouteParams {
   }
 }
 // GET /api/services/[slug] - Lấy thông tin service theo slug
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { slug } = params
     // Find service by slug from static data

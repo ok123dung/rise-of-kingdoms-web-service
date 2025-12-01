@@ -1,107 +1,9 @@
 'use client'
 
-import {
-  Target,
-  Users,
-  Sword,
-  Crown,
-  MessageCircle,
-  BarChart3,
-  Calendar,
-  Headphones,
-  ArrowRight,
-  Shield
-} from 'lucide-react'
+import { ArrowRight, Crown, Shield } from 'lucide-react'
 import Link from 'next/link'
 
-interface Service {
-  id: string
-  title: string
-  description: string
-  price: string
-  icon: React.ComponentType<{ className?: string }>
-  iconBgColor: string
-  iconColor: string
-  featured?: boolean
-}
-
-const services: Service[] = [
-  {
-    id: 'strategy-consulting',
-    title: 'Tư vấn chiến thuật',
-    description: 'Phân tích và tối ưu chiến thuật cho từng tình huống trong game',
-    price: '500.000 VNĐ/tháng',
-    icon: Target,
-    iconBgColor: 'bg-blue-100',
-    iconColor: 'text-blue-600'
-  },
-  {
-    id: 'alliance-management',
-    title: 'Quản lý liên minh',
-    description: 'Hỗ trợ quản lý, tuyển dụng và phát triển liên minh mạnh mẽ',
-    price: '1.000.000 VNĐ/tháng',
-    icon: Users,
-    iconBgColor: 'bg-green-100',
-    iconColor: 'text-green-600',
-    featured: true
-  },
-  {
-    id: 'commander-training',
-    title: 'Training Commander',
-    description: 'Hướng dẫn build và phát triển commander hiệu quả nhất',
-    price: '300.000 VNĐ/session',
-    icon: Sword,
-    iconBgColor: 'bg-purple-100',
-    iconColor: 'text-purple-600'
-  },
-  {
-    id: 'kvk-support',
-    title: 'Hỗ trợ KvK',
-    description: 'Chiến thuật và coordination chuyên nghiệp cho Kingdom vs Kingdom',
-    price: '2.000.000 VNĐ/KvK',
-    icon: Crown,
-    iconBgColor: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
-    featured: true
-  },
-  {
-    id: 'personal-coaching',
-    title: 'Coaching 1-on-1',
-    description: 'Hướng dẫn cá nhân hóa từ chuyên gia top player hàng đầu',
-    price: '200.000 VNĐ/giờ',
-    icon: MessageCircle,
-    iconBgColor: 'bg-indigo-100',
-    iconColor: 'text-indigo-600'
-  },
-  {
-    id: 'account-analysis',
-    title: 'Phân tích tài khoản',
-    description: 'Đánh giá toàn diện và đưa ra lộ trình phát triển tài khoản',
-    price: '150.000 VNĐ/lần',
-    icon: BarChart3,
-    iconBgColor: 'bg-orange-100',
-    iconColor: 'text-orange-600'
-  },
-  {
-    id: 'event-support',
-    title: 'Hỗ trợ Event',
-    description: 'Tối ưu hóa chiến lược cho các sự kiện đặc biệt và limited time',
-    price: '400.000 VNĐ/event',
-    icon: Calendar,
-    iconBgColor: 'bg-pink-100',
-    iconColor: 'text-pink-600'
-  },
-  {
-    id: 'vip-support',
-    title: 'VIP Support 24/7',
-    description: 'Hỗ trợ ưu tiên và tư vấn chuyên nghiệp mọi lúc mọi nơi',
-    price: '3.000.000 VNĐ/tháng',
-    icon: Headphones,
-    iconBgColor: 'bg-accent-100',
-    iconColor: 'text-accent-600',
-    featured: true
-  }
-]
+import { SERVICES_CONFIG, type ServiceConfig } from '@/config/services'
 
 export default function Services() {
   return (
@@ -140,7 +42,7 @@ export default function Services() {
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {services.map((service, index) => (
+          {SERVICES_CONFIG.map((service, index) => (
             <div
               key={service.id}
               className="animate-fadeInUp"
@@ -175,7 +77,7 @@ export default function Services() {
 }
 
 interface ServiceCardProps {
-  service: Service
+  service: ServiceConfig
 }
 
 function ServiceCard({ service }: ServiceCardProps) {
@@ -186,12 +88,12 @@ function ServiceCard({ service }: ServiceCardProps) {
   return (
     <div
       aria-labelledby={`service-title-${service.id}`}
+      data-testid="service-card"
       role="article"
       className={`
         ${cardClass} hover-lift group relative cursor-pointer
         ${featured ? 'border-2 border-amber-200 shadow-2xl' : ''}
       `}
-      data-testid="service-card"
     >
       {/* Featured Badge */}
       {featured && (
@@ -246,7 +148,9 @@ function ServiceCard({ service }: ServiceCardProps) {
 
         <div className="border-t border-slate-100 pt-4">
           <div className="mb-6">
-            <span className={`text-3xl font-bold price ${featured ? 'text-gradient' : 'text-blue-600'}`}>
+            <span
+              className={`price text-3xl font-bold ${featured ? 'text-gradient' : 'text-blue-600'}`}
+            >
               {price}
             </span>
             <span className="ml-2 text-sm text-slate-500">
@@ -258,7 +162,7 @@ function ServiceCard({ service }: ServiceCardProps) {
             aria-label={`Đặt dịch vụ ${title}`}
             href="/contact"
             className={`
-              block w-full transform rounded-xl px-6 py-4 text-center font-semibold transition-all duration-300
+              book-now-btn block w-full transform rounded-xl px-6 py-4 text-center font-semibold transition-all duration-300
               ${
                 featured
                   ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-amber-500/25'

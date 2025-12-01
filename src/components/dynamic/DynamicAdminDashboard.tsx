@@ -16,7 +16,7 @@ export const DynamicAdminSidebar = dynamic(() => import('@/components/admin/Admi
       <div className="p-4">
         <div className="mb-4 h-8 rounded bg-gray-700" />
         <div className="space-y-2">
-          {[...Array(6)].map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="h-10 rounded bg-gray-700" />
           ))}
         </div>
@@ -29,7 +29,7 @@ export const DynamicAdminSidebar = dynamic(() => import('@/components/admin/Admi
 export const DynamicDashboardStats = dynamic(() => import('@/components/admin/DashboardStats'), {
   loading: () => (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-      {[...Array(4)].map((_, i) => (
+      {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="animate-pulse rounded-lg bg-white p-6 shadow">
           <div className="mb-2 h-6 rounded bg-gray-300" />
           <div className="h-8 rounded bg-gray-300" />
@@ -57,7 +57,7 @@ export const DynamicRecentBookings = dynamic(() => import('@/components/admin/Re
         <div className="h-6 w-32 rounded bg-gray-300" />
       </div>
       <div className="space-y-4 p-6">
-        {[...Array(5)].map((_, i) => (
+        {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex animate-pulse items-center space-x-4">
             <div className="h-10 w-10 rounded-full bg-gray-300" />
             <div className="flex-1">
@@ -79,7 +79,7 @@ export const DynamicTopCustomers = dynamic(() => import('@/components/admin/TopC
         <div className="h-6 w-32 rounded bg-gray-300" />
       </div>
       <div className="space-y-4 p-6">
-        {[...Array(5)].map((_, i) => (
+        {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex animate-pulse items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="h-8 w-8 rounded-full bg-gray-300" />
@@ -102,7 +102,7 @@ export const DynamicQuickActions = dynamic(() => import('@/components/admin/Quic
     <div className="rounded-lg bg-white p-6 shadow">
       <div className="mb-4 h-6 w-32 rounded bg-gray-300" />
       <div className="grid grid-cols-2 gap-4">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="h-12 animate-pulse rounded bg-gray-300" />
         ))}
       </div>

@@ -16,7 +16,7 @@ interface CacheEntry<T> {
 
 // In-memory cache for development
 class MemoryCache {
-  private store = new Map<string, CacheEntry<any>>()
+  private store = new Map<string, CacheEntry<unknown>>()
   private cleanupInterval: NodeJS.Timeout
 
   constructor() {
@@ -27,7 +27,7 @@ class MemoryCache {
     }
   }
 
-  async get<T>(key: string): Promise<T | null> {
+  get<T>(key: string): T | null {
     const entry = this.store.get(key)
     if (!entry) return null
 
@@ -37,10 +37,10 @@ class MemoryCache {
       return null
     }
 
-    return entry.data
+    return entry.data as T
   }
 
-  async set<T>(key: string, value: T, ttl: number): Promise<void> {
+  set<T>(key: string, value: T, ttl: number): void {
     // Limit cache size
     if (this.store.size > 1000) {
       // Remove oldest entries
@@ -60,11 +60,11 @@ class MemoryCache {
     })
   }
 
-  async del(key: string): Promise<void> {
+  del(key: string): void {
     this.store.delete(key)
   }
 
-  async flush(): Promise<void> {
+  flush(): void {
     this.store.clear()
   }
 
@@ -155,15 +155,15 @@ export class CacheManager {
     options?: { ttl?: number; staleWhileRevalidate?: boolean }
   ): Promise<T | null> {
     const cacheKey = this.getCacheKey(key)
-    const cached = await this.cache.get<T>(cacheKey)
+    const cachedValue = await this.cache.get<T>(cacheKey)
 
     // If we have cached data and no fetcher, return it
-    if (cached !== null && !fetcher) {
-      return cached
+    if (cachedValue !== null && !fetcher) {
+      return cachedValue
     }
 
     // If no cached data and we have a fetcher, fetch and cache
-    if (cached === null && fetcher) {
+    if (cachedValue === null && fetcher) {
       try {
         const fresh = await fetcher()
         const ttl = options?.ttl || this.config.ttl || 300 // 5 minutes default
@@ -177,40 +177,42 @@ export class CacheManager {
 
     // If we have stale data and staleWhileRevalidate is enabled
     if (
-      cached !== null &&
+      cachedValue !== null &&
       fetcher &&
       (options?.staleWhileRevalidate || this.config.staleWhileRevalidate)
     ) {
       // Return stale data immediately
-      this.revalidateInBackground(cacheKey, fetcher, options?.ttl)
-      return cached
+      void this.revalidateInBackground(cacheKey, fetcher, options?.ttl)
+      return cachedValue
     }
 
-    return cached
+    return cachedValue
   }
 
-  private async revalidateInBackground<T>(
+  private revalidateInBackground<T>(
     cacheKey: string,
     fetcher: () => Promise<T>,
     ttl?: number
-  ): Promise<void> {
+  ): void {
     // Prevent duplicate revalidations
     if (this.revalidationQueue.has(cacheKey)) return
 
     this.revalidationQueue.add(cacheKey)
 
     // Run revalidation in background
-    setImmediate(async () => {
-      try {
-        const fresh = await fetcher()
-        const cacheTtl = ttl || this.config.ttl || 300
-        await this.cache.set(cacheKey, fresh, cacheTtl)
-        getLogger().debug(`Cache revalidated: ${cacheKey}`)
-      } catch (error) {
-        getLogger().error('Background revalidation error', error as Error, { key: cacheKey })
-      } finally {
-        this.revalidationQueue.delete(cacheKey)
-      }
+    setImmediate(() => {
+      fetcher()
+        .then(async fresh => {
+          const cacheTtl = ttl || this.config.ttl || 300
+          await this.cache.set(cacheKey, fresh, cacheTtl)
+          getLogger().debug(`Cache revalidated: ${cacheKey}`)
+        })
+        .catch(error => {
+          getLogger().error('Background revalidation error', error as Error, { key: cacheKey })
+        })
+        .finally(() => {
+          this.revalidationQueue.delete(cacheKey)
+        })
     })
   }
 
@@ -225,7 +227,7 @@ export class CacheManager {
     await this.cache.del(cacheKey)
   }
 
-  async invalidate(pattern: string): Promise<void> {
+  invalidate(_pattern: string): void {
     // For Redis, we could use pattern matching
     // For memory cache, we need to iterate
     if (this.cache instanceof MemoryCache) {
@@ -253,18 +255,22 @@ export function getCache(name = 'default', config?: CacheConfig): CacheManager {
 
 // API response cache decorator
 export function cached(options: { ttl?: number; key?: string } = {}) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value
+  return function (
+    target: { constructor: { name: string } },
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalMethod = descriptor.value as (...args: unknown[]) => unknown
 
-    descriptor.value = async function (...args: any[]) {
-      const cache = getCache('api', { ttl: options.ttl || 300 })
+    descriptor.value = async function (this: unknown, ...args: unknown[]) {
+      const cache = getCache('api', { ttl: options.ttl ?? 300 })
       const cacheKey =
-        options.key || `${target.constructor.name}:${propertyKey}:${JSON.stringify(args)}`
+        options.key ?? `${target.constructor.name}:${propertyKey}:${JSON.stringify(args)}`
 
       return cache.get(
         cacheKey,
-        async () => {
-          return originalMethod.apply(this, args)
+        () => {
+          return Promise.resolve(originalMethod.apply(this, args))
         },
         { staleWhileRevalidate: true }
       )

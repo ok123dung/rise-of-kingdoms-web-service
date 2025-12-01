@@ -53,8 +53,9 @@ export default function TwoFactorVerify({ onVerify, onCancel, email }: TwoFactor
         </p>
       </div>
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form className="space-y-4" onSubmit={e => void handleSubmit(e)}>
         <div>
+          {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
           <input
             autoFocus
             autoComplete="off"

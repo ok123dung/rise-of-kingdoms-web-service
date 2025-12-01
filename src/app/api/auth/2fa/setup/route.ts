@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { TwoFactorAuthService } from '@/lib/auth/two-factor'
 import { getLogger } from '@/lib/monitoring/logger'
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      status: status || { enabled: false, backupCodesRemaining: 0 }
+      status: status ?? { enabled: false, backupCodesRemaining: 0 }
     })
   } catch (error) {
     getLogger().error('2FA status error', error as Error)

@@ -65,7 +65,7 @@ export default function CustomerAnalytics() {
       setLoading(false)
     }
 
-    loadAnalytics()
+    void loadAnalytics()
   }, [timeRange])
 
   if (loading) {
@@ -74,7 +74,7 @@ export default function CustomerAnalytics() {
         <div className="animate-pulse">
           <div className="mb-4 h-6 w-48 rounded bg-gray-300" />
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="rounded-lg bg-gray-100 p-4">
                 <div className="mb-2 h-4 rounded bg-gray-300" />
                 <div className="h-8 rounded bg-gray-300" />
@@ -160,7 +160,7 @@ export default function CustomerAnalytics() {
         <div className="mb-8">
           <h4 className="mb-4 text-sm font-medium text-gray-700">Xu hướng theo tháng</h4>
           <div className="flex h-64 items-end justify-between rounded-lg bg-gray-50 p-4">
-            {data.monthlyData.map((month, index) => (
+            {data.monthlyData.map((month, _index) => (
               <div key={month.month} className="flex flex-col items-center space-y-2">
                 <div className="text-xs text-gray-600">{(month.spent / 1000000).toFixed(1)}M</div>
                 <div
@@ -181,7 +181,7 @@ export default function CustomerAnalytics() {
           <div>
             <h4 className="mb-4 text-sm font-medium text-gray-700">Phân bố dịch vụ</h4>
             <div className="space-y-3">
-              {data.serviceBreakdown.map((service, index) => (
+              {data.serviceBreakdown.map((service, _index) => (
                 <div
                   key={service.service}
                   className="flex items-center justify-between rounded-lg bg-gray-50 p-3"

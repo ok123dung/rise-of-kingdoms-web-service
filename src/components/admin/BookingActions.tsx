@@ -16,6 +16,7 @@ export default function BookingActions({ booking }: BookingActionsProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   const updateStatus = async (status: string) => {
+    // eslint-disable-next-line no-alert
     if (!confirm(`Bạn có chắc chắn muốn chuyển trạng thái sang ${status}?`)) return
 
     setIsLoading(true)
@@ -29,10 +30,12 @@ export default function BookingActions({ booking }: BookingActionsProps) {
       if (res.ok) {
         router.refresh()
       } else {
+        // eslint-disable-next-line no-alert
         alert('Có lỗi xảy ra')
       }
     } catch (error) {
       console.error(error)
+      // eslint-disable-next-line no-alert
       alert('Có lỗi xảy ra')
     } finally {
       setIsLoading(false)

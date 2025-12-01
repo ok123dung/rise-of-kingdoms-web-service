@@ -1,4 +1,5 @@
-async function globalTeardown() {
+/* eslint-disable no-console */
+function globalTeardown() {
   console.log('🧹 Starting global test teardown...')
 
   // Cleanup test database or other global resources

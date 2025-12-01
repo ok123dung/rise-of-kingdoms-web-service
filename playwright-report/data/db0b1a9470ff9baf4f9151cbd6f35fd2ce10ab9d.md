@@ -1,0 +1,34 @@
+# Page snapshot
+
+```yaml
+- heading "🧪 Conversion Tests" [level=3]
+- heading "💰 Revenue Readiness" [level=3]
+- text: "❌ VNĐ Pricing Display ❌ Lead Generation Ready ❌ VN Payment Methods ❌ SEO Optimized ❌ Conversion Elements ❌ Mobile Optimized Readiness: 0/6 (0%) Revenue Projection: Monthly: 0 VNĐ Annual: 0 VNĐ Basic: 0 customers Pro: 0 customers Premium: 0 customers"
+- heading "Đăng nhập vào RoK Services" [level=2]
+- paragraph:
+  - text: Hoặc
+  - link "tạo tài khoản mới":
+    - /url: /auth/signup
+- text: Email
+- textbox "Email"
+- text: Mật khẩu
+- textbox "Mật khẩu"
+- button
+- checkbox "Ghi nhớ đăng nhập"
+- text: Ghi nhớ đăng nhập
+- link "Quên mật khẩu?":
+  - /url: /auth/forgot-password
+- button "Đăng nhập"
+- text: Hoặc đăng nhập với
+- button "Đăng nhập với Discord":
+  - img
+  - text: Đăng nhập với Discord
+- paragraph:
+  - text: Bằng cách đăng nhập, bạn đồng ý với
+  - link "Điều khoản dịch vụ":
+    - /url: /terms
+  - text: và
+  - link "Chính sách bảo mật":
+    - /url: /privacy
+- alert
+```

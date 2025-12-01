@@ -7,6 +7,7 @@ import { z } from 'zod'
 
 import { prisma, basePrisma } from '@/lib/db'
 import { getLogger, type LogContext } from '@/lib/monitoring/logger'
+import { rateLimiters } from '@/lib/rate-limit'
 import type { User } from '@/types/prisma'
 
 import type { NextRequest } from 'next/server'
@@ -53,7 +54,7 @@ type RouteHandler = (req: NextRequest, ...args: unknown[]) => Promise<Response> 
 // Utility functions
 export const hashPassword = async (password: string) => {
   // Use 14 rounds for better security (OWASP recommendation for 2024)
-  return await bcrypt.hash(password, 14)
+  return bcrypt.hash(password, 14)
 }
 
 // Check password history to prevent reuse
@@ -104,14 +105,14 @@ export const savePasswordToHistory = async (userId: string, passwordHash: string
 }
 
 export const getCurrentSession = async () => {
-  return await getServerSession(authOptions)
+  return getServerSession(authOptions)
 }
 
 export const getCurrentUser = async () => {
   const session = await getCurrentSession()
   if (!session?.user?.id) return null
 
-  return await prisma.user.findUnique({
+  return prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
       staffProfile: true,
@@ -151,9 +152,8 @@ export const withAuth = (handler: RouteHandler) => {
 }
 
 // Rate limiting implementation using centralized limiter
-import { rateLimiters } from '@/lib/rate-limit'
 
-export const withRateLimit = (maxRequests = 60, windowMs = 60000) => {
+export const withRateLimit = (_maxRequests = 60, _windowMs = 60000) => {
   return (handler: RouteHandler) => {
     return async (req: NextRequest & { headers?: Headers; ip?: string }, ...args: unknown[]) => {
       // Use the centralized API limiter by default, but we could create a dynamic one if needed
@@ -261,15 +261,14 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             email: user.email,
             name: user.fullName,
-            // @ts-ignore - image field exists in DB but types are stale
-            image: user.image,
+            image: user.image ?? undefined,
             role: user.staffProfile?.role || 'customer'
           }
         } catch (error) {
           // Log failed authentication attempt for security monitoring
-          const { getLogger } = await import('@/lib/monitoring/logger')
-          getLogger().error('Auth error', error as Error)
-          getLogger().logSecurityEvent('auth_failed', {
+          const { getLogger: importedLogger } = await import('@/lib/monitoring/logger')
+          importedLogger().error('Auth error', error as Error)
+          importedLogger().logSecurityEvent('auth_failed', {
             email: credentials?.email,
             timestamp: new Date().toISOString()
           })
@@ -350,7 +349,7 @@ export const authOptions: NextAuthOptions = {
 
       return token
     },
-    async session({ session, token }) {
+    session({ session, token }) {
       if (token) {
         session.user.id = token.userId
         session.user.role = token.role
@@ -358,7 +357,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
-    async redirect({ url, baseUrl }) {
+    redirect({ url, baseUrl }) {
       if (url.startsWith('/')) return `${baseUrl}${url}`
       else if (new URL(url).origin === baseUrl) return url
       return `${baseUrl}/dashboard`
@@ -369,17 +368,17 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error'
   },
   events: {
-    async signIn({ user, account, profile, isNewUser }) {
-      const { getLogger } = await import('@/lib/monitoring/logger')
-      getLogger().info('User signed in', {
+    async signIn({ user, account, isNewUser }) {
+      const { getLogger: signInLogger } = await import('@/lib/monitoring/logger')
+      signInLogger().info('User signed in', {
         user: user.email,
         provider: account?.provider,
         isNewUser
       })
     },
     async createUser({ user }) {
-      const { getLogger } = await import('@/lib/monitoring/logger')
-      getLogger().info('New user created', { email: user.email })
+      const { getLogger: createUserLogger } = await import('@/lib/monitoring/logger')
+      createUserLogger().info('New user created', { email: user.email })
 
       try {
         await prisma.lead.create({
@@ -400,7 +399,7 @@ export const authOptions: NextAuthOptions = {
 }
 
 // Security event logging
-export const logSecurityEvent = async (event: string, data: Record<string, unknown>) => {
+export const logSecurityEvent = (event: string, data: Record<string, unknown>) => {
   try {
     // Log security events to console for now since database tables don't exist
     getLogger().warn(`Security event: ${event}`, data as LogContext)
@@ -439,7 +438,7 @@ export const validatePasswordStrength = (password: string) => {
 }
 
 // Session security enhancement
-export const enhanceSession = async (session: SessionWithSecurity, request?: NextRequest) => {
+export const enhanceSession = (session: SessionWithSecurity, request?: NextRequest) => {
   if (!session?.user) return session
 
   // Add security context

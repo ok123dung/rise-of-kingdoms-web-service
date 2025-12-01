@@ -11,6 +11,7 @@ class ClientLogger {
   private logLevel: LogLevel = this.isDevelopment ? LogLevel.DEBUG : LogLevel.WARN
   debug(...args: unknown[]): void {
     if (this.logLevel <= LogLevel.DEBUG) {
+      // eslint-disable-next-line no-console
       console.log(...args)
     }
   }

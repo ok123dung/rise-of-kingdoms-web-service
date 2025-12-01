@@ -1,4 +1,4 @@
-import { Target, LucideIcon } from 'lucide-react'
+import { Target, type LucideIcon } from 'lucide-react'
 
 export interface ServiceData {
   slug: string

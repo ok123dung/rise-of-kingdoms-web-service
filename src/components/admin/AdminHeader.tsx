@@ -127,7 +127,7 @@ export default function AdminHeader() {
                 </Link>
                 <button
                   className="flex w-full items-center space-x-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={() => void signOut({ callbackUrl: '/' })}
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Sign out</span>
@@ -152,8 +152,8 @@ function NotificationItem({
   time: string
   type: 'booking' | 'payment' | 'lead'
 }) {
-  const getTypeColor = (type: string) => {
-    switch (type) {
+  const getTypeColor = (itemType: string) => {
+    switch (itemType) {
       case 'booking':
         return 'bg-blue-100 text-blue-600'
       case 'payment':

@@ -32,7 +32,7 @@ export function parseVNPayTimestamp(vnpayDate: string | undefined): number {
 
     // Adjust for Vietnamese timezone (UTC+7)
     // Note: This assumes server is in UTC. Adjust if needed.
-    const vtOffset = 7 * 60 * 60 * 1000 // 7 hours in milliseconds
+    const _vtOffset = 7 * 60 * 60 * 1000 // 7 hours in milliseconds
 
     return date.getTime()
   } catch (error) {

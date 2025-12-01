@@ -504,8 +504,8 @@ export class EmailService {
     const serviceName = `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
     const daysLeft = booking.endDate
       ? Math.ceil(
-        (new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-      )
+          (new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+        )
       : 0
 
     return {

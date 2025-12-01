@@ -43,7 +43,6 @@ export class HealthMonitor {
   }
   // Comprehensive health check
   public async performHealthCheck(): Promise<HealthCheckResult> {
-    const startTime = Date.now()
     const timestamp = new Date().toISOString()
     try {
       // Run all health checks in parallel
@@ -141,7 +140,7 @@ export class HealthMonitor {
     }
   }
   // Redis health check
-  private async checkRedis(): Promise<HealthCheck> {
+  private checkRedis(): HealthCheck {
     const startTime = Date.now()
     try {
       if (!process.env.REDIS_URL) {
@@ -220,7 +219,7 @@ export class HealthMonitor {
     await Promise.race([fetch('https://openapi.zalopay.vn', { method: 'HEAD' }), timeout])
   }
   // Disk space check
-  private async checkDiskSpace(): Promise<HealthCheck> {
+  private checkDiskSpace(): HealthCheck {
     try {
       // In serverless environment, disk space is managed by platform
       // Return a mock healthy status
@@ -239,7 +238,7 @@ export class HealthMonitor {
     }
   }
   // Memory usage check
-  private async checkMemory(): Promise<HealthCheck> {
+  private checkMemory(): HealthCheck {
     try {
       const memoryUsage = process.memoryUsage()
       const memoryUsageMB = memoryUsage.heapUsed / 1024 / 1024
@@ -333,7 +332,7 @@ export class HealthMonitor {
       })
     }, interval)
     // Initial health check
-    this.performHealthCheck()
+    void this.performHealthCheck()
   }
   // Stop periodic health checks
   public stopPeriodicHealthChecks(): void {
@@ -399,11 +398,13 @@ export class PerformanceMonitor {
 }
 // Request tracking middleware
 export function trackRequest(endpoint: string) {
-  return (handler: Function) => {
-    return async (req: NextRequest, ...args: unknown[]) => {
+  return <T extends Response, C = undefined>(
+    handler: (req: NextRequest, context?: C) => T | Promise<T>
+  ) => {
+    return async (req: NextRequest, context?: C): Promise<T> => {
       const startTime = Date.now()
       try {
-        const result = await handler(req, ...args)
+        const result = await Promise.resolve(handler(req, context))
         const responseTime = Date.now() - startTime
         PerformanceMonitor.recordResponseTime(endpoint, responseTime)
         return result

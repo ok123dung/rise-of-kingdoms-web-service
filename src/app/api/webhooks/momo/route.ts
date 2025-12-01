@@ -15,7 +15,23 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json()
+    interface MoMoWebhookBody {
+      partnerCode: string
+      orderId: string
+      requestId: string
+      amount: number
+      orderInfo: string
+      orderType: string
+      transId: string
+      resultCode: number
+      message: string
+      payType: string
+      responseTime: number
+      extraData: string
+      signature: string
+    }
+
+    const body = (await request.json()) as MoMoWebhookBody
 
     // Verify webhook signature
     const {
@@ -51,7 +67,7 @@ export async function POST(request: NextRequest) {
       `&transId=${transId}`
 
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.MOMO_SECRET_KEY || '')
+      .createHmac('sha256', process.env.MOMO_SECRET_KEY ?? '')
       .update(rawSignature)
       .digest('hex')
 
@@ -85,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Store webhook event for processing
-    await webhookService.storeWebhookEvent('momo', 'payment_notification', eventId, body)
+    await webhookService.storeWebhookEvent('momo', 'payment_notification', eventId, body as unknown as Record<string, unknown>)
 
     // Process immediately
     const processed = await webhookService.processWebhookEvent(eventId)

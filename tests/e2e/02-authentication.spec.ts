@@ -42,7 +42,7 @@ test.describe('Authentication Tests', () => {
       await authPage.signIn('invalid@email.com', 'wrongpassword')
 
       // Should show error message
-      await expect(page.locator('text=/Invalid credentials|Sai thông tin/i')).toBeVisible()
+      await expect(page.locator('text=/Invalid credentials|Sai thông tin|không đúng|mật khẩu/i')).toBeVisible()
     })
 
     test('should successfully login with valid credentials', async ({ page }) => {

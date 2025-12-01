@@ -28,7 +28,7 @@ class ServiceWorkerManager {
   private updateAvailable = false
 
   private constructor() {
-    this.initializeServiceWorker()
+    void this.initializeServiceWorker()
     this.setupInstallPrompt()
     this.setupUpdateNotifications()
   }
@@ -73,7 +73,7 @@ class ServiceWorkerManager {
 
       // Check for updates periodically
       setInterval(() => {
-        this.registration?.update()
+        void this.registration?.update()
       }, 60000) // Check every minute
     } catch (error) {
       clientLogger.error('SW: Service Worker registration failed:', error)
@@ -148,7 +148,7 @@ class ServiceWorkerManager {
     return this.updateAvailable
   }
 
-  async updateApp(): Promise<void> {
+  updateApp(): void {
     if (!this.registration || !this.updateAvailable) {
       return
     }
@@ -163,10 +163,12 @@ class ServiceWorkerManager {
     }
   }
 
-  async queueOfflineAction(action: string, data: any): Promise<void> {
+  async queueOfflineAction(action: string, data: Record<string, unknown>): Promise<void> {
     try {
       // In a real implementation, use IndexedDB
-      const queuedActions = JSON.parse(localStorage.getItem('offline_queue') || '[]')
+      const queuedActions = JSON.parse(
+        localStorage.getItem('offline_queue') || '[]'
+      ) as Array<{ id: string; action: string; data: unknown; timestamp: string }>
 
       queuedActions.push({
         id: Date.now().toString(),
@@ -182,7 +184,10 @@ class ServiceWorkerManager {
         try {
           const registration = await navigator.serviceWorker.ready
           if ('sync' in registration) {
-            await (registration as any).sync.register(`${action}-queue`)
+            const regWithSync = registration as ServiceWorkerRegistration & {
+              sync: { register: (tag: string) => Promise<void> }
+            }
+            await regWithSync.sync.register(`${action}-queue`)
           }
         } catch (error) {
           clientLogger.warn('Background sync not supported:', error)
@@ -348,13 +353,14 @@ class ServiceWorkerManager {
     return 'unknown'
   }
 
-  private trackEvent(event: string, data?: any) {
+  private trackEvent(event: string, data?: Record<string, unknown>) {
     // Track PWA events for analytics
     clientLogger.debug('SW: Event tracked:', event, data)
 
     // In a real implementation, send to analytics service
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      ;(window as any).gtag('event', event, {
+    const windowWithGtag = window as Window & { gtag?: (a: string, b: string, c: object) => void }
+    if (typeof window !== 'undefined' && windowWithGtag.gtag) {
+      windowWithGtag.gtag('event', event, {
         event_category: 'PWA',
         ...data
       })
@@ -367,7 +373,7 @@ export const swManager = typeof window !== 'undefined' ? ServiceWorkerManager.ge
 
 // Make available globally for easy access
 if (typeof window !== 'undefined') {
-  ;(window as any).swManager = swManager
+  (window as unknown as { swManager: ServiceWorkerManager | null }).swManager = swManager
 }
 
 // Hook into React for easy usage in components
@@ -376,8 +382,8 @@ export function useServiceWorker() {
     isInstallAvailable: () => swManager?.isInstallAvailable() ?? false,
     isUpdateAvailable: () => swManager?.isUpdateAvailable() ?? false,
     installApp: () => swManager?.installApp() ?? Promise.resolve(false),
-    updateApp: () => swManager?.updateApp() ?? Promise.resolve(),
-    queueOfflineAction: (action: string, data: any) =>
+    updateApp: () => swManager?.updateApp(),
+    queueOfflineAction: (action: string, data: Record<string, unknown>) =>
       swManager?.queueOfflineAction(action, data) ?? Promise.resolve(),
     requestNotificationPermission: () =>
       swManager?.requestNotificationPermission() ?? Promise.resolve(false),

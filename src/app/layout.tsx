@@ -7,6 +7,11 @@ import { PerformanceMonitor } from '@/components/performance/PerformanceMonitor'
 import Providers from '@/components/Providers'
 import { RevenueValidation } from '@/components/revenue/RevenueValidation'
 import { OrganizationSchema } from '@/components/seo/StructuredData'
+import {
+  VietnameseGamingSchema,
+  VietnameseKeywordsOptimization,
+  VietnameseLocalBusinessSchema
+} from '@/components/seo/VietnameseGamingSEO'
 import { ConversionTesting } from '@/components/testing/ConversionTesting'
 
 import type { Metadata, Viewport } from 'next'
@@ -14,13 +19,15 @@ import './globals.css'
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
-  variable: '--font-inter'
+  variable: '--font-inter',
+  display: 'swap'
 })
 
 const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-poppins'
+  subsets: ['latin', 'latin-ext'],
+  weight: ['500', '700'],
+  variable: '--font-poppins',
+  display: 'swap'
 })
 
 export const metadata: Metadata = {
@@ -108,6 +115,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name="RoK Services"
           url={process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'}
         />
+        {/* Vietnamese Gaming SEO - Rich snippets for Vietnamese market */}
+        <VietnameseGamingSchema />
+        <VietnameseKeywordsOptimization />
+        <VietnameseLocalBusinessSchema />
         <Providers>
           <ErrorBoundary>
             <div className="flex min-h-screen flex-col">

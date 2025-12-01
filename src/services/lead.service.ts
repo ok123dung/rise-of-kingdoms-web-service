@@ -30,11 +30,11 @@ export class LeadService {
     const existingLead = await this.checkExistingLead(data.email, data.phone)
     if (existingLead) {
       // Update existing lead instead of creating duplicate
-      return await this.updateLead(existingLead.id, {
-        serviceInterest: data.serviceInterest || existingLead.serviceInterest || undefined,
+      return this.updateLead(existingLead.id, {
+        serviceInterest: data.serviceInterest ?? existingLead.serviceInterest ?? undefined,
         notes: data.notes
-          ? `${existingLead.notes || ''}\n[${new Date().toISOString()}] ${data.notes}`
-          : existingLead.notes || undefined
+          ? `${existingLead.notes ?? ''}\n[${new Date().toISOString()}] ${data.notes}`
+          : (existingLead.notes ?? undefined)
       })
     }
 
@@ -97,7 +97,8 @@ export class LeadService {
       followUpDate: Date
     }>
   ): Promise<Lead> {
-    const lead = await this.getLeadById(leadId)
+    // Validate lead exists
+    await this.getLeadById(leadId)
 
     const updated = await prisma.lead.update({
       where: { id: leadId },
@@ -162,7 +163,15 @@ export class LeadService {
     limit?: number
     offset?: number
   }) {
-    const where: any = {}
+    interface LeadWhereInput {
+      status?: string
+      assignedTo?: string | null
+      source?: string
+      OR?: Array<Record<string, unknown>>
+      createdAt?: { gte?: Date; lte?: Date }
+    }
+
+    const where: LeadWhereInput = {}
 
     if (query.status) {
       where.status = query.status
@@ -184,7 +193,7 @@ export class LeadService {
       ]
     }
 
-    if (query.fromDate || query.toDate) {
+    if (query.fromDate ?? query.toDate) {
       where.createdAt = {}
       if (query.fromDate) where.createdAt.gte = query.fromDate
       if (query.toDate) where.createdAt.lte = query.toDate
@@ -199,8 +208,8 @@ export class LeadService {
           }
         },
         orderBy: { createdAt: 'desc' },
-        take: query.limit || 20,
-        skip: query.offset || 0
+        take: query.limit ?? 20,
+        skip: query.offset ?? 0
       }),
       prisma.lead.count({ where })
     ])
@@ -212,13 +221,20 @@ export class LeadService {
    * Get lead statistics
    */
   async getLeadStats(query?: { fromDate?: Date; toDate?: Date }) {
-    const where: any = {}
-
-    if (query?.fromDate || query?.toDate) {
-      where.createdAt = {}
-      if (query.fromDate) where.createdAt.gte = query.fromDate
-      if (query.toDate) where.createdAt.lte = query.toDate
+    interface LeadStatsWhere {
+      createdAt?: { gte?: Date; lte?: Date }
+      status?: string
     }
+
+    const where: LeadStatsWhere = {}
+
+    if (query?.fromDate ?? query?.toDate) {
+      where.createdAt = {}
+      if (query?.fromDate) where.createdAt.gte = query.fromDate
+      if (query?.toDate) where.createdAt.lte = query.toDate
+    }
+
+    const convertedWhere: LeadStatsWhere = { ...where, status: 'converted' }
 
     const [total, byStatus, bySource, conversionRate] = await Promise.all([
       prisma.lead.count({ where }),
@@ -233,7 +249,7 @@ export class LeadService {
         _count: true
       }),
       prisma.lead.count({
-        where: { ...where, status: 'converted' }
+        where: convertedWhere
       })
     ])
 
@@ -249,7 +265,7 @@ export class LeadService {
       bySource: bySource.reduce(
         (acc, item) => ({
           ...acc,
-          [item.source || 'unknown']: item._count
+          [item.source ?? 'unknown']: item._count
         }),
         {}
       ),
@@ -287,7 +303,11 @@ export class LeadService {
   private async checkExistingLead(email?: string, phone?: string): Promise<Lead | null> {
     if (!email && !phone) return null
 
-    const where: any = { OR: [] }
+    interface LeadSearchWhere {
+      OR: Array<{ email?: string; phone?: string }>
+    }
+
+    const where: LeadSearchWhere = { OR: [] }
 
     if (email) {
       where.OR.push({ email: email.toLowerCase() })
@@ -297,7 +317,7 @@ export class LeadService {
       where.OR.push({ phone })
     }
 
-    return await prisma.lead.findFirst({ where })
+    return prisma.lead.findFirst({ where })
   }
 
   private async sendLeadNotification(lead: Lead): Promise<void> {
@@ -305,18 +325,18 @@ export class LeadService {
       // Send email notification to sales team
       const emailContent = `
         <h2>New Lead Received</h2>
-        <p><strong>Name:</strong> ${lead.fullName || 'Not provided'}</p>
-        <p><strong>Email:</strong> ${lead.email || 'Not provided'}</p>
-        <p><strong>Phone:</strong> ${lead.phone || 'Not provided'}</p>
-        <p><strong>Service Interest:</strong> ${lead.serviceInterest || 'Not specified'}</p>
+        <p><strong>Name:</strong> ${lead.fullName ?? 'Not provided'}</p>
+        <p><strong>Email:</strong> ${lead.email ?? 'Not provided'}</p>
+        <p><strong>Phone:</strong> ${lead.phone ?? 'Not provided'}</p>
+        <p><strong>Service Interest:</strong> ${lead.serviceInterest ?? 'Not specified'}</p>
         <p><strong>Source:</strong> ${lead.source}</p>
         ${lead.notes ? `<p><strong>Notes:</strong> ${lead.notes}</p>` : ''}
         <p><strong>Created:</strong> ${new Date(lead.createdAt).toLocaleString('vi-VN')}</p>
       `
 
       await sendEmail({
-        to: process.env.SALES_NOTIFICATION_EMAIL || 'sales@rokdbot.com',
-        subject: `New Lead: ${lead.fullName || lead.email || lead.phone}`,
+        to: process.env.SALES_NOTIFICATION_EMAIL ?? 'sales@rokdbot.com',
+        subject: `New Lead: ${lead.fullName ?? lead.email ?? lead.phone}`,
         html: emailContent
       })
     } catch (error) {

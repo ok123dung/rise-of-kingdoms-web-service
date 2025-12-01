@@ -20,7 +20,7 @@ interface ExpressResponse {
   statusCode?: number
   locals?: Record<string, unknown>
   setHeader: (name: string, value: string) => void
-  end: (chunk?: any, encoding?: string) => void
+  end: (chunk?: unknown, encoding?: string) => void
 }
 
 interface ExpressNextFunction {
@@ -121,13 +121,13 @@ class Logger {
             message: entry.message,
             service: entry.service,
             environment: entry.environment,
-            context: entry.context as any,
+            context: entry.context ? JSON.parse(JSON.stringify(entry.context)) : undefined,
             error: entry.error
-              ? {
+              ? JSON.parse(JSON.stringify({
                   message: entry.error.message,
                   stack: entry.error.stack,
                   name: entry.error.name
-                }
+                }))
               : undefined,
             timestamp: entry.timestamp
           }
@@ -135,6 +135,7 @@ class Logger {
       }
     } catch (error) {
       // Avoid infinite logging loop
+      // eslint-disable-next-line no-console
       console.error('Failed to persist log to database:', error)
     }
   }
@@ -143,6 +144,7 @@ class Logger {
     if (!this.shouldLog(LogLevel.DEBUG)) return
 
     const entry = this.createLogEntry(LogLevel.DEBUG, message, context)
+    // eslint-disable-next-line no-console
     console.debug(this.formatLogEntry(entry))
   }
 
@@ -167,7 +169,7 @@ class Logger {
     console.warn(this.formatLogEntry(entry))
 
     // Persist to database
-    this.persistLog(entry)
+    void this.persistLog(entry)
 
     // Send to Sentry
     Sentry.captureMessage(message, 'warning')
@@ -183,7 +185,7 @@ class Logger {
     console.error(this.formatLogEntry(entry))
 
     // Persist to database
-    this.persistLog(entry)
+    void this.persistLog(entry)
 
     // Send to Sentry
     if (error) {
@@ -206,7 +208,7 @@ class Logger {
     console.error(this.formatLogEntry(entry))
 
     // Persist to database immediately
-    this.persistLog(entry)
+    void this.persistLog(entry)
 
     // Send to Sentry with high priority
     if (error) {
@@ -365,18 +367,16 @@ export class PerformanceMonitor {
     return duration
   }
 
-  static measureAsync<T>(name: string, fn: () => Promise<T>, context?: LogContext): Promise<T> {
-    return new Promise(async (resolve, reject) => {
-      this.startTimer(name)
-      try {
-        const result = await fn()
-        this.endTimer(name, context)
-        resolve(result)
-      } catch (error) {
-        this.endTimer(name, { ...context, error: true })
-        reject(error)
-      }
-    })
+  static async measureAsync<T>(name: string, fn: () => Promise<T>, context?: LogContext): Promise<T> {
+    this.startTimer(name)
+    try {
+      const result = await fn()
+      this.endTimer(name, context)
+      return result
+    } catch (error) {
+      this.endTimer(name, { ...context, error: true })
+      throw error
+    }
   }
 
   static measure<T>(name: string, fn: () => T, context?: LogContext): T {
@@ -530,22 +530,22 @@ export class ApplicationMonitor {
   private startHealthCheckInterval(): void {
     // Run health checks every 30 seconds
     setInterval(() => {
-      this.runHealthChecks()
+      void this.runHealthChecks()
     }, 30000)
   }
 
   private async runHealthChecks(): Promise<void> {
     const checks = [
-      { name: 'database', check: this.checkDatabase },
-      { name: 'redis', check: this.checkRedis },
-      { name: 'external_apis', check: this.checkExternalAPIs },
-      { name: 'disk_space', check: this.checkDiskSpace },
-      { name: 'memory', check: this.checkMemory }
+      { name: 'database', check: () => this.checkDatabase() },
+      { name: 'redis', check: () => this.checkRedis() },
+      { name: 'external_apis', check: () => this.checkExternalAPIs() },
+      { name: 'disk_space', check: () => this.checkDiskSpace() },
+      { name: 'memory', check: () => this.checkMemory() }
     ]
 
     for (const check of checks) {
       try {
-        const result = await check.check.call(this)
+        const result = await check.check()
         this.healthChecks.set(check.name, {
           status: result.status,
           lastCheck: Date.now(),
@@ -572,7 +572,7 @@ export class ApplicationMonitor {
     }
   }
 
-  private async checkDatabase(): Promise<{ status: string; details?: Record<string, unknown> }> {
+  private checkDatabase(): { status: string; details?: Record<string, unknown> } {
     try {
       // Skip database health check for now
       return { status: 'healthy', details: { message: 'Database check skipped' } }
@@ -584,18 +584,11 @@ export class ApplicationMonitor {
     }
   }
 
-  private async checkRedis(): Promise<{ status: string; details?: Record<string, unknown> }> {
+  private checkRedis(): { status: string; details?: Record<string, unknown> } {
     // If Redis is configured
     if (process.env.REDIS_URL) {
-      try {
-        // Add Redis health check here
-        return { status: 'healthy' }
-      } catch (error) {
-        return {
-          status: 'unhealthy',
-          details: { error: error instanceof Error ? error.message : String(error) }
-        }
-      }
+      // Add Redis health check here
+      return { status: 'healthy' }
     }
     return { status: 'healthy', details: { message: 'Redis not configured' } }
   }
@@ -632,7 +625,7 @@ export class ApplicationMonitor {
     }
   }
 
-  private async checkDiskSpace(): Promise<{ status: string; details?: Record<string, unknown> }> {
+  private checkDiskSpace(): { status: string; details?: Record<string, unknown> } {
     try {
       // Only check disk space in Node.js environment and not in Edge Runtime
       if (typeof window === 'undefined' && typeof process !== 'undefined' && process.memoryUsage) {
@@ -656,7 +649,7 @@ export class ApplicationMonitor {
     }
   }
 
-  private async checkMemory(): Promise<{ status: string; details?: Record<string, unknown> }> {
+  private checkMemory(): { status: string; details?: Record<string, unknown> } {
     // Check if we're in Node.js environment with process.memoryUsage available
     if (!process?.memoryUsage) {
       return {

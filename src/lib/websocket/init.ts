@@ -48,7 +48,7 @@ export function emitWebSocketEvent(
   type: 'user' | 'role' | 'booking',
   target: string,
   event: string,
-  data: any
+  data: Record<string, unknown>
 ) {
   const ws = getWebSocketServer()
   if (!ws) {

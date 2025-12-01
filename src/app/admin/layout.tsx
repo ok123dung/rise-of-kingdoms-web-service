@@ -34,7 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           fallback={
             <div className="fixed inset-y-0 left-0 z-50 w-64 animate-pulse bg-gray-800">
               <div className="space-y-2 p-4">
-                {[...Array(8)].map((_, i) => (
+                {[...Array<undefined>(8)].map((_, i) => (
                   <div key={i} className="h-10 rounded bg-gray-700" />
                 ))}
               </div>

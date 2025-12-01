@@ -16,9 +16,15 @@ const resetPasswordSchema = z
     path: ['confirmPassword']
   })
 
+interface ResetPasswordRequest {
+  token: string
+  password: string
+  confirmPassword: string
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = (await request.json()) as ResetPasswordRequest
     const result = resetPasswordSchema.safeParse(body)
 
     if (!result.success) {

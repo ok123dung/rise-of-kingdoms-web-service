@@ -110,7 +110,7 @@ export function buildCSPHeader(directives: CSPDirectives, nonce?: string): strin
       }
 
       if (Array.isArray(value)) {
-        const values = nonce ? value.map(v => v.replace('{{NONCE}}', nonce)) : value
+        const values = nonce ? value.map(v => (v as string).replace('{{NONCE}}', nonce)) : value
 
         return `${key} ${values.join(' ')}`
       }

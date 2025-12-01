@@ -51,6 +51,7 @@ export class MemorySafeRateLimiter {
       }
     }
     if (removed > 0) {
+      // eslint-disable-next-line no-console
       console.log(`[RateLimiter] Cleaned up ${removed} expired entries`)
     }
     this.lastCleanup = now
@@ -71,12 +72,12 @@ export class MemorySafeRateLimiter {
       }
     }
   }
-  public async checkLimit(identifier: string): Promise<{
+  public checkLimit(identifier: string): {
     success: boolean
     remaining: number
     reset: number
     retryAfter?: number
-  }> {
+  } {
     const now = Date.now()
     const key = this.config.prefix ? `${this.config.prefix}:${identifier}` : identifier
     let entry = this.store.get(key)
@@ -142,7 +143,8 @@ export class RedisRateLimiter {
       pipe.incr(key)
       pipe.expire(key, Math.ceil(this.config.window / 1000))
       const results = await pipe.exec()
-      const count = ((results?.[0] as any)?.[1] as number) || 1
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const count = ((results?.[0] as [Error | null, number])?.[1] as number) || 1
       const remaining = Math.max(0, this.config.max - count)
       const success = count <= this.config.max
       return {

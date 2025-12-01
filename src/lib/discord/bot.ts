@@ -30,8 +30,7 @@ class RoKDiscordBot {
   }
 
   private setupEventHandlers() {
-    this.client.once('ready', async () => {
-      const { getLogger } = await import('@/lib/monitoring/logger')
+    this.client.once('ready', () => {
       getLogger().info('Discord bot logged in', { tag: this.client.user?.tag })
       this.isReady = true
     })
@@ -44,21 +43,19 @@ class RoKDiscordBot {
     })
 
     // Handle slash commands
-    this.client.on('interactionCreate', async interaction => {
+    this.client.on('interactionCreate', interaction => {
       if (!interaction.isChatInputCommand()) return
 
-      try {
-        await this.handleSlashCommand(interaction)
-      } catch (error) {
+      this.handleSlashCommand(interaction).catch(error => {
         getLogger().error(
           'Slash command error',
           error instanceof Error ? error : new Error(String(error))
         )
-        await interaction.reply({
+        void interaction.reply({
           content: 'Có lỗi xảy ra khi xử lý lệnh.',
           ephemeral: true
         })
-      }
+      })
     })
   }
 
@@ -361,15 +358,15 @@ class RoKDiscordBot {
           },
           ...(booking.user.discordId
             ? [
-              {
-                id: booking.user.discordId,
-                allow: [
-                  PermissionFlagsBits.ViewChannel,
-                  PermissionFlagsBits.SendMessages,
-                  PermissionFlagsBits.ReadMessageHistory
-                ]
-              }
-            ]
+                {
+                  id: booking.user.discordId,
+                  allow: [
+                    PermissionFlagsBits.ViewChannel,
+                    PermissionFlagsBits.SendMessages,
+                    PermissionFlagsBits.ReadMessageHistory
+                  ]
+                }
+              ]
             : [])
         ]
       })

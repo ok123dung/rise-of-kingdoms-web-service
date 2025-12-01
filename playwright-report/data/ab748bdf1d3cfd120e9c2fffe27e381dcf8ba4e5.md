@@ -1,0 +1,35 @@
+# Page snapshot
+
+```yaml
+- heading "🧪 Conversion Tests" [level=3]
+- text: "❌ No urgency elements found ⚠️ Limited CTAs found: 1 ✅ Social proof elements found ❌ No risk reduction elements found ❌ VNĐ pricing not found ❌ Mobile sticky actions not found ❌ Vietnamese payment methods not found"
+- heading "💰 Revenue Readiness" [level=3]
+- text: "❌ VNĐ Pricing Display ❌ Lead Generation Ready ❌ VN Payment Methods ❌ SEO Optimized ❌ Conversion Elements ❌ Mobile Optimized Readiness: 0/6 (0%) Revenue Projection: Monthly: 18.000.000 VNĐ Annual: 216.000.000 VNĐ Basic: 12 customers Pro: 6 customers Premium: 3 customers"
+- heading "Đăng nhập vào RoK Services" [level=2]
+- paragraph:
+  - text: Hoặc
+  - link "tạo tài khoản mới":
+    - /url: /auth/signup
+- text: Email
+- textbox "Email": nguyenvana@example.com
+- text: Mật khẩu
+- textbox "Mật khẩu": MatKhau123!
+- button
+- checkbox "Ghi nhớ đăng nhập"
+- text: Ghi nhớ đăng nhập
+- link "Quên mật khẩu?":
+  - /url: /auth/forgot-password
+- button "Đăng nhập"
+- text: Hoặc đăng nhập với
+- button "Đăng nhập với Discord":
+  - img
+  - text: Đăng nhập với Discord
+- paragraph:
+  - text: Bằng cách đăng nhập, bạn đồng ý với
+  - link "Điều khoản dịch vụ":
+    - /url: /terms
+  - text: và
+  - link "Chính sách bảo mật":
+    - /url: /privacy
+- alert
+```

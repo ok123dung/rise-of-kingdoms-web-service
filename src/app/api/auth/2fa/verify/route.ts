@@ -10,6 +10,10 @@ const verifySchema = z.object({
   token: z.string().min(6).max(9) // 6 digits for TOTP, 9 chars for backup code (XXXX-XXXX)
 })
 
+interface Verify2FARequest {
+  token: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -18,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = (await request.json()) as Verify2FARequest
     const { token } = verifySchema.parse(body)
 
     // Verify and enable 2FA
@@ -28,7 +32,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           verified: false,
-          message: result.message || 'Invalid verification code'
+          message: result.message ?? 'Invalid verification code'
         },
         { status: 400 }
       )

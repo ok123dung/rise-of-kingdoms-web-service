@@ -8,17 +8,27 @@ import { Bell, X, Check, AlertCircle, Info } from 'lucide-react'
 
 import { useNotificationWebSocket } from '@/hooks/useWebSocket'
 
+interface Notification {
+  id: string
+  type: string
+  title: string
+  message: string
+  createdAt: string
+  read: boolean
+  link?: string
+}
+
 export function RealtimeNotifications() {
   const { isConnected, notifications, unreadCount, markAsRead } = useNotificationWebSocket()
 
   const [showDropdown, setShowDropdown] = useState(false)
   const [showToast, setShowToast] = useState(false)
-  const [latestNotification, setLatestNotification] = useState<any>(null)
+  const [latestNotification, setLatestNotification] = useState<Notification | null>(null)
 
   // Show toast for new notifications
   useEffect(() => {
     if (notifications.length > 0 && notifications[0] !== latestNotification) {
-      setLatestNotification(notifications[0])
+      setLatestNotification(notifications[0] as Notification)
       setShowToast(true)
 
       // Auto-hide toast after 5 seconds
@@ -41,7 +51,7 @@ export function RealtimeNotifications() {
     }
   }
 
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = (notification: Notification) => {
     markAsRead(notification.id)
     // Navigate to relevant page based on notification type
     if (notification.link) {
@@ -89,10 +99,11 @@ export function RealtimeNotifications() {
                 </div>
               ) : (
                 <div className="divide-y">
-                  {notifications.slice(0, 10).map(notification => (
-                    <div
+                  {(notifications as Notification[]).slice(0, 10).map(notification => (
+                    <button
                       key={notification.id}
-                      className={`flex cursor-pointer gap-3 p-4 transition-colors hover:bg-gray-50 ${
+                      type="button"
+                      className={`flex w-full cursor-pointer gap-3 p-4 text-left transition-colors hover:bg-gray-50 ${
                         !notification.read ? 'bg-blue-50' : ''
                       }`}
                       onClick={() => handleNotificationClick(notification)}
@@ -112,7 +123,7 @@ export function RealtimeNotifications() {
                           <div className="h-2 w-2 rounded-full bg-blue-600" />
                         </div>
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -151,6 +162,7 @@ export function RealtimeNotifications() {
         </div>
       )}
 
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes slide-up {
           from {

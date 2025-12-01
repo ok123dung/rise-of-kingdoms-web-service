@@ -28,10 +28,7 @@ interface PerformanceMetrics {
 }
 
 export function PerformanceMonitor() {
-  // Only run in production
-  if (process.env.NODE_ENV !== 'production') return null
-
-  const [metrics, setMetrics] = useState<PerformanceMetrics>({
+  const [_metrics, setMetrics] = useState<PerformanceMetrics>({
     webVitals: {},
     pageLoad: {},
     scrollDepth: []
@@ -68,6 +65,9 @@ export function PerformanceMonitor() {
 
   // Use performance optimization hook
   usePerformanceOptimization()
+
+  // Only run in production
+  if (process.env.NODE_ENV !== 'production') return null
 
   return (
     <>

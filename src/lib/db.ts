@@ -26,7 +26,7 @@ class CircuitBreaker {
     private readonly threshold = 5,
     private readonly timeout = 60000, // 1 minute
     private readonly halfOpenRequests = 3
-  ) { }
+  ) {}
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === 'open') {
@@ -116,15 +116,15 @@ class EnhancedPrismaClient extends PrismaClient {
 
   private setupEventHandlers() {
     // Query logging
-    this.$on('query' as never, (e: any) => {
-      if (e.duration > 1000) {
-        getLogger().warn(`Slow query detected: ${e.query} (${e.duration}ms)`)
+    this.$on('query' as never, (e: { duration?: number; query?: string }) => {
+      if (e.duration && e.duration > 1000) {
+        getLogger().warn(`Slow query detected: ${e.query ?? 'unknown'} (${e.duration}ms)`)
       }
     })
 
     // Error logging
-    this.$on('error' as never, (e: any) => {
-      getLogger().error('Database error', new Error(e.message), {
+    this.$on('error' as never, (e: { message?: string; target?: string; timestamp?: string }) => {
+      getLogger().error('Database error', new Error(e.message ?? 'Unknown database error'), {
         target: e.target,
         timestamp: e.timestamp
       })
@@ -132,7 +132,7 @@ class EnhancedPrismaClient extends PrismaClient {
     })
 
     // Warning logging
-    this.$on('warn' as never, (e: any) => {
+    this.$on('warn' as never, (e: { message?: string; timestamp?: string }) => {
       getLogger().warn('Database warning', {
         message: e.message,
         timestamp: e.timestamp
@@ -213,7 +213,8 @@ class EnhancedPrismaClient extends PrismaClient {
   }
 
   // Override $transaction to add timeout and retry logic
-  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P]): Promise<UnwrapTuple<P>>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  $transaction<P extends Prisma.PrismaPromise<unknown>[]>(arg: [...P]): Promise<UnwrapTuple<P>>
   $transaction<R>(
     fn: (
       prisma: Omit<
@@ -227,24 +228,37 @@ class EnhancedPrismaClient extends PrismaClient {
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
   ): Promise<R>
-  async $transaction<T = any>(arg: any, options?: any): Promise<T> {
+  async $transaction<T = unknown>(arg: unknown, options?: unknown): Promise<T> {
     const defaultOptions = {
       maxWait: CONNECTION_POOL_CONFIG.pool_timeout,
       timeout: CONNECTION_POOL_CONFIG.statement_timeout,
-      ...options
+      ...(options as object)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.circuitBreaker.execute(async () => {
       try {
         if (Array.isArray(arg)) {
-          return (await super.$transaction(arg, options)) as any
+          return (await super.$transaction(
+            arg as Prisma.PrismaPromise<unknown>[],
+            options as { isolationLevel?: Prisma.TransactionIsolationLevel }
+          )) as T
         } else {
-          return (await super.$transaction(arg, defaultOptions)) as any
+          return (await super.$transaction(
+            arg as (
+              prisma: Omit<
+                PrismaClient,
+                '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+              >
+            ) => Promise<T>,
+            defaultOptions
+          )) as T
         }
       } catch (error) {
         // Log transaction errors with context
         getLogger().error('Transaction failed', error as Error, {
-          options: defaultOptions
+          maxWait: defaultOptions.maxWait,
+          timeout: defaultOptions.timeout
         })
         throw error
       }
@@ -277,19 +291,24 @@ async function ensureConnected() {
 }
 
 // Middleware to ensure connection before queries
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 export const prisma = new Proxy(prismaEnhanced, {
   get(target, prop, receiver) {
     // For model operations, ensure connected first
     if (typeof prop === 'string' && prop in target && !prop.startsWith('$')) {
-      return new Proxy(Reflect.get(target, prop, receiver), {
+      const modelProxy = Reflect.get(target, prop, receiver) as object
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return new Proxy(modelProxy, {
         get(modelTarget, modelProp) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const value = Reflect.get(modelTarget, modelProp)
           if (typeof value === 'function') {
-            return async (...args: any[]) => {
+            return async (...args: unknown[]) => {
               await ensureConnected()
-              return value.apply(modelTarget, args)
+              return (value as (...args: unknown[]) => unknown).apply(modelTarget, args)
             }
           }
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return value
         }
       })
@@ -297,15 +316,17 @@ export const prisma = new Proxy(prismaEnhanced, {
 
     // For $-prefixed methods
     if (typeof prop === 'string' && prop.startsWith('$') && prop !== '$connect') {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const value = Reflect.get(target, prop, receiver)
       if (typeof value === 'function') {
-        return async (...args: any[]) => {
+        return async (...args: unknown[]) => {
           await ensureConnected()
-          return value.apply(target, args)
+          return (value as (...args: unknown[]) => unknown).apply(target, args)
         }
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return Reflect.get(target, prop, receiver)
   }
 })

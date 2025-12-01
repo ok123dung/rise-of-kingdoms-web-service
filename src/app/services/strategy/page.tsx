@@ -600,7 +600,7 @@ interface MethodologyStepProps {
   index: number
 }
 
-function MethodologyStep({ step, index }: MethodologyStepProps) {
+function MethodologyStep({ step, index: _index }: MethodologyStepProps) {
   return (
     <div className="flex items-start space-x-6">
       <div className="flex-shrink-0">

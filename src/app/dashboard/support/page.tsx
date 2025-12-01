@@ -33,7 +33,7 @@ export default function SupportPage() {
     formState: { errors },
     reset
   } = useForm<SupportForm>()
-  const onSubmit = async (data: SupportForm) => {
+  const onSubmit = async (_data: SupportForm) => {
     setLoading(true)
     try {
       // Simulate API call
@@ -92,24 +92,36 @@ export default function SupportPage() {
             <h3 className="mb-3 text-sm font-medium text-gray-900">Câu hỏi thường gặp</h3>
             <ul className="space-y-2">
               <li>
-                <a className="text-rok-gold hover:text-rok-gold-dark text-sm" href="#">
+                <button
+                  className="text-rok-gold hover:text-rok-gold-dark text-left text-sm"
+                  type="button"
+                >
                   Làm thế nào để thanh toán?
-                </a>
+                </button>
               </li>
               <li>
-                <a className="text-rok-gold hover:text-rok-gold-dark text-sm" href="#">
+                <button
+                  className="text-rok-gold hover:text-rok-gold-dark text-left text-sm"
+                  type="button"
+                >
                   Thời gian xử lý đơn hàng?
-                </a>
+                </button>
               </li>
               <li>
-                <a className="text-rok-gold hover:text-rok-gold-dark text-sm" href="#">
+                <button
+                  className="text-rok-gold hover:text-rok-gold-dark text-left text-sm"
+                  type="button"
+                >
                   Chính sách hoàn tiền?
-                </a>
+                </button>
               </li>
               <li>
-                <a className="text-rok-gold hover:text-rok-gold-dark text-sm" href="#">
+                <button
+                  className="text-rok-gold hover:text-rok-gold-dark text-left text-sm"
+                  type="button"
+                >
                   Bảo mật tài khoản?
-                </a>
+                </button>
               </li>
             </ul>
           </div>
@@ -135,7 +147,7 @@ export default function SupportPage() {
           ) : (
             <div className="rounded-lg bg-white p-6 shadow">
               <h2 className="mb-4 text-lg font-medium text-gray-900">Gửi yêu cầu hỗ trợ</h2>
-              <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+              <form className="space-y-6" onSubmit={e => void handleSubmit(onSubmit)(e)}>
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="category">
                     Loại vấn đề

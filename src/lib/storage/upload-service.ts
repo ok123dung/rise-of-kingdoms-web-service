@@ -58,7 +58,7 @@ export class UploadService {
     try {
       // Validate file type
       const fileCategory = this.getFileCategory(mimeType)
-      if (!isValidFileType(mimeType, fileCategory as any)) {
+      if (!isValidFileType(mimeType, fileCategory as 'image' | 'video' | 'avatar' | 'document' | 'screenshot')) {
         return {
           success: false,
           error: 'Invalid file type'
@@ -75,7 +75,7 @@ export class UploadService {
       }
 
       // Validate file size
-      if (!isValidFileSize(buffer.length, fileCategory as any)) {
+      if (!isValidFileSize(buffer.length, fileCategory as 'default' | 'image' | 'video' | 'avatar' | 'document')) {
         return {
           success: false,
           error: 'File size exceeds limit'

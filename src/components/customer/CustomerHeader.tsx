@@ -31,9 +31,9 @@ export default function CustomerHeader({
   const [showUserMenu, setShowUserMenu] = useState(false)
   const router = useRouter()
   useEffect(() => {
-    fetchCustomerData()
+    void fetchCustomerData()
   }, [])
-  const fetchCustomerData = async () => {
+  const fetchCustomerData = () => {
     try {
       setLoading(true)
       // Simulate API call - replace with real endpoint

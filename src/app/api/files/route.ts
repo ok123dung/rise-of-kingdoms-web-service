@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = request.nextUrl
-    const folder = searchParams.get('folder') || undefined
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const folder = searchParams.get('folder') ?? undefined
+    const limit = parseInt(searchParams.get('limit') ?? '20', 10)
+    const offset = parseInt(searchParams.get('offset') ?? '0', 10)
 
     const result = await UploadService.listUserFiles(session.user.id, folder, limit, offset)
 

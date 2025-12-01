@@ -70,7 +70,7 @@ export class EdgeRateLimiter {
     this.store = rateLimitStores.get(storeKey)!
   }
 
-  async checkLimit(identifier: string): Promise<RateLimitResult> {
+  checkLimit(identifier: string): RateLimitResult {
     const now = Date.now()
     const key = this.config.prefix ? `${this.config.prefix}:${identifier}` : identifier
 

@@ -112,6 +112,7 @@ export function sanitizeInput(input: string): string {
 
 // SQL injection prevention (for raw queries)
 export function escapeSqlString(str: string): string {
+  // eslint-disable-next-line no-control-regex, no-useless-escape
   return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, char => {
     switch (char) {
       case '\0':
@@ -217,7 +218,7 @@ export function validatePhoneNumber(phone: string): boolean {
 // JWT token validation
 export function validateJWT(token: string): {
   valid: boolean
-  payload?: any
+  payload?: { exp?: number; [key: string]: unknown }
   error?: string
 } {
   try {
@@ -228,7 +229,10 @@ export function validateJWT(token: string): {
     }
 
     // Decode payload
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'))
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8')) as {
+      exp?: number
+      [key: string]: unknown
+    }
 
     // Check expiration
     if (payload.exp && payload.exp < Date.now() / 1000) {
@@ -274,9 +278,9 @@ export function hashData(data: string, salt?: string): string {
 // Verify hashed data
 export function verifyHash(data: string, hashedData: string): boolean {
   const [salt, hash] = hashedData.split(':')
-  const verifyHash = crypto.pbkdf2Sync(data, salt, 10000, 64, 'sha512').toString('hex')
+  const computedHash = crypto.pbkdf2Sync(data, salt, 10000, 64, 'sha512').toString('hex')
 
-  return hash === verifyHash
+  return hash === computedHash
 }
 
 // Content type validation

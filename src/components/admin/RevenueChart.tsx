@@ -19,7 +19,7 @@ export default function RevenueChart() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchRevenueData()
+    void fetchRevenueData()
   }, [])
 
   const fetchRevenueData = async () => {
@@ -77,7 +77,7 @@ export default function RevenueChart() {
             <p>{error}</p>
             <button
               className="mt-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-              onClick={fetchRevenueData}
+              onClick={() => void fetchRevenueData()}
             >
               Thử lại
             </button>

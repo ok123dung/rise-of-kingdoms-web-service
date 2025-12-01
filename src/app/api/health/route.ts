@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export function GET() {
   try {
     const uptime = process.uptime()
 

@@ -18,6 +18,12 @@ const changePasswordSchema = z
     path: ['confirmPassword']
   })
 
+interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -25,7 +31,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = (await request.json()) as ChangePasswordRequest
     const result = changePasswordSchema.safeParse(body)
 
     if (!result.success) {

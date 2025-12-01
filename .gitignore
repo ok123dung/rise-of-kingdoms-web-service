@@ -70,3 +70,8 @@ Thumbs.db
 # payment gateway test files
 /test-payments/
 /sandbox-credentials/
+
+# Claude Code
+.claude/settings.json
+.claude/settings.local.json
+!.claude/SESSION_NOTES.md

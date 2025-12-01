@@ -1,0 +1,229 @@
+﻿npx : [1A[2K[2m[WebS
+erver] 
+[22m[2mEnvironment 
+variables loaded from 
+.env[22m
+At line:1 char:1
++ npx playwright test 
+--reporter=line > 
+test_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: ([1A[2K[2m[   
+ We... from .env[2    
+2m:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+
+[1A[2K[2m[WebServer]
+ [22m[@sentry/nextjs] 
+DEPRECATION WARNING: 
+It is recommended 
+renaming your `sentry.c
+lient.config.ts` file, 
+or moving its content 
+to `instrumentation-cli
+ent.ts`. When using 
+Turbopack `sentry.clien
+t.config.ts` will no 
+longer work. Read more 
+about the `instrumentat
+ion-client.ts` file: ht
+tps://nextjs.org/docs/a
+pp/api-reference/file-c
+onventions/instrumentat
+ion-client
+
+[1A[2K[2m[WebServer]
+ [22m[2025-11-28T16:59
+:32.946Z] WARN  R2 
+credentials not 
+configured. File 
+uploads will be 
+disabled. 
+
+[1A[2K[2m[WebServer]
+ [22m[2025-11-28T16:59
+:32.963Z] WARN  R2 
+credentials not 
+configured. File 
+uploads will be 
+disabled. 
+
+[1A[2K[2m[WebServer]
+ [22m[2025-11-28T16:59
+:32.965Z] WARN  R2 
+credentials not 
+configured. File 
+uploads will be 
+disabled. 
+
+[1A[2K[2m[WebServer]
+ [22m[2025-11-28T16:59
+:32.998Z] WARN  R2 
+credentials not 
+configured. File 
+uploads will be 
+disabled. 
+
+[1A[2K[2m[WebServer]
+ [22m[2025-11-28T16:59
+:33.018Z] WARN  R2 
+credentials not 
+configured. File 
+uploads will be 
+disabled. 
+
+
+[1A[2K[2m[WebServer]
+ [22m[2025-11-28T16:59
+:35.992Z] ERROR Error 
+fetching user profile 
+[2m[WebServer] 
+[22mError: Dynamic 
+server usage: Route 
+/api/user/profile 
+couldn't be rendered 
+statically because it 
+used `headers`. See 
+more info here: https:/
+/nextjs.org/docs/messag
+es/dynamic-server-error
+[2m[WebServer] 
+[22mStack: Error: 
+Dynamic server usage: 
+Route 
+/api/user/profile 
+couldn't be rendered 
+statically because it 
+used `headers`. See 
+more info here: https:/
+/nextjs.org/docs/messag
+es/dynamic-server-error
+[2m[WebServer] [22m  
+  at l (C:\Users\admin\
+.gemini\antigravity\pla
+yground\silver-sojourne
+r\rok-services\.next\se
+rver\chunks\9085.js:1:5
+8786)
+[2m[WebServer] [22m  
+  at d (C:\Users\admin\
+.gemini\antigravity\pla
+yground\silver-sojourne
+r\rok-services\.next\se
+rver\chunks\4007.js:25:
+31477)
+[2m[WebServer] [22m  
+  at s (C:\Users\admin\
+.gemini\antigravity\pla
+yground\silver-sojourne
+r\rok-services\.next\se
+rver\chunks\4007.js:25:
+20520)
+[2m[WebServer] [22m  
+  at y (C:\Users\admin\
+.gemini\antigravity\pla
+yground\silver-sojourne
+r\rok-services\.next\se
+rver\app\api\user\profi
+le\route.js:1:3263)
+[2m[WebServer] [22m  
+  at C:\Users\admin\.ge
+mini\antigravity\playgr
+ound\silver-sojourner\r
+ok-services\node_module
+s\next\dist\compiled\ne
+xt-server\app-route.run
+time.prod.js:6:38417
+[2m[WebServer] [22m  
+  at C:\Users\admin\.ge
+mini\antigravity\playgr
+ound\silver-sojourner\r
+ok-services\node_module
+s\next\dist\server\lib\
+trace\tracer.js:140:36
+[2m[WebServer] [22m  
+  at NoopContextManager
+.with (C:\Users\admin\.
+gemini\antigravity\play
+ground\silver-sojourner
+\rok-services\node_modu
+les\@opentelemetry\api\
+build\src\context\NoopC
+ontextManager.js:25:19)
+[2m[WebServer] [22m  
+  at ContextAPI.with (C
+:\Users\admin\.gemini\a
+ntigravity\playground\s
+ilver-sojourner\rok-ser
+vices\node_modules\@ope
+ntelemetry\api\build\sr
+c\api\context.js:60:46)
+[2m[WebServer] [22m  
+  at NoopTracer.startAc
+tiveSpan (C:\Users\admi
+n\.gemini\antigravity\p
+layground\silver-sojour
+ner\rok-services\node_m
+odules\@opentelemetry\a
+pi\build\src\trace\Noop
+Tracer.js:65:31)
+[2m[WebServer] [22m  
+  at ProxyTracer.startA
+ctiveSpan (C:\Users\adm
+in\.gemini\antigravity\
+playground\silver-sojou
+rner\rok-services\node_
+modules\@opentelemetry\
+api\build\src\trace\Pro
+xyTracer.js:36:24)
+[1A[2K[2m[WebServer]
+ [22m[2025-11-28T16:59
+:37.100Z] WARN  R2 
+credentials not 
+configured. File 
+uploads will be 
+disabled. 
+
+[1A[2K[2m[WebServer]
+ [22m[2025-11-28T16:59
+:37.100Z] WARN  R2 
+credentials not 
+configured. File 
+uploads will be 
+disabled. 
+
+≡ƒÜÇ Starting global test setup...
+ΓÜá∩╕Å  Tests should 
+run with NODE_ENV=test
+Error: browserType.launch: Executable doesn't exist at C:\Users\admin\AppData\Local\ms-playwright\chromium_headless_shell-1181\chrome-win\headless_shell.exe
+ΓòöΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòù
+Γòæ Looks like Playwright Test or Playwright was just installed or updated. Γòæ
+Γòæ Please run the following command to download new browsers:              Γòæ
+Γòæ                                                                         Γòæ
+Γòæ     npx playwright install                                              Γòæ
+Γòæ                                                                         Γòæ
+Γòæ <3 Playwright Team                                                      Γòæ
+ΓòÜΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓò¥
+
+   at ..\global-setup.ts:12
+
+  10 |
+  11 |   // Verify that the test server is running
+> 12 |   const browser = await chromium.launch()
+     |                                  ^
+  13 |   const context = await browser.newContext()
+  14 |   const page = await context.newPage()
+  15 |
+    at globalSetup (C:\Users\admin\.gemini\antigravity\playground\silver-sojourner\rok-services\tests\global-setup.ts:12:34)
+
+≡ƒº╣ Starting global test teardown...
+Γ£à Global teardown completed
+[1A[2K

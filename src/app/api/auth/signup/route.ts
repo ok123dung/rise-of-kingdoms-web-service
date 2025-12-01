@@ -1,6 +1,7 @@
 import { hash } from 'bcryptjs'
 import { type NextRequest, NextResponse } from 'next/server'
 
+import { withDatabaseConnection } from '@/lib/api/db-middleware'
 import { basePrisma as prisma } from '@/lib/db'
 import { sendWelcomeEmail } from '@/lib/email'
 import {
@@ -12,86 +13,40 @@ import {
 } from '@/lib/errors'
 import { trackRequest } from '@/lib/monitoring'
 import { getLogger } from '@/lib/monitoring/logger'
+import { rateLimiters } from '@/lib/rate-limit'
 import { signupSchema, sanitizeInput } from '@/lib/validation'
 
-export const POST = trackRequest('/api/auth/signup')(async function (request: NextRequest) {
+interface SignupBody {
+  fullName: string
+  email: string
+  phone?: string
+  password: string
+}
+
+const signupHandler = async function (request: NextRequest): Promise<NextResponse> {
   try {
-    // Check if database is configured
-    if (!process.env.DATABASE_URL) {
-      getLogger().error('DATABASE_URL not configured')
+    // Rate limiting - prevent registration spam
+    const clientId = request.headers.get('x-forwarded-for') ?? request.ip ?? 'anonymous'
+    const rateLimit = await rateLimiters.auth.isAllowed(clientId)
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        {
-          success: false,
-          message:
-            'Database not configured. Please set DATABASE_URL environment variable in Vercel Dashboard.',
-          error_code: 'DB_NOT_CONFIGURED',
-          help_url:
-            'https://github.com/ok123dung/rok-services/blob/main/docs/VERCEL_DATABASE_SETUP.md'
-        },
-        { status: 503 }
+        { error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.', retryAfter: rateLimit.retryAfter },
+        { status: 429 }
       )
     }
 
-    // Test database connection
-    try {
-      await prisma.$connect()
-      await prisma.$queryRaw`SELECT 1`
-    } catch (dbError) {
-      getLogger().error('Database connection failed', dbError as Error)
-
-      const errorInfo: any = {
-        success: false,
-        error_code: 'DB_CONNECTION_FAILED',
-        message:
-          'Unable to connect to database. This is usually due to missing or incorrect DATABASE_URL configuration.'
-      }
-
-      // Provide helpful error messages based on error type
-      if (dbError instanceof Error) {
-        if (dbError.message.includes('P1001')) {
-          errorInfo.message =
-            'Cannot reach database server. Please check DATABASE_URL and ensure it includes connection pooling parameters.'
-          errorInfo.hint = 'Add ?pgbouncer=true&connection_limit=1 to your DATABASE_URL'
-        } else if (dbError.message.includes('P1002')) {
-          errorInfo.message = 'Database server timeout. The server took too long to respond.'
-          errorInfo.hint =
-            'This often happens in serverless environments. Ensure connection pooling is enabled.'
-        } else if (dbError.message.includes('ECONNREFUSED')) {
-          errorInfo.message = 'Connection refused by database server.'
-          errorInfo.hint = 'Verify the database host and port in your DATABASE_URL.'
-        } else if (dbError.message.includes('certificate') || dbError.message.includes('SSL')) {
-          errorInfo.message = 'SSL/TLS connection error.'
-          errorInfo.hint = 'Try adding ?sslmode=require to your DATABASE_URL.'
-        }
-
-        // TEMPORARY DEBUG: Always return debug info
-        errorInfo.debug = {
-          error: dbError.message,
-          code: (dbError as any).code,
-          meta: (dbError as any).meta,
-          hasDbUrl: !!process.env.DATABASE_URL,
-          urlFormat: process.env.DATABASE_URL ? 'postgresql://...' : 'not set'
-        }
-      }
-
-      errorInfo.help_url =
-        'https://github.com/yourusername/yourrepo/blob/main/VERCEL-DEPLOYMENT-FIX.md'
-
-      return NextResponse.json(errorInfo, { status: 503 })
-    }
-
-    const body = await request.json()
+    const body = (await request.json()) as SignupBody
 
     // Validate input
     let validatedData
     try {
       validatedData = signupSchema.parse({
-        fullName: sanitizeInput(body.fullName),
-        email: sanitizeInput(body.email.toLowerCase()),
+        fullName: sanitizeInput(body.fullName ?? ''),
+        email: sanitizeInput((body.email ?? '').toLowerCase()),
         phone: body.phone ? sanitizeInput(body.phone) : null,
-        password: body.password
+        password: body.password ?? ''
       })
-    } catch (error) {
+    } catch (_error) {
       throw new ValidationError(ErrorMessages.INVALID_INPUT)
     }
 
@@ -119,8 +74,8 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
       }
     }
 
-    // Hash password
-    const hashedPassword = await hash(validatedData.password, 12)
+    // Hash password (14 rounds for better security - OWASP recommendation)
+    const hashedPassword = await hash(validatedData.password, 14)
 
     // Create user
     let user
@@ -141,8 +96,10 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
           createdAt: true
         }
       })
-    } catch (error) {
-      handleDatabaseError(error)
+    } catch (dbError) {
+      handleDatabaseError(dbError)
+      // handleDatabaseError always throws, but TypeScript doesn't know that
+      throw dbError
     }
 
     // Log successful registration
@@ -154,11 +111,15 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
     })
 
     // Send welcome email (non-blocking)
-    sendWelcomeEmail(user.email, user.fullName).catch(emailError => {
-      getLogger().error('Failed to send welcome email', emailError as Error, {
-        userId: user.id,
-        email: user.email
-      })
+    sendWelcomeEmail(user.email, user.fullName).catch((emailError: unknown) => {
+      getLogger().error(
+        'Failed to send welcome email',
+        emailError instanceof Error ? emailError : new Error(String(emailError)),
+        {
+          userId: user.id,
+          email: user.email
+        }
+      )
     })
 
     return NextResponse.json(
@@ -175,6 +136,8 @@ export const POST = trackRequest('/api/auth/signup')(async function (request: Ne
       { status: 201 }
     )
   } catch (error) {
-    return handleApiError(error, request.headers.get('x-request-id') || undefined)
+    return handleApiError(error, request.headers.get('x-request-id') ?? undefined)
   }
-})
+}
+
+export const POST = trackRequest('/api/auth/signup')(withDatabaseConnection(signupHandler))

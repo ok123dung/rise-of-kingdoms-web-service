@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { useLanguage } from '@/contexts/LanguageContext'
 
 import { Menu, X, Crown, Shield, Users, BookOpen, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+
+import { useLanguage } from '@/contexts/LanguageContext'
+
 import UserMenu from './UserMenu'
-
-
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -80,13 +80,13 @@ export default function Header() {
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
           <button
+            className="relative z-50 flex items-center space-x-1 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-white/50"
             type="button"
-            onClick={(e) => {
+            onClick={e => {
               e.preventDefault()
               e.stopPropagation()
               toggleLanguage()
             }}
-            className="relative z-50 flex items-center space-x-1 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-white/50"
           >
             <span>{language === 'vi' ? '🇻🇳 VI' : '🇺🇸 EN'}</span>
           </button>
@@ -105,8 +105,9 @@ export default function Header() {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden">
-          <div
-            className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
+          <button
+            className="fixed inset-0 z-50 h-full w-full cursor-default bg-black/20 backdrop-blur-sm"
+            type="button"
             onClick={() => setMobileMenuOpen(false)}
           />
           <div className="glassmorphism fixed inset-y-0 right-0 z-50 w-full overflow-y-auto border-l border-white/20 px-6 py-6 sm:max-w-sm">
@@ -139,11 +140,11 @@ export default function Header() {
                     </Link>
                   ))}
                   <button
+                    className="-mx-3 flex w-full items-center space-x-4 rounded-2xl px-4 py-3 text-base font-semibold leading-7 text-slate-800 transition-all duration-300 hover:bg-white/20"
                     onClick={() => {
                       toggleLanguage()
                       setMobileMenuOpen(false)
                     }}
-                    className="-mx-3 flex w-full items-center space-x-4 rounded-2xl px-4 py-3 text-base font-semibold leading-7 text-slate-800 transition-all duration-300 hover:bg-white/20"
                   >
                     <span className="text-xl">{language === 'vi' ? '🇻🇳' : '🇺🇸'}</span>
                     <span>{language === 'vi' ? 'Tiếng Việt' : 'English'}</span>

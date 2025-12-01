@@ -222,7 +222,7 @@ Trân trọng,
 "Your Rise of Kingdoms Success Partner"
   `
 
-  return await sendEmail({
+  return sendEmail({
     to: email,
     subject: '🏰 Chào mừng đến với RoK Services - Tài khoản đã được tạo thành công!',
     html: htmlContent,
@@ -344,7 +344,7 @@ Trân trọng,
 Đội ngũ RoK Services
   `
 
-  return await sendEmail({
+  return sendEmail({
     to: email,
     subject: '🔒 Đặt lại mật khẩu - RoK Services',
     html: htmlContent,
@@ -400,7 +400,7 @@ export async function sendAccountCreatedEmail(
     </html>
   `
 
-  return await sendEmail({
+  return sendEmail({
     to: email,
     subject: '🔐 Thông tin tài khoản RoK Services của bạn',
     html: htmlContent,
@@ -415,7 +415,7 @@ export async function sendBookingReceivedEmail(
   bookingNumber: string,
   serviceName: string
 ): Promise<boolean> {
-  const paymentUrl = `${process.env.NEXTAUTH_URL || 'https://rokdbot.com'}/booking` // Ideally link to specific booking if possible
+  const _paymentUrl = `${process.env.NEXTAUTH_URL || 'https://rokdbot.com'}/booking` // Ideally link to specific booking if possible
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -444,7 +444,7 @@ export async function sendBookingReceivedEmail(
     </html>
   `
 
-  return await sendEmail({
+  return sendEmail({
     to: email,
     subject: `📅 Xác nhận yêu cầu đặt lịch #${bookingNumber}`,
     html: htmlContent,
@@ -499,7 +499,7 @@ export async function sendOrderConfirmationEmail(
     </html>
   `
 
-  return await sendEmail({
+  return sendEmail({
     to: email,
     subject: `✅ Thanh toán thành công #${orderDetails.orderNumber}`,
     html: htmlContent,

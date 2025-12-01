@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import { CalendarIcon, ClockIcon } from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
@@ -56,25 +56,26 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchBookings()
-    }
-  }, [session])
-
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
       const response = await fetch('/api/user/bookings')
       if (response.ok) {
-        const data = await response.json()
-        setBookings(data.bookings || [])
+        const data = (await response.json()) as { bookings?: Booking[] }
+        setBookings(data.bookings ?? [])
       }
-    } catch (error) {
-      console.error('Error fetching bookings:', error)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      console.error('Error fetching bookings:', message)
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (session?.user) {
+      void fetchBookings()
+    }
+  }, [session, fetchBookings])
 
   if (loading) {
     return (

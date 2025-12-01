@@ -26,9 +26,16 @@ const createPaymentSchema = z.object({
   cancelUrl: z.string().url().optional()
 })
 
+interface CreatePaymentBody {
+  bookingId: string
+  paymentMethod: string
+  returnUrl?: string
+  cancelUrl?: string
+}
+
 async function createPaymentHandler(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = (await request.json()) as CreatePaymentBody
 
     // Validate request data
     let validatedData
@@ -91,10 +98,31 @@ async function createPaymentHandler(request: NextRequest) {
       userId: session?.user?.id
     })
 
-    let paymentResult: any
+    interface PaymentResult {
+      success: boolean
+      error?: string
+      data?: {
+        payUrl?: string
+        order_url?: string
+        orderId?: string
+        app_trans_id?: string
+        // Banking transfer fields
+        transferCode?: string
+        bankAccounts?: Array<{
+          bankName: string
+          accountNumber: string
+          accountName: string
+        }>
+        amount?: number
+        transferContent?: string
+        expireTime?: Date
+      }
+    }
+
+    let paymentResult: PaymentResult
 
     switch (validatedData.paymentMethod) {
-      case 'momo':
+      case 'momo': {
         const momoPayment = new MoMoPayment()
         paymentResult = await momoPayment.createPayment({
           bookingId: validatedData.bookingId,
@@ -104,8 +132,9 @@ async function createPaymentHandler(request: NextRequest) {
           ipnUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/momo/webhook`
         })
         break
+      }
 
-      case 'zalopay':
+      case 'zalopay': {
         const zaloPayment = new ZaloPayPayment()
         paymentResult = await zaloPayment.createOrder({
           bookingId: validatedData.bookingId,
@@ -114,8 +143,9 @@ async function createPaymentHandler(request: NextRequest) {
           callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
         })
         break
+      }
 
-      case 'vnpay':
+      case 'vnpay': {
         const vnpayInstance = new VNPayPayment()
         paymentResult = await vnpayInstance.createPaymentUrl({
           bookingId: booking.id,
@@ -124,8 +154,9 @@ async function createPaymentHandler(request: NextRequest) {
           returnUrl: `${process.env.NEXTAUTH_URL}/api/payments/vnpay/return`
         })
         break
+      }
 
-      case 'banking':
+      case 'banking': {
         // For banking, create payment record and send instructions
         const bankingInstance = new BankingTransfer()
         paymentResult = await bankingInstance.createTransferOrder({
@@ -133,27 +164,28 @@ async function createPaymentHandler(request: NextRequest) {
           amount: amount,
           customerName: booking.user.fullName,
           customerEmail: booking.user.email,
-          customerPhone: booking.user.phone || undefined
+          customerPhone: booking.user.phone ?? undefined
         })
         break
+      }
 
       default:
         throw new ValidationError('Unsupported payment method')
     }
 
     if (!paymentResult.success) {
-      throw new PaymentError(paymentResult.error || ErrorMessages.PAYMENT_FAILED, {
+      throw new PaymentError(paymentResult.error ?? ErrorMessages.PAYMENT_FAILED, {
         paymentMethod: validatedData.paymentMethod
       })
     }
 
     // Return payment URL for redirect
-    const paymentUrl = paymentResult.data?.payUrl || paymentResult.data?.order_url
+    const paymentUrl = paymentResult.data?.payUrl ?? paymentResult.data?.order_url
 
     getLogger().info('Payment created successfully', {
       bookingId: validatedData.bookingId,
       paymentMethod: validatedData.paymentMethod,
-      orderId: paymentResult.data?.orderId || paymentResult.data?.app_trans_id
+      orderId: paymentResult.data?.orderId ?? paymentResult.data?.app_trans_id
     })
 
     return NextResponse.json({
@@ -162,13 +194,13 @@ async function createPaymentHandler(request: NextRequest) {
         paymentUrl,
         paymentMethod: validatedData.paymentMethod,
         amount,
-        orderId: paymentResult.data?.orderId || paymentResult.data?.app_trans_id,
+        orderId: paymentResult.data?.orderId ?? paymentResult.data?.app_trans_id,
         bookingId: validatedData.bookingId
       },
       message: 'Payment created successfully'
     })
   } catch (error) {
-    return handleApiError(error, request.headers.get('x-request-id') || undefined)
+    return handleApiError(error, request.headers.get('x-request-id') ?? undefined)
   }
 }
 

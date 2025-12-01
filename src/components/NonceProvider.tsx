@@ -21,13 +21,23 @@ export function useNonce() {
 }
 
 // Helper component for inline scripts
-export function InlineScript({ children, ...props }: { children: string; [key: string]: any }) {
+export function InlineScript({
+  children,
+  ...props
+}: {
+  children: string
+} & React.ScriptHTMLAttributes<HTMLScriptElement>) {
   const nonce = useNonce()
   return <script dangerouslySetInnerHTML={{ __html: children }} nonce={nonce} {...props} />
 }
 
 // Helper component for inline styles
-export function InlineStyle({ children, ...props }: { children: string; [key: string]: any }) {
+export function InlineStyle({
+  children,
+  ...props
+}: {
+  children: string
+} & React.StyleHTMLAttributes<HTMLStyleElement>) {
   const nonce = useNonce()
   return <style dangerouslySetInnerHTML={{ __html: children }} nonce={nonce} {...props} />
 }

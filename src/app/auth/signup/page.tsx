@@ -118,7 +118,7 @@ export default function SignUpPage() {
         })
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as { message?: string }
 
       if (!response.ok) {
         throw new Error(data.message || 'Có lỗi xảy ra')
@@ -127,26 +127,29 @@ export default function SignUpPage() {
       setSuccess(true)
 
       // Auto sign in after successful registration
-      setTimeout(async () => {
-        const result = await signIn('credentials', {
-          email: formData.email,
-          password: formData.password,
-          redirect: false
-        })
+      setTimeout(() => {
+        void (async () => {
+          const result = await signIn('credentials', {
+            email: formData.email,
+            password: formData.password,
+            redirect: false
+          })
 
-        if (result?.ok) {
-          router.push('/admin/dashboard')
-        }
+          if (result?.ok) {
+            router.push('/admin/dashboard')
+          }
+        })()
       }, 2000)
-    } catch (error: any) {
-      setError(error.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Có lỗi xảy ra'
+      setError(message)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleDiscordSignIn = () => {
-    signIn('discord', { callbackUrl: '/admin/dashboard' })
+  const _handleDiscordSignIn = () => {
+    void signIn('discord', { callbackUrl: '/admin/dashboard' })
   }
 
   if (success) {
@@ -181,7 +184,10 @@ export default function SignUpPage() {
         </div>
 
         {/* Sign up form */}
-        <form className="mt-8 space-y-6 rounded-xl bg-white p-8 shadow-lg" onSubmit={handleSubmit}>
+        <form
+          className="mt-8 space-y-6 rounded-xl bg-white p-8 shadow-lg"
+          onSubmit={e => void handleSubmit(e)}
+        >
           {error && (
             <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600">
               <AlertCircle className="h-4 w-4" />
@@ -334,9 +340,9 @@ export default function SignUpPage() {
 
           <div>
             <button
-              id="submit-signup"
               className="group relative flex w-full justify-center rounded-lg border border-transparent bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:scale-105 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isLoading || !isMounted}
+              id="submit-signup"
               type="submit"
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Tạo tài khoản'}

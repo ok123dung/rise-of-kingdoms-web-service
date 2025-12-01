@@ -39,16 +39,17 @@ export function WebhookMonitor() {
   const [retrying, setRetrying] = useState<string | null>(null)
   const [filter, setFilter] = useState<string>('all')
   useEffect(() => {
-    fetchWebhooks()
-    const interval = setInterval(fetchWebhooks, 30000) // Refresh every 30s
+    void fetchWebhooks()
+    const interval = setInterval(() => void fetchWebhooks(), 30000) // Refresh every 30s
     return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter])
   const fetchWebhooks = async () => {
     try {
       const params = new URLSearchParams()
       if (filter !== 'all') params.append('status', filter)
-      const response = await fetch(`/api/admin/webhooks?${params}`)
-      const data = await response.json()
+      const response = await fetch(`/api/admin/webhooks?${params.toString()}`)
+      const data = (await response.json()) as { webhooks: WebhookEvent[]; stats: WebhookStats }
       setWebhooks(data.webhooks)
       setStats(data.stats)
     } catch (error) {
@@ -66,7 +67,7 @@ export function WebhookMonitor() {
         body: JSON.stringify({ eventId })
       })
       if (response.ok) {
-        fetchWebhooks()
+        void fetchWebhooks()
       }
     } catch (error) {
       console.error('Failed to retry webhook:', error)
@@ -150,7 +151,7 @@ export function WebhookMonitor() {
         </select>
         <button
           className="ml-auto text-sm text-blue-600 hover:text-blue-700"
-          onClick={fetchWebhooks}
+          onClick={() => void fetchWebhooks()}
         >
           <RefreshCw className="h-4 w-4" />
         </button>
@@ -214,7 +215,7 @@ export function WebhookMonitor() {
                     <button
                       className="text-blue-600 hover:text-blue-700"
                       disabled={retrying === webhook.eventId}
-                      onClick={() => retryWebhook(webhook.eventId)}
+                      onClick={() => void retryWebhook(webhook.eventId)}
                     >
                       {retrying === webhook.eventId ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

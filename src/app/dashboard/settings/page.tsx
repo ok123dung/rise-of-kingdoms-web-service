@@ -6,7 +6,7 @@ import { ShieldCheckIcon, KeyIcon, DevicePhoneMobileIcon } from '@heroicons/reac
 import { useSession } from 'next-auth/react'
 
 export default function SettingsPage() {
-  const { data: session } = useSession()
+  useSession()
   const [notifications, setNotifications] = useState({
     email: true,
     sms: false,

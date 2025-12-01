@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Health check endpoint
-export async function HEAD() {
+// Health check endpoint - simple sync handler
+export function HEAD() {
   return new NextResponse(null, { status: 200 })
 }

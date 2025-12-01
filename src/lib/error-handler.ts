@@ -1,107 +1,83 @@
+// Sentry error handling integration
+// Re-exports error classes from centralized errors.ts
+
 import * as Sentry from '@sentry/nextjs'
 
 import { getLogger } from '@/lib/monitoring/logger'
 
+// Re-export from centralized errors
+export {
+  AppError,
+  ValidationError,
+  AuthenticationError,
+  AuthorizationError,
+  NotFoundError,
+  ConflictError,
+  RateLimitError,
+  ExternalServiceError,
+  handleApiError,
+  handleDatabaseError,
+  logError,
+  isAppError,
+  isOperationalError,
+  ErrorMessages
+} from '@/lib/errors'
+
+import { type AppError, isAppError } from '@/lib/errors'
+
 export interface ErrorContext {
   userId?: string
   action?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   tags?: Record<string, string>
-  [key: string]: any
 }
 
-export class AppError extends Error {
-  public statusCode: number
-  public isOperational: boolean
-  public context?: ErrorContext
-
-  constructor(message: string, statusCode = 500, isOperational = true, context?: ErrorContext) {
-    super(message)
-    this.statusCode = statusCode
-    this.isOperational = isOperational
-    this.context = context
-
-    Error.captureStackTrace(this, this.constructor)
-  }
-}
-
-export class ValidationError extends AppError {
-  constructor(message: string, context?: ErrorContext) {
-    super(message, 400, true, context)
-  }
-}
-
-export class AuthenticationError extends AppError {
-  constructor(message = 'Authentication failed', context?: ErrorContext) {
-    super(message, 401, true, context)
-  }
-}
-
-export class AuthorizationError extends AppError {
-  constructor(message = 'Access denied', context?: ErrorContext) {
-    super(message, 403, true, context)
-  }
-}
-
-export class NotFoundError extends AppError {
-  constructor(message = 'Resource not found', context?: ErrorContext) {
-    super(message, 404, true, context)
-  }
-}
-
-export class ConflictError extends AppError {
-  constructor(message = 'Resource conflict', context?: ErrorContext) {
-    super(message, 409, true, context)
-  }
-}
-
-export class RateLimitError extends AppError {
-  constructor(message = 'Too many requests', context?: ErrorContext) {
-    super(message, 429, true, context)
-  }
-}
-
-export class ExternalServiceError extends AppError {
-  constructor(service: string, message: string, context?: ErrorContext) {
-    super(`${service} error: ${message}`, 502, true, context)
-  }
-}
-
-// Enhanced error handler with Sentry
-export function handleError(error: Error | AppError, context?: ErrorContext): void {
+// Enhanced error handler with Sentry integration
+export function handleErrorWithSentry(error: Error | AppError, context?: ErrorContext): void {
   // Log to console in development
   if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
     console.error('Error:', error)
     if (context) {
+      // eslint-disable-next-line no-console
       console.error('Context:', context)
     }
   }
 
   // Log to monitoring
-  getLogger().error(error.message, error, context ? { ...context } : undefined)
+  getLogger().error(
+    error.message,
+    error,
+    context
+      ? {
+          userId: context.userId,
+          action: context.action
+        }
+      : undefined
+  )
 
   // Send to Sentry with context
-  if (error instanceof AppError) {
+  if (isAppError(error)) {
+    const appError = error
     // Operational errors
-    if (error.isOperational) {
+    if (appError.isOperational) {
       // Only send to Sentry if it's a server error
-      if (error.statusCode >= 500) {
+      if (appError.statusCode >= 500) {
         Sentry.captureException(error, {
           level: 'error',
           contexts: {
             app: {
-              statusCode: error.statusCode,
-              isOperational: error.isOperational,
-              ...(error.context || {})
-            } as any
+              statusCode: appError.statusCode,
+              isOperational: appError.isOperational
+            }
           },
           tags: {
             type: 'operational',
-            statusCode: error.statusCode.toString(),
-            ...error.context?.tags
+            statusCode: appError.statusCode.toString(),
+            ...context?.tags
           },
-          user: error.context?.userId ? { id: error.context.userId } : undefined,
-          extra: error.context?.metadata
+          user: context?.userId ? { id: context.userId } : undefined,
+          extra: context?.metadata
         })
       }
     } else {
@@ -110,27 +86,23 @@ export function handleError(error: Error | AppError, context?: ErrorContext): vo
         level: 'fatal',
         contexts: {
           app: {
-            statusCode: error.statusCode,
-            isOperational: error.isOperational,
-            ...error.context
+            statusCode: appError.statusCode,
+            isOperational: appError.isOperational
           }
         },
         tags: {
           type: 'programming',
-          statusCode: error.statusCode.toString(),
-          ...error.context?.tags
+          statusCode: appError.statusCode.toString(),
+          ...context?.tags
         },
-        user: error.context?.userId ? { id: error.context.userId } : undefined,
-        extra: error.context?.metadata
+        user: context?.userId ? { id: context.userId } : undefined,
+        extra: context?.metadata
       })
     }
   } else {
     // Unknown errors - always send to Sentry
     Sentry.captureException(error, {
       level: 'error',
-      contexts: {
-        app: context as any
-      },
       tags: {
         type: 'unknown',
         ...context?.tags
@@ -141,7 +113,7 @@ export function handleError(error: Error | AppError, context?: ErrorContext): vo
   }
 }
 
-// Error response helper
+// Error response helper with Sentry trace
 export function createErrorResponse(error: Error | AppError): {
   error: string
   message?: string
@@ -149,7 +121,7 @@ export function createErrorResponse(error: Error | AppError): {
   timestamp: string
   requestId?: string
 } {
-  const statusCode = error instanceof AppError ? error.statusCode : 500
+  const statusCode = isAppError(error) ? error.statusCode : 500
   const message = error.message || 'Internal server error'
 
   // Don't expose internal errors in production
@@ -165,26 +137,8 @@ export function createErrorResponse(error: Error | AppError): {
   }
 }
 
-// Async error wrapper
-export function asyncHandler<T extends (...args: any[]) => Promise<any>>(
-  fn: T,
-  context?: ErrorContext
-): T {
-  return (async (...args: Parameters<T>) => {
-    try {
-      return await fn(...args)
-    } catch (error) {
-      handleError(error as Error, context)
-      throw error
-    }
-  }) as T
-}
-
 // Express-style error handler for API routes
-export async function apiErrorHandler(
-  error: Error | AppError,
-  request: Request
-): Promise<Response> {
+export function apiErrorHandler(error: Error | AppError, request: Request): Response {
   const context: ErrorContext = {
     action: `${request.method} ${new URL(request.url).pathname}`,
     metadata: {
@@ -194,7 +148,7 @@ export async function apiErrorHandler(
     }
   }
 
-  handleError(error, context)
+  handleErrorWithSentry(error, context)
 
   const response = createErrorResponse(error)
 
@@ -202,7 +156,7 @@ export async function apiErrorHandler(
     status: response.statusCode,
     headers: {
       'Content-Type': 'application/json',
-      'X-Request-ID': response.requestId || ''
+      'X-Request-ID': response.requestId ?? ''
     }
   })
 }

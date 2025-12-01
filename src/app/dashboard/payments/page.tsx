@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import {
   CreditCardIcon,
@@ -33,6 +33,11 @@ interface Payment {
     }
   }
 }
+
+interface PaymentsResponse {
+  payments: Payment[]
+}
+
 const statusIcons = {
   pending: ClockIcon,
   completed: CheckCircleIcon,
@@ -57,25 +62,27 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
-  useEffect(() => {
-    if (session?.user) {
-      fetchPayments()
-    }
-  }, [session, filter])
-  const fetchPayments = async () => {
+
+  const fetchPayments = useCallback(async () => {
     try {
       const url = filter === 'all' ? '/api/user/payments' : `/api/user/payments?status=${filter}`
       const response = await fetch(url)
       if (response.ok) {
-        const data = await response.json()
-        setPayments(data.payments || [])
+        const data = (await response.json()) as PaymentsResponse
+        setPayments(data.payments ?? [])
       }
     } catch (error) {
       console.error('Error fetching payments:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter])
+
+  useEffect(() => {
+    if (session?.user) {
+      void fetchPayments()
+    }
+  }, [session, fetchPayments])
   const getStatusText = (status: string) => {
     const statusTexts: Record<string, string> = {
       pending: 'Chờ thanh toán',

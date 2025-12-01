@@ -1,6 +1,7 @@
 'use client'
 
 import { Clock, Trophy, ShieldCheck } from 'lucide-react'
+
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Features() {
@@ -47,8 +48,8 @@ export default function Features() {
             <div
               key={feature.id}
               className="animate-fadeInUp group relative rounded-3xl border border-slate-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              style={{ animationDelay: `${index * 0.1}s` }}
               data-testid="feature-item"
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div
                 className={`mb-6 inline-flex rounded-2xl p-4 ${feature.iconBgColor} transition-transform duration-300 group-hover:scale-110`}

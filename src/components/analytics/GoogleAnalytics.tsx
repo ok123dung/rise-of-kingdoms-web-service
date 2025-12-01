@@ -35,12 +35,15 @@ export default function GoogleAnalytics() {
 }
 
 // Analytics tracking functions
-export const trackEvent = (eventName: string, parameters?: Record<string, any>) => {
+export const trackEvent = (eventName: string, parameters?: Record<string, unknown>) => {
   if (window?.gtag) {
+    const params = parameters
+    const label = (params?.label as string) ?? ''
+    const value = (params?.value as number) ?? 0
     window.gtag('event', eventName, {
       event_category: 'engagement',
-      event_label: parameters?.label || '',
-      value: parameters?.value || 0,
+      event_label: label,
+      value,
       ...parameters
     })
   }

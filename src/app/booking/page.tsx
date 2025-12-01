@@ -2,7 +2,16 @@
 
 import { Suspense, useState, useEffect } from 'react'
 
-import { Check, ChevronRight, ChevronLeft, User, Shield, Sparkles, Loader2, Target } from 'lucide-react'
+import {
+  Check,
+  ChevronRight,
+  ChevronLeft,
+  User,
+  Shield,
+  Sparkles,
+  Loader2,
+  Target
+} from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
 import Footer from '@/components/layout/Footer'
@@ -43,7 +52,7 @@ function BookingContent() {
       setFormData(prev => ({
         ...prev,
         serviceId: serviceParam,
-        tierId: tierParam || ''
+        tierId: tierParam ?? ''
       }))
     }
   }, [searchParams])
@@ -60,6 +69,11 @@ function BookingContent() {
     }
   }
 
+  interface BookingResponse {
+    bookingId?: string
+    error?: string
+  }
+
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
@@ -70,13 +84,17 @@ function BookingContent() {
       })
 
       if (response.ok) {
-        const data = await response.json()
-        router.push(`/booking/payment/${data.bookingId}`)
+        const data = (await response.json()) as BookingResponse
+        if (data.bookingId) {
+          router.push(`/booking/payment/${data.bookingId}`)
+        }
       } else {
+        // eslint-disable-next-line no-alert
         alert('Có lỗi xảy ra. Vui lòng thử lại.')
       }
     } catch (error) {
       console.error('Booking error:', error)
+      // eslint-disable-next-line no-alert
       alert('Có lỗi xảy ra. Vui lòng thử lại.')
     } finally {
       setIsSubmitting(false)
@@ -88,15 +106,22 @@ function BookingContent() {
     return t.services[slug as keyof typeof t.services]
   }
 
+  interface PricingTier {
+    tier: string
+    price: number
+    features: string[]
+  }
+
   const selectedService = getServiceData(formData.serviceId)
   // Find tier by matching slug or name since we don't have explicit slugs in translation pricing
-  const selectedTier = selectedService?.pricing.find((p: any) =>
-    p.tier.toLowerCase().replace(/\s+/g, '-') === formData.tierId ||
-    p.tier === formData.tierId
-  ) || selectedService?.pricing[0]
+  const selectedTier =
+    selectedService?.pricing.find(
+      (p: PricingTier) =>
+        p.tier.toLowerCase().replace(/\s+/g, '-') === formData.tierId || p.tier === formData.tierId
+    ) ?? selectedService?.pricing[0]
 
   // Icon map
-  const iconMap: Record<string, any> = {
+  const iconMap: Record<string, typeof Target> = {
     'auto-gem-farm': Target
   }
 
@@ -108,18 +133,19 @@ function BookingContent() {
           {/* Progress Steps */}
           <div className="mb-12">
             <div className="relative flex justify-between">
-              {steps.map((step, index) => {
+              {steps.map((step, _index) => {
                 const isActive = currentStep >= step.id
-                const isCurrent = currentStep === step.id
+                const _isCurrent = currentStep === step.id
 
                 return (
                   <div key={step.id} className="relative z-10 flex flex-col items-center">
                     <div
                       className={`
                         flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-300
-                        ${isActive
-                          ? 'border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-                          : 'border-gray-300 bg-white text-gray-400'
+                        ${
+                          isActive
+                            ? 'border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-500/30'
+                            : 'border-gray-300 bg-white text-gray-400'
                         }
                       `}
                     >
@@ -161,9 +187,10 @@ function BookingContent() {
                           key={slug}
                           className={`
                             cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md
-                            ${formData.serviceId === slug
-                              ? 'border-amber-500 bg-amber-50 ring-1 ring-amber-500'
-                              : 'border-gray-100 hover:border-amber-200'
+                            ${
+                              formData.serviceId === slug
+                                ? 'border-amber-500 bg-amber-50 ring-1 ring-amber-500'
+                                : 'border-gray-100 hover:border-amber-200'
                             }
                           `}
                           onClick={() => setFormData(prev => ({ ...prev, serviceId: slug }))}
@@ -207,9 +234,15 @@ function BookingContent() {
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-700">Email</label>
+                      <label
+                        className="mb-2 block text-sm font-medium text-gray-700"
+                        htmlFor="booking-email"
+                      >
+                        Email
+                      </label>
                       <input
                         className="input-field"
+                        id="booking-email"
                         placeholder="email@example.com"
                         type="email"
                         value={formData.email}
@@ -217,11 +250,15 @@ function BookingContent() {
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                      <label
+                        className="mb-2 block text-sm font-medium text-gray-700"
+                        htmlFor="booking-phone"
+                      >
                         Phone
                       </label>
                       <input
                         className="input-field"
+                        id="booking-phone"
                         placeholder="0912345678"
                         type="tel"
                         value={formData.phone}
@@ -229,11 +266,15 @@ function BookingContent() {
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                      <label
+                        className="mb-2 block text-sm font-medium text-gray-700"
+                        htmlFor="booking-kingdom"
+                      >
                         Kingdom ID (Optional)
                       </label>
                       <input
                         className="input-field"
+                        id="booking-kingdom"
                         placeholder="#1234"
                         type="text"
                         value={formData.kingdom}
@@ -241,11 +282,15 @@ function BookingContent() {
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                      <label
+                        className="mb-2 block text-sm font-medium text-gray-700"
+                        htmlFor="booking-notes"
+                      >
                         Note
                       </label>
                       <textarea
                         className="input-field"
+                        id="booking-notes"
                         placeholder="Bạn cần hỗ trợ cụ thể vấn đề gì?"
                         rows={3}
                         value={formData.notes}
@@ -305,9 +350,7 @@ function BookingContent() {
 
                   <div className="mt-6 flex items-start space-x-3 rounded-lg bg-blue-50 p-4 text-sm text-blue-700">
                     <Sparkles className="mt-0.5 h-5 w-5 flex-shrink-0" />
-                    <p>
-                      {t.features.time.desc}
-                    </p>
+                    <p>{t.features.time.desc}</p>
                   </div>
                 </div>
               )}
@@ -319,9 +362,10 @@ function BookingContent() {
                 disabled={currentStep === 1}
                 className={`
                   flex items-center space-x-2 rounded-xl px-6 py-3 font-medium transition-colors
-                  ${currentStep === 1
-                    ? 'cursor-not-allowed text-gray-300'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  ${
+                    currentStep === 1
+                      ? 'cursor-not-allowed text-gray-300'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   }
                 `}
                 onClick={handleBack}
@@ -346,7 +390,7 @@ function BookingContent() {
                 <button
                   className="btn-primary flex items-center space-x-2 px-8 py-3"
                   disabled={isSubmitting}
-                  onClick={handleSubmit}
+                  onClick={() => void handleSubmit()}
                 >
                   {isSubmitting ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
