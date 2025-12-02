@@ -1,23 +1,14 @@
 import { type MetadataRoute } from 'next'
 
-import { prisma } from '@/lib/db'
+// Check if we're in build phase to avoid DB access during static generation
+const isBuildPhase =
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  (process.env.VERCEL && process.env.VERCEL_ENV === undefined)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'
 
-  // Fetch all active services
-  const services = await prisma.service.findMany({
-    where: { isActive: true },
-    select: { slug: true, updatedAt: true }
-  })
-
-  const serviceUrls = services.map(service => ({
-    url: `${baseUrl}/services/${service.slug}`,
-    lastModified: service.updatedAt,
-    changeFrequency: 'weekly' as const,
-    priority: 0.8
-  }))
-
+  // Static routes - always included
   const staticRoutes = [
     '',
     '/services',
@@ -35,6 +26,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: route === '' ? 'daily' : ('weekly' as const),
     priority: route === '' ? 1 : 0.7
   }))
+
+  // Skip DB access during build phase
+  if (isBuildPhase) {
+    return staticRoutes as MetadataRoute.Sitemap
+  }
+
+  // Lazy import prisma only at runtime
+  const { prisma } = await import('@/lib/db')
+
+  // Fetch all active services
+  let serviceUrls: Array<{
+    url: string
+    lastModified: Date
+    changeFrequency: 'weekly'
+    priority: number
+  }> = []
+
+  try {
+    const services = await prisma.service.findMany({
+      where: { isActive: true },
+      select: { slug: true, updatedAt: true }
+    })
+
+    serviceUrls = services.map(service => ({
+      url: `${baseUrl}/services/${service.slug}`,
+      lastModified: service.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8
+    }))
+  } catch {
+    // If DB is not available, just return static routes
+    console.warn('Sitemap: Could not fetch services from database')
+  }
 
   return [...staticRoutes, ...serviceUrls] as MetadataRoute.Sitemap
 }

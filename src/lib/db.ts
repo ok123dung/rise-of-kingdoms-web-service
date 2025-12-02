@@ -266,14 +266,22 @@ class EnhancedPrismaClient extends PrismaClient {
   }
 }
 
+// Guard against build-time instantiation
+const isBuildPhase =
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  (process.env.VERCEL && process.env.VERCEL_ENV === undefined)
+
 // Global instance management
 const globalForPrisma = globalThis as unknown as {
   prismaEnhanced: EnhancedPrismaClient | undefined
 }
 
-export const prismaEnhanced = globalForPrisma.prismaEnhanced ?? new EnhancedPrismaClient()
+// Only instantiate if not in build phase
+export const prismaEnhanced = isBuildPhase
+  ? (null as unknown as EnhancedPrismaClient)
+  : (globalForPrisma.prismaEnhanced ?? new EnhancedPrismaClient())
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' && !isBuildPhase) {
   globalForPrisma.prismaEnhanced = prismaEnhanced
 }
 
@@ -291,45 +299,48 @@ async function ensureConnected() {
 }
 
 // Middleware to ensure connection before queries
+// During build phase, export a dummy object that will never be called
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-export const prisma = new Proxy(prismaEnhanced, {
-  get(target, prop, receiver) {
-    // For model operations, ensure connected first
-    if (typeof prop === 'string' && prop in target && !prop.startsWith('$')) {
-      const modelProxy = Reflect.get(target, prop, receiver) as object
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return new Proxy(modelProxy, {
-        get(modelTarget, modelProp) {
+export const prisma: EnhancedPrismaClient = isBuildPhase
+  ? (null as unknown as EnhancedPrismaClient)
+  : new Proxy(prismaEnhanced, {
+      get(target, prop, receiver) {
+        // For model operations, ensure connected first
+        if (typeof prop === 'string' && prop in target && !prop.startsWith('$')) {
+          const modelProxy = Reflect.get(target, prop, receiver) as object
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return new Proxy(modelProxy, {
+            get(modelTarget, modelProp) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              const value = Reflect.get(modelTarget, modelProp)
+              if (typeof value === 'function') {
+                return async (...args: unknown[]) => {
+                  await ensureConnected()
+                  return (value as (...args: unknown[]) => unknown).apply(modelTarget, args)
+                }
+              }
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+              return value
+            }
+          })
+        }
+
+        // For $-prefixed methods
+        if (typeof prop === 'string' && prop.startsWith('$') && prop !== '$connect') {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const value = Reflect.get(modelTarget, modelProp)
+          const value = Reflect.get(target, prop, receiver)
           if (typeof value === 'function') {
             return async (...args: unknown[]) => {
               await ensureConnected()
-              return (value as (...args: unknown[]) => unknown).apply(modelTarget, args)
+              return (value as (...args: unknown[]) => unknown).apply(target, args)
             }
           }
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return value
         }
-      })
-    }
 
-    // For $-prefixed methods
-    if (typeof prop === 'string' && prop.startsWith('$') && prop !== '$connect') {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const value = Reflect.get(target, prop, receiver)
-      if (typeof value === 'function') {
-        return async (...args: unknown[]) => {
-          await ensureConnected()
-          return (value as (...args: unknown[]) => unknown).apply(target, args)
-        }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return Reflect.get(target, prop, receiver)
       }
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return Reflect.get(target, prop, receiver)
-  }
-})
+    })
 
 // Export health check function
 export async function checkDatabaseHealth() {
@@ -372,11 +383,19 @@ export async function disconnectDatabase() {
 
 // Export base Prisma client for NextAuth adapter
 // The PrismaAdapter doesn't work well with our enhanced client
-export const basePrisma = new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  }
-})
+// Lazy instantiation to avoid build-time side effects
+const globalForBasePrisma = globalThis as unknown as {
+  basePrisma: PrismaClient | undefined
+}
+
+// Only create during runtime, not build
+export const basePrisma: PrismaClient = isBuildPhase
+  ? (null as unknown as PrismaClient)
+  : (globalForBasePrisma.basePrisma ??= new PrismaClient({
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL
+        }
+      }
+    }))

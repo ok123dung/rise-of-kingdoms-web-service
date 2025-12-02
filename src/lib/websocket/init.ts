@@ -6,7 +6,16 @@ import { WebSocketServer } from './server'
 
 let wsServer: WebSocketServer | null = null
 
+// Check if we're in a Vercel serverless environment
+const isVercelServerless = process.env.VERCEL && !process.env.ENABLE_WEBSOCKET
+
 export function initializeWebSocketServer(port = 3001) {
+  // WebSocket servers don't work in Vercel's serverless environment
+  if (isVercelServerless) {
+    getLogger().warn('WebSocket server not supported in Vercel serverless. Skipping initialization.')
+    return null
+  }
+
   if (wsServer) {
     getLogger().info('WebSocket server already initialized')
     return wsServer

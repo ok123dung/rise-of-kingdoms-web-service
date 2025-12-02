@@ -1,6 +1,24 @@
-import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
-import { emitWebSocketEvent } from '@/lib/websocket/init'
+
+// Lazy imports to avoid module-level side effects during build
+let _prisma: Awaited<typeof import('@/lib/db')>['prisma'] | null = null
+let _emitWebSocketEvent: Awaited<typeof import('@/lib/websocket/init')>['emitWebSocketEvent'] | null = null
+
+async function getPrisma() {
+  if (!_prisma) {
+    const { prisma } = await import('@/lib/db')
+    _prisma = prisma
+  }
+  return _prisma
+}
+
+async function getEmitWebSocketEvent() {
+  if (!_emitWebSocketEvent) {
+    const { emitWebSocketEvent } = await import('@/lib/websocket/init')
+    _emitWebSocketEvent = emitWebSocketEvent
+  }
+  return _emitWebSocketEvent
+}
 
 export interface WebhookRetryConfig {
   maxAttempts: number
@@ -25,6 +43,7 @@ export class WebhookRetryService {
 
   // Store webhook event for processing
   async storeWebhookEvent(provider: string, eventType: string, eventId: string, payload: Record<string, unknown>) {
+    const prisma = await getPrisma()
     try {
       // Check if event already exists
       const existingEvent = await prisma.webhookEvent.findUnique({
@@ -63,6 +82,7 @@ export class WebhookRetryService {
 
   // Process webhook event
   async processWebhookEvent(eventId: string): Promise<boolean> {
+    const prisma = await getPrisma()
     try {
       const event = await prisma.webhookEvent.findUnique({
         where: { eventId }
@@ -157,6 +177,7 @@ export class WebhookRetryService {
 
   // Handle MoMo webhook
   private async handleMoMoWebhook(event: { payload: Record<string, unknown> }): Promise<boolean> {
+    const prisma = await getPrisma()
     try {
       const { payload } = event
 
@@ -219,6 +240,7 @@ export class WebhookRetryService {
       })
 
       // Send real-time notification (outside transaction)
+      const emitWebSocketEvent = await getEmitWebSocketEvent()
       emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
         paymentId: payment.id,
         amount: payment.amount,
@@ -235,6 +257,7 @@ export class WebhookRetryService {
 
   // Handle ZaloPay webhook
   private async handleZaloPayWebhook(event: { payload: Record<string, unknown> }): Promise<boolean> {
+    const prisma = await getPrisma()
     try {
       const { payload } = event
 
@@ -291,6 +314,7 @@ export class WebhookRetryService {
       })
 
       // Send real-time notification (outside transaction)
+      const emitWebSocketEvent = await getEmitWebSocketEvent()
       emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
         paymentId: payment.id,
         amount: payment.amount,
@@ -307,6 +331,7 @@ export class WebhookRetryService {
 
   // Handle VNPay webhook
   private async handleVNPayWebhook(event: { payload: Record<string, unknown> }): Promise<boolean> {
+    const prisma = await getPrisma()
     try {
       const { payload } = event
 
@@ -363,6 +388,7 @@ export class WebhookRetryService {
       })
 
       // Send real-time notification (outside transaction)
+      const emitWebSocketEvent = await getEmitWebSocketEvent()
       emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
         paymentId: payment.id,
         amount: payment.amount,
@@ -379,6 +405,7 @@ export class WebhookRetryService {
 
   // Schedule retry for failed webhook
   private async scheduleRetry(event: { id: string; eventId: string; attempts: number }) {
+    const prisma = await getPrisma()
     const attempts = event.attempts + 1
     const delay = Math.min(
       this.config.initialDelay * Math.pow(this.config.backoffMultiplier, attempts - 1),
@@ -406,6 +433,7 @@ export class WebhookRetryService {
 
   // Process pending webhooks (run this in a cron job)
   async processPendingWebhooks() {
+    const prisma = await getPrisma()
     try {
       const now = new Date()
 
@@ -436,6 +464,7 @@ export class WebhookRetryService {
 
   // Clean up old completed/failed webhooks
   async cleanupOldWebhooks(daysToKeep = 30) {
+    const prisma = await getPrisma()
     try {
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)

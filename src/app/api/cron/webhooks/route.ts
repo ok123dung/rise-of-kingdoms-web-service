@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { getLogger } from '@/lib/monitoring/logger'
-import { webhookService } from '@/lib/webhooks/processor'
+import { getWebhookService } from '@/lib/webhooks/processor'
 
 // This endpoint should be called by a cron job service
 // Example: Vercel Cron, GitHub Actions, or external cron service
@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
     }
 
     getLogger().info('Running webhook cron job')
+
+    const webhookService = await getWebhookService()
 
     // Process pending webhooks
     await webhookService.processPendingWebhooks()

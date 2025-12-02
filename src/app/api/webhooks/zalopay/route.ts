@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { getLogger } from '@/lib/monitoring/logger'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
-import { webhookService } from '@/lib/webhooks/processor'
+import { getWebhookService } from '@/lib/webhooks/processor'
 import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
 
 export async function POST(request: NextRequest) {
@@ -72,6 +72,8 @@ export async function POST(request: NextRequest) {
         return_message: replayValidation.isDuplicate ? 'Already processed' : 'Invalid request'
       })
     }
+
+    const webhookService = await getWebhookService()
 
     // Store webhook event for processing
     await webhookService.storeWebhookEvent('zalopay', 'payment_notification', eventId, jsonData as unknown as Record<string, unknown>)

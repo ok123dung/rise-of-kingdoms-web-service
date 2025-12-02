@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { getLogger } from '@/lib/monitoring/logger'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
-import { webhookService } from '@/lib/webhooks/processor'
+import { getWebhookService } from '@/lib/webhooks/processor'
 import { validateWebhookReplayProtection } from '@/lib/webhooks/replay-protection'
 import { parseVNPayTimestamp } from '@/lib/webhooks/timestamp-utils'
 import type { VNPayWebhookParams } from '@/types/webhook-payloads'
@@ -79,6 +79,8 @@ export async function GET(request: NextRequest) {
         Message: replayValidation.isDuplicate ? 'Already processed' : 'Invalid request'
       })
     }
+
+    const webhookService = await getWebhookService()
 
     // Store webhook event for processing
     await webhookService.storeWebhookEvent('vnpay', 'payment_notification', eventId, vnpParams)

@@ -1,4 +1,10 @@
 export async function register() {
+  // Skip during Vercel build phase - critical for deployment
+  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === undefined && process.env.VERCEL) {
+    console.log('⏭️  Skipping instrumentation during build phase')
+    return
+  }
+
   // Skip if database URL is not properly configured
   if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('username:password')) {
     console.warn('⚠️  DATABASE_URL not configured properly. Skipping instrumentation.')
