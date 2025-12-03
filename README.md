@@ -1,225 +1,202 @@
-# Rise of Kingdoms Services Website
+# ROK Services
 
-Website cung cấp dịch vụ chuyên nghiệp cho game Rise of Kingdoms tại Việt Nam.
+Professional gaming services platform for Rise of Kingdoms players in Vietnam.
 
-## 🚀 Quick Start
+**Domain:** rokdbot.com | **Status:** Production-Ready MVP
+
+---
+
+## Quick Start
 
 ### Prerequisites
-
-- Node.js 18+
-- PostgreSQL database (Supabase, Neon, or local)
-- npm or yarn
+- Node.js 20.x LTS
+- PostgreSQL (Supabase recommended)
+- npm
 
 ### Development Setup
 
-1. **Install Dependencies**
-
 ```bash
+# Install dependencies
 npm install
-```
 
-2. **Configure Environment Variables**
-
-```bash
-# Copy the example environment file
+# Configure environment
 cp .env.example .env.local
+# Edit .env.local with your credentials
 
-# Edit .env.local and add your configuration:
-# - DATABASE_URL: Your PostgreSQL connection string
-# - NEXTAUTH_SECRET: Generate with: openssl rand -base64 32
-# - Other API keys as needed
-```
-
-3. **Setup Database**
-
-```bash
-# Generate Prisma client
+# Setup database
 npx prisma generate
-
-# Run migrations
 npx prisma migrate dev
 
-# (Optional) Seed initial data
-npx tsx prisma/seed.ts
-```
-
-4. **Start Development Server**
-
-```bash
+# Start development
 npm run dev
-# Open http://localhost:3000
 ```
 
-### Production Build
+Open http://localhost:3000
+
+### Production Deployment
 
 ```bash
-npm run build
-npm start
+npm i -g vercel
+vercel login
+vercel --prod
 ```
 
-## 📦 Deployment
+See [docs/DEPLOYMENT-GUIDE.md](docs/DEPLOYMENT-GUIDE.md) for detailed instructions.
 
-### Vercel Deployment
+---
 
-1. Install Vercel CLI: `npm install -g vercel`
-2. Login: `vercel login`
-3. Deploy: `vercel --prod`
+## Tech Stack
 
-### Environment Variables
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript (strict) |
+| Database | PostgreSQL + Prisma ORM |
+| Auth | NextAuth.js + 2FA (TOTP) |
+| Styling | Tailwind CSS |
+| Payments | MoMo, VNPay, ZaloPay |
+| Hosting | Vercel + Cloudflare |
+| Monitoring | Sentry |
 
-Copy `.env.example` to `.env.local` and configure:
+---
 
-```bash
-NEXT_PUBLIC_SITE_URL=https://rokdbot.com
-NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
-NEXT_PUBLIC_DISCORD_INVITE=https://discord.gg/rokservices
-```
+## Features
 
-## 🛠 Tech Stack
+- 8 RoK gaming services with tiered pricing
+- User authentication with Discord OAuth + 2FA
+- Vietnamese payment gateway integration
+- Real-time WebSocket notifications
+- Admin dashboard with analytics
+- Lead management and conversion tracking
+- Mobile-optimized, SEO-ready
 
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript (strict mode)
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: NextAuth.js
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React & Heroicons
-- **Deployment**: Vercel
-- **Monitoring**: Sentry
-- **Payment Gateways**: MoMo, ZaloPay, VNPay
+---
 
-## 📱 Features
-
-- **8 RoK Services** with detailed pricing
-- **Strategy Consulting** page with case studies
-- **Mobile-optimized** for Vietnamese gamers
-- **SEO optimized** for Vietnamese gaming keywords
-- **Conversion optimized** with urgency elements
-
-## 🎯 Target Audience
-
-Vietnamese Rise of Kingdoms players seeking professional gaming services.
-
-## 📊 Performance
-
-- **Core Web Vitals**: Optimized for mobile users
-- **SEO Score**: 95+ with structured data
-- **Loading Speed**: < 2.5s LCP for Vietnamese users
-
-## 🔧 Development
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint errors automatically
-- `npm run type-check` - TypeScript type checking
-- `npm run format` - Format code with Prettier
-- `npm run test` - Run Jest tests
-- `npm run test:e2e` - Run Playwright E2E tests
-- `npm run db:studio` - Open Prisma Studio
-- `npm run db:migrate` - Run database migrations
-
-### Project Structure
+## Project Structure
 
 ```
 src/
-├── app/                 # Next.js 14 app directory
-│   ├── api/            # API routes
-│   ├── (auth)/         # Auth pages
+├── app/                # Next.js App Router
+│   ├── api/            # API routes (~50 endpoints)
+│   ├── auth/           # Auth pages
 │   ├── admin/          # Admin dashboard
-│   └── ...
-├── components/          # React components
-│   ├── ui/             # UI components
-│   ├── sections/       # Page sections
-│   └── ...
-├── lib/                # Utility functions
-│   ├── auth/           # Authentication utilities
-│   ├── payments/       # Payment integrations
-│   └── ...
-├── types/              # TypeScript type definitions
-└── middleware/         # Next.js middleware
+│   └── dashboard/      # Customer dashboard
+├── components/         # React components (77 files)
+├── services/           # Business logic layer
+├── lib/                # Utilities and integrations
+├── hooks/              # Custom React hooks
+└── types/              # TypeScript definitions
+
 prisma/
-├── schema.prisma       # Database schema
-├── migrations/         # Database migrations
-└── seed.ts            # Database seeding
+├── schema.prisma       # Database schema (20 models)
+└── migrations/         # Database migrations
+
+docs/                   # Documentation
 ```
 
-### Security Features
+---
 
-✅ **Strong Password Policy**
-
-- Minimum 12 characters
-- Requires uppercase, lowercase, numbers, and special characters
-- Checks against common passwords
-- Prevents sequential/repeating characters
-
-✅ **Security Headers**
-
-- Content Security Policy (CSP)
-- X-Frame-Options: DENY
-- X-Content-Type-Options: nosniff
-- Strict-Transport-Security (HSTS)
-- CSRF Protection
-
-✅ **Input Validation**
-
-- Zod schema validation on all API endpoints
-- SQL injection prevention via Prisma ORM
-- XSS protection with sanitization
-
-✅ **Rate Limiting**
-
-- Auth endpoints: 5 req/min
-- Payment endpoints: 20 req/min
-- General API: 60 req/min
-
-### Environment Variables
-
-Required variables (see [.env.example](.env.example) for full list):
+## Available Scripts
 
 ```bash
-# Database
-DATABASE_URL=           # PostgreSQL connection string
-DIRECT_URL=            # Direct database connection (for migrations)
-
-# Authentication
-NEXTAUTH_URL=          # Your site URL
-NEXTAUTH_SECRET=       # Generate with: openssl rand -base64 32
-
-# Security
-API_SECRET_KEY=        # Generate with: openssl rand -base64 32
-JWT_SECRET=            # Generate with: openssl rand -base64 32
-ENCRYPTION_KEY=        # Generate with: openssl rand -base64 32
+npm run dev           # Development server
+npm run build         # Production build
+npm run start         # Production server
+npm run lint          # ESLint check
+npm run lint:fix      # Fix lint errors
+npm run type-check    # TypeScript check
+npm run test          # Jest tests
+npm run test:e2e      # Playwright E2E
+npm run db:studio     # Prisma Studio
+npm run db:migrate    # Run migrations
 ```
 
-## 🌐 Domain Configuration
+---
 
-Domain: `rokdbot.com`
+## Environment Variables
 
-- **Frontend**: Vercel
-- **CDN**: Cloudflare
-- **SSL**: Automatic via Cloudflare
+**Required:**
+```bash
+DATABASE_URL=postgresql://...
+DIRECT_URL=postgresql://...
+NEXTAUTH_URL=https://rokdbot.com
+NEXTAUTH_SECRET=<openssl rand -base64 32>
+```
 
-## 📈 Analytics
+**Payment Gateways:**
+```bash
+VNPAY_TMN_CODE, VNPAY_HASH_SECRET
+MOMO_PARTNER_CODE, MOMO_ACCESS_KEY, MOMO_SECRET_KEY
+ZALOPAY_APP_ID, ZALOPAY_KEY1, ZALOPAY_KEY2
+```
 
-- **Google Analytics 4**: User behavior tracking
-- **Core Web Vitals**: Performance monitoring
-- **Conversion Tracking**: Lead generation metrics
+**Optional:**
+```bash
+RESEND_API_KEY        # Email service
+DISCORD_*             # Discord OAuth/bot
+SENTRY_DSN            # Error monitoring
+NEXT_PUBLIC_GA_*      # Analytics
+```
 
-## 🔒 Security
+See `.env.example` for complete list.
 
-- **HTTPS**: Enforced via Cloudflare
-- **Security Headers**: XSS protection, CSRF prevention
-- **DDoS Protection**: Cloudflare enterprise-level
+---
 
-## 📞 Support
+## Security
 
-- **Discord**: https://discord.gg/rokservices
-- **Email**: contact@rokdbot.com
-- **Phone**: +84123456789
+| Feature | Implementation |
+|---------|----------------|
+| Password | 12+ chars, bcrypt 14 rounds, history |
+| 2FA | TOTP with backup codes |
+| Headers | CSP, HSTS, X-Frame-Options |
+| Rate Limiting | Auth: 5/min, Payments: 20/min |
+| Input Validation | Zod schemas, Prisma ORM |
+| Webhook Security | HMAC verification, replay protection |
 
-## 📄 License
+---
+
+## Database Models (20)
+
+**Core:** User, Service, ServiceTier, Booking, Payment, Lead, Staff
+
+**Supporting:** Communication, ServiceTask, FileUpload, WebhookEvent
+
+**Auth:** Account, Session, VerificationToken, PasswordResetToken, TwoFactorAuth, PasswordHistory
+
+**Logging:** SystemLog, SecurityLog, AuditLog
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Project Overview PDR](docs/project-overview-pdr.md) | Product requirements, features, metrics |
+| [Codebase Summary](docs/codebase-summary.md) | File structure, modules, data flow |
+| [Code Standards](docs/code-standards.md) | Naming conventions, patterns |
+| [System Architecture](docs/system-architecture.md) | Architecture diagrams, components |
+| [Project Roadmap](docs/project-roadmap.md) | Technical debt, future features |
+| [Deployment Guide](docs/DEPLOYMENT-GUIDE.md) | Setup, configuration, troubleshooting |
+
+---
+
+## Cost Estimates
+
+| Scale | Monthly Cost |
+|-------|--------------|
+| Free tier (MVP) | $0 |
+| Production (50+ users) | ~$55 |
+| Business (200+ users) | ~$180 |
+
+---
+
+## Support
+
+- **Discord:** https://discord.gg/rokservices
+- **Email:** contact@rokdbot.com
+
+---
+
+## License
 
 MIT License - See LICENSE file for details.

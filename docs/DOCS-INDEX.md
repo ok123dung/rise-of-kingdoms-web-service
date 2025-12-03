@@ -1,183 +1,100 @@
-# 📚 DOCUMENTATION INDEX
+# Documentation Index
 
-Tất cả tài liệu quan trọng của dự án ROK Services.
+ROK Services project documentation.
 
----
-
-## 🚀 DEPLOYMENT (Ưu tiên đọc)
-
-### 1. **DEPLOY-NOW.md** ⭐ QUAN TRỌNG NHẤT
-
-- Hướng dẫn deploy nhanh nhất (15 phút)
-- 3 bước đơn giản
-- Copy & paste commands
-
-### 2. **DEPLOY-MANUAL-STEPS.md** ⭐ CHI TIẾT
-
-- Hướng dẫn từng bước cụ thể
-- Troubleshooting guide
-- Environment variables setup
-
-### 3. **DEPLOYMENT-GUIDE.md**
-
-- Full deployment guide
-- Multiple deployment options
-- Production setup
+**Last Updated:** 2025-12-03
 
 ---
 
-## 📖 SETUP & CONFIGURATION
+## Core Documentation (Primary Reference)
 
-### 4. **SETUP-GUIDE.md**
-
-- Hướng dẫn setup project từ đầu
-- Database configuration
-- Development environment
-
-### 5. **NEXT-STEPS.md**
-
-- Roadmap phát triển
-- Feature suggestions
-- Phase-by-phase plan
+| Document | Description |
+|----------|-------------|
+| [project-overview-pdr.md](project-overview-pdr.md) | Product requirements, vision, features, success metrics |
+| [codebase-summary.md](codebase-summary.md) | Complete file structure, modules, data flow |
+| [code-standards.md](code-standards.md) | Naming conventions, patterns, best practices |
+| [system-architecture.md](system-architecture.md) | Architecture diagrams, component interactions |
+| [project-roadmap.md](project-roadmap.md) | Technical debt, future features, timeline |
+| [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Setup, configuration, deployment, troubleshooting |
 
 ---
 
-## 🔒 SECURITY & AUDIT
+## Quick Links
 
-### 6. **SECURITY-IMPROVEMENTS-SUMMARY.md** ⭐
+**Deploy Now:** [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md)
 
-- Tổng kết các cải tiến bảo mật
-- Security Grade: A
-- All fixes implemented
+**Understand Codebase:** [codebase-summary.md](codebase-summary.md)
 
-### 7. **AUDIT-EXECUTIVE-SUMMARY.md**
+**Architecture Overview:** [system-architecture.md](system-architecture.md)
 
-- Executive summary of audit
-- Overall score: 7.5/10
-- Priority issues
-
-### 8. **COMPREHENSIVE-AUDIT-REPORT.md**
-
-- Full technical audit (1818 lines)
-- Detailed findings
-- Code analysis
-
-### 9. **FINAL-VERIFICATION-REPORT.md**
-
-- Final verification before production
-- All checks passed
-- Production ready status
+**Code Standards:** [code-standards.md](code-standards.md)
 
 ---
 
-## 💻 TECHNICAL DETAILS
+## Additional Documentation
 
-### 10. **TYPESCRIPT-FIXES-SUMMARY.md**
+### Security & Audit
+| Document | Description |
+|----------|-------------|
+| [SECURITY-IMPROVEMENTS-SUMMARY.md](SECURITY-IMPROVEMENTS-SUMMARY.md) | Security fixes, Grade A status |
+| [AUDIT-EXECUTIVE-SUMMARY.md](AUDIT-EXECUTIVE-SUMMARY.md) | Audit findings summary |
+| [COMPREHENSIVE-AUDIT-REPORT.md](COMPREHENSIVE-AUDIT-REPORT.md) | Full technical audit |
 
-- TypeScript errors fixed
-- 13 → 0 errors
-- Type safety improvements
+### Setup Guides
+| Document | Description |
+|----------|-------------|
+| [SETUP-GUIDE.md](SETUP-GUIDE.md) | Local development setup |
+| [DATABASE-SETUP-INSTRUCTIONS.md](DATABASE-SETUP-INSTRUCTIONS.md) | Supabase/PostgreSQL setup |
+| [NEXT-STEPS.md](NEXT-STEPS.md) | Development roadmap |
 
-### 11. **BACKEND-FRONTEND-ARCHITECTURE.md**
+### Technical Details
+| Document | Description |
+|----------|-------------|
+| [BACKEND-FRONTEND-ARCHITECTURE.md](BACKEND-FRONTEND-ARCHITECTURE.md) | Architecture patterns |
+| [COMPREHENSIVE-BACKEND-ANALYSIS.md](COMPREHENSIVE-BACKEND-ANALYSIS.md) | Backend analysis |
+| [PROJECT_ASSESSMENT_REPORT.md](PROJECT_ASSESSMENT_REPORT.md) | Project assessment |
 
-- System architecture overview
-- Communication patterns
-- Data flow diagrams
-
-### 12. **COMPREHENSIVE-BACKEND-ANALYSIS.md**
-
-- Backend code analysis
-- API routes inventory
-- Database schema
+### Legacy Deployment Docs (superseded by DEPLOYMENT-GUIDE.md)
+| Document | Status |
+|----------|--------|
+| DEPLOY-NOW.md | Superseded |
+| DEPLOY-MANUAL-STEPS.md | Superseded |
+| PRE-DEPLOY-CHECKLIST.md | Superseded |
 
 ---
 
-## 📝 PROJECT INFO
-
-### 13. **README.md**
-
-- Project overview
-- Quick start guide
-- Main documentation
-
----
-
-## 🗂️ FILE ORGANIZATION
+## Document Structure
 
 ```
-ROOT/
-├── DOCS-INDEX.md                          ← YOU ARE HERE
+docs/
+├── Core Documentation
+│   ├── project-overview-pdr.md      # Product requirements
+│   ├── codebase-summary.md          # File structure
+│   ├── code-standards.md            # Coding standards
+│   ├── system-architecture.md       # Architecture
+│   ├── project-roadmap.md           # Roadmap
+│   └── DEPLOYMENT-GUIDE.md          # Deployment
 │
-├── 🚀 DEPLOYMENT/
-│   ├── DEPLOY-NOW.md                      ← START HERE
-│   ├── DEPLOY-MANUAL-STEPS.md
-│   └── DEPLOYMENT-GUIDE.md
+├── Security & Audit
+│   ├── SECURITY-IMPROVEMENTS-SUMMARY.md
+│   ├── AUDIT-EXECUTIVE-SUMMARY.md
+│   └── COMPREHENSIVE-AUDIT-REPORT.md
 │
-├── 📖 SETUP/
+├── Setup Guides
 │   ├── SETUP-GUIDE.md
+│   ├── DATABASE-SETUP-INSTRUCTIONS.md
 │   └── NEXT-STEPS.md
 │
-├── 🔒 SECURITY/
-│   ├── SECURITY-IMPROVEMENTS-SUMMARY.md   ← IMPORTANT
-│   ├── AUDIT-EXECUTIVE-SUMMARY.md
-│   ├── COMPREHENSIVE-AUDIT-REPORT.md
-│   └── FINAL-VERIFICATION-REPORT.md
-│
-├── 💻 TECHNICAL/
-│   ├── TYPESCRIPT-FIXES-SUMMARY.md
-│   ├── BACKEND-FRONTEND-ARCHITECTURE.md
-│   └── COMPREHENSIVE-BACKEND-ANALYSIS.md
-│
-└── README.md
+└── Technical Details
+    ├── BACKEND-FRONTEND-ARCHITECTURE.md
+    ├── COMPREHENSIVE-BACKEND-ANALYSIS.md
+    └── PROJECT_ASSESSMENT_REPORT.md
 ```
 
 ---
 
-## 🎯 QUICK LINKS
+## Maintenance Notes
 
-**Want to deploy NOW?** → Read: `DEPLOY-NOW.md`
-
-**Need detailed steps?** → Read: `DEPLOY-MANUAL-STEPS.md`
-
-**Want to understand security?** → Read: `SECURITY-IMPROVEMENTS-SUMMARY.md`
-
-**Need full technical details?** → Read: `COMPREHENSIVE-AUDIT-REPORT.md`
-
-**Setting up locally?** → Read: `SETUP-GUIDE.md`
-
----
-
-## 📊 DOCUMENT STATS
-
-- **Total docs:** 13 files
-- **Deployment guides:** 3
-- **Security reports:** 4
-- **Technical docs:** 3
-- **Setup guides:** 2
-- **Main README:** 1
-
-**Total size:** ~150KB of documentation
-
----
-
-## 🗑️ REMOVED DOCS
-
-**Đã xóa 61 files duplicate/outdated:**
-
-- Old deployment guides
-- Database setup duplicates
-- Environment setup duplicates
-- Multiple deployment checklists
-- Deprecated config files
-
-**Backup location:** `/tmp/rok-old-docs/`
-
----
-
-## ✅ MAINTENANCE
-
-**Last cleanup:** October 5, 2025 **By:** Claude AI **Reason:** Too many duplicates (74 → 13 files)
-
----
-
-**Need help?** Check the appropriate doc from the list above!
+- Core documentation updated: 2025-12-03
+- Security audit completed: 2025-10
+- Last major cleanup: 2025-10 (74 -> ~20 files)

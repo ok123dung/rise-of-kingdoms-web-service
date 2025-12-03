@@ -50,12 +50,33 @@ export default function SignUpPage() {
       setError('Vui lòng nhập họ tên')
       return false
     }
+    if (formData.fullName.trim().length < 2) {
+      setError('Họ tên phải có ít nhất 2 ký tự')
+      return false
+    }
     if (!formData.email.includes('@')) {
       setError('Email không hợp lệ')
       return false
     }
-    if (formData.password.length < 8) {
-      setError('Mật khẩu phải có ít nhất 8 ký tự')
+    // Password must match server requirements (12+ chars, uppercase, lowercase, number, special)
+    if (formData.password.length < 12) {
+      setError('Mật khẩu phải có ít nhất 12 ký tự')
+      return false
+    }
+    if (!/[A-Z]/.test(formData.password)) {
+      setError('Mật khẩu phải chứa ít nhất 1 chữ in hoa')
+      return false
+    }
+    if (!/[a-z]/.test(formData.password)) {
+      setError('Mật khẩu phải chứa ít nhất 1 chữ thường')
+      return false
+    }
+    if (!/[0-9]/.test(formData.password)) {
+      setError('Mật khẩu phải chứa ít nhất 1 số')
+      return false
+    }
+    if (!/[^A-Za-z0-9]/.test(formData.password)) {
+      setError('Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt')
       return false
     }
     if (formData.password !== formData.confirmPassword) {
@@ -280,7 +301,7 @@ export default function SignUpPage() {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-gray-500">Tối thiểu 8 ký tự</p>
+              <p className="mt-1 text-xs text-gray-500">Tối thiểu 12 ký tự, chứa chữ hoa, chữ thường, số và ký tự đặc biệt</p>
             </div>
 
             <div>

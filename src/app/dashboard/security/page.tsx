@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 
-import { ShieldCheck, ShieldOff, Key, RefreshCw, AlertCircle } from 'lucide-react'
+import { ShieldCheck, ShieldOff, Key, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
@@ -10,6 +10,7 @@ import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
 import ChangePasswordForm from '@/components/security/ChangePasswordForm'
 import TwoFactorSetup from '@/components/TwoFactorSetup'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 interface TwoFactorStatus {
   enabled: boolean
@@ -43,6 +44,8 @@ export default function SecurityPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
+  const [generatedBackupCodes, setGeneratedBackupCodes] = useState<string[] | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -95,39 +98,26 @@ export default function SecurityPage() {
     }
   }
 
-  const handleRegenerateBackupCodes = async () => {
-    // eslint-disable-next-line no-alert
-    if (
-      !confirm(
-        'Are you sure you want to regenerate backup codes? Your old codes will no longer work.'
-      )
-    ) {
-      return
-    }
+  const handleRegenerateBackupCodes = async (inputPassword?: string) => {
+    if (!inputPassword) return
 
     setLoading(true)
     setError('')
     setSuccess('')
-
-    // eslint-disable-next-line no-alert
-    const passwordInput = prompt('Please enter your password to regenerate backup codes:')
-    if (!passwordInput) return
+    setShowRegenerateConfirm(false)
 
     try {
       const response = await fetch('/api/auth/2fa/backup-codes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput })
+        body: JSON.stringify({ password: inputPassword })
       })
 
       const data = (await response.json()) as BackupCodesResponse
 
       if (data.success && data.backupCodes) {
-        // Show backup codes to user
-        // eslint-disable-next-line no-alert
-        alert(
-          `New backup codes:\n\n${data.backupCodes.join('\n')}\n\nPlease save these codes in a secure location!`
-        )
+        // Show backup codes in a modal instead of alert
+        setGeneratedBackupCodes(data.backupCodes)
         setSuccess('Backup codes regenerated successfully')
         void fetchTwoFactorStatus()
       } else {
@@ -223,7 +213,7 @@ export default function SecurityPage() {
                   </div>
                   <button
                     className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
-                    onClick={() => void handleRegenerateBackupCodes()}
+                    onClick={() => setShowRegenerateConfirm(true)}
                   >
                     <RefreshCw className="h-4 w-4" />
                     Tạo mã mới
@@ -285,6 +275,48 @@ export default function SecurityPage() {
                     {loading ? 'Đang xử lý...' : 'Tắt 2FA'}
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Regenerate Backup Codes Confirmation Modal */}
+          <ConfirmModal
+            isOpen={showRegenerateConfirm}
+            title="Tạo mã dự phòng mới"
+            message="Bạn có chắc chắn muốn tạo mã dự phòng mới? Các mã cũ sẽ không còn hoạt động."
+            confirmText="Tạo mã mới"
+            cancelText="Hủy"
+            variant="warning"
+            requirePassword={true}
+            passwordPlaceholder="Nhập mật khẩu của bạn"
+            onConfirm={pwd => void handleRegenerateBackupCodes(pwd)}
+            onCancel={() => setShowRegenerateConfirm(false)}
+          />
+
+          {/* Display Generated Backup Codes Modal */}
+          {generatedBackupCodes && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-md rounded-xl bg-white p-6">
+                <div className="mb-4 flex items-center gap-3">
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                  <h3 className="text-xl font-semibold">Mã dự phòng mới</h3>
+                </div>
+                <p className="mb-4 text-sm text-gray-600">
+                  Lưu các mã này ở nơi an toàn. Mỗi mã chỉ có thể sử dụng một lần.
+                </p>
+                <div className="mb-4 rounded-lg bg-gray-100 p-4 font-mono text-sm">
+                  {generatedBackupCodes.map((code, index) => (
+                    <div key={index} className="py-1">
+                      {code}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  onClick={() => setGeneratedBackupCodes(null)}
+                >
+                  Đã lưu mã
+                </button>
               </div>
             </div>
           )}
