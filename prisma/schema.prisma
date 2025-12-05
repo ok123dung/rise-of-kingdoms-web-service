@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
@@ -9,258 +9,308 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id                  String               @id @default(cuid())
-  email               String               @unique
-  password            String
-  phone               String?
-  image               String?
-  fullName            String               @map("full_name")
-  discordUsername     String?              @map("discord_username")
-  discordId           String?              @map("discord_id")
-  rokPlayerId         String?              @map("rok_player_id")
-  rokKingdom          String?              @map("rok_kingdom")
-  rokPower            BigInt?              @map("rok_power")
-  preferredLanguage   String               @default("vi") @map("preferred_language")
-  timezone            String               @default("Asia/Ho_Chi_Minh")
-  status              String               @default("active")
-  emailVerified       DateTime?            @map("email_verified")
-  lastLogin           DateTime?            @map("last_login")
-  createdAt           DateTime             @default(now()) @map("created_at")
-  updatedAt           DateTime             @updatedAt @map("updated_at")
-  accounts            Account[]
-  auditLogs           AuditLog[]
-  bookings            Booking[]
-  communications      Communication[]
-  fileUploads         FileUpload[]
-  leads               Lead[]
-  passwordHistory     PasswordHistory[]
-  passwordResetTokens PasswordResetToken[]
-  serviceTasks        ServiceTask[]
-  sessions            Session[]
-  staffProfile        Staff?
-  twoFactorAuth       TwoFactorAuth?
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model accounts {
+  id                  String  @id
+  user_id             String
+  type                String
+  provider            String
+  provider_account_id String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+  users               users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@map("users")
+  @@unique([provider, provider_account_id])
 }
 
-model Service {
-  id               String        @id @default(cuid())
-  name             String
-  slug             String        @unique
-  description      String?
-  shortDescription String?       @map("short_description")
-  basePrice        Decimal       @map("base_price") @db.Decimal(12, 2)
-  currency         String        @default("VND")
-  category         String?
-  isActive         Boolean       @default(true) @map("is_active")
-  isFeatured       Boolean       @default(false) @map("is_featured")
-  sortOrder        Int           @default(0) @map("sort_order")
-  metadata         Json?
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
-  serviceTiers     ServiceTier[]
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model audit_logs {
+  id          String   @id
+  user_id     String
+  action      String
+  resource    String
+  resource_id String
+  details     Json?
+  ip          String?
+  user_agent  String?
+  timestamp   DateTime @default(now())
+  created_at  DateTime @default(now())
+  users       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@map("services")
+  @@index([resource, resource_id])
+  @@index([user_id, timestamp])
 }
 
-model ServiceTier {
-  id               String    @id @default(cuid())
-  serviceId        String    @map("service_id")
-  name             String
-  slug             String
-  price            Decimal   @db.Decimal(12, 2)
-  originalPrice    Decimal?  @map("original_price") @db.Decimal(12, 2)
-  features         Json
-  limitations      Json?
-  isPopular        Boolean   @default(false) @map("is_popular")
-  isAvailable      Boolean   @default(true) @map("is_available")
-  maxCustomers     Int?      @map("max_customers")
-  currentCustomers Int       @default(0) @map("current_customers")
-  sortOrder        Int       @default(0) @map("sort_order")
-  metadata         Json?
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  bookings         Booking[]
-  service          Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bookings {
+  id                    String           @id
+  booking_number        String           @unique
+  user_id               String
+  service_tier_id       String
+  status                String           @default("pending")
+  payment_status        String           @default("pending")
+  total_amount          Decimal          @db.Decimal(12, 2)
+  discount_amount       Decimal          @default(0) @db.Decimal(12, 2)
+  final_amount          Decimal          @db.Decimal(12, 2)
+  currency              String           @default("VND")
+  booking_details       Json?
+  customer_requirements String?
+  start_date            DateTime?
+  end_date              DateTime?
+  assigned_staff_id     String?
+  completion_percentage Int              @default(0)
+  customer_rating       Int?
+  customer_feedback     String?
+  internal_notes        String?
+  created_at            DateTime         @default(now())
+  updated_at            DateTime
+  service_tiers         service_tiers    @relation(fields: [service_tier_id], references: [id])
+  users                 users            @relation(fields: [user_id], references: [id])
+  communications        communications[]
+  leads                 leads?
+  payments              payments[]
+  service_tasks         service_tasks[]
 
-  @@unique([serviceId, slug])
-  @@map("service_tiers")
+  @@index([assigned_staff_id, status])
+  @@index([payment_status])
+  @@index([service_tier_id])
+  @@index([status, created_at])
+  @@index([user_id, status])
 }
 
-model Booking {
-  id                   String          @id @default(cuid())
-  bookingNumber        String          @unique @map("booking_number")
-  userId               String          @map("user_id")
-  serviceTierId        String          @map("service_tier_id")
-  status               String          @default("pending")
-  paymentStatus        String          @default("pending") @map("payment_status")
-  totalAmount          Decimal         @map("total_amount") @db.Decimal(12, 2)
-  discountAmount       Decimal         @default(0) @map("discount_amount") @db.Decimal(12, 2)
-  finalAmount          Decimal         @map("final_amount") @db.Decimal(12, 2)
-  currency             String          @default("VND")
-  bookingDetails       Json?           @map("booking_details")
-  customerRequirements String?         @map("customer_requirements")
-  startDate            DateTime?       @map("start_date")
-  endDate              DateTime?       @map("end_date")
-  assignedStaffId      String?         @map("assigned_staff_id")
-  completionPercentage Int             @default(0) @map("completion_percentage")
-  customerRating       Int?            @map("customer_rating")
-  customerFeedback     String?         @map("customer_feedback")
-  internalNotes        String?         @map("internal_notes")
-  createdAt            DateTime        @default(now()) @map("created_at")
-  updatedAt            DateTime        @updatedAt @map("updated_at")
-  serviceTier          ServiceTier     @relation(fields: [serviceTierId], references: [id])
-  user                 User            @relation(fields: [userId], references: [id])
-  communications       Communication[]
-  convertedLead        Lead?
-  payments             Payment[]
-  serviceTasks         ServiceTask[]
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model communications {
+  id            String    @id
+  user_id       String
+  booking_id    String?
+  type          String
+  channel       String?
+  subject       String?
+  content       String
+  template_id   String?
+  template_data Json?
+  status        String    @default("pending")
+  sent_at       DateTime?
+  delivered_at  DateTime?
+  read_at       DateTime?
+  error_message String?
+  created_at    DateTime  @default(now())
+  bookings      bookings? @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  users         users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@index([userId, status])
-  @@index([status, createdAt])
-  @@index([paymentStatus])
-  @@index([assignedStaffId, status])
-  @@index([serviceTierId])
-  @@map("bookings")
-}
-
-model Payment {
-  id                   String    @id @default(cuid())
-  bookingId            String    @map("booking_id")
-  paymentNumber        String    @unique @map("payment_number")
-  amount               Decimal   @db.Decimal(12, 2)
-  currency             String    @default("VND")
-  paymentMethod        String    @map("payment_method")
-  paymentGateway       String    @map("payment_gateway")
-  gatewayTransactionId String?   @map("gateway_transaction_id")
-  gatewayOrderId       String?   @map("gateway_order_id")
-  status               String    @default("pending")
-  failureReason        String?   @map("failure_reason")
-  gatewayResponse      Json?     @map("gateway_response")
-  paidAt               DateTime? @map("paid_at")
-  refundedAt           DateTime? @map("refunded_at")
-  refundAmount         Decimal   @default(0) @map("refund_amount") @db.Decimal(12, 2)
-  refundReason         String?   @map("refund_reason")
-  createdAt            DateTime  @default(now()) @map("created_at")
-  updatedAt            DateTime  @updatedAt @map("updated_at")
-  booking              Booking   @relation(fields: [bookingId], references: [id])
-
-  @@index([bookingId])
-  @@index([status])
-  @@index([createdAt])
-  @@index([paymentGateway, status])
-  @@map("payments")
-}
-
-model Communication {
-  id           String    @id @default(cuid())
-  userId       String    @map("user_id")
-  bookingId    String?   @map("booking_id")
-  type         String
-  channel      String?
-  subject      String?
-  content      String
-  templateId   String?   @map("template_id")
-  templateData Json?     @map("template_data")
-  status       String    @default("pending")
-  sentAt       DateTime? @map("sent_at")
-  deliveredAt  DateTime? @map("delivered_at")
-  readAt       DateTime? @map("read_at")
-  errorMessage String?   @map("error_message")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  booking      Booking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([bookingId])
+  @@index([booking_id])
   @@index([type, status])
-  @@map("communications")
+  @@index([user_id])
 }
 
-model Lead {
-  id                 String    @id @default(cuid())
-  email              String?
-  phone              String?
-  fullName           String?   @map("full_name")
-  serviceInterest    String?   @map("service_interest")
-  source             String?
-  utmSource          String?   @map("utm_source")
-  utmMedium          String?   @map("utm_medium")
-  utmCampaign        String?   @map("utm_campaign")
-  leadScore          Int       @default(0) @map("lead_score")
-  status             String    @default("new")
-  assignedTo         String?   @map("assigned_to")
-  notes              String?
-  convertedAt        DateTime? @map("converted_at")
-  convertedBookingId String?   @unique @map("converted_booking_id")
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
-  assignedUser       User?     @relation(fields: [assignedTo], references: [id])
-  convertedBooking   Booking?  @relation(fields: [convertedBookingId], references: [id])
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model file_uploads {
+  id            String   @id
+  key           String   @unique
+  filename      String
+  mime_type     String
+  size          Int
+  folder        String
+  is_public     Boolean  @default(false)
+  thumbnail_key String?
+  metadata      Json?
+  created_at    DateTime @default(now())
+  updated_at    DateTime
+  user_id       String
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@index([status, createdAt])
-  @@index([assignedTo, status])
-  @@index([source])
+  @@index([created_at])
+  @@index([user_id, folder])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model leads {
+  id                   String    @id
+  email                String?
+  phone                String?
+  full_name            String?
+  service_interest     String?
+  source               String?
+  utm_source           String?
+  utm_medium           String?
+  utm_campaign         String?
+  lead_score           Int       @default(0)
+  status               String    @default("new")
+  assigned_to          String?
+  notes                String?
+  converted_at         DateTime?
+  converted_booking_id String?   @unique
+  created_at           DateTime  @default(now())
+  updated_at           DateTime
+  users                users?    @relation(fields: [assigned_to], references: [id])
+  bookings             bookings? @relation(fields: [converted_booking_id], references: [id])
+
+  @@index([assigned_to, status])
   @@index([email])
-  @@map("leads")
+  @@index([source])
+  @@index([status, created_at])
 }
 
-model Staff {
-  id              String    @id @default(cuid())
-  userId          String    @unique @map("user_id")
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model password_history {
+  id            String   @id
+  user_id       String
+  password_hash String
+  created_at    DateTime @default(now())
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, created_at])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model password_reset_tokens {
+  id         String   @id
+  token      String   @unique
+  user_id    String
+  created_at DateTime @default(now())
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model payments {
+  id                     String    @id
+  booking_id             String
+  payment_number         String    @unique
+  amount                 Decimal   @db.Decimal(12, 2)
+  currency               String    @default("VND")
+  payment_method         String
+  payment_gateway        String
+  gateway_transaction_id String?
+  gateway_order_id       String?
+  status                 String    @default("pending")
+  failure_reason         String?
+  gateway_response       Json?
+  paid_at                DateTime?
+  refunded_at            DateTime?
+  refund_amount          Decimal   @default(0) @db.Decimal(12, 2)
+  refund_reason          String?
+  created_at             DateTime  @default(now())
+  updated_at             DateTime
+  bookings               bookings  @relation(fields: [booking_id], references: [id])
+
+  @@index([booking_id])
+  @@index([created_at])
+  @@index([payment_gateway, status])
+  @@index([status])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model security_logs {
+  id         String   @id
+  event      String
+  user_id    String?
+  ip         String?
+  user_agent String?
+  url        String?
+  data       Json?
+  timestamp  DateTime @default(now())
+  created_at DateTime @default(now())
+
+  @@index([event, timestamp])
+  @@index([user_id, timestamp])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model service_tasks {
+  id           String    @id
+  booking_id   String
+  type         String
+  title        String
+  description  String?
+  priority     String    @default("medium")
+  status       String    @default("pending")
+  assigned_to  String?
+  due_date     DateTime?
+  completed_at DateTime?
+  metadata     Json?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime
+  users        users?    @relation(fields: [assigned_to], references: [id])
+  bookings     bookings  @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+
+  @@index([assigned_to, status])
+  @@index([booking_id, status])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model service_tiers {
+  id                String     @id
+  service_id        String
+  name              String
+  slug              String
+  price             Decimal    @db.Decimal(12, 2)
+  original_price    Decimal?   @db.Decimal(12, 2)
+  features          Json
+  limitations       Json?
+  is_popular        Boolean    @default(false)
+  is_available      Boolean    @default(true)
+  max_customers     Int?
+  current_customers Int        @default(0)
+  sort_order        Int        @default(0)
+  metadata          Json?
+  created_at        DateTime   @default(now())
+  updated_at        DateTime
+  bookings          bookings[]
+  services          services   @relation(fields: [service_id], references: [id], onDelete: Cascade)
+
+  @@unique([service_id, slug])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model services {
+  id                String          @id
+  name              String
+  slug              String          @unique
+  description       String?
+  short_description String?
+  base_price        Decimal         @db.Decimal(12, 2)
+  currency          String          @default("VND")
+  category          String?
+  is_active         Boolean         @default(true)
+  is_featured       Boolean         @default(false)
+  sort_order        Int             @default(0)
+  metadata          Json?
+  created_at        DateTime        @default(now())
+  updated_at        DateTime
+  service_tiers     service_tiers[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model sessions {
+  id            String   @id
+  session_token String   @unique
+  user_id       String
+  expires       DateTime
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model staff {
+  id              String    @id
+  user_id         String    @unique
   role            String
   permissions     Json?
   specializations Json?
-  isActive        Boolean   @default(true) @map("is_active")
-  hireDate        DateTime? @map("hire_date")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("staff")
+  is_active       Boolean   @default(true)
+  hire_date       DateTime?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime
+  users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String  @map("user_id")
-  type              String
-  provider          String
-  providerAccountId String  @map("provider_account_id")
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@map("accounts")
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique @map("session_token")
-  userId       String   @map("user_id")
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-  @@map("verification_tokens")
-}
-
-model SystemLog {
-  id          String   @id @default(cuid())
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model system_logs {
+  id          String   @id
   level       String
   message     String
   service     String
@@ -268,141 +318,85 @@ model SystemLog {
   context     Json?
   error       Json?
   timestamp   DateTime @default(now())
-  createdAt   DateTime @default(now()) @map("created_at")
+  created_at  DateTime @default(now())
 
   @@index([level, timestamp])
   @@index([service, timestamp])
-  @@map("system_logs")
 }
 
-model SecurityLog {
-  id        String   @id @default(cuid())
-  event     String
-  userId    String?  @map("user_id")
-  ip        String?
-  userAgent String?  @map("user_agent")
-  url       String?
-  data      Json?
-  timestamp DateTime @default(now())
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@index([event, timestamp])
-  @@index([userId, timestamp])
-  @@map("security_logs")
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model two_factor_auth {
+  id                    String   @id
+  user_id               String   @unique
+  secret                String
+  enabled               Boolean  @default(false)
+  backup_codes          String[]
+  last_used_backup_code String?
+  created_at            DateTime @default(now())
+  updated_at            DateTime
+  users                 users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
-model AuditLog {
-  id         String   @id @default(cuid())
-  userId     String   @map("user_id")
-  action     String
-  resource   String
-  resourceId String   @map("resource_id")
-  details    Json?
-  ip         String?
-  userAgent  String?  @map("user_agent")
-  timestamp  DateTime @default(now())
-  createdAt  DateTime @default(now()) @map("created_at")
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, timestamp])
-  @@index([resource, resourceId])
-  @@map("audit_logs")
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users {
+  id                    String                  @id
+  email                 String                  @unique
+  password              String
+  phone                 String?
+  full_name             String
+  discord_username      String?
+  discord_id            String?
+  rok_player_id         String?
+  rok_kingdom           String?
+  rok_power             BigInt?
+  preferred_language    String                  @default("vi")
+  timezone              String                  @default("Asia/Ho_Chi_Minh")
+  status                String                  @default("active")
+  email_verified        DateTime?
+  last_login            DateTime?
+  created_at            DateTime                @default(now())
+  updated_at            DateTime
+  image                 String?
+  accounts              accounts[]
+  audit_logs            audit_logs[]
+  bookings              bookings[]
+  communications        communications[]
+  file_uploads          file_uploads[]
+  leads                 leads[]
+  password_history      password_history[]
+  password_reset_tokens password_reset_tokens[]
+  service_tasks         service_tasks[]
+  sessions              sessions[]
+  staff                 staff?
+  two_factor_auth       two_factor_auth?
 }
 
-model ServiceTask {
-  id           String    @id @default(cuid())
-  bookingId    String    @map("booking_id")
-  type         String
-  title        String
-  description  String?
-  priority     String    @default("medium")
-  status       String    @default("pending")
-  assignedTo   String?   @map("assigned_to")
-  dueDate      DateTime? @map("due_date")
-  completedAt  DateTime? @map("completed_at")
-  metadata     Json?
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  assignedUser User?     @relation(fields: [assignedTo], references: [id])
-  booking      Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model verification_tokens {
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-  @@index([bookingId, status])
-  @@index([assignedTo, status])
-  @@map("service_tasks")
+  @@unique([identifier, token])
 }
 
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String   @map("user_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model webhook_events {
+  id              String    @id
+  provider        String
+  event_type      String
+  event_id        String    @unique
+  payload         Json
+  status          String    @default("pending")
+  attempts        Int       @default(0)
+  last_attempt_at DateTime?
+  next_retry_at   DateTime?
+  error_message   String?
+  processed_at    DateTime?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime
 
-  @@map("password_reset_tokens")
-}
-
-model TwoFactorAuth {
-  id                 String   @id @default(cuid())
-  userId             String   @unique @map("user_id")
-  secret             String
-  enabled            Boolean  @default(false)
-  backupCodes        String[] @map("backup_codes")
-  lastUsedBackupCode String?  @map("last_used_backup_code")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("two_factor_auth")
-}
-
-model FileUpload {
-  id           String   @id @default(cuid())
-  key          String   @unique
-  filename     String
-  mimeType     String   @map("mime_type")
-  size         Int
-  folder       String
-  isPublic     Boolean  @default(false) @map("is_public")
-  thumbnailKey String?  @map("thumbnail_key")
-  metadata     Json?
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  userId       String   @map("user_id")
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, folder])
-  @@index([createdAt])
-  @@map("file_uploads")
-}
-
-model WebhookEvent {
-  id            String    @id @default(cuid())
-  provider      String
-  eventType     String    @map("event_type")
-  eventId       String    @unique @map("event_id")
-  payload       Json
-  status        String    @default("pending")
-  attempts      Int       @default(0)
-  lastAttemptAt DateTime? @map("last_attempt_at")
-  nextRetryAt   DateTime? @map("next_retry_at")
-  errorMessage  String?   @map("error_message")
-  processedAt   DateTime? @map("processed_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-
+  @@index([event_id])
+  @@index([next_retry_at])
   @@index([provider, status])
-  @@index([nextRetryAt])
-  @@index([eventId])
-  @@map("webhook_events")
-}
-
-model PasswordHistory {
-  id           String   @id @default(cuid())
-  userId       String   @map("user_id")
-  passwordHash String   @map("password_hash")
-  createdAt    DateTime @default(now()) @map("created_at")
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@map("password_history")
 }
