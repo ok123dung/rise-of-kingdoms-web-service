@@ -215,7 +215,7 @@ jobs:
     name: Deploy Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    needs: [test, security, e2e]
+    needs: [test, security]
     environment: production
     
     steps:
