@@ -2,40 +2,56 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 
-import { prisma } from '@/lib/db'
+import { withDatabaseConnection } from '@/lib/api/db-middleware'
+import { prismaAdmin as prisma } from '@/lib/db'
 import { sendPasswordResetEmail } from '@/lib/email'
+import { ValidationError, handleApiError, ErrorMessages } from '@/lib/errors'
+import { trackRequest } from '@/lib/monitoring'
 import { getLogger } from '@/lib/monitoring/logger'
+import { rateLimiters } from '@/lib/rate-limit'
+import { sanitizeInput } from '@/lib/validation'
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Email không hợp lệ')
+  email: z.string().email('Email không hợp lệ').toLowerCase()
 })
 
 interface ForgotPasswordRequest {
   email: string
 }
 
-export async function POST(request: NextRequest) {
+async function forgotPasswordHandler(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = (await request.json()) as ForgotPasswordRequest
-    const result = forgotPasswordSchema.safeParse(body)
-
-    if (!result.success) {
+    // Rate limiting
+    const clientId = request.headers.get('x-forwarded-for') ?? request.ip ?? 'anonymous'
+    const rateLimit = await rateLimiters.auth.isAllowed(clientId)
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { success: false, error: result.error.errors[0].message },
-        { status: 400 }
+        { error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.', retryAfter: rateLimit.retryAfter },
+        { status: 429 }
       )
     }
 
-    const { email } = result.data
+    const body = (await request.json()) as ForgotPasswordRequest
 
-    // 1. Find user
-    const user = await prisma.user.findUnique({
-      where: { email }
+    let validatedData
+    try {
+      validatedData = forgotPasswordSchema.parse({
+        email: sanitizeInput((body.email ?? '').toLowerCase())
+      })
+    } catch (_error) {
+      throw new ValidationError(ErrorMessages.INVALID_INPUT)
+    }
+
+    const { email } = validatedData
+
+    // Find user
+    const user = await prisma.users.findUnique({
+      where: { email },
+      select: { id: true, email: true, full_name: true }
     })
 
-    // Even if user not found, we return success to prevent email enumeration
+    // Even if user not found, return success to prevent email enumeration
     if (!user) {
-      // Log for debugging but don't reveal to user
       getLogger().info(`Forgot password requested for non-existent email: ${email}`)
       return NextResponse.json({
         success: true,
@@ -43,23 +59,24 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 2. Generate token
+    // Generate token
     const token = uuidv4()
 
-    // 3. Save token
-    // First, delete any existing tokens for this user to keep it clean
-    await prisma.passwordResetToken.deleteMany({
-      where: { userId: user.id }
+    // Delete any existing tokens for this user
+    await prisma.password_reset_tokens.deleteMany({
+      where: { user_id: user.id }
     })
 
-    await prisma.passwordResetToken.create({
+    // Create new token
+    await prisma.password_reset_tokens.create({
       data: {
+        id: uuidv4(),
         token,
-        userId: user.id
+        user_id: user.id
       }
     })
 
-    // 4. Send email
+    // Send email
     const emailSent = await sendPasswordResetEmail(email, token)
 
     if (!emailSent) {
@@ -77,7 +94,8 @@ export async function POST(request: NextRequest) {
       message: 'Nếu email tồn tại, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.'
     })
   } catch (error) {
-    getLogger().error('Forgot password error', error as Error)
-    return NextResponse.json({ success: false, error: 'Đã có lỗi xảy ra' }, { status: 500 })
+    return handleApiError(error, request.headers.get('x-request-id') ?? undefined)
   }
 }
+
+export const POST = trackRequest('/api/auth/forgot-password')(withDatabaseConnection(forgotPasswordHandler))

@@ -1,85 +1,97 @@
-import bcrypt from 'bcryptjs'
+import { compare, hash } from 'bcryptjs'
 import { type NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
 import { z } from 'zod'
 
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { withDatabaseConnection } from '@/lib/api/db-middleware'
+import { getAuthenticatedUser } from '@/lib/auth/middleware'
+import { prismaAdmin as prisma } from '@/lib/db'
+import { AuthenticationError, ValidationError, handleApiError, ErrorMessages } from '@/lib/errors'
+import { trackRequest } from '@/lib/monitoring'
 import { getLogger } from '@/lib/monitoring/logger'
 
 const changePasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, 'Current password is required'),
-    newPassword: z.string().min(6, 'New password must be at least 6 characters'),
-    confirmPassword: z.string().min(6, 'Confirm password must be at least 6 characters')
+    currentPassword: z.string().min(1, 'Mật khẩu hiện tại không được để trống'),
+    newPassword: z.string().min(8, 'Mật khẩu mới phải có ít nhất 8 ký tự'),
+    confirmPassword: z.string().min(1, 'Xác nhận mật khẩu không được để trống')
   })
   .refine(data => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: 'Mật khẩu xác nhận không khớp',
     path: ['confirmPassword']
   })
 
-export async function PUT(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
+interface ChangePasswordBody {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+async function changePasswordHandler(request: NextRequest): Promise<NextResponse> {
+  try {
+    const authUser = await getAuthenticatedUser(request)
+    if (!authUser) {
+      throw new AuthenticationError('Bạn cần đăng nhập để thực hiện thao tác này')
     }
 
-    const body = (await request.json()) as Record<string, unknown>
-    const validatedData = changePasswordSchema.parse(body)
+    const body = (await request.json()) as ChangePasswordBody
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+    let validatedData
+    try {
+      validatedData = changePasswordSchema.parse(body)
+    } catch (_error) {
+      throw new ValidationError(ErrorMessages.INVALID_INPUT)
+    }
+
+    // Get user with password
+    const user = await prisma.users.findUnique({
+      where: { id: authUser.id },
+      select: { id: true, password: true }
     })
 
     if (!user) {
-      return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
+      return NextResponse.json(
+        { success: false, error: 'Không tìm thấy người dùng' },
+        { status: 404 }
+      )
     }
 
     // Verify current password
-    // Note: If user signed up via social login and has no password, this might need special handling
-    // But for now assuming password auth users
-    if (user.password) {
-      const isValid = await bcrypt.compare(validatedData.currentPassword, user.password)
-      if (!isValid) {
-        return NextResponse.json(
-          { success: false, message: 'Mật khẩu hiện tại không đúng' },
-          { status: 400 }
-        )
-      }
+    if (!user.password) {
+      return NextResponse.json(
+        { success: false, error: 'Tài khoản này không sử dụng đăng nhập bằng mật khẩu' },
+        { status: 400 }
+      )
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(validatedData.newPassword, 14)
+    const isValid = await compare(validatedData.currentPassword, user.password)
+    if (!isValid) {
+      return NextResponse.json(
+        { success: false, error: 'Mật khẩu hiện tại không đúng' },
+        { status: 400 }
+      )
+    }
+
+    // Hash new password (14 rounds - OWASP recommendation)
+    const hashedPassword = await hash(validatedData.newPassword, 14)
 
     // Update password
-    await prisma.user.update({
-      where: { id: session.user.id },
+    await prisma.users.update({
+      where: { id: authUser.id },
       data: {
         password: hashedPassword,
-        updatedAt: new Date()
+        updated_at: new Date()
       }
     })
 
-    getLogger().info('User changed password', { userId: session.user.id })
+    getLogger().info('User changed password', { userId: authUser.id })
 
     return NextResponse.json({
       success: true,
       message: 'Đổi mật khẩu thành công'
     })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid input', errors: error.errors },
-        { status: 400 }
-      )
-    }
-
-    getLogger().error('Error changing password', error as Error)
-    return NextResponse.json(
-      { success: false, message: 'Failed to change password' },
-      { status: 500 }
-    )
+    return handleApiError(error, request.headers.get('x-request-id') ?? undefined)
   }
 }
+
+export const PUT = trackRequest('/api/user/password')(withDatabaseConnection(changePasswordHandler))

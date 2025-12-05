@@ -399,3 +399,20 @@ export const basePrisma: PrismaClient = isBuildPhase
         }
       }
     }))
+
+// Admin Prisma client using DIRECT_URL to bypass RLS
+// Use for auth operations (signup, password reset) where RLS blocks anonymous access
+const globalForPrismaAdmin = globalThis as unknown as {
+  prismaAdmin: PrismaClient | undefined
+}
+
+export const prismaAdmin: PrismaClient = isBuildPhase
+  ? (null as unknown as PrismaClient)
+  : (globalForPrismaAdmin.prismaAdmin ??= new PrismaClient({
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      datasources: {
+        db: {
+          url: process.env.DIRECT_URL || process.env.DATABASE_URL
+        }
+      }
+    }))

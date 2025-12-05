@@ -2,7 +2,7 @@ import { hash } from 'bcryptjs'
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { withDatabaseConnection } from '@/lib/api/db-middleware'
-import { basePrisma as prisma } from '@/lib/db'
+import { prismaAdmin as prisma } from '@/lib/db'
 import { sendWelcomeEmail } from '@/lib/email'
 import {
   ConflictError,
@@ -51,7 +51,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.users.findUnique({
       where: {
         email: validatedData.email
       }
@@ -63,7 +63,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
 
     // Check phone number if provided
     if (validatedData.phone) {
-      const existingPhone = await prisma.user.findFirst({
+      const existingPhone = await prisma.users.findFirst({
         where: {
           phone: validatedData.phone
         }
@@ -80,20 +80,22 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
     // Create user
     let user
     try {
-      user = await prisma.user.create({
+      user = await prisma.users.create({
         data: {
-          fullName: validatedData.fullName,
+          id: crypto.randomUUID(),
+          full_name: validatedData.fullName,
           email: validatedData.email,
           phone: validatedData.phone,
           password: hashedPassword,
-          emailVerified: null // Will be verified later if needed
+          email_verified: null, // Will be verified later if needed
+          updated_at: new Date()
         },
         select: {
           id: true,
-          fullName: true,
+          full_name: true,
           email: true,
           phone: true,
-          createdAt: true
+          created_at: true
         }
       })
     } catch (dbError) {
@@ -106,12 +108,12 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
     getLogger().info('New user registered', {
       id: user.id,
       email: user.email,
-      fullName: user.fullName,
+      fullName: user.full_name,
       timestamp: new Date().toISOString()
     })
 
     // Send welcome email (non-blocking)
-    sendWelcomeEmail(user.email, user.fullName).catch((emailError: unknown) => {
+    sendWelcomeEmail(user.email, user.full_name).catch((emailError: unknown) => {
       getLogger().error(
         'Failed to send welcome email',
         emailError instanceof Error ? emailError : new Error(String(emailError)),
@@ -128,7 +130,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
         message: 'Tài khoản đã được tạo thành công',
         user: {
           id: user.id,
-          fullName: user.fullName,
+          fullName: user.full_name,
           email: user.email,
           role: 'customer' // default role
         }

@@ -1,9 +1,13 @@
+import { hash } from 'bcryptjs'
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { hashPassword, savePasswordToHistory, checkPasswordHistory } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { withDatabaseConnection } from '@/lib/api/db-middleware'
+import { prismaAdmin as prisma } from '@/lib/db'
+import { ValidationError, handleApiError, ErrorMessages } from '@/lib/errors'
+import { trackRequest } from '@/lib/monitoring'
 import { getLogger } from '@/lib/monitoring/logger'
+import { rateLimiters } from '@/lib/rate-limit'
 
 const resetPasswordSchema = z
   .object({
@@ -22,24 +26,33 @@ interface ResetPasswordRequest {
   confirmPassword: string
 }
 
-export async function POST(request: NextRequest) {
+async function resetPasswordHandler(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = (await request.json()) as ResetPasswordRequest
-    const result = resetPasswordSchema.safeParse(body)
-
-    if (!result.success) {
+    // Rate limiting
+    const clientId = request.headers.get('x-forwarded-for') ?? request.ip ?? 'anonymous'
+    const rateLimit = await rateLimiters.auth.isAllowed(clientId)
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { success: false, error: result.error.errors[0].message },
-        { status: 400 }
+        { error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.', retryAfter: rateLimit.retryAfter },
+        { status: 429 }
       )
     }
 
-    const { token, password } = result.data
+    const body = (await request.json()) as ResetPasswordRequest
 
-    // 1. Find token
-    const resetToken = await prisma.passwordResetToken.findUnique({
+    let validatedData
+    try {
+      validatedData = resetPasswordSchema.parse(body)
+    } catch (_error) {
+      throw new ValidationError(ErrorMessages.INVALID_INPUT)
+    }
+
+    const { token, password } = validatedData
+
+    // Find token
+    const resetToken = await prisma.password_reset_tokens.findUnique({
       where: { token },
-      include: { user: true }
+      include: { users: true }
     })
 
     if (!resetToken) {
@@ -49,60 +62,47 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 2. Check expiration (1 hour)
+    // Check expiration (1 hour)
     const now = new Date()
-    const tokenCreated = new Date(resetToken.createdAt)
+    const tokenCreated = new Date(resetToken.created_at)
     const diffMs = now.getTime() - tokenCreated.getTime()
     const diffHours = diffMs / (1000 * 60 * 60)
 
     if (diffHours > 1) {
       // Delete expired token
-      await prisma.passwordResetToken.delete({ where: { id: resetToken.id } })
+      await prisma.password_reset_tokens.delete({ where: { id: resetToken.id } })
       return NextResponse.json(
         { success: false, error: 'Link đặt lại mật khẩu đã hết hạn' },
         { status: 400 }
       )
     }
 
-    // 3. Check password history
-    const isNew = await checkPasswordHistory(resetToken.userId, password)
-    if (!isNew) {
-      return NextResponse.json(
-        { success: false, error: 'Bạn không thể sử dụng lại 5 mật khẩu gần nhất' },
-        { status: 400 }
-      )
-    }
+    // Hash new password (14 rounds - OWASP recommendation)
+    const hashedPassword = await hash(password, 14)
 
-    // 4. Update password
-    const hashedPassword = await hashPassword(password)
-
-    await prisma.$transaction(async tx => {
-      // Update user password
-      await tx.user.update({
-        where: { id: resetToken.userId },
+    // Update password and delete token in transaction
+    await prisma.$transaction([
+      prisma.users.update({
+        where: { id: resetToken.user_id },
         data: {
           password: hashedPassword,
-          updatedAt: new Date()
+          updated_at: new Date()
         }
-      })
-
-      // Delete used token
-      await tx.passwordResetToken.delete({
+      }),
+      prisma.password_reset_tokens.delete({
         where: { id: resetToken.id }
       })
-    })
+    ])
 
-    // Save to history (outside transaction for simplicity with helper)
-    await savePasswordToHistory(resetToken.userId, hashedPassword)
-
-    getLogger().info(`Password reset successfully for user ${resetToken.userId}`)
+    getLogger().info(`Password reset successfully for user ${resetToken.user_id}`)
 
     return NextResponse.json({
       success: true,
       message: 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập ngay bây giờ.'
     })
   } catch (error) {
-    getLogger().error('Reset password error', error as Error)
-    return NextResponse.json({ success: false, error: 'Đã có lỗi xảy ra' }, { status: 500 })
+    return handleApiError(error, request.headers.get('x-request-id') ?? undefined)
   }
 }
+
+export const POST = trackRequest('/api/auth/reset-password')(withDatabaseConnection(resetPasswordHandler))
