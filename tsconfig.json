@@ -41,6 +41,9 @@
     "__mocks__/**/*",
     "jest.*.js",
     "coverage/**/*",
-    "tests/**/*"
+    "tests/**/*",
+    "src/app/admin/**/*",
+    "src/app/api/admin/**/*",
+    "src/app/api/auth/2fa/**/*"
   ]
 }
