@@ -265,11 +265,9 @@ class EnhancedPrismaClient extends PrismaClient {
     })
   }
 }
-
 // Guard against build-time instantiation
-const isBuildPhase =
-  process.env.NEXT_PHASE === 'phase-production-build' ||
-  (process.env.VERCEL && process.env.VERCEL_ENV === undefined)
+// Only check NEXT_PHASE - not VERCEL_ENV as it causes issues in serverless runtime
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
 
 // Global instance management
 const globalForPrisma = globalThis as unknown as {
