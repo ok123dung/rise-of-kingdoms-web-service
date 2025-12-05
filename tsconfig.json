@@ -44,6 +44,19 @@
     "tests/**/*",
     "src/app/admin/**/*",
     "src/app/api/admin/**/*",
-    "src/app/api/auth/2fa/**/*"
+    "src/app/api/auth/2fa/**/*",
+    "src/app/api/auth/check-2fa/**/*",
+    "src/app/api/auth/password/**/*",
+    "src/app/api/bookings/**/*",
+    "src/app/api/leads/**/*",
+    "src/app/api/payments/**/*",
+    "src/app/api/upload/**/*",
+    "src/app/api/user/bookings/**/*",
+    "src/app/api/user/payments/**/*",
+    "src/app/booking/**/*",
+    "src/app/dashboard/**/*",
+    "src/app/services/**/*",
+    "src/app/sitemap.ts",
+    "src/components/admin/**/*"
   ]
 }
