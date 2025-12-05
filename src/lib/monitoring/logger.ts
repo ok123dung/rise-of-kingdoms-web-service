@@ -122,8 +122,9 @@ class Logger {
       ) {
         const { prisma } = await import('@/lib/db')
         if (!prisma) return // Safety check if prisma is null during build
-        await prisma.systemLog.create({
+        await prisma.system_logs.create({
           data: {
+            id: crypto.randomUUID(),
             level: entry.level,
             message: entry.message,
             service: entry.service,
