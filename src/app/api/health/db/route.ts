@@ -38,7 +38,7 @@ export async function GET() {
     await prisma.$connect()
 
     // Try a simple query
-    await prisma.$queryRaw`SELECT 1`
+    await prisma.$queryRawUnsafe('SELECT 1')
 
     diagnostics.database.status = 'connected'
     diagnostics.database.message = 'Database connection successful'

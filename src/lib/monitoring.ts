@@ -122,7 +122,7 @@ export class HealthMonitor {
     try {
       const { prisma } = await import('@/lib/db')
       // Simple query to test connection
-      await prisma.$queryRaw`SELECT 1`
+      await prisma.$queryRawUnsafe('SELECT 1')
       const responseTime = Date.now() - startTime
       return {
         status: responseTime < 1000 ? 'pass' : 'warn',

@@ -83,7 +83,7 @@ export async function GET(_request: NextRequest) {
     // 4. Test query execution
     try {
       const queryStart = Date.now()
-      await prisma.$queryRaw`SELECT 1 as test`
+      await prisma.$queryRawUnsafe('SELECT 1 as test')
       const queryTime = Date.now() - queryStart
 
       diagnostics.checks.query = {

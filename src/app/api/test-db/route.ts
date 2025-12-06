@@ -34,7 +34,7 @@ export async function GET() {
       }
     })
 
-    const result = await testPrisma.$queryRaw`SELECT 1 as test`
+    const result = await testPrisma.$queryRawUnsafe('SELECT 1 as test')
     await testPrisma.$disconnect()
 
     return NextResponse.json({
