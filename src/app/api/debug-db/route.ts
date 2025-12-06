@@ -46,7 +46,7 @@ export async function GET(): Promise<NextResponse<DebugDbResponse>> {
 
   try {
     await prisma.$connect()
-    await prisma.$queryRaw\`SELECT 1 as result\`
+    await prisma.$queryRawUnsafe('SELECT 1 as result')
 
     const userCount = await prisma.users.count()
     response.user_count = userCount
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   try {
     const body = await request.json() as { email?: string; full_name?: string; password?: string }
-    const email = body.email || \`test\${Date.now()}@example.com\`
+    const email = body.email || 'test' + Date.now() + '@example.com'
     const full_name = body.full_name || 'Test User Debug'
     const password = body.password || 'TestPass123!'
 
