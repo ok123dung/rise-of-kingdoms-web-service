@@ -9,7 +9,7 @@ import { getLogger } from '@/lib/monitoring/logger'
 import { createOptimizedRateLimiter } from '@/lib/rate-limit-lru'
 
 interface AuthenticatedSocket extends Socket {
-  userId?: string
+  user_id?: string
   userRole?: string
   sessionId?: string
   lastActivity?: number
@@ -25,7 +25,7 @@ interface ConnectionOptions {
 export class SecureWebSocketServer {
   private io: SocketIOServer
   private userSockets: Map<string, Set<string>> = new Map()
-  private socketSessions: Map<string, { userId: string; createdAt: number }> = new Map()
+  private socketSessions: Map<string, { user_id: string; created_at: number }> = new Map()
   private rateLimiter = createOptimizedRateLimiter({
     window: 60000, // 1 minute
     max: 100, // 100 events per minute
@@ -103,7 +103,7 @@ export class SecureWebSocketServer {
         // Verify JWT token
         const decoded = await verifyToken(token)
 
-        if (!decoded?.userId) {
+        if (!decoded?.user_id) {
           return next(new Error('Invalid token'))
         }
 
@@ -114,7 +114,7 @@ export class SecureWebSocketServer {
         }
 
         // Check for concurrent connections
-        const userConnections = this.userSockets.get(decoded.userId) || new Set()
+        const userConnections = this.userSockets.get(decoded.user_id) || new Set()
         if (userConnections.size >= this.options.maxConnectionsPerUser) {
           return next(new Error('Too many concurrent connections'))
         }
@@ -123,19 +123,19 @@ export class SecureWebSocketServer {
         const secureSessionId = sessionId || crypto.randomBytes(32).toString('hex')
 
         // Attach user info to socket
-        socket.userId = decoded.userId
+        socket.user_id = decoded.user_id
         socket.userRole = decoded.role
         socket.sessionId = secureSessionId
         socket.lastActivity = Date.now()
 
         // Track session
         this.socketSessions.set(socket.id, {
-          userId: decoded.userId,
-          createdAt: Date.now()
+          user_id: decoded.user_id,
+          created_at: Date.now()
         })
 
         // Track user connections
-        this.addUserSocket(decoded.userId, socket.id)
+        this.addUserSocket(decoded.user_id, socket.id)
 
         next()
       } catch (error) {
@@ -161,7 +161,7 @@ export class SecureWebSocketServer {
     this.io.on('connection', (socket: AuthenticatedSocket) => {
       getLogger().info('WebSocket client connected', {
         socketId: socket.id,
-        userId: socket.userId,
+        user_id: socket.user_id,
         sessionId: socket.sessionId
       })
 
@@ -172,8 +172,8 @@ export class SecureWebSocketServer {
       })
 
       // Join user-specific room with validation
-      if (socket.userId) {
-        socket.join(`user:${socket.userId}`)
+      if (socket.user_id) {
+        socket.join(`user:${socket.user_id}`)
 
         // Join role-specific room
         if (socket.userRole === 'admin' || socket.userRole === 'staff') {
@@ -196,7 +196,7 @@ export class SecureWebSocketServer {
             }
 
             // Rate limiting per event
-            const rateLimitKey = `${socket.userId}:${eventName}`
+            const rateLimitKey = `${socket.user_id}:${eventName}`
             const result = await this.rateLimiter.checkLimit(rateLimitKey)
 
             if (!result.success) {
@@ -215,7 +215,7 @@ export class SecureWebSocketServer {
             await handler(...args)
           } catch (error) {
             getLogger().error(`WebSocket event error: ${eventName}`, error as Error, {
-              userId: socket.userId,
+              user_id: socket.user_id,
               eventName
             })
             socket.emit('error', {
@@ -227,10 +227,10 @@ export class SecureWebSocketServer {
       }
 
       // Secure booking subscription
-      secureHandler('booking:subscribe', async (data: { bookingId: string }) => {
-        const { bookingId } = data
+      secureHandler('booking:subscribe', async (data: { booking_id: string }) => {
+        const { booking_id } = data
 
-        if (!bookingId || typeof bookingId !== 'string') {
+        if (!booking_id || typeof booking_id !== 'string') {
           socket.emit('error', {
             code: 'INVALID_REQUEST',
             message: 'Invalid booking ID'
@@ -239,18 +239,18 @@ export class SecureWebSocketServer {
         }
 
         // Verify user has access to this booking
-        const booking = await prisma.booking.findFirst({
+        const booking = await prisma.bookings.findFirst({
           where: {
-            id: bookingId,
-            userId: socket.userId // Only allow user to subscribe to their own bookings
+            id: booking_id,
+            user_id: socket.user_id // Only allow user to subscribe to their own bookings
           },
           select: { id: true, status: true }
         })
 
         if (booking) {
-          socket.join(`booking:${bookingId}`)
+          socket.join(`booking:${booking_id}`)
           socket.emit('booking:subscribed', {
-            bookingId,
+            booking_id,
             status: booking.status
           })
         } else {
@@ -262,11 +262,11 @@ export class SecureWebSocketServer {
       })
 
       // Secure chat message handler
-      secureHandler('chat:message', async (data: { bookingId: string; message: string }) => {
-        const { bookingId, message } = data
+      secureHandler('chat:message', async (data: { booking_id: string; message: string }) => {
+        const { booking_id, message } = data
 
         // Validate input
-        if (!bookingId || !message || typeof message !== 'string') {
+        if (!booking_id || !message || typeof message !== 'string') {
           socket.emit('error', {
             code: 'INVALID_REQUEST',
             message: 'Invalid message data'
@@ -282,23 +282,23 @@ export class SecureWebSocketServer {
         }
 
         // Verify access and send message
-        const hasAccess = await this.verifyBookingAccess(socket.userId!, bookingId)
+        const hasAccess = await this.verifyBookingAccess(socket.user_id!, booking_id)
 
         if (hasAccess) {
           // Store message in database
-          const chatMessage = await prisma.communication.create({
+          const chatMessage = await prisma.communications.create({
             data: {
-              userId: socket.userId!,
-              bookingId,
+          id: crypto.randomUUID(),
+          user_id: socket.user_id!,
+              booking_id,
               type: 'chat',
               content: sanitizedMessage,
               channel: `socket:${socket.id}`
             },
-            include: {
-              user: {
+            include: { users: {
                 select: {
                   id: true,
-                  fullName: true
+                  full_name: true
                   // image: true // Field doesn't exist in User schema
                 }
               }
@@ -306,12 +306,12 @@ export class SecureWebSocketServer {
           })
 
           // Broadcast to booking room
-          this.io.to(`booking:${bookingId}`).emit('chat:message', {
+          this.io.to(`booking:${booking_id}`).emit('chat:message', {
             id: chatMessage.id,
-            bookingId,
+            booking_id,
             message: sanitizedMessage,
-            user: chatMessage.user,
-            createdAt: chatMessage.createdAt
+            user: chatMessage.users,
+            created_at: chatMessage.created_at
           })
         } else {
           socket.emit('error', {
@@ -325,12 +325,12 @@ export class SecureWebSocketServer {
       socket.on('disconnect', reason => {
         getLogger().info('WebSocket client disconnected', {
           socketId: socket.id,
-          userId: socket.userId,
+          user_id: socket.user_id,
           reason
         })
 
-        if (socket.userId) {
-          this.removeUserSocket(socket.userId, socket.id)
+        if (socket.user_id) {
+          this.removeUserSocket(socket.user_id, socket.id)
         }
 
         this.socketSessions.delete(socket.id)
@@ -340,7 +340,7 @@ export class SecureWebSocketServer {
       socket.on('error', error => {
         getLogger().error('WebSocket error', error, {
           socketId: socket.id,
-          userId: socket.userId
+          user_id: socket.user_id
         })
       })
     })
@@ -355,11 +355,11 @@ export class SecureWebSocketServer {
     return sessionAge < this.options.sessionTimeout
   }
 
-  private async verifyBookingAccess(userId: string, bookingId: string): Promise<boolean> {
-    const booking = await prisma.booking.findFirst({
+  private async verifyBookingAccess(user_id: string, booking_id: string): Promise<boolean> {
+    const booking = await prisma.bookings.findFirst({
       where: {
-        id: bookingId,
-        userId // Only check if user owns the booking
+        id: booking_id,
+        user_id // Only check if user owns the booking
       },
       select: { id: true }
     })
@@ -367,18 +367,18 @@ export class SecureWebSocketServer {
     return !!booking
   }
 
-  private addUserSocket(userId: string, socketId: string) {
-    const sockets = this.userSockets.get(userId) || new Set()
+  private addUserSocket(user_id: string, socketId: string) {
+    const sockets = this.userSockets.get(user_id) || new Set()
     sockets.add(socketId)
-    this.userSockets.set(userId, sockets)
+    this.userSockets.set(user_id, sockets)
   }
 
-  private removeUserSocket(userId: string, socketId: string) {
-    const sockets = this.userSockets.get(userId)
+  private removeUserSocket(user_id: string, socketId: string) {
+    const sockets = this.userSockets.get(user_id)
     if (sockets) {
       sockets.delete(socketId)
       if (sockets.size === 0) {
-        this.userSockets.delete(userId)
+        this.userSockets.delete(user_id)
       }
     }
   }
@@ -391,7 +391,7 @@ export class SecureWebSocketServer {
         let cleaned = 0
 
         for (const [socketId, session] of this.socketSessions.entries()) {
-          const age = now - session.createdAt
+          const age = now - session.created_at
           if (age > this.options.sessionTimeout) {
             const socket = this.io.sockets.sockets.get(socketId)
             if (socket) {
@@ -411,12 +411,12 @@ export class SecureWebSocketServer {
   }
 
   // Public methods for server-side events
-  public sendToUser(userId: string, event: string, data: any) {
-    this.io.to(`user:${userId}`).emit(event, data)
+  public sendToUser(user_id: string, event: string, data: any) {
+    this.io.to(`user:${user_id}`).emit(event, data)
   }
 
-  public sendToBooking(bookingId: string, event: string, data: any) {
-    this.io.to(`booking:${bookingId}`).emit(event, data)
+  public sendToBooking(booking_id: string, event: string, data: any) {
+    this.io.to(`booking:${booking_id}`).emit(event, data)
   }
 
   public sendToRole(role: string, event: string, data: any) {

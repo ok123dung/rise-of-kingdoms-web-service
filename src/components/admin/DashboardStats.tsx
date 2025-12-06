@@ -29,49 +29,49 @@ async function getDashboardStats() {
     lastMonthBookings
   ] = await Promise.all([
     // Total revenue this month
-    prisma.payment.aggregate({
+    prisma.payments.aggregate({
       where: {
         status: 'completed',
-        paidAt: { gte: startOfMonth }
+        paid_at: { gte: startOfMonth }
       },
       _sum: { amount: true }
     }),
 
     // Total bookings this month
-    prisma.booking.count({
-      where: { createdAt: { gte: startOfMonth } }
+    prisma.bookings.count({
+      where: { created_at: { gte: startOfMonth } }
     }),
 
     // Total customers this month
-    prisma.user.count({
-      where: { createdAt: { gte: startOfMonth } }
+    prisma.users.count({
+      where: { created_at: { gte: startOfMonth } }
     }),
 
     // Completed payments this month
-    prisma.payment.count({
+    prisma.payments.count({
       where: {
         status: 'completed',
-        paidAt: { gte: startOfMonth }
+        paid_at: { gte: startOfMonth }
       }
     }),
 
     // Active leads
-    prisma.lead.count({
+    prisma.leads.count({
       where: {
         status: { in: ['new', 'contacted', 'qualified'] }
       }
     }),
 
     // Today's bookings
-    prisma.booking.count({
-      where: { createdAt: { gte: startOfToday } }
+    prisma.bookings.count({
+      where: { created_at: { gte: startOfToday } }
     }),
 
     // Last month revenue for comparison
-    prisma.payment.aggregate({
+    prisma.payments.aggregate({
       where: {
         status: 'completed',
-        paidAt: {
+        paid_at: {
           gte: startOfLastMonth,
           lte: endOfLastMonth
         }
@@ -80,9 +80,9 @@ async function getDashboardStats() {
     }),
 
     // Last month bookings for comparison
-    prisma.booking.count({
+    prisma.bookings.count({
       where: {
-        createdAt: {
+        created_at: {
           gte: startOfLastMonth,
           lte: endOfLastMonth
         }

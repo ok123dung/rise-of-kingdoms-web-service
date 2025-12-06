@@ -150,8 +150,8 @@ export class SessionTokenManager {
     return randomBytes(this.TOKEN_LENGTH).toString('hex')
   }
 
-  static generateSessionId(userId: string, timestamp: number = Date.now()): string {
-    const data = `${userId}:${timestamp}:${randomBytes(16).toString('hex')}`
+  static generateSessionId(user_id: string, timestamp: number = Date.now()): string {
+    const data = `${user_id}:${timestamp}:${randomBytes(16).toString('hex')}`
     return createHash('sha256').update(data).digest('hex')
   }
 
@@ -161,19 +161,19 @@ export class SessionTokenManager {
 
   static rotateToken(
     oldToken: string,
-    userId: string
+    user_id: string
   ): {
     token: string
     sessionId: string
     expiresAt: Date
   } {
     const newToken = this.generateToken()
-    const sessionId = this.generateSessionId(userId)
+    const sessionId = this.generateSessionId(user_id)
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
 
     // Log rotation event
     getLogger().logSecurityEvent('session_token_rotated', {
-      userId,
+      user_id,
       oldSessionId: createHash('sha256').update(oldToken).digest('hex').substring(0, 8),
       newSessionId: sessionId.substring(0, 8)
     })

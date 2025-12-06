@@ -8,7 +8,7 @@ import { clientLogger } from '@/lib/client-logger'
 
 interface BookingData {
   id: string
-  serviceId: string
+  service_id: string
   serviceName?: string
   customerName: string
   customerEmail: string
@@ -18,13 +18,13 @@ interface BookingData {
   notes: string
   status: string
   amount: number
-  createdAt: string
+  created_at: string
 }
 
 interface BookingModalProps {
   isOpen: boolean
   onClose: () => void
-  serviceId?: string
+  service_id?: string
   serviceName?: string
   onBookingSuccess?: (bookingData: BookingData) => void
 }
@@ -39,11 +39,11 @@ const services = [
 const BookingModal = memo(function BookingModal({
   isOpen,
   onClose,
-  serviceId,
+  service_id,
   serviceName: _serviceName,
   onBookingSuccess
 }: BookingModalProps) {
-  const [selectedService, setSelectedService] = useState(serviceId ?? '')
+  const [selectedService, setSelectedService] = useState(service_id ?? '')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [customerName, setCustomerName] = useState('')
@@ -68,7 +68,7 @@ const BookingModal = memo(function BookingModal({
 
         const bookingData = {
           id: `BK_${Date.now()}`,
-          serviceId: selectedService,
+          service_id: selectedService,
           serviceName: selectedServiceData?.name,
           customerName,
           customerEmail,
@@ -78,7 +78,7 @@ const BookingModal = memo(function BookingModal({
           notes,
           status: 'confirmed',
           amount: selectedServiceData?.price ?? 0,
-          createdAt: new Date().toISOString()
+          created_at: new Date().toISOString()
         }
 
         onBookingSuccess?.(bookingData)

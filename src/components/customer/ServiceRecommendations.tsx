@@ -10,14 +10,14 @@ interface ServiceRecommendation {
   name: string
   slug: string
   description: string | null
-  basePrice: number
-  originalPrice?: number | null
+  base_price: number
+  original_price?: number | null
   discount?: number
   category: string | null
   rating: number
   reviewCount: number
-  isPopular: boolean
-  isFeatured: boolean
+  is_popular: boolean
+  is_featured: boolean
   recommendationReason: string
   estimatedDuration: string
 }
@@ -115,7 +115,7 @@ export default function ServiceRecommendations({ recommendations }: ServiceRecom
                         <h4 className="font-semibold text-gray-900 transition-colors group-hover:text-amber-600">
                           {service.name}
                         </h4>
-                        {service.isFeatured && <Crown className="h-4 w-4 text-yellow-500" />}
+                        {service.is_featured && <Crown className="h-4 w-4 text-yellow-500" />}
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${badge.color}`}
                         >
@@ -142,13 +142,13 @@ export default function ServiceRecommendations({ recommendations }: ServiceRecom
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      {service.originalPrice && service.discount && (
+                      {service.original_price && service.discount && (
                         <span className="text-sm text-gray-500 line-through">
-                          {formatVND(service.originalPrice)}
+                          {formatVND(service.original_price)}
                         </span>
                       )}
                       <span className="text-lg font-bold text-gray-900">
-                        {formatVND(service.basePrice)}
+                        {formatVND(service.base_price)}
                       </span>
                       {service.discount && (
                         <span className="rounded bg-red-50 px-2 py-1 text-xs font-medium text-red-600">

@@ -19,7 +19,7 @@ interface FileUploadProps {
   accept?: string
   maxSize?: number
   folder?: string
-  isPublic?: boolean
+  is_public?: boolean
   className?: string
   children?: React.ReactNode
 }
@@ -28,7 +28,7 @@ interface UploadedFile {
   key: string
   url: string
   size: number
-  mimeType: string
+  mime_type: string
   filename: string
 }
 
@@ -38,7 +38,7 @@ export function FileUpload({
   accept = '*/*',
   maxSize = 10 * 1024 * 1024, // 10MB default
   folder = 'general',
-  isPublic = false,
+  is_public = false,
   className = '',
   children
 }: FileUploadProps) {
@@ -71,7 +71,7 @@ export function FileUpload({
       const formData = new FormData()
       formData.append('file', file)
       formData.append('folder', folder)
-      formData.append('isPublic', isPublic.toString())
+      formData.append('is_public', is_public.toString())
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -117,7 +117,7 @@ export function FileUpload({
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [maxSize, folder, isPublic, onUpload, onError]
+    [maxSize, folder, is_public, onUpload, onError]
   )
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -221,19 +221,19 @@ interface FileListProps {
     key: string
     filename: string
     size: number
-    mimeType: string
+    mime_type: string
     url: string
-    createdAt: string
+    created_at: string
   }>
   onDelete?: (key: string) => void
   loading?: boolean
 }
 
 export function FileList({ files, onDelete, loading }: FileListProps) {
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType.startsWith('image/')) return <ImageIcon className="h-5 w-5" />
-    if (mimeType.startsWith('video/')) return <Film className="h-5 w-5" />
-    if (mimeType.includes('pdf')) return <FileText className="h-5 w-5" />
+  const getFileIcon = (mime_type: string) => {
+    if (mime_type.startsWith('image/')) return <ImageIcon className="h-5 w-5" />
+    if (mime_type.startsWith('video/')) return <Film className="h-5 w-5" />
+    if (mime_type.includes('pdf')) return <FileText className="h-5 w-5" />
     return <File className="h-5 w-5" />
   }
 
@@ -268,11 +268,11 @@ export function FileList({ files, onDelete, loading }: FileListProps) {
           className="flex items-center justify-between rounded-lg border bg-white p-3 transition-colors hover:border-gray-300"
         >
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="text-gray-400">{getFileIcon(file.mimeType)}</div>
+            <div className="text-gray-400">{getFileIcon(file.mime_type)}</div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-gray-900">{file.filename}</p>
               <p className="text-xs text-gray-500">
-                {formatFileSize(file.size)} • {new Date(file.createdAt).toLocaleDateString()}
+                {formatFileSize(file.size)} • {new Date(file.created_at).toLocaleDateString()}
               </p>
             </div>
           </div>

@@ -63,7 +63,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 }
 
 // Welcome email template
-export async function sendWelcomeEmail(email: string, fullName: string): Promise<boolean> {
+export async function sendWelcomeEmail(email: string, full_name: string): Promise<boolean> {
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -121,7 +121,7 @@ export async function sendWelcomeEmail(email: string, fullName: string): Promise
     <body>
       <div class="header">
         <h1>🏰 Chào mừng đến với RoK Services!</h1>
-        <p>Xin chào ${fullName}, cảm ơn bạn đã tham gia cộng đồng Rise of Kingdoms chuyên nghiệp!</p>
+        <p>Xin chào ${full_name}, cảm ơn bạn đã tham gia cộng đồng Rise of Kingdoms chuyên nghiệp!</p>
       </div>
       
       <div class="content">
@@ -192,7 +192,7 @@ export async function sendWelcomeEmail(email: string, fullName: string): Promise
   const textContent = `
 Chào mừng đến với RoK Services!
 
-Xin chào ${fullName},
+Xin chào ${full_name},
 
 Cảm ơn bạn đã tham gia cộng đồng Rise of Kingdoms chuyên nghiệp!
 
@@ -355,7 +355,7 @@ Trân trọng,
 // Account created email with password
 export async function sendAccountCreatedEmail(
   email: string,
-  fullName: string,
+  full_name: string,
   password: string
 ): Promise<boolean> {
   const loginUrl = `${process.env.NEXTAUTH_URL || 'https://rokdbot.com'}/auth/signin`
@@ -381,7 +381,7 @@ export async function sendAccountCreatedEmail(
           <h1>Chào mừng đến với RoK Services!</h1>
         </div>
         <div class="content">
-          <p>Xin chào <strong>${fullName}</strong>,</p>
+          <p>Xin chào <strong>${full_name}</strong>,</p>
           <p>Tài khoản của bạn đã được tạo tự động khi bạn đặt dịch vụ. Dưới đây là thông tin đăng nhập của bạn:</p>
           
           <div class="credentials">
@@ -404,15 +404,15 @@ export async function sendAccountCreatedEmail(
     to: email,
     subject: '🔐 Thông tin tài khoản RoK Services của bạn',
     html: htmlContent,
-    text: `Xin chào ${fullName}, tài khoản của bạn đã được tạo. Email: ${email}, Mật khẩu: ${password}. Đăng nhập tại: ${loginUrl}`
+    text: `Xin chào ${full_name}, tài khoản của bạn đã được tạo. Email: ${email}, Mật khẩu: ${password}. Đăng nhập tại: ${loginUrl}`
   })
 }
 
 // Booking received email
 export async function sendBookingReceivedEmail(
   email: string,
-  fullName: string,
-  bookingNumber: string,
+  full_name: string,
+  booking_number: string,
   serviceName: string
 ): Promise<boolean> {
   const _paymentUrl = `${process.env.NEXTAUTH_URL || 'https://rokdbot.com'}/booking` // Ideally link to specific booking if possible
@@ -434,9 +434,9 @@ export async function sendBookingReceivedEmail(
           <h1>Đã nhận yêu cầu đặt lịch</h1>
         </div>
         <div class="content">
-          <p>Xin chào <strong>${fullName}</strong>,</p>
+          <p>Xin chào <strong>${full_name}</strong>,</p>
           <p>Chúng tôi đã nhận được yêu cầu đặt lịch <strong>${serviceName}</strong> của bạn.</p>
-          <p>Mã đơn hàng: <strong>${bookingNumber}</strong></p>
+          <p>Mã đơn hàng: <strong>${booking_number}</strong></p>
           <p>Vui lòng hoàn tất thanh toán để kích hoạt dịch vụ.</p>
         </div>
       </div>
@@ -446,22 +446,22 @@ export async function sendBookingReceivedEmail(
 
   return sendEmail({
     to: email,
-    subject: `📅 Xác nhận yêu cầu đặt lịch #${bookingNumber}`,
+    subject: `📅 Xác nhận yêu cầu đặt lịch #${booking_number}`,
     html: htmlContent,
-    text: `Xin chào ${fullName}, chúng tôi đã nhận được yêu cầu đặt lịch ${serviceName} (Mã: ${bookingNumber}). Vui lòng hoàn tất thanh toán.`
+    text: `Xin chào ${full_name}, chúng tôi đã nhận được yêu cầu đặt lịch ${serviceName} (Mã: ${booking_number}). Vui lòng hoàn tất thanh toán.`
   })
 }
 
 // Order confirmation email (Updated)
 export async function sendOrderConfirmationEmail(
   email: string,
-  fullName: string,
+  full_name: string,
   orderDetails: {
     orderNumber: string
     serviceName: string
     amount: number
     currency: string
-    paymentMethod?: string
+    payment_method?: string
   }
 ): Promise<boolean> {
   const htmlContent = `
@@ -482,14 +482,14 @@ export async function sendOrderConfirmationEmail(
           <h1>Thanh toán thành công!</h1>
         </div>
         <div class="content">
-          <p>Xin chào <strong>${fullName}</strong>,</p>
+          <p>Xin chào <strong>${full_name}</strong>,</p>
           <p>Cảm ơn bạn đã thanh toán. Dịch vụ của bạn đã được kích hoạt.</p>
           
           <div class="details">
             <p><strong>Mã đơn hàng:</strong> ${orderDetails.orderNumber}</p>
             <p><strong>Dịch vụ:</strong> ${orderDetails.serviceName}</p>
             <p><strong>Thành tiền:</strong> ${orderDetails.amount.toLocaleString()} ${orderDetails.currency}</p>
-            <p><strong>Phương thức:</strong> ${orderDetails.paymentMethod || 'N/A'}</p>
+            <p><strong>Phương thức:</strong> ${orderDetails.payment_method || 'N/A'}</p>
           </div>
 
           <p>Đội ngũ của chúng tôi sẽ liên hệ với bạn sớm nhất có thể.</p>
@@ -503,6 +503,6 @@ export async function sendOrderConfirmationEmail(
     to: email,
     subject: `✅ Thanh toán thành công #${orderDetails.orderNumber}`,
     html: htmlContent,
-    text: `Xin chào ${fullName}, thanh toán cho đơn hàng #${orderDetails.orderNumber} đã thành công. Cảm ơn bạn đã sử dụng dịch vụ.`
+    text: `Xin chào ${full_name}, thanh toán cho đơn hàng #${orderDetails.orderNumber} đã thành công. Cảm ơn bạn đã sử dụng dịch vụ.`
   })
 }

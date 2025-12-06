@@ -13,7 +13,7 @@ const BACKUP_CODES_COUNT = 10
 interface TwoFactorSetupResult {
   secret: string
   qrCode: string
-  backupCodes: string[]
+  backup_codes: string[]
 }
 
 interface VerificationResult {
@@ -25,7 +25,7 @@ export class TwoFactorAuthService {
   /**
    * Generate a new 2FA secret and QR code for setup
    */
-  static async generateSecret(userId: string, userEmail: string): Promise<TwoFactorSetupResult> {
+  static async generateSecret(user_id: string, userEmail: string): Promise<TwoFactorSetupResult> {
     try {
       // Generate secret
       const secret = speakeasy.generateSecret({
@@ -35,21 +35,23 @@ export class TwoFactorAuthService {
       })
 
       // Generate backup codes
-      const backupCodes = this.generateBackupCodes()
+      const backup_codes = this.generateBackupCodes()
 
       // Store secret in database (not enabled yet)
-      await prisma.twoFactorAuth.upsert({
-        where: { userId },
+      await prisma.two_factor_auth.upsert({
+        where: { user_id },
         create: {
-          userId,
+          id: crypto.randomUUID(),
+          user_id,
           secret: secret.base32,
           enabled: false,
-          backupCodes
+          backup_codes,
+          updated_at: new Date()
         },
         update: {
           secret: secret.base32,
           enabled: false,
-          backupCodes
+          backup_codes
         }
       })
 
@@ -57,14 +59,14 @@ export class TwoFactorAuthService {
       const qrCode = await QRCode.toDataURL(secret.otpauth_url!)
 
       getLogger().logSecurityEvent('2fa_setup_initiated', {
-        userId,
+        user_id,
         email: userEmail
       })
 
       return {
         secret: secret.base32,
         qrCode,
-        backupCodes
+        backup_codes
       }
     } catch (error) {
       getLogger().error('2FA setup error', error as Error)
@@ -75,10 +77,10 @@ export class TwoFactorAuthService {
   /**
    * Verify a TOTP token during setup
    */
-  static async verifyAndEnable(userId: string, token: string): Promise<VerificationResult> {
+  static async verifyAndEnable(user_id: string, token: string): Promise<VerificationResult> {
     try {
-      const twoFactorAuth = await prisma.twoFactorAuth.findUnique({
-        where: { userId }
+      const twoFactorAuth = await prisma.two_factor_auth.findUnique({
+        where: { user_id }
       })
 
       if (!twoFactorAuth) {
@@ -99,12 +101,12 @@ export class TwoFactorAuthService {
 
       if (verified) {
         // Enable 2FA
-        await prisma.twoFactorAuth.update({
-          where: { userId },
+        await prisma.two_factor_auth.update({
+          where: { user_id },
           data: { enabled: true }
         })
 
-        getLogger().logSecurityEvent('2fa_enabled', { userId })
+        getLogger().logSecurityEvent('2fa_enabled', { user_id })
 
         return { verified: true }
       }
@@ -119,10 +121,10 @@ export class TwoFactorAuthService {
   /**
    * Verify a TOTP token during login
    */
-  static async verifyToken(userId: string, token: string): Promise<VerificationResult> {
+  static async verifyToken(user_id: string, token: string): Promise<VerificationResult> {
     try {
-      const twoFactorAuth = await prisma.twoFactorAuth.findUnique({
-        where: { userId }
+      const twoFactorAuth = await prisma.two_factor_auth.findUnique({
+        where: { user_id }
       })
 
       if (!twoFactorAuth || !twoFactorAuth.enabled) {
@@ -138,32 +140,32 @@ export class TwoFactorAuthService {
       })
 
       if (verified) {
-        getLogger().logSecurityEvent('2fa_login_success', { userId })
+        getLogger().logSecurityEvent('2fa_login_success', { user_id })
         return { verified: true }
       }
 
       // Try backup code if TOTP fails
-      if (twoFactorAuth.backupCodes.includes(token)) {
+      if (twoFactorAuth.backup_codes.includes(token)) {
         // Remove used backup code
-        const updatedCodes = twoFactorAuth.backupCodes.filter(code => code !== token)
+        const updatedCodes = twoFactorAuth.backup_codes.filter(code => code !== token)
 
-        await prisma.twoFactorAuth.update({
-          where: { userId },
+        await prisma.two_factor_auth.update({
+          where: { user_id },
           data: {
-            backupCodes: updatedCodes,
-            lastUsedBackupCode: token
+            backup_codes: updatedCodes,
+            last_used_backup_code: token
           }
         })
 
         getLogger().logSecurityEvent('2fa_backup_code_used', {
-          userId,
+          user_id,
           remainingCodes: updatedCodes.length
         })
 
         return { verified: true, message: 'Backup code used successfully' }
       }
 
-      getLogger().logSecurityEvent('2fa_login_failed', { userId })
+      getLogger().logSecurityEvent('2fa_login_failed', { user_id })
       return { verified: false, message: 'Invalid verification code' }
     } catch (error) {
       getLogger().error('2FA token verification error', error as Error)
@@ -174,11 +176,11 @@ export class TwoFactorAuthService {
   /**
    * Disable 2FA for a user
    */
-  static async disable(userId: string, password?: string): Promise<boolean> {
+  static async disable(user_id: string, password?: string): Promise<boolean> {
     try {
       // Optional: Verify password before disabling
       if (password) {
-        const user = await prisma.user.findUnique({ where: { id: userId } })
+        const user = await prisma.users.findUnique({ where: { id: user_id } })
         if (!user) return false
 
         // Password verification would go here
@@ -186,12 +188,12 @@ export class TwoFactorAuthService {
         // if (!isValid) return false
       }
 
-      await prisma.twoFactorAuth.update({
-        where: { userId },
+      await prisma.two_factor_auth.update({
+        where: { user_id },
         data: { enabled: false }
       })
 
-      getLogger().logSecurityEvent('2fa_disabled', { userId })
+      getLogger().logSecurityEvent('2fa_disabled', { user_id })
       return true
     } catch (error) {
       getLogger().error('2FA disable error', error as Error)
@@ -202,17 +204,17 @@ export class TwoFactorAuthService {
   /**
    * Generate new backup codes
    */
-  static async regenerateBackupCodes(userId: string): Promise<string[]> {
+  static async regenerateBackupCodes(user_id: string): Promise<string[]> {
     try {
-      const backupCodes = this.generateBackupCodes()
+      const backup_codes = this.generateBackupCodes()
 
-      await prisma.twoFactorAuth.update({
-        where: { userId },
-        data: { backupCodes }
+      await prisma.two_factor_auth.update({
+        where: { user_id },
+        data: { backup_codes }
       })
 
-      getLogger().logSecurityEvent('2fa_backup_codes_regenerated', { userId })
-      return backupCodes
+      getLogger().logSecurityEvent('2fa_backup_codes_regenerated', { user_id })
+      return backup_codes
     } catch (error) {
       getLogger().error('Backup code regeneration error', error as Error)
       throw new Error('Failed to regenerate backup codes')
@@ -222,10 +224,10 @@ export class TwoFactorAuthService {
   /**
    * Check if user has 2FA enabled
    */
-  static async isEnabled(userId: string): Promise<boolean> {
+  static async isEnabled(user_id: string): Promise<boolean> {
     try {
-      const twoFactorAuth = await prisma.twoFactorAuth.findUnique({
-        where: { userId },
+      const twoFactorAuth = await prisma.two_factor_auth.findUnique({
+        where: { user_id },
         select: { enabled: true }
       })
 
@@ -253,22 +255,22 @@ export class TwoFactorAuthService {
   /**
    * Get 2FA status and remaining backup codes for a user
    */
-  static async getStatus(userId: string): Promise<{
+  static async getStatus(user_id: string): Promise<{
     enabled: boolean
-    backupCodesRemaining: number
+    backup_codesRemaining: number
     lastBackupCodeUsed?: Date
   } | null> {
     try {
-      const twoFactorAuth = await prisma.twoFactorAuth.findUnique({
-        where: { userId }
+      const twoFactorAuth = await prisma.two_factor_auth.findUnique({
+        where: { user_id }
       })
 
       if (!twoFactorAuth) return null
 
       return {
         enabled: twoFactorAuth.enabled,
-        backupCodesRemaining: twoFactorAuth.backupCodes.length,
-        lastBackupCodeUsed: twoFactorAuth.lastUsedBackupCode ? twoFactorAuth.updatedAt : undefined
+        backup_codesRemaining: twoFactorAuth.backup_codes.length,
+        lastBackupCodeUsed: twoFactorAuth.last_used_backup_code ? twoFactorAuth.updated_at : undefined
       }
     } catch (error) {
       getLogger().error('2FA status retrieval error', error as Error)

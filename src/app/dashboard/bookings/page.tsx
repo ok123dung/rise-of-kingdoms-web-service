@@ -9,8 +9,8 @@ import { useSession } from 'next-auth/react'
 
 interface Booking {
   id: string
-  bookingNumber: string
-  serviceTier: {
+  booking_number: string
+  service_tiers: {
     name: string
     service: {
       name: string
@@ -18,11 +18,11 @@ interface Booking {
     }
   }
   status: string
-  paymentStatus: string
-  totalAmount: number
-  createdAt: string
-  startDate: string | null
-  endDate: string | null
+  payment_status: string
+  total_amount: number
+  created_at: string
+  start_date: string | null
+  end_date: string | null
 }
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -30,7 +30,7 @@ const statusColors = {
   completed: 'bg-green-100 text-green-800',
   cancelled: 'bg-red-100 text-red-800'
 }
-const paymentStatusColors = {
+const payment_statusColors = {
   pending: 'bg-gray-100 text-gray-800',
   paid: 'bg-green-100 text-green-800',
   failed: 'bg-red-100 text-red-800'
@@ -117,15 +117,15 @@ export default function BookingsPage() {
                       <div className="flex items-center">
                         <div className="bg-rok-gold/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full">
                           <span className="text-2xl">
-                            {getServiceIcon(booking.serviceTier.service.slug || '')}
+                            {getServiceIcon(booking.service_tiers.services.slug || '')}
                           </span>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {booking.serviceTier.service.name} - {booking.serviceTier.name}
+                            {booking.service_tiers.services.name} - {booking.service_tiers.name}
                           </div>
                           <div className="text-sm text-gray-500">
-                            Mã đơn: {booking.bookingNumber}
+                            Mã đơn: {booking.booking_number}
                           </div>
                         </div>
                       </div>
@@ -135,10 +135,10 @@ export default function BookingsPage() {
                             {new Intl.NumberFormat('vi-VN', {
                               style: 'currency',
                               currency: 'VND'
-                            }).format(booking.totalAmount)}
+                            }).format(booking.total_amount)}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {format(new Date(booking.createdAt), 'dd/MM/yyyy', { locale: vi })}
+                            {format(new Date(booking.created_at), 'dd/MM/yyyy', { locale: vi })}
                           </p>
                         </div>
                         <div className="flex flex-col items-end space-y-1">
@@ -151,22 +151,22 @@ export default function BookingsPage() {
                             {booking.status === 'cancelled' && 'Đã hủy'}
                           </span>
                           <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${paymentStatusColors[booking.paymentStatus as keyof typeof paymentStatusColors]}`}
+                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${payment_statusColors[booking.payment_status as keyof typeof payment_statusColors]}`}
                           >
-                            {booking.paymentStatus === 'pending' && 'Chưa thanh toán'}
-                            {booking.paymentStatus === 'paid' && 'Đã thanh toán'}
-                            {booking.paymentStatus === 'failed' && 'Thanh toán thất bại'}
+                            {booking.payment_status === 'pending' && 'Chưa thanh toán'}
+                            {booking.payment_status === 'paid' && 'Đã thanh toán'}
+                            {booking.payment_status === 'failed' && 'Thanh toán thất bại'}
                           </span>
                         </div>
                       </div>
                     </div>
-                    {booking.startDate && (
+                    {booking.start_date && (
                       <div className="mt-2 sm:flex sm:justify-between">
                         <div className="sm:flex">
                           <p className="flex items-center text-sm text-gray-500">
                             <ClockIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" />
                             Bắt đầu:{' '}
-                            {format(new Date(booking.startDate), 'dd/MM/yyyy HH:mm', {
+                            {format(new Date(booking.start_date), 'dd/MM/yyyy HH:mm', {
                               locale: vi
                             })}
                           </p>

@@ -13,7 +13,7 @@ interface Notification {
   type: string
   title: string
   message: string
-  createdAt: string
+  created_at: string
   read: boolean
   link?: string
 }
@@ -113,7 +113,7 @@ export function RealtimeNotifications() {
                         <p className="text-sm font-medium text-gray-900">{notification.title}</p>
                         <p className="mt-1 text-sm text-gray-600">{notification.message}</p>
                         <p className="mt-1 text-xs text-gray-400">
-                          {format(new Date(notification.createdAt), 'dd MMM, HH:mm', {
+                          {format(new Date(notification.created_at), 'dd MMM, HH:mm', {
                             locale: vi
                           })}
                         </p>

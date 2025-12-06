@@ -192,26 +192,26 @@ function detectDatabaseProvider(url: string): string {
   return 'Unknown'
 }
 
-function getRecommendations(errorMessage: string): string[] {
+function getRecommendations(error_message: string): string[] {
   const recommendations = []
 
-  if (errorMessage.includes('P1001') || errorMessage.includes('connect')) {
+  if (error_message.includes('P1001') || error_message.includes('connect')) {
     recommendations.push('Ensure DATABASE_URL is set in Vercel environment variables')
     recommendations.push('Add connection pooling: ?pgbouncer=true&connection_limit=1')
     recommendations.push('Verify database server is accessible from Vercel')
   }
 
-  if (errorMessage.includes('timeout')) {
+  if (error_message.includes('timeout')) {
     recommendations.push('Add connection timeout: ?connect_timeout=30')
     recommendations.push('Ensure database region is close to Vercel deployment region')
   }
 
-  if (errorMessage.includes('SSL') || errorMessage.includes('certificate')) {
+  if (error_message.includes('SSL') || error_message.includes('certificate')) {
     recommendations.push('Add SSL mode to DATABASE_URL: ?sslmode=require')
     recommendations.push('For some providers, try: ?ssl=true')
   }
 
-  if (errorMessage.includes('too many connections')) {
+  if (error_message.includes('too many connections')) {
     recommendations.push('Enable connection pooling: ?pgbouncer=true')
     recommendations.push('Limit connections: ?connection_limit=1')
     recommendations.push('Consider upgrading database plan for more connections')

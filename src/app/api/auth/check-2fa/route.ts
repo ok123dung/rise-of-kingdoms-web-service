@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = checkSchema.parse(body)
 
     // Find user
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email }
     })
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       requires2FA: is2FAEnabled,
-      userId: user.id
+      user_id: user.id
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

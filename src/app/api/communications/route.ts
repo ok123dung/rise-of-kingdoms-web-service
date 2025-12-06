@@ -11,16 +11,16 @@ const communicationService = new CommunicationService()
 const logger = getLogger()
 
 const sendMessageSchema = z.object({
-  userId: z.string().optional(), // Optional if sending to self (current user)
-  bookingId: z.string().optional(),
+  user_id: z.string().optional(), // Optional if sending to self (current user)
+  booking_id: z.string().optional(),
   type: z.nativeEnum(CommunicationType),
   content: z.string().min(1, 'Content is required'),
   subject: z.string().optional()
 })
 
 interface SendMessageRequest {
-  userId?: string
-  bookingId?: string
+  user_id?: string
+  booking_id?: string
   type: CommunicationType
   content: string
   subject?: string
@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
     let targetUserId = session.user.id
 
     // If admin/staff is sending to another user
-    if (['admin', 'manager', 'staff'].includes(session.user.role) && data.userId) {
-      targetUserId = data.userId
+    if (['admin', 'manager', 'staff'].includes(session.user.role) && data.user_id) {
+      targetUserId = data.user_id
     }
 
     const message = await communicationService.sendMessage({
-      userId: targetUserId,
-      bookingId: data.bookingId,
+      user_id: targetUserId,
+      booking_id: data.booking_id,
       type: data.type,
       content: data.content,
       subject: data.subject
@@ -73,18 +73,18 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const bookingId = searchParams.get('bookingId') ?? undefined
-    const userIdParam = searchParams.get('userId')
+    const booking_id = searchParams.get('booking_id') ?? undefined
+    const user_idParam = searchParams.get('user_id')
 
     // Determine whose history to fetch
     let targetUserId = session.user.id
 
     // Admin can view anyone's history
-    if (['admin', 'manager', 'staff'].includes(session.user.role) && userIdParam) {
-      targetUserId = userIdParam
+    if (['admin', 'manager', 'staff'].includes(session.user.role) && user_idParam) {
+      targetUserId = user_idParam
     }
 
-    const history = await communicationService.getHistory(targetUserId, bookingId)
+    const history = await communicationService.getHistory(targetUserId, booking_id)
 
     return NextResponse.json({ success: true, history })
   } catch (error) {

@@ -7,7 +7,7 @@ import type { Prisma } from '@prisma/client'
 
 // JWT Token interface
 interface AuthToken {
-  userId: string
+  user_id: string
   email: string
   role: string
   name?: string
@@ -129,32 +129,32 @@ export function hasPermission(userRole: string, requiredRoles: string[]): boolea
 
 // Resource ownership checking
 export async function checkResourceOwnership(
-  userId: string,
+  user_id: string,
   resourceType: 'booking' | 'payment' | 'user',
-  resourceId: string
+  resource_id: string
 ): Promise<boolean> {
   try {
     const { prisma } = await import('@/lib/db')
 
     switch (resourceType) {
       case 'booking': {
-        const booking = await prisma.booking.findUnique({
-          where: { id: resourceId },
-          select: { userId: true }
+        const booking = await prisma.bookings.findUnique({
+          where: { id: resource_id },
+          select: { user_id: true }
         })
-        return booking?.userId === userId
+        return booking?.user_id === user_id
       }
 
       case 'payment': {
-        const payment = await prisma.payment.findUnique({
-          where: { id: resourceId },
-          include: { booking: { select: { userId: true } } }
+        const payment = await prisma.payments.findUnique({
+          where: { id: resource_id },
+          include: { bookings: { select: { user_id: true } } }
         })
-        return payment?.booking?.userId === userId
+        return payment?.bookings?.user_id === user_id
       }
 
       case 'user':
-        return resourceId === userId
+        return resource_id === user_id
 
       default:
         return false
@@ -163,7 +163,7 @@ export async function checkResourceOwnership(
     getLogger().error(
       'Resource ownership check failed',
       error instanceof Error ? error : new Error(String(error)),
-      { resourceType, resourceId, userId }
+      { resourceType, resource_id, user_id }
     )
     return false
   }
@@ -223,7 +223,7 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
       await logSecurityEvent('unauthorized_admin_access', {
         url: request.url,
         ip: request.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: request.headers.get('user-agent')
+        user_agent: request.headers.get('user-agent')
       })
 
       return {
@@ -235,7 +235,7 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
     if (token.role !== 'admin' && token.role !== 'superadmin') {
       // Log access denied attempt
       await logSecurityEvent('admin_access_denied', {
-        userId: token.userId,
+        user_id: token.user_id,
         userRole: token.role,
         url: request.url,
         ip: request.headers.get('x-forwarded-for') || 'unknown'
@@ -249,7 +249,7 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
 
     // Log successful admin access
     await logSecurityEvent('admin_access_granted', {
-      userId: token.userId,
+      user_id: token.user_id,
       userRole: token.role,
       url: request.url
     })
@@ -257,7 +257,7 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
     return {
       allowed: true,
       user: {
-        userId: token.sub || '',
+        user_id: token.sub || '',
         email: token.email || '',
         role: 'admin',
         name: token.name
@@ -279,12 +279,13 @@ export async function requireAdminAccess(request: NextRequest): Promise<{
 async function logSecurityEvent(event: string, data: Record<string, unknown>) {
   try {
     const { prisma } = await import('@/lib/db')
-    await prisma.securityLog.create({
+    await prisma.security_logs.create({
       data: {
+        id: crypto.randomUUID(),
         event,
-        userId: data.userId as string | undefined,
+        user_id: data.user_id as string | undefined,
         ip: data.ip as string | undefined,
-        userAgent: data.userAgent as string | undefined,
+        user_agent: data.user_agent as string | undefined,
         url: data.url as string | undefined,
         data: data as Prisma.InputJsonValue,
         timestamp: new Date()
@@ -308,26 +309,27 @@ export async function logAdminAction(
   adminId: string,
   action: string,
   resource: string,
-  resourceId: string,
+  resource_id: string,
   details?: Record<string, unknown>
 ): Promise<void> {
   try {
     const { prisma } = await import('@/lib/db')
 
-    await prisma.auditLog.create({
+    await prisma.audit_logs.create({
       data: {
-        userId: adminId,
+        id: crypto.randomUUID(),
+        user_id: adminId,
         action,
         resource,
-        resourceId,
+        resource_id,
         details: details as Prisma.InputJsonValue,
         ip: details?.ip as string | undefined,
-        userAgent: details?.userAgent as string | undefined,
+        user_agent: details?.user_agent as string | undefined,
         timestamp: new Date()
       }
     })
 
-    getLogger().info('Audit log created', { adminId, action, resource, resourceId })
+    getLogger().info('Audit log created', { adminId, action, resource, resource_id })
   } catch (error) {
     getLogger().warn(
       `Failed to log admin action: ${error instanceof Error ? error.message : String(error)}`,
@@ -339,7 +341,7 @@ export async function logAdminAction(
       adminId,
       action,
       resource,
-      resourceId,
+      resource_id,
       details: JSON.stringify(details)
     })
   }

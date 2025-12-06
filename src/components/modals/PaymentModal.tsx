@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 
 interface PaymentData {
-  bookingId: string
+  booking_id: string
   amount: number
   method: 'momo' | 'vnpay' | 'zalopay'
   transactionId: string
@@ -15,14 +15,14 @@ interface PaymentModalProps {
   isOpen: boolean
   onClose: () => void
   amount: number
-  bookingId: string
+  booking_id: string
   onPaymentSuccess?: (paymentData: PaymentData) => void
 }
 export default function PaymentModal({
   isOpen,
   onClose,
   amount,
-  bookingId,
+  booking_id,
   onPaymentSuccess
 }: PaymentModalProps) {
   const [selectedMethod, setSelectedMethod] = useState<'momo' | 'vnpay' | 'zalopay' | null>(null)
@@ -35,7 +35,7 @@ export default function PaymentModal({
       // Mock payment processing
       await new Promise(resolve => setTimeout(resolve, 2000))
       const paymentData = {
-        bookingId,
+        booking_id,
         amount,
         method: selectedMethod,
         transactionId: `TX_${Date.now()}`,
@@ -65,7 +65,7 @@ export default function PaymentModal({
           <div className="text-2xl font-bold text-blue-900">
             {amount.toLocaleString('vi-VN')} VNĐ
           </div>
-          <div className="mt-1 text-sm text-blue-600">Booking ID: {bookingId}</div>
+          <div className="mt-1 text-sm text-blue-600">Booking ID: {booking_id}</div>
         </div>
         {/* Payment Methods */}
         <div className="mb-6">

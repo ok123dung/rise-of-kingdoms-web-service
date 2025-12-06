@@ -11,16 +11,16 @@ interface Renewal {
   id: string
   booking: {
     id: string
-    bookingNumber: string
-    serviceTier: {
+    booking_number: string
+    service_tiers: {
       name: string
       service: {
         name: string
         icon: string
       }
     }
-    startDate: string
-    endDate: string
+    start_date: string
+    end_date: string
   }
   daysRemaining: number
   status: 'active' | 'expiring' | 'expired'
@@ -42,16 +42,16 @@ export default function RenewalsPage() {
           id: '1',
           booking: {
             id: '1',
-            bookingNumber: 'RK241201001',
-            serviceTier: {
+            booking_number: 'RK241201001',
+            service_tiers: {
               name: 'Gói Premium',
               service: {
                 name: 'Nâng cấp VIP',
                 icon: '👑'
               }
             },
-            startDate: '2024-11-01T00:00:00Z',
-            endDate: '2024-12-15T23:59:59Z'
+            start_date: '2024-11-01T00:00:00Z',
+            end_date: '2024-12-15T23:59:59Z'
           },
           daysRemaining: 5,
           status: 'expiring'
@@ -133,16 +133,16 @@ export default function RenewalsPage() {
                       <div className="flex items-center">
                         <div className="bg-rok-gold/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full">
                           <span className="text-2xl">
-                            {renewal.booking.serviceTier.service.icon}
+                            {renewal.bookings.service_tiers.services.icon}
                           </span>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {renewal.booking.serviceTier.service.name} -{' '}
-                            {renewal.booking.serviceTier.name}
+                            {renewal.bookings.service_tiers.services.name} -{' '}
+                            {renewal.bookings.service_tiers.name}
                           </div>
                           <div className="text-sm text-gray-500">
-                            Mã đơn: {renewal.booking.bookingNumber}
+                            Mã đơn: {renewal.bookings.booking_number}
                           </div>
                         </div>
                       </div>
@@ -150,7 +150,7 @@ export default function RenewalsPage() {
                         <div className="text-right">
                           <p className="text-sm text-gray-900">
                             Hết hạn:{' '}
-                            {format(new Date(renewal.booking.endDate), 'dd/MM/yyyy', {
+                            {format(new Date(renewal.bookings.end_date), 'dd/MM/yyyy', {
                               locale: vi
                             })}
                           </p>
@@ -168,7 +168,7 @@ export default function RenewalsPage() {
                           </span>
                           <Link
                             className="bg-rok-gold hover:bg-rok-gold-dark inline-flex items-center rounded-md border border-transparent px-3 py-1 text-xs font-medium text-white"
-                            href={`/services/${renewal.booking.serviceTier.service.name.toLowerCase().replace(/\s+/g, '-')}`}
+                            href={`/services/${renewal.bookings.service_tiers.services.name.toLowerCase().replace(/\s+/g, '-')}`}
                           >
                             <ArrowPathIcon className="mr-1 h-3 w-3" />
                             Gia hạn ngay
@@ -181,11 +181,11 @@ export default function RenewalsPage() {
                         <p className="flex items-center text-sm text-gray-500">
                           <ClockIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" />
                           Thời gian sử dụng:{' '}
-                          {format(new Date(renewal.booking.startDate), 'dd/MM/yyyy', {
+                          {format(new Date(renewal.bookings.start_date), 'dd/MM/yyyy', {
                             locale: vi
                           })}{' '}
                           -{' '}
-                          {format(new Date(renewal.booking.endDate), 'dd/MM/yyyy', { locale: vi })}
+                          {format(new Date(renewal.bookings.end_date), 'dd/MM/yyyy', { locale: vi })}
                         </p>
                       </div>
                     </div>

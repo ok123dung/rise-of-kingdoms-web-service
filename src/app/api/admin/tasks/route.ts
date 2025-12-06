@@ -11,13 +11,13 @@ const taskService = new ServiceTaskService()
 const logger = getLogger()
 
 const createTaskSchema = z.object({
-  bookingId: z.string().min(1, 'Booking ID is required'),
+  booking_id: z.string().min(1, 'Booking ID is required'),
   type: z.string().min(1, 'Task type is required'),
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
   priority: z.nativeEnum(ServiceTaskPriority).optional(),
-  assignedTo: z.string().optional(),
-  dueDate: z
+  assigned_to: z.string().optional(),
+  due_date: z
     .string()
     .optional()
     .transform(str => (str ? new Date(str) : undefined)),
@@ -25,13 +25,13 @@ const createTaskSchema = z.object({
 })
 
 interface CreateTaskRequest {
-  bookingId: string
+  booking_id: string
   type: string
   title: string
   description?: string
   priority?: ServiceTaskPriority
-  assignedTo?: string
-  dueDate?: string
+  assigned_to?: string
+  due_date?: string
   metadata?: Record<string, unknown>
 }
 
@@ -68,19 +68,19 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const bookingId = searchParams.get('bookingId')
-    const assignedTo = searchParams.get('assignedTo')
+    const booking_id = searchParams.get('booking_id')
+    const assigned_to = searchParams.get('assigned_to')
 
     let tasks
-    if (bookingId) {
-      tasks = await taskService.getTasksByBooking(bookingId)
-    } else if (assignedTo) {
-      tasks = await taskService.getTasksByAssignee(assignedTo)
+    if (booking_id) {
+      tasks = await taskService.getTasksByBooking(booking_id)
+    } else if (assigned_to) {
+      tasks = await taskService.getTasksByAssignee(assigned_to)
     } else {
       // If no filter, maybe return empty or all (careful with all)
       // For now, let's require a filter or return 400
       return NextResponse.json(
-        { error: 'Missing filter (bookingId or assignedTo)' },
+        { error: 'Missing filter (booking_id or assigned_to)' },
         { status: 400 }
       )
     }

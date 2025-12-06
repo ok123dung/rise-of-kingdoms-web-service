@@ -19,18 +19,18 @@ import { BookingChat } from '@/components/BookingChat'
 
 interface BookingDetail {
   id: string
-  bookingNumber: string
+  booking_number: string
   status: string
-  paymentStatus: string
-  totalAmount: number
-  finalAmount: number
-  discountAmount: number
-  createdAt: string
-  startDate: string | null
-  endDate: string | null
-  customerRequirements: string | null
-  bookingDetails: Record<string, unknown> | null
-  serviceTier: {
+  payment_status: string
+  total_amount: number
+  final_amount: number
+  discount_amount: number
+  created_at: string
+  start_date: string | null
+  end_date: string | null
+  customer_requirements: string | null
+  booking_details: Record<string, unknown> | null
+  service_tiers: {
     name: string
     description: string
     service: {
@@ -40,17 +40,17 @@ interface BookingDetail {
     }
   }
   user: {
-    fullName: string
+    full_name: string
     email: string
     phone: string | null
   }
   payments: Array<{
     id: string
-    paymentNumber: string
+    payment_number: string
     amount: number
     status: string
-    paymentMethod: string
-    createdAt: string
+    payment_method: string
+    created_at: string
   }>
 }
 const statusColors = {
@@ -144,10 +144,10 @@ export default function BookingDetailPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Chi tiết đơn hàng #{booking.bookingNumber}
+              Chi tiết đơn hàng #{booking.booking_number}
             </h1>
             <p className="mt-1 text-sm text-gray-500">
-              Đặt ngày {format(new Date(booking.createdAt), 'dd/MM/yyyy HH:mm', { locale: vi })}
+              Đặt ngày {format(new Date(booking.created_at), 'dd/MM/yyyy HH:mm', { locale: vi })}
             </p>
           </div>
         </div>
@@ -168,18 +168,18 @@ export default function BookingDetailPage() {
             <h2 className="mb-4 text-lg font-medium text-gray-900">Thông tin dịch vụ</h2>
             <div className="flex items-start space-x-4">
               <div className="bg-rok-gold/10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg">
-                <span className="text-3xl">{booking.serviceTier.service.icon}</span>
+                <span className="text-3xl">{booking.service_tiers.services.icon}</span>
               </div>
               <div className="flex-1">
                 <h3 className="text-base font-medium text-gray-900">
-                  {booking.serviceTier.service.name} - {booking.serviceTier.name}
+                  {booking.service_tiers.services.name} - {booking.service_tiers.name}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500">{booking.serviceTier.description}</p>
+                <p className="mt-1 text-sm text-gray-500">{booking.service_tiers.description}</p>
               </div>
             </div>
           </div>
           {/* Timeline */}
-          {booking.startDate && (
+          {booking.start_date && (
             <div className="rounded-lg bg-white p-6 shadow">
               <h2 className="mb-4 text-lg font-medium text-gray-900">Thời gian thực hiện</h2>
               <div className="space-y-3">
@@ -187,15 +187,15 @@ export default function BookingDetailPage() {
                   <CalendarIcon className="mr-2 h-5 w-5 text-gray-400" />
                   <span className="text-gray-500">Bắt đầu:</span>
                   <span className="ml-2 text-gray-900">
-                    {format(new Date(booking.startDate), 'dd/MM/yyyy HH:mm', { locale: vi })}
+                    {format(new Date(booking.start_date), 'dd/MM/yyyy HH:mm', { locale: vi })}
                   </span>
                 </div>
-                {booking.endDate && (
+                {booking.end_date && (
                   <div className="flex items-center text-sm">
                     <ClockIcon className="mr-2 h-5 w-5 text-gray-400" />
                     <span className="text-gray-500">Dự kiến hoàn thành:</span>
                     <span className="ml-2 text-gray-900">
-                      {format(new Date(booking.endDate), 'dd/MM/yyyy HH:mm', { locale: vi })}
+                      {format(new Date(booking.end_date), 'dd/MM/yyyy HH:mm', { locale: vi })}
                     </span>
                   </div>
                 )}
@@ -203,20 +203,20 @@ export default function BookingDetailPage() {
             </div>
           )}
           {/* Requirements */}
-          {booking.customerRequirements && (
+          {booking.customer_requirements && (
             <div className="rounded-lg bg-white p-6 shadow">
               <h2 className="mb-4 text-lg font-medium text-gray-900">Yêu cầu của khách hàng</h2>
               <p className="whitespace-pre-wrap text-sm text-gray-700">
-                {booking.customerRequirements}
+                {booking.customer_requirements}
               </p>
             </div>
           )}
           {/* Game Details */}
-          {booking.bookingDetails && (
+          {booking.booking_details && (
             <div className="rounded-lg bg-white p-6 shadow">
               <h2 className="mb-4 text-lg font-medium text-gray-900">Thông tin game</h2>
               <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-                {Object.entries(booking.bookingDetails).map(([key, value]) => (
+                {Object.entries(booking.booking_details).map(([key, value]) => (
                   <div key={key}>
                     <dt className="text-sm font-medium text-gray-500">{key}</dt>
                     <dd className="mt-1 text-sm text-gray-900">{String(value)}</dd>
@@ -228,7 +228,7 @@ export default function BookingDetailPage() {
           {/* Live Chat */}
           <div className="rounded-lg bg-white p-6 shadow" id="booking-chat">
             <h2 className="mb-4 text-lg font-medium text-gray-900">Chat với nhân viên</h2>
-            <BookingChat bookingId={booking.id} />
+            <BookingChat booking_id={booking.id} />
           </div>
         </div>
         {/* Sidebar */}
@@ -243,10 +243,10 @@ export default function BookingDetailPage() {
                   {new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND'
-                  }).format(booking.totalAmount)}
+                  }).format(booking.total_amount)}
                 </dd>
               </div>
-              {booking.discountAmount > 0 && (
+              {booking.discount_amount > 0 && (
                 <div className="flex justify-between">
                   <dt className="text-sm text-gray-500">Giảm giá</dt>
                   <dd className="text-sm font-medium text-green-600">
@@ -254,7 +254,7 @@ export default function BookingDetailPage() {
                     {new Intl.NumberFormat('vi-VN', {
                       style: 'currency',
                       currency: 'VND'
-                    }).format(booking.discountAmount)}
+                    }).format(booking.discount_amount)}
                   </dd>
                 </div>
               )}
@@ -265,7 +265,7 @@ export default function BookingDetailPage() {
                     {new Intl.NumberFormat('vi-VN', {
                       style: 'currency',
                       currency: 'VND'
-                    }).format(booking.finalAmount)}
+                    }).format(booking.final_amount)}
                   </dd>
                 </div>
               </div>
@@ -275,16 +275,16 @@ export default function BookingDetailPage() {
                 <span className="text-sm text-gray-500">Trạng thái</span>
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    booking.paymentStatus === 'paid'
+                    booking.payment_status === 'paid'
                       ? 'bg-green-100 text-green-800'
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
-                  {booking.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                  {booking.payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
                 </span>
               </div>
             </div>
-            {booking.paymentStatus === 'pending' && booking.status !== 'cancelled' && (
+            {booking.payment_status === 'pending' && booking.status !== 'cancelled' && (
               <div className="mt-4">
                 <Link
                   className="bg-rok-gold hover:bg-rok-gold-dark inline-flex w-full items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm"

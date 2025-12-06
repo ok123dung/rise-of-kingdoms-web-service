@@ -83,7 +83,7 @@ async function changePasswordHandler(request: NextRequest): Promise<NextResponse
       }
     })
 
-    getLogger().info('User changed password', { userId: authUser.id })
+    getLogger().info('User changed password', { user_id: authUser.id })
 
     return NextResponse.json({
       success: true,

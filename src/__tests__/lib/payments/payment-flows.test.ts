@@ -25,10 +25,10 @@ describe('Payment Flow Integration Tests', () => {
 
   beforeEach(async () => {
     // Create test data
-    testUser = await prisma.user.create({
+    testUser = await prisma.users.create({
       data: {
         email: 'test@example.com',
-        fullName: 'Test User',
+        full_name: 'Test User',
         phone: '+84123456789'
       }
     })
@@ -38,32 +38,32 @@ describe('Payment Flow Integration Tests', () => {
         name: 'Test Service',
         slug: 'test-service',
         description: 'Test service description',
-        basePrice: 100000,
+        base_price: 100000,
         currency: 'VND',
-        isActive: true
+        is_active: true
       }
     })
 
-    testServiceTier = await prisma.serviceTier.create({
+    testServiceTier = await prisma.service_tiers.create({
       data: {
-        serviceId: testService.id,
+        service_id: testService.id,
         name: 'Test Tier',
         slug: 'test',
         price: 100000,
         features: ['Feature 1', 'Feature 2'],
-        isAvailable: true
+        is_available: true
       }
     })
 
-    testBooking = await prisma.booking.create({
+    testBooking = await prisma.bookings.create({
       data: {
-        bookingNumber: 'TEST001',
-        userId: testUser.id,
-        serviceTierId: testServiceTier.id,
+        booking_number: 'TEST001',
+        user_id: testUser.id,
+        service_tier_id: testServiceTier.id,
         status: 'pending',
-        paymentStatus: 'pending',
-        totalAmount: 100000,
-        finalAmount: 100000,
+        payment_status: 'pending',
+        total_amount: 100000,
+        final_amount: 100000,
         currency: 'VND'
       }
     })
@@ -71,11 +71,11 @@ describe('Payment Flow Integration Tests', () => {
 
   afterEach(async () => {
     // Clean up test data
-    await prisma.payment.deleteMany({ where: { bookingId: testBooking.id } })
-    await prisma.booking.delete({ where: { id: testBooking.id } })
-    await prisma.serviceTier.delete({ where: { id: testServiceTier.id } })
+    await prisma.payments.deleteMany({ where: { booking_id: testBooking.id } })
+    await prisma.bookings.delete({ where: { id: testBooking.id } })
+    await prisma.service_tiers.delete({ where: { id: testServiceTier.id } })
     await prisma.service.delete({ where: { id: testService.id } })
-    await prisma.user.delete({ where: { id: testUser.id } })
+    await prisma.users.delete({ where: { id: testUser.id } })
   })
 
   describe('MoMo Payment Flow', () => {
@@ -83,7 +83,7 @@ describe('Payment Flow Integration Tests', () => {
       const momoPayment = new MoMoPayment()
 
       const result = await momoPayment.createPayment({
-        bookingId: testBooking.id,
+        booking_id: testBooking.id,
         amount: 100000,
         orderInfo: 'Test payment'
       })
@@ -92,11 +92,11 @@ describe('Payment Flow Integration Tests', () => {
       expect(result.data).toBeDefined()
 
       // Verify payment record was created
-      const payment = await prisma.payment.findFirst({
-        where: { bookingId: testBooking.id }
+      const payment = await prisma.payments.findFirst({
+        where: { booking_id: testBooking.id }
       })
       expect(payment).toBeDefined()
-      expect(payment?.paymentMethod).toBe('momo')
+      expect(payment?.payment_method).toBe('momo')
       expect(payment?.status).toBe('pending')
     })
 
@@ -104,7 +104,7 @@ describe('Payment Flow Integration Tests', () => {
       // First create a payment
       const momoPayment = new MoMoPayment()
       await momoPayment.createPayment({
-        bookingId: testBooking.id,
+        booking_id: testBooking.id,
         amount: 100000,
         orderInfo: 'Test payment'
       })
@@ -130,16 +130,16 @@ describe('Payment Flow Integration Tests', () => {
       expect(result.success).toBe(true)
 
       // Verify payment status was updated
-      const payment = await prisma.payment.findFirst({
-        where: { bookingId: testBooking.id }
+      const payment = await prisma.payments.findFirst({
+        where: { booking_id: testBooking.id }
       })
       expect(payment?.status).toBe('completed')
 
       // Verify booking status was updated
-      const booking = await prisma.booking.findUnique({
+      const booking = await prisma.bookings.findUnique({
         where: { id: testBooking.id }
       })
-      expect(booking?.paymentStatus).toBe('completed')
+      expect(booking?.payment_status).toBe('completed')
       expect(booking?.status).toBe('confirmed')
     })
   })
@@ -149,7 +149,7 @@ describe('Payment Flow Integration Tests', () => {
       const zaloPayment = new ZaloPayPayment()
 
       const result = await zaloPayment.createOrder({
-        bookingId: testBooking.id,
+        booking_id: testBooking.id,
         amount: 100000,
         description: 'Test payment'
       })
@@ -158,11 +158,11 @@ describe('Payment Flow Integration Tests', () => {
       expect(result.data).toBeDefined()
 
       // Verify payment record was created
-      const payment = await prisma.payment.findFirst({
-        where: { bookingId: testBooking.id }
+      const payment = await prisma.payments.findFirst({
+        where: { booking_id: testBooking.id }
       })
       expect(payment).toBeDefined()
-      expect(payment?.paymentMethod).toBe('zalopay')
+      expect(payment?.payment_method).toBe('zalopay')
       expect(payment?.status).toBe('pending')
     })
   })
@@ -172,7 +172,7 @@ describe('Payment Flow Integration Tests', () => {
       const vnpayPayment = new VNPayPayment()
 
       const result = await vnpayPayment.createPaymentUrl({
-        bookingId: testBooking.id,
+        booking_id: testBooking.id,
         amount: 100000,
         orderInfo: 'Test payment'
       })
@@ -182,11 +182,11 @@ describe('Payment Flow Integration Tests', () => {
       expect(result.data?.orderId).toBeDefined()
 
       // Verify payment record was created
-      const payment = await prisma.payment.findFirst({
-        where: { bookingId: testBooking.id }
+      const payment = await prisma.payments.findFirst({
+        where: { booking_id: testBooking.id }
       })
       expect(payment).toBeDefined()
-      expect(payment?.paymentMethod).toBe('vnpay')
+      expect(payment?.payment_method).toBe('vnpay')
       expect(payment?.status).toBe('pending')
     })
 
@@ -222,7 +222,7 @@ describe('Payment Flow Integration Tests', () => {
       const bankingTransfer = new BankingTransfer()
 
       const result = await bankingTransfer.createTransferOrder({
-        bookingId: testBooking.id,
+        booking_id: testBooking.id,
         amount: 100000,
         customerName: 'Test User',
         customerEmail: 'test@example.com'
@@ -234,11 +234,11 @@ describe('Payment Flow Integration Tests', () => {
       expect(result.data?.amount).toBe(100000)
 
       // Verify payment record was created
-      const payment = await prisma.payment.findFirst({
-        where: { bookingId: testBooking.id }
+      const payment = await prisma.payments.findFirst({
+        where: { booking_id: testBooking.id }
       })
       expect(payment).toBeDefined()
-      expect(payment?.paymentMethod).toBe('banking')
+      expect(payment?.payment_method).toBe('banking')
       expect(payment?.status).toBe('pending')
     })
 
@@ -247,7 +247,7 @@ describe('Payment Flow Integration Tests', () => {
 
       // First create a transfer order
       const createResult = await bankingTransfer.createTransferOrder({
-        bookingId: testBooking.id,
+        booking_id: testBooking.id,
         amount: 100000,
         customerName: 'Test User',
         customerEmail: 'test@example.com'
@@ -265,16 +265,16 @@ describe('Payment Flow Integration Tests', () => {
       expect(confirmResult.success).toBe(true)
 
       // Verify payment status was updated
-      const payment = await prisma.payment.findFirst({
-        where: { bookingId: testBooking.id }
+      const payment = await prisma.payments.findFirst({
+        where: { booking_id: testBooking.id }
       })
       expect(payment?.status).toBe('completed')
 
       // Verify booking status was updated
-      const booking = await prisma.booking.findUnique({
+      const booking = await prisma.bookings.findUnique({
         where: { id: testBooking.id }
       })
-      expect(booking?.paymentStatus).toBe('completed')
+      expect(booking?.payment_status).toBe('completed')
       expect(booking?.status).toBe('confirmed')
     })
   })
@@ -284,7 +284,7 @@ describe('Payment Flow Integration Tests', () => {
       const momoPayment = new MoMoPayment()
 
       const result = await momoPayment.createPayment({
-        bookingId: 'invalid-id',
+        booking_id: 'invalid-id',
         amount: 100000,
         orderInfo: 'Test payment'
       })
@@ -298,7 +298,7 @@ describe('Payment Flow Integration Tests', () => {
 
       // Create first payment
       const result1 = await momoPayment.createPayment({
-        bookingId: testBooking.id,
+        booking_id: testBooking.id,
         amount: 100000,
         orderInfo: 'Test payment'
       })
@@ -306,7 +306,7 @@ describe('Payment Flow Integration Tests', () => {
 
       // Try to create second payment for same booking
       const result2 = await momoPayment.createPayment({
-        bookingId: testBooking.id,
+        booking_id: testBooking.id,
         amount: 100000,
         orderInfo: 'Test payment'
       })
@@ -319,48 +319,48 @@ describe('Payment Flow Integration Tests', () => {
   describe('Payment Status Transitions', () => {
     it('should handle payment status transitions correctly', async () => {
       // Create payment
-      const payment = await prisma.payment.create({
+      const payment = await prisma.payments.create({
         data: {
-          bookingId: testBooking.id,
-          paymentNumber: 'TEST_PAY_001',
+          booking_id: testBooking.id,
+          payment_number: 'TEST_PAY_001',
           amount: 100000,
           currency: 'VND',
-          paymentMethod: 'momo',
-          paymentGateway: 'momo',
-          gatewayTransactionId: 'TEST_TXN_001',
+          payment_method: 'momo',
+          payment_gateway: 'momo',
+          gateway_transaction_id: 'TEST_TXN_001',
           status: 'pending'
         }
       })
 
       // Test pending -> completed
-      await prisma.payment.update({
+      await prisma.payments.update({
         where: { id: payment.id },
-        data: { status: 'completed', paidAt: new Date() }
+        data: { status: 'completed', paid_at: new Date() }
       })
 
-      const updatedPayment = await prisma.payment.findUnique({
+      const updatedPayment = await prisma.payments.findUnique({
         where: { id: payment.id }
       })
       expect(updatedPayment?.status).toBe('completed')
-      expect(updatedPayment?.paidAt).toBeDefined()
+      expect(updatedPayment?.paid_at).toBeDefined()
 
       // Test completed -> refunded
-      await prisma.payment.update({
+      await prisma.payments.update({
         where: { id: payment.id },
         data: {
           status: 'refunded',
-          refundAmount: 100000,
-          refundReason: 'Customer request',
-          refundedAt: new Date()
+          refund_amount: 100000,
+          refund_reason: 'Customer request',
+          refunded_at: new Date()
         }
       })
 
-      const refundedPayment = await prisma.payment.findUnique({
+      const refundedPayment = await prisma.payments.findUnique({
         where: { id: payment.id }
       })
       expect(refundedPayment?.status).toBe('refunded')
-      expect(refundedPayment?.refundAmount).toBe(100000)
-      expect(refundedPayment?.refundedAt).toBeDefined()
+      expect(refundedPayment?.refund_amount).toBe(100000)
+      expect(refundedPayment?.refunded_at).toBeDefined()
     })
   })
 })
@@ -373,10 +373,10 @@ describe('Payment Performance Tests', () => {
     // Create multiple test bookings
     const bookings = await Promise.all(
       Array.from({ length: 10 }, async (_, i) => {
-        const user = await prisma.user.create({
+        const user = await prisma.users.create({
           data: {
             email: `test${i}@example.com`,
-            fullName: `Test User ${i}`,
+            full_name: `Test User ${i}`,
             phone: `+8412345678${i}`
           }
         })
@@ -386,32 +386,32 @@ describe('Payment Performance Tests', () => {
             name: `Test Service ${i}`,
             slug: `test-service-${i}`,
             description: 'Test service description',
-            basePrice: 100000,
+            base_price: 100000,
             currency: 'VND',
-            isActive: true
+            is_active: true
           }
         })
 
-        const serviceTier = await prisma.serviceTier.create({
+        const service_tiers = await prisma.service_tiers.create({
           data: {
-            serviceId: service.id,
+            service_id: service.id,
             name: 'Test Tier',
             slug: 'test',
             price: 100000,
             features: ['Feature 1'],
-            isAvailable: true
+            is_available: true
           }
         })
 
-        return await prisma.booking.create({
+        return await prisma.bookings.create({
           data: {
-            bookingNumber: `TEST${i.toString().padStart(3, '0')}`,
-            userId: user.id,
-            serviceTierId: serviceTier.id,
+            booking_number: `TEST${i.toString().padStart(3, '0')}`,
+            user_id: user.id,
+            service_tier_id: service_tiers.id,
             status: 'pending',
-            paymentStatus: 'pending',
-            totalAmount: 100000,
-            finalAmount: 100000,
+            payment_status: 'pending',
+            total_amount: 100000,
+            final_amount: 100000,
             currency: 'VND'
           }
         })
@@ -423,7 +423,7 @@ describe('Payment Performance Tests', () => {
     const results = await Promise.all(
       bookings.map(booking =>
         momoPayment.createPayment({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: 100000,
           orderInfo: 'Concurrent test payment'
         })
@@ -446,16 +446,16 @@ describe('Payment Performance Tests', () => {
     // Cleanup
     await Promise.all(
       bookings.map(async booking => {
-        await prisma.payment.deleteMany({ where: { bookingId: booking.id } })
-        await prisma.booking.delete({ where: { id: booking.id } })
-        const serviceTier = await prisma.serviceTier.findFirst({
-          where: { id: booking.serviceTierId }
+        await prisma.payments.deleteMany({ where: { booking_id: booking.id } })
+        await prisma.bookings.delete({ where: { id: booking.id } })
+        const service_tiers = await prisma.service_tiers.findFirst({
+          where: { id: booking.service_tier_id }
         })
-        if (serviceTier) {
-          await prisma.serviceTier.delete({ where: { id: serviceTier.id } })
-          await prisma.service.delete({ where: { id: serviceTier.serviceId } })
+        if (service_tiers) {
+          await prisma.service_tiers.delete({ where: { id: service_tiers.id } })
+          await prisma.service.delete({ where: { id: service_tiers.service_id } })
         }
-        await prisma.user.delete({ where: { id: booking.userId } })
+        await prisma.users.delete({ where: { id: booking.user_id } })
       })
     )
   })

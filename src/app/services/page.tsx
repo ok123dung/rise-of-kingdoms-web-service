@@ -204,7 +204,7 @@ export default function ServicesPage() {
                         <IconComponent className="h-6 w-6 text-primary-600" />
                       </div>
                       <h3 className="mb-2 text-xl font-semibold text-gray-900">{service.name}</h3>
-                      <p className="text-sm text-gray-600">{service.shortDescription}</p>
+                      <p className="text-sm text-gray-600">{service.short_description}</p>
                     </div>
 
                     <div className="mb-6 text-center">

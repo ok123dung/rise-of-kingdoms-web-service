@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get('file') as File
     const folder = (formData.get('folder') as string | null) ?? 'general'
-    const isPublic = formData.get('isPublic') === 'true'
+    const is_public = formData.get('is_public') === 'true'
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
     // Upload file
     const result = await UploadService.uploadFile(buffer, file.name, file.type, {
       folder,
-      userId: session.user.id,
-      isPublic,
+      user_id: session.user.id,
+      is_public,
       metadata: {
         uploadedBy: session.user.email
       }
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         key: result.key,
         url: result.url,
         size: result.size,
-        mimeType: result.mimeType
+        mime_type: result.mime_type
       }
     })
   } catch (error) {
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl
     const filename = searchParams.get('filename')
     const folder = searchParams.get('folder') ?? 'general'
-    const mimeType = searchParams.get('mimeType') ?? 'application/octet-stream'
+    const mime_type = searchParams.get('mime_type') ?? 'application/octet-stream'
 
     if (!filename) {
       return NextResponse.json({ error: 'Filename is required' }, { status: 400 })
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
       filename,
       folder,
       session.user.id,
-      mimeType
+      mime_type
     )
 
     return NextResponse.json({

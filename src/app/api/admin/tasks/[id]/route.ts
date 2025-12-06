@@ -16,8 +16,8 @@ const updateTaskSchema = z.object({
   description: z.string().optional(),
   priority: z.nativeEnum(ServiceTaskPriority).optional(),
   status: z.nativeEnum(ServiceTaskStatus).optional(),
-  assignedTo: z.string().optional(),
-  dueDate: z
+  assigned_to: z.string().optional(),
+  due_date: z
     .string()
     .optional()
     .transform(str => (str ? new Date(str) : undefined)),
@@ -29,8 +29,8 @@ interface UpdateTaskRequest {
   description?: string
   priority?: ServiceTaskPriority
   status?: ServiceTaskStatus
-  assignedTo?: string
-  dueDate?: string
+  assigned_to?: string
+  due_date?: string
   metadata?: Record<string, unknown>
 }
 

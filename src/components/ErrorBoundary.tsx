@@ -64,7 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
         componentStack: errorInfo.componentStack,
         errorId: this.state.errorId,
         url: typeof window !== 'undefined' ? window.location.href : 'unknown',
-        userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown'
+        user_agent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown'
       })
       scope.setLevel('error')
       scope.setTag('error.boundary', true)
@@ -77,7 +77,7 @@ export class ErrorBoundary extends Component<Props, State> {
       errorBoundary: true,
       errorId: this.state.errorId,
       url: typeof window !== 'undefined' ? window.location.href : 'unknown',
-      userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown'
+      user_agent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown'
     })
 
     this.setState({

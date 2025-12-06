@@ -9,12 +9,12 @@ import { BookingService } from '@/services/booking.service'
 
 // Stricter Schema validation
 const bookingSchema = z.object({
-  serviceId: z.string().min(1, 'Service ID is required'),
-  // Assuming serviceId sent from frontend is actually the service SLUG.
-  // Ideally, frontend should send serviceTierId, but if it sends serviceSlug, we need to handle that.
+  service_id: z.string().min(1, 'Service ID is required'),
+  // Assuming service_id sent from frontend is actually the service SLUG.
+  // Ideally, frontend should send service_tiersId, but if it sends serviceSlug, we need to handle that.
   // Based on previous code, it seems to expect a slug.
 
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  full_name: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   phone: z.string().regex(/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/, 'Invalid Vietnamese phone number'),
   kingdom: z.string().optional(),
@@ -27,8 +27,8 @@ const bookingSchema = z.object({
 })
 
 interface CreateBookingRequest {
-  serviceId: string
-  fullName: string
+  service_id: string
+  full_name: string
   email: string
   phone: string
   kingdom?: string
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // 1. Find or Create User
     // We keep this logic here or move to UserService. For now, keeping it here to minimize scope creep.
-    let user = await prisma.user.findUnique({
+    let user = await prisma.users.findUnique({
       where: { email: data.email }
     })
 
@@ -54,19 +54,19 @@ export async function POST(request: NextRequest) {
       const { hashPassword } = await import('@/lib/auth')
       const hashedPassword = await hashPassword(password)
 
-      user = await prisma.user.create({
+      user = await prisma.users.create({
         data: {
           email: data.email,
-          fullName: data.fullName,
+          full_name: data.full_name,
           phone: data.phone,
           password: hashedPassword,
-          rokKingdom: data.kingdom,
+          rok_kingdom: data.kingdom,
           status: 'active'
         }
       })
 
       // Send account created email
-      sendAccountCreatedEmail(data.email, data.fullName, password).catch((err: unknown) =>
+      sendAccountCreatedEmail(data.email, data.full_name, password).catch((err: unknown) =>
         getLogger().error(
           'Failed to send account created email',
           err instanceof Error ? err : new Error(String(err))
@@ -76,15 +76,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Resolve Service Tier
-    // The frontend sends 'serviceId' which is likely the Service Slug.
+    // The frontend sends 'service_id' which is likely the Service Slug.
     // We need to find the default (first) tier for this service.
-    const serviceTier = await prisma.serviceTier.findFirst({
-      where: { service: { slug: data.serviceId } },
-      orderBy: { sortOrder: 'asc' },
-      include: { service: true }
+    const service_tiers = await prisma.service_tiers.findFirst({
+      where: { service: { slug: data.service_id } },
+      orderBy: { sort_order: 'asc' },
+      include: { services: true }
     })
 
-    if (!serviceTier) {
+    if (!service_tiers) {
       // No Self-Healing anymore. Fail if not found.
       return NextResponse.json(
         { success: false, error: 'Service not found or unavailable' },
@@ -94,33 +94,33 @@ export async function POST(request: NextRequest) {
 
     // 3. Create Booking using Service
     const booking = await bookingService.createBooking({
-      userId: user.id,
-      serviceTierId: serviceTier.id,
-      customerRequirements: data.notes,
+      user_id: user.id,
+      service_tiersId: service_tiers.id,
+      customer_requirements: data.notes,
       notes: `Kingdom: ${data.kingdom ?? 'N/A'}`
     })
 
     // 4. Create Lead (for tracking)
     // This could be moved to an event listener or service, but keeping here for now
-    await prisma.lead.create({
+    await prisma.leads.create({
       data: {
         email: data.email,
-        fullName: data.fullName,
+        full_name: data.full_name,
         phone: data.phone,
-        serviceInterest: data.serviceId,
+        service_interest: data.service_id,
         source: 'booking_form',
         status: 'converted',
-        convertedBookingId: booking.id,
-        leadScore: 80
+        converted_booking_id: booking.id,
+        lead_score: 80
       }
     })
 
     // Send booking received email
     sendBookingReceivedEmail(
       data.email,
-      data.fullName,
-      booking.bookingNumber,
-      serviceTier.service.name
+      data.full_name,
+      booking.booking_number,
+      service_tiers.services.name
     ).catch((err: unknown) =>
       getLogger().error(
         'Failed to send booking received email',
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      bookingId: booking.id,
+      booking_id: booking.id,
       message: 'Booking created successfully'
     })
   } catch (error) {

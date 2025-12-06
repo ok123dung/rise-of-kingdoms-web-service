@@ -17,7 +17,7 @@ import { rateLimiters } from '@/lib/rate-limit'
 import { signupSchema, sanitizeInput } from '@/lib/validation'
 
 interface SignupBody {
-  fullName: string
+  full_name: string
   email: string
   phone?: string
   password: string
@@ -41,7 +41,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
     let validatedData
     try {
       validatedData = signupSchema.parse({
-        fullName: sanitizeInput(body.fullName ?? ''),
+        full_name: sanitizeInput(body.full_name ?? ''),
         email: sanitizeInput((body.email ?? '').toLowerCase()),
         phone: body.phone ? sanitizeInput(body.phone) : null,
         password: body.password ?? ''
@@ -83,7 +83,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
       user = await prisma.users.create({
         data: {
           id: crypto.randomUUID(),
-          full_name: validatedData.fullName,
+          full_name: validatedData.full_name,
           email: validatedData.email,
           phone: validatedData.phone,
           password: hashedPassword,
@@ -108,7 +108,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
     getLogger().info('New user registered', {
       id: user.id,
       email: user.email,
-      fullName: user.full_name,
+      full_name: user.full_name,
       timestamp: new Date().toISOString()
     })
 
@@ -118,7 +118,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
         'Failed to send welcome email',
         emailError instanceof Error ? emailError : new Error(String(emailError)),
         {
-          userId: user.id,
+          user_id: user.id,
           email: user.email
         }
       )
@@ -130,7 +130,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
         message: 'Tài khoản đã được tạo thành công',
         user: {
           id: user.id,
-          fullName: user.full_name,
+          full_name: user.full_name,
           email: user.email,
           role: 'customer' // default role
         }

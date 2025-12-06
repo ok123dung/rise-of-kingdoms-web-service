@@ -31,20 +31,20 @@ describe('/api/auth/signup', () => {
   describe('POST', () => {
     it('should create a new user successfully', async () => {
       // Mock Prisma responses
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
-      ;(prisma.user.findFirst as jest.Mock).mockResolvedValue(null)
-      ;(prisma.user.create as jest.Mock).mockResolvedValue({
+      ;(prisma.users.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(prisma.users.findFirst as jest.Mock).mockResolvedValue(null)
+      ;(prisma.users.create as jest.Mock).mockResolvedValue({
         id: '1',
-        fullName: 'Test User',
+        full_name: 'Test User',
         email: 'test@example.com',
         phone: '+84987654321',
-        createdAt: new Date()
+        created_at: new Date()
       })
 
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: 'Test User',
+          full_name: 'Test User',
           email: 'test@example.com',
           phone: '0987654321',
           password: 'password123'
@@ -59,35 +59,35 @@ describe('/api/auth/signup', () => {
       expect(data.message).toBe('Tài khoản đã được tạo thành công')
       expect(data.user).toEqual({
         id: '1',
-        fullName: 'Test User',
+        full_name: 'Test User',
         email: 'test@example.com',
         role: 'customer'
       })
 
       // Verify database calls
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      expect(prisma.users.findUnique).toHaveBeenCalledWith({
         where: { email: 'test@example.com' }
       })
-      expect(prisma.user.create).toHaveBeenCalledWith({
+      expect(prisma.users.create).toHaveBeenCalledWith({
         data: {
-          fullName: 'Test User',
+          full_name: 'Test User',
           email: 'test@example.com',
           phone: '+84987654321',
           password: 'hashed-password',
-          emailVerified: null
+          email_verified: null
         },
         select: {
           id: true,
-          fullName: true,
+          full_name: true,
           email: true,
           phone: true,
-          createdAt: true
+          created_at: true
         }
       })
     })
 
     it('should return 409 if email already exists', async () => {
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      ;(prisma.users.findUnique as jest.Mock).mockResolvedValue({
         id: '1',
         email: 'existing@example.com'
       })
@@ -95,7 +95,7 @@ describe('/api/auth/signup', () => {
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: 'Test User',
+          full_name: 'Test User',
           email: 'existing@example.com',
           password: 'password123'
         })
@@ -110,8 +110,8 @@ describe('/api/auth/signup', () => {
     })
 
     it('should return 409 if phone number already exists', async () => {
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
-      ;(prisma.user.findFirst as jest.Mock).mockResolvedValue({
+      ;(prisma.users.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(prisma.users.findFirst as jest.Mock).mockResolvedValue({
         id: '1',
         phone: '+84987654321'
       })
@@ -119,7 +119,7 @@ describe('/api/auth/signup', () => {
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: 'Test User',
+          full_name: 'Test User',
           email: 'test@example.com',
           phone: '0987654321',
           password: 'password123'
@@ -138,7 +138,7 @@ describe('/api/auth/signup', () => {
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: 'A', // Too short
+          full_name: 'A', // Too short
           email: 'invalid-email',
           password: '123' // Too short
         })
@@ -153,19 +153,19 @@ describe('/api/auth/signup', () => {
     })
 
     it('should sanitize input data', async () => {
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
-      ;(prisma.user.findFirst as jest.Mock).mockResolvedValue(null)
-      ;(prisma.user.create as jest.Mock).mockResolvedValue({
+      ;(prisma.users.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(prisma.users.findFirst as jest.Mock).mockResolvedValue(null)
+      ;(prisma.users.create as jest.Mock).mockResolvedValue({
         id: '1',
-        fullName: 'Clean Name',
+        full_name: 'Clean Name',
         email: 'clean@example.com',
-        createdAt: new Date()
+        created_at: new Date()
       })
 
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: '<script>alert("xss")</script>Clean Name',
+          full_name: '<script>alert("xss")</script>Clean Name',
           email: '  CLEAN@EXAMPLE.COM  ',
           password: 'password123'
         })
@@ -173,9 +173,9 @@ describe('/api/auth/signup', () => {
 
       await POST(request)
 
-      expect(prisma.user.create).toHaveBeenCalledWith({
+      expect(prisma.users.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          fullName: 'Clean Name',
+          full_name: 'Clean Name',
           email: 'clean@example.com'
         }),
         select: expect.any(Object)
@@ -183,14 +183,14 @@ describe('/api/auth/signup', () => {
     })
 
     it('should handle database errors gracefully', async () => {
-      ;(prisma.user.findUnique as jest.Mock).mockRejectedValue(
+      ;(prisma.users.findUnique as jest.Mock).mockRejectedValue(
         new Error('Database connection failed')
       )
 
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: 'Test User',
+          full_name: 'Test User',
           email: 'test@example.com',
           password: 'password123'
         })
@@ -205,13 +205,13 @@ describe('/api/auth/signup', () => {
     })
 
     it('should continue signup even if welcome email fails', async () => {
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
-      ;(prisma.user.findFirst as jest.Mock).mockResolvedValue(null)
-      ;(prisma.user.create as jest.Mock).mockResolvedValue({
+      ;(prisma.users.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(prisma.users.findFirst as jest.Mock).mockResolvedValue(null)
+      ;(prisma.users.create as jest.Mock).mockResolvedValue({
         id: '1',
-        fullName: 'Test User',
+        full_name: 'Test User',
         email: 'test@example.com',
-        createdAt: new Date()
+        created_at: new Date()
       })
 
       // Mock email failure
@@ -221,7 +221,7 @@ describe('/api/auth/signup', () => {
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: 'Test User',
+          full_name: 'Test User',
           email: 'test@example.com',
           password: 'password123'
         })
@@ -236,20 +236,20 @@ describe('/api/auth/signup', () => {
     })
 
     it('should validate Vietnamese phone number format', async () => {
-      ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
-      ;(prisma.user.findFirst as jest.Mock).mockResolvedValue(null)
-      ;(prisma.user.create as jest.Mock).mockResolvedValue({
+      ;(prisma.users.findUnique as jest.Mock).mockResolvedValue(null)
+      ;(prisma.users.findFirst as jest.Mock).mockResolvedValue(null)
+      ;(prisma.users.create as jest.Mock).mockResolvedValue({
         id: '1',
-        fullName: 'Test User',
+        full_name: 'Test User',
         email: 'test@example.com',
         phone: '+84356789012',
-        createdAt: new Date()
+        created_at: new Date()
       })
 
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: 'Test User',
+          full_name: 'Test User',
           email: 'test@example.com',
           phone: '0356789012', // Valid Vietnamese mobile number
           password: 'password123'
@@ -260,7 +260,7 @@ describe('/api/auth/signup', () => {
       const data = await response.json()
 
       expect(response.status).toBe(201)
-      expect(prisma.user.create).toHaveBeenCalledWith({
+      expect(prisma.users.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           phone: '+84356789012' // Should be normalized
         }),

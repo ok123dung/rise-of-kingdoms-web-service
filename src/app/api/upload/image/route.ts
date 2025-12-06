@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get('file') as File
     const folder = (formData.get('folder') as string) || 'images'
-    const isPublic = formData.get('isPublic') === 'true'
+    const is_public = formData.get('is_public') === 'true'
     const width = formData.get('width') ? parseInt(formData.get('width') as string) : undefined
     const height = formData.get('height') ? parseInt(formData.get('height') as string) : undefined
     const quality = formData.get('quality') ? parseInt(formData.get('quality') as string) : 85
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
     // Upload and process image
     const result = await UploadService.uploadImage(buffer, file.name, {
       folder,
-      userId: session.user.id,
-      isPublic,
+      user_id: session.user.id,
+      is_public,
       metadata: {
         uploadedBy: session.user.email
       },
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         key: result.key,
         url: result.url,
         size: result.size,
-        mimeType: result.mimeType
+        mime_type: result.mime_type
       }
     })
   } catch (error) {

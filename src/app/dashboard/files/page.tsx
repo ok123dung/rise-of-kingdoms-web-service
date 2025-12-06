@@ -12,9 +12,9 @@ interface FileItem {
   key: string
   filename: string
   size: number
-  mimeType: string
+  mime_type: string
   url: string
-  createdAt: string
+  created_at: string
 }
 
 interface FilesResponse {

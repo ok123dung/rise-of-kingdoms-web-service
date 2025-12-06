@@ -4,14 +4,14 @@ import { getLogger } from '@/lib/monitoring/logger'
 import { type CommunicationType, CommunicationStatus } from '@/types/enums'
 
 export interface CreateCommunicationDTO {
-  userId: string
-  bookingId?: string
+  user_id: string
+  booking_id?: string
   type: CommunicationType
   channel?: string
   subject?: string
   content: string
-  templateId?: string
-  templateData?: Record<string, unknown>
+  template_id?: string
+  template_data?: Record<string, unknown>
   status?: CommunicationStatus
 }
 
@@ -21,30 +21,31 @@ export class CommunicationService {
   async sendMessage(data: CreateCommunicationDTO) {
     try {
       // Verify user exists
-      const user = await prisma.user.findUnique({
-        where: { id: data.userId }
+      const user = await prisma.users.findUnique({
+        where: { id: data.user_id }
       })
 
       if (!user) {
-        throw new NotFoundError(`User with ID ${data.userId} not found`)
+        throw new NotFoundError(`User with ID ${data.user_id} not found`)
       }
 
-      const communication = await prisma.communication.create({
+      const communication = await prisma.communications.create({
         data: {
-          userId: data.userId,
-          bookingId: data.bookingId,
+        id: crypto.randomUUID(),
+        user_id: data.user_id,
+          booking_id: data.booking_id,
           type: data.type,
           channel: data.channel ?? 'web',
           subject: data.subject,
           content: data.content,
-          templateId: data.templateId,
-          templateData: data.templateData ? JSON.parse(JSON.stringify(data.templateData)) : undefined,
+          template_id: data.template_id,
+          template_data: data.template_data ? JSON.parse(JSON.stringify(data.template_data)) : undefined,
           status: data.status ?? CommunicationStatus.SENT,
-          sentAt: new Date()
+          sent_at: new Date()
         }
       })
 
-      this.logger.info(`Created communication ${communication.id} for user ${data.userId}`)
+      this.logger.info(`Created communication ${communication.id} for user ${data.user_id}`)
       return communication
     } catch (error) {
       this.logger.error('Failed to create communication', error as Error)
@@ -52,17 +53,16 @@ export class CommunicationService {
     }
   }
 
-  async getHistory(userId: string, bookingId?: string) {
-    return prisma.communication.findMany({
+  async getHistory(user_id: string, booking_id?: string) {
+    return prisma.communications.findMany({
       where: {
-        userId,
-        ...(bookingId ? { bookingId } : {})
+        user_id,
+        ...(booking_id ? { booking_id } : {})
       },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
+      orderBy: { created_at: 'desc' },
+      include: { users: {
           select: {
-            fullName: true,
+            full_name: true,
             email: true,
             image: true
           }
@@ -73,7 +73,7 @@ export class CommunicationService {
 
   async markAsRead(id: string) {
     try {
-      const communication = await prisma.communication.findUnique({
+      const communication = await prisma.communications.findUnique({
         where: { id }
       })
 
@@ -81,11 +81,11 @@ export class CommunicationService {
         throw new NotFoundError(`Communication with ID ${id} not found`)
       }
 
-      const updated = await prisma.communication.update({
+      const updated = await prisma.communications.update({
         where: { id },
         data: {
           status: CommunicationStatus.READ,
-          readAt: new Date()
+          read_at: new Date()
         }
       })
 
@@ -97,10 +97,10 @@ export class CommunicationService {
     }
   }
 
-  async getUnreadCount(userId: string) {
-    return prisma.communication.count({
+  async getUnreadCount(user_id: string) {
+    return prisma.communications.count({
       where: {
-        userId,
+        user_id,
         status: {
           not: CommunicationStatus.READ
         }

@@ -15,17 +15,17 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
 
-    const bookings = await prisma.booking.findMany({
-      where: { userId: session.user.id },
+    const bookings = await prisma.bookings.findMany({
+      where: { user_id: session.user.id },
       include: {
-        serviceTier: {
+        service_tiers: {
           include: {
             service: true
           }
         },
         payments: true
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { created_at: 'desc' }
     })
 
     return NextResponse.json({

@@ -41,7 +41,7 @@ interface PricingTier {
   id: string
   name: string
   price: string
-  originalPrice?: string
+  original_price?: string
   description: string
   features: string[]
   popular?: boolean
@@ -53,7 +53,7 @@ const pricingTiers: PricingTier[] = [
     id: 'basic',
     name: 'Basic Strategy',
     price: '750.000 VNĐ/tháng',
-    originalPrice: '900.000 VNĐ/tháng',
+    original_price: '900.000 VNĐ/tháng',
     description: 'Tư vấn chiến thuật cơ bản cho người chơi mới',
     features: [
       'Phân tích tài khoản chi tiết (20+ metrics)',
@@ -70,7 +70,7 @@ const pricingTiers: PricingTier[] = [
     id: 'pro',
     name: 'Pro Strategy',
     price: '900.000 VNĐ/tháng',
-    originalPrice: '1.100.000 VNĐ/tháng',
+    original_price: '1.100.000 VNĐ/tháng',
     description: 'Tư vấn toàn diện cho game thủ nghiêm túc',
     popular: true,
     features: [
@@ -89,7 +89,7 @@ const pricingTiers: PricingTier[] = [
     id: 'premium',
     name: 'Premium Strategy',
     price: '1.200.000 VNĐ/tháng',
-    originalPrice: '1.500.000 VNĐ/tháng',
+    original_price: '1.500.000 VNĐ/tháng',
     description: 'Coaching cá nhân từ top players',
     features: [
       'Tất cả tính năng Pro PLUS',
@@ -559,8 +559,8 @@ function PricingCard({ tier }: PricingCardProps) {
 
         <div className="mb-4">
           <div className="text-3xl font-bold text-primary-600">{tier.price}</div>
-          {tier.originalPrice && (
-            <div className="text-sm text-gray-500 line-through">{tier.originalPrice}</div>
+          {tier.original_price && (
+            <div className="text-sm text-gray-500 line-through">{tier.original_price}</div>
           )}
         </div>
       </div>

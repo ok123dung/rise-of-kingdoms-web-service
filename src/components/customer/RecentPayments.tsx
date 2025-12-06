@@ -7,14 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface RecentPayment {
   id: string
-  paymentNumber: string
-  bookingId: string
+  payment_number: string
+  booking_id: string
   serviceName: string
   amount: number
   status: string
   method: string
-  createdAt: string
-  paidAt: string | null
+  created_at: string
+  paid_at: string | null
 }
 
 interface RecentPaymentsProps {
@@ -141,11 +141,11 @@ export default function RecentPayments({ payments }: RecentPaymentsProps) {
 
                     <div className="flex items-center justify-between text-sm text-gray-600">
                       <div className="space-y-1">
-                        <p>#{payment.paymentNumber}</p>
+                        <p>#{payment.payment_number}</p>
                         <p className="text-xs">
-                          {payment.paidAt
-                            ? `Thanh toán: ${formatDateTime(payment.paidAt)}`
-                            : `Tạo: ${formatDateTime(payment.createdAt)}`}
+                          {payment.paid_at
+                            ? `Thanh toán: ${formatDateTime(payment.paid_at)}`
+                            : `Tạo: ${formatDateTime(payment.created_at)}`}
                         </p>
                       </div>
                     </div>

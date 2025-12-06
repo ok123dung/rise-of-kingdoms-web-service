@@ -15,7 +15,7 @@ interface ServicePageProps {
 import { prisma } from '@/lib/db'
 
 export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
-  const service = await prisma.service.findUnique({
+  const service = await prisma.services.findUnique({
     where: { slug: params.slug }
   })
 
@@ -28,10 +28,10 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
 
   return {
     title: `${service.name} - RoK Services Premium`,
-    description: service.description || service.shortDescription,
+    description: service.description || service.short_description,
     openGraph: {
       title: `${service.name} - Dịch vụ Rise of Kingdoms Hàng Đầu`,
-      description: service.description || service.shortDescription || undefined,
+      description: service.description || service.short_description || undefined,
       images: ['/og-image.png'],
       type: 'website',
       url: `/services/${service.slug}`

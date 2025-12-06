@@ -9,7 +9,7 @@ import Header from '@/components/layout/Header'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
-    fullName: '',
+    full_name: '',
     email: '',
     phone: '',
     service: '',
@@ -39,10 +39,10 @@ export default function ContactPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          fullName: formData.fullName,
+          full_name: formData.full_name,
           email: formData.email,
           phone: formData.phone,
-          serviceInterest: formData.service,
+          service_interest: formData.service,
           message: formData.message,
           source: 'contact_form'
         })
@@ -51,7 +51,7 @@ export default function ContactPage() {
       if (response.ok) {
         setSubmitStatus('success')
         setFormData({
-          fullName: '',
+          full_name: '',
           email: '',
           phone: '',
           service: '',
@@ -108,18 +108,18 @@ export default function ContactPage() {
                     <div>
                       <label
                         className="mb-2 block text-sm font-semibold text-slate-700"
-                        htmlFor="fullName"
+                        htmlFor="full_name"
                       >
                         Họ và tên *
                       </label>
                       <input
                         required
                         className="input-field"
-                        id="fullName"
-                        name="fullName"
+                        id="full_name"
+                        name="full_name"
                         placeholder="Nhập họ và tên"
                         type="text"
-                        value={formData.fullName}
+                        value={formData.full_name}
                         onChange={handleChange}
                       />
                     </div>

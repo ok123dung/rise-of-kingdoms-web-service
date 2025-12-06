@@ -108,8 +108,8 @@ async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
   const rateLimiter = rateLimiters.get(limitKey) || rateLimiters.get('default')!
 
   // Create identifier with IP and user agent for better fingerprinting
-  const userAgent = req.headers.get('user-agent') || 'unknown'
-  const identifier = `${ip}:${userAgent.substring(0, 50)}`
+  const user_agent = req.headers.get('user-agent') || 'unknown'
+  const identifier = `${ip}:${user_agent.substring(0, 50)}`
 
   const result = await rateLimiter.checkLimit(identifier)
 

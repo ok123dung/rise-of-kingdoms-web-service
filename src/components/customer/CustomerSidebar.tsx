@@ -92,7 +92,7 @@ export default function CustomerSidebar() {
             <li>
               <ul className="-mx-2 space-y-1">
                 {navigation.map(item => {
-                  const isActive = pathname === item.href
+                  const is_active = pathname === item.href
                   return (
                     <li key={item.name}>
                       <Link
@@ -100,7 +100,7 @@ export default function CustomerSidebar() {
                         className={`
                           group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors
                           ${
-                            isActive
+                            is_active
                               ? 'bg-primary-600 text-white'
                               : 'text-gray-700 hover:bg-gray-50 hover:text-primary-600'
                           }
@@ -108,7 +108,7 @@ export default function CustomerSidebar() {
                       >
                         <item.icon
                           className={`h-6 w-6 shrink-0 ${
-                            isActive ? 'text-white' : 'text-gray-400 group-hover:text-primary-600'
+                            is_active ? 'text-white' : 'text-gray-400 group-hover:text-primary-600'
                           }`}
                         />
                         {item.name}

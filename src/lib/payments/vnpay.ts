@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface VNPayRequest {
-  bookingId: string
+  booking_id: string
   amount: number
   orderInfo: string
   returnUrl?: string
@@ -81,13 +81,13 @@ export class VNPayPayment {
     error?: string
   }> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: request.bookingId }
+      const booking = await prisma.bookings.findUnique({
+        where: { id: request.booking_id }
       })
       if (!booking) {
         return { success: false, error: 'Booking not found' }
       }
-      const orderId = `VNPAY_${booking.bookingNumber}_${Date.now()}`
+      const orderId = `VNPAY_${booking.booking_number}_${Date.now()}`
       const createDate = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '')
       const expireDate = new Date(Date.now() + 15 * 60 * 1000)
         .toISOString()
@@ -127,15 +127,17 @@ export class VNPayPayment {
           .map(key => `${key}=${encodeURIComponent(vnpParams[key])}`)
           .join('&')
       // Create payment record
-      await prisma.payment.create({
+      await prisma.payments.create({
         data: {
-          bookingId: request.bookingId,
+          id: crypto.randomUUID(),
+          booking_id: request.booking_id,
           amount: request.amount,
-          paymentMethod: 'vnpay',
-          paymentGateway: 'vnpay',
-          gatewayTransactionId: orderId,
-          gatewayOrderId: orderId,
-          paymentNumber: `PAY${Date.now()}`
+          payment_method: 'vnpay',
+          payment_gateway: 'vnpay',
+          gateway_transaction_id: orderId,
+          gateway_order_id: orderId,
+          payment_number: `PAY${Date.now()}`,
+          updated_at: new Date()
         }
       })
       getLogger().info('VNPay payment URL created', { orderId, amount: request.amount })
@@ -228,17 +230,17 @@ export class VNPayPayment {
 
       // Idempotency check - prevent duplicate webhook processing
       const webhookEventId = `vnpay_${orderId}_${transactionNo || responseCode}`
-      const existingEvent = await prisma.webhookEvent.findUnique({
-        where: { eventId: webhookEventId }
+      const existingEvent = await prisma.webhook_events.findUnique({
+        where: { event_id: webhookEventId }
       })
       if (existingEvent) {
-        getLogger().info('VNPay webhook already processed', { eventId: webhookEventId })
+        getLogger().info('VNPay webhook already processed', { event_id: webhookEventId })
         return { success: true, message: 'Webhook already processed', responseCode: '00' }
       }
 
       // Find payment record
-      const payment = await prisma.payment.findFirst({
-        where: { gatewayTransactionId: orderId }
+      const payment = await prisma.payments.findFirst({
+        where: { gateway_transaction_id: orderId }
       })
       if (!payment) {
         return { success: false, message: 'Payment not found', responseCode: '01' }
@@ -255,11 +257,11 @@ export class VNPayPayment {
       if (responseCode === '00') {
         // Payment successful - use transaction for atomic updates
         await prisma.$transaction(async tx => {
-          await tx.payment.update({
+          await tx.payments.update({
             where: { id: payment.id },
             data: {
               status: 'completed',
-              gatewayResponse: {
+              gateway_response: {
                 transactionNo: transactionNo || '',
                 bankCode,
                 payDate,
@@ -269,35 +271,37 @@ export class VNPayPayment {
             }
           })
           // Update booking status
-          await tx.booking.update({
-            where: { id: payment.bookingId },
+          await tx.bookings.update({
+            where: { id: payment.booking_id },
             data: {
-              paymentStatus: 'completed',
+              payment_status: 'completed',
               status: 'confirmed'
             }
           })
         })
         // Send confirmation email
-        await this.sendConfirmationEmail(payment.bookingId)
+        await this.sendConfirmationEmail(payment.booking_id)
         // Send Discord notification
-        await this.sendDiscordNotification(payment.bookingId, 'completed', {
+        await this.sendDiscordNotification(payment.booking_id, 'completed', {
           orderId: orderId || '',
           transId: transactionNo,
           amount,
-          paymentMethod: 'VNPay'
+          payment_method: 'VNPay'
         })
         // Trigger service delivery workflow
-        await this.triggerServiceDelivery(payment.bookingId)
+        await this.triggerServiceDelivery(payment.booking_id)
 
         // Record webhook event for idempotency
-        await prisma.webhookEvent.create({
+        await prisma.webhook_events.create({
           data: {
+            id: crypto.randomUUID(),
             provider: 'vnpay',
-            eventType: 'payment_ipn',
-            eventId: webhookEventId,
+            event_type: 'payment_ipn',
+            event_id: webhookEventId,
             payload: query,
             status: 'processed',
-            processedAt: new Date()
+            processed_at: new Date(),
+            updated_at: new Date()
           }
         })
 
@@ -306,32 +310,34 @@ export class VNPayPayment {
       } else {
         // Payment failed - use transaction for atomic updates
         await prisma.$transaction(async tx => {
-          await tx.payment.update({
+          await tx.payments.update({
             where: { id: payment.id },
             data: {
               status: 'failed',
-              failureReason: this.getResponseMessage(responseCode || '99'),
-              gatewayResponse: {
+              failure_reason: this.getResponseMessage(responseCode || '99'),
+              gateway_response: {
                 responseCode,
                 ...query
               }
             }
           })
-          await tx.booking.update({
-            where: { id: payment.bookingId },
-            data: { paymentStatus: 'failed' }
+          await tx.bookings.update({
+            where: { id: payment.booking_id },
+            data: { payment_status: 'failed' }
           })
         })
 
         // Record webhook event for idempotency
-        await prisma.webhookEvent.create({
+        await prisma.webhook_events.create({
           data: {
+            id: crypto.randomUUID(),
             provider: 'vnpay',
-            eventType: 'payment_ipn_failed',
-            eventId: webhookEventId,
+            event_type: 'payment_ipn_failed',
+            event_id: webhookEventId,
             payload: query,
             status: 'processed',
-            processedAt: new Date()
+            processed_at: new Date(),
+            updated_at: new Date()
           }
         })
 
@@ -452,16 +458,16 @@ export class VNPayPayment {
       const responseData = (await response.json()) as VNPayRefundResponse
       if (responseData.vnp_ResponseCode === '00') {
         // Update payment record with refund info
-        const payment = await prisma.payment.findFirst({
-          where: { gatewayTransactionId: orderId }
+        const payment = await prisma.payments.findFirst({
+          where: { gateway_transaction_id: orderId }
         })
         if (payment) {
-          await prisma.payment.update({
+          await prisma.payments.update({
             where: { id: payment.id },
             data: {
-              refundAmount: amount,
-              refundReason: reason,
-              refundedAt: new Date(),
+              refund_amount: amount,
+              refund_reason: reason,
+              refunded_at: new Date(),
               status: 'refunded'
             }
           })
@@ -500,34 +506,34 @@ export class VNPayPayment {
     return messages[responseCode] || 'Lỗi không xác định'
   }
   // Send confirmation email
-  private async sendConfirmationEmail(bookingId: string): Promise<void> {
+  private async sendConfirmationEmail(booking_id: string): Promise<void> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: booking_id },
         include: {
-          user: true,
-          serviceTier: {
-            include: { service: true }
+          users: true,
+          service_tiers: {
+            include: { services: true }
           }
         }
       })
       if (booking) {
         const { sendEmail } = await import('@/lib/email')
         await sendEmail({
-          to: booking.user.email,
+          to: booking.users.email,
           subject: 'Xác nhận thanh toán thành công - RoK Services',
           html: `
             <h2>Thanh toán thành công!</h2>
-            <p>Xin chào ${booking.user.fullName},</p>
-            <p>Chúng tôi đã nhận được thanh toán của bạn cho dịch vụ <strong>${booking.serviceTier.service.name}</strong>.</p>
+            <p>Xin chào ${booking.users.full_name},</p>
+            <p>Chúng tôi đã nhận được thanh toán của bạn cho dịch vụ <strong>${booking.service_tiers.services.name}</strong>.</p>
             <ul>
-              <li>Mã booking: ${booking.bookingNumber}</li>
-              <li>Số tiền: ${booking.totalAmount.toLocaleString()} VNĐ</li>
+              <li>Mã booking: ${booking.booking_number}</li>
+              <li>Số tiền: ${booking.total_amount.toLocaleString()} VNĐ</li>
               <li>Phương thức: VNPay</li>
             </ul>
             <p>Cảm ơn bạn đã sử dụng dịch vụ RoK Services!</p>
           `,
-          text: `Thanh toán thành công cho dịch vụ ${booking.serviceTier.service.name}. Mã booking: ${booking.bookingNumber}`
+          text: `Thanh toán thành công cho dịch vụ ${booking.service_tiers.services.name}. Mã booking: ${booking.booking_number}`
         })
       }
     } catch (error) {
@@ -538,27 +544,27 @@ export class VNPayPayment {
   }
   // Send Discord notification
   private async sendDiscordNotification(
-    bookingId: string,
+    booking_id: string,
     status: string,
-    paymentData: { orderId: string; transId?: string; amount: number; paymentMethod: string }
+    paymentData: { orderId: string; transId?: string; amount: number; payment_method: string }
   ): Promise<void> {
     try {
       const { discordNotifier } = await import('@/lib/discord')
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: booking_id },
         include: {
-          user: true,
-          serviceTier: { include: { service: true } }
+          users: true,
+          service_tiers: { include: { services: true } }
         }
       })
       if (booking) {
         await discordNotifier.sendPaymentNotification({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: paymentData.amount,
-          paymentMethod: paymentData.paymentMethod,
+          payment_method: paymentData.payment_method,
           status: status as 'pending' | 'completed' | 'failed' | 'cancelled',
-          customerEmail: booking.user.email,
-          customerName: booking.user.fullName,
+          customerEmail: booking.users.email,
+          customerName: booking.users.full_name,
           transactionId: paymentData.transId
         })
       }
@@ -569,39 +575,41 @@ export class VNPayPayment {
     }
   }
   // Trigger service delivery workflow
-  private async triggerServiceDelivery(bookingId: string): Promise<void> {
+  private async triggerServiceDelivery(booking_id: string): Promise<void> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: booking_id },
         include: {
-          serviceTier: {
-            include: { service: true }
+          service_tiers: {
+            include: { services: true }
           }
         }
       })
       if (booking) {
         // Update booking to in-progress
-        await prisma.booking.update({
-          where: { id: bookingId },
+        await prisma.bookings.update({
+          where: { id: booking_id },
           data: {
             status: 'in_progress',
-            startDate: new Date()
+            start_date: new Date()
           }
         })
         // Create service delivery task
-        await prisma.serviceTask.create({
+        await prisma.service_tasks.create({
           data: {
-            bookingId: bookingId,
+            id: crypto.randomUUID(),
+            booking_id: booking_id,
             type: 'delivery',
-            title: `Deliver ${booking.serviceTier.service.name}`,
-            description: `Process service delivery for booking ${booking.bookingNumber}`,
+            title: `Deliver ${booking.service_tiers.services.name}`,
+            description: `Process service delivery for booking ${booking.booking_number}`,
             priority: 'high',
             status: 'pending',
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
+            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            updated_at: new Date() // 7 days default
           }
         })
         getLogger().info('Service delivery workflow triggered', {
-          bookingNumber: booking.bookingNumber
+          booking_number: booking.booking_number
         })
       }
     } catch (error) {

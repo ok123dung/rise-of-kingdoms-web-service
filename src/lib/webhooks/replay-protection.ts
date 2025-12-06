@@ -53,26 +53,26 @@ export function validateWebhookTimestamp(timestamp: number | string): boolean {
  * Check if webhook event has already been processed (idempotency check)
  * Returns true if this is a duplicate event
  */
-export async function isDuplicateWebhook(provider: string, eventId: string): Promise<boolean> {
+export async function isDuplicateWebhook(provider: string, event_id: string): Promise<boolean> {
   try {
-    const existingEvent = await prisma.webhookEvent.findUnique({
-      where: { eventId },
-      select: { status: true, createdAt: true }
+    const existingEvent = await prisma.webhook_events.findUnique({
+      where: { event_id },
+      select: { status: true, created_at: true }
     })
 
     if (existingEvent) {
       getLogger().info('Duplicate webhook detected', {
         provider,
-        eventId,
+        event_id,
         existingStatus: existingEvent.status,
-        existingCreatedAt: existingEvent.createdAt.toISOString()
+        existingCreatedAt: existingEvent.created_at.toISOString()
       })
       return true
     }
 
     return false
   } catch (error) {
-    getLogger().error('Error checking duplicate webhook', error as Error, { provider, eventId })
+    getLogger().error('Error checking duplicate webhook', error as Error, { provider, event_id })
     // Fail open: allow the webhook to proceed if we can't check
     return false
   }
@@ -84,7 +84,7 @@ export async function isDuplicateWebhook(provider: string, eventId: string): Pro
  */
 export async function validateWebhookReplayProtection(
   provider: string,
-  eventId: string,
+  event_id: string,
   timestamp?: number | string
 ): Promise<WebhookValidationResult> {
   // 1. Validate timestamp if provided
@@ -98,7 +98,7 @@ export async function validateWebhookReplayProtection(
   }
 
   // 2. Check for duplicate
-  const isDuplicate = await isDuplicateWebhook(provider, eventId)
+  const isDuplicate = await isDuplicateWebhook(provider, event_id)
   if (isDuplicate) {
     return {
       valid: false,
@@ -148,7 +148,7 @@ export async function verifyWebhookNonce(provider: string, nonce: string): Promi
       return false
     }
 
-    // Check if nonce has been used (use eventId as unique identifier)
+    // Check if nonce has been used (use event_id as unique identifier)
     const nonceEventId = `${provider}_nonce_${nonce}`
     const isDuplicate = await isDuplicateWebhook(provider, nonceEventId)
 
@@ -157,14 +157,16 @@ export async function verifyWebhookNonce(provider: string, nonce: string): Promi
     }
 
     // Store nonce to prevent reuse
-    await prisma.webhookEvent.create({
+    await prisma.webhook_events.create({
       data: {
+        id: crypto.randomUUID(),
         provider,
-        eventType: 'nonce_validation',
-        eventId: nonceEventId,
+        event_type: 'nonce_validation',
+        event_id: nonceEventId,
         payload: { nonce, timestamp: timestamp.toString() },
         status: 'completed',
-        attempts: 0
+        attempts: 0,
+        updated_at: new Date()
       }
     })
 
@@ -184,10 +186,10 @@ export async function cleanupOldWebhookProtectionData(daysToKeep = 7): Promise<n
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)
 
-    const result = await prisma.webhookEvent.deleteMany({
+    const result = await prisma.webhook_events.deleteMany({
       where: {
-        eventType: 'nonce_validation',
-        createdAt: { lt: cutoffDate }
+        event_type: 'nonce_validation',
+        created_at: { lt: cutoffDate }
       }
     })
 

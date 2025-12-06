@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 import { sendWelcomeEmail } from '@/lib/email'
 import { NotFoundError, ValidationError, AuthenticationError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
-import type { User } from '@/types/database'
+import type { User } from '@/types/prisma'
 
 export class UserService {
   private logger = getLogger()
@@ -15,10 +15,10 @@ export class UserService {
   async createUser(data: {
     email: string
     password: string
-    fullName: string
+    full_name: string
     phone?: string
-    rokPlayerId?: string
-    rokKingdom?: string
+    rok_player_id?: string
+    rok_kingdom?: string
   }): Promise<User> {
     // Check if email already exists
     const existingUser = await this.getUserByEmail(data.email)
@@ -30,30 +30,32 @@ export class UserService {
     const hashedPassword = await hash(data.password, 12)
 
     // Create user
-    const user = await prisma.user.create({
+    const user = await prisma.users.create({
       data: {
+        id: crypto.randomUUID(),
         email: data.email.toLowerCase(),
         password: hashedPassword,
-        fullName: data.fullName,
+        full_name: data.full_name,
         phone: data.phone,
-        rokPlayerId: data.rokPlayerId,
-        rokKingdom: data.rokKingdom,
-        status: 'active'
+        rok_player_id: data.rok_player_id,
+        rok_kingdom: data.rok_kingdom,
+        status: 'active',
+        updated_at: new Date()
       }
     })
 
     // Send welcome email
     try {
-      await sendWelcomeEmail(user.email, user.fullName)
+      await sendWelcomeEmail(user.email, user.full_name)
     } catch (error) {
       this.logger.warn('Failed to send welcome email', {
-        userId: user.id,
+        user_id: user.id,
         error: error instanceof Error ? error.message : 'Unknown error'
       })
     }
 
     this.logger.info('User created', {
-      userId: user.id,
+      user_id: user.id,
       email: user.email
     })
 
@@ -79,9 +81,9 @@ export class UserService {
     }
 
     // Update last login
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: user.id },
-      data: { lastLogin: new Date() }
+      data: { last_login: new Date() }
     })
 
     return user
@@ -90,9 +92,9 @@ export class UserService {
   /**
    * Get user by ID
    */
-  async getUserById(userId: string): Promise<User | null> {
-    return prisma.user.findUnique({
-      where: { id: userId }
+  async getUserById(user_id: string): Promise<User | null> {
+    return prisma.users.findUnique({
+      where: { id: user_id }
     })
   }
 
@@ -100,7 +102,7 @@ export class UserService {
    * Get user by email
    */
   async getUserByEmail(email: string): Promise<User | null> {
-    return prisma.user.findUnique({
+    return prisma.users.findUnique({
       where: { email: email.toLowerCase() }
     })
   }
@@ -109,35 +111,35 @@ export class UserService {
    * Update user profile
    */
   async updateUserProfile(
-    userId: string,
+    user_id: string,
     data: {
-      fullName?: string
+      full_name?: string
       phone?: string
-      rokPlayerId?: string
-      rokKingdom?: string
-      rokPower?: bigint
-      discordUsername?: string
+      rok_player_id?: string
+      rok_kingdom?: string
+      rok_power?: bigint
+      discord_username?: string
     }
   ): Promise<User> {
-    const user = await this.getUserById(userId)
+    const user = await this.getUserById(user_id)
     if (!user) {
       throw new NotFoundError('User')
     }
 
-    const updated = await prisma.user.update({
-      where: { id: userId },
+    const updated = await prisma.users.update({
+      where: { id: user_id },
       data: {
-        fullName: data.fullName ?? user.fullName,
+        full_name: data.full_name ?? user.full_name,
         phone: data.phone ?? user.phone,
-        rokPlayerId: data.rokPlayerId ?? user.rokPlayerId,
-        rokKingdom: data.rokKingdom ?? user.rokKingdom,
-        rokPower: data.rokPower ?? user.rokPower,
-        discordUsername: data.discordUsername ?? user.discordUsername
+        rok_player_id: data.rok_player_id ?? user.rok_player_id,
+        rok_kingdom: data.rok_kingdom ?? user.rok_kingdom,
+        rok_power: data.rok_power ?? user.rok_power,
+        discord_username: data.discord_username ?? user.discord_username
       }
     })
 
     this.logger.info('User profile updated', {
-      userId,
+      user_id,
       updatedFields: Object.keys(data).join(', ')
     })
 
@@ -148,11 +150,11 @@ export class UserService {
    * Change user password
    */
   async changePassword(
-    userId: string,
+    user_id: string,
     currentPassword: string,
     newPassword: string
   ): Promise<void> {
-    const user = await this.getUserById(userId)
+    const user = await this.getUserById(user_id)
     if (!user) {
       throw new NotFoundError('User')
     }
@@ -167,44 +169,44 @@ export class UserService {
     const hashedPassword = await hash(newPassword, 12)
 
     // Update password
-    await prisma.user.update({
-      where: { id: userId },
+    await prisma.users.update({
+      where: { id: user_id },
       data: { password: hashedPassword }
     })
 
-    this.logger.info('User password changed', { userId })
+    this.logger.info('User password changed', { user_id })
   }
 
   /**
    * Get user statistics
    */
-  async getUserStats(userId: string) {
+  async getUserStats(user_id: string) {
     const [user, totalBookings, activeBookings, completedBookings, totalSpent, lastBooking] =
       await Promise.all([
-        prisma.user.findUnique({ where: { id: userId } }),
-        prisma.booking.count({
-          where: { userId }
+        prisma.users.findUnique({ where: { id: user_id } }),
+        prisma.bookings.count({
+          where: { user_id }
         }),
-        prisma.booking.count({
+        prisma.bookings.count({
           where: {
-            userId,
+            user_id,
             status: { in: ['pending', 'confirmed', 'in_progress'] }
           }
         }),
-        prisma.booking.count({
-          where: { userId, status: 'completed' }
+        prisma.bookings.count({
+          where: { user_id, status: 'completed' }
         }),
-        prisma.payment.aggregate({
+        prisma.payments.aggregate({
           where: {
-            booking: { userId },
+            bookings: { user_id },
             status: 'completed'
           },
           _sum: { amount: true }
         }),
-        prisma.booking.findFirst({
-          where: { userId },
-          orderBy: { createdAt: 'desc' },
-          select: { createdAt: true }
+        prisma.bookings.findFirst({
+          where: { user_id },
+          orderBy: { created_at: 'desc' },
+          select: { created_at: true }
         })
       ])
 
@@ -212,9 +214,9 @@ export class UserService {
       totalBookings,
       activeBookings,
       completedBookings,
-      totalSpent: totalSpent._sum.amount?.toNumber() ?? 0,
-      lastBookingDate: lastBooking?.createdAt,
-      memberSince: user?.createdAt
+      totalSpent: totalSpent._sum?.amount?.toNumber() ?? 0,
+      lastBookingDate: lastBooking?.created_at,
+      memberSince: user?.created_at
     }
   }
 
@@ -238,7 +240,7 @@ export class UserService {
     if (query.search) {
       where.OR = [
         { email: { contains: query.search, mode: 'insensitive' } },
-        { fullName: { contains: query.search, mode: 'insensitive' } },
+        { full_name: { contains: query.search, mode: 'insensitive' } },
         { phone: { contains: query.search } }
       ]
     }
@@ -248,22 +250,22 @@ export class UserService {
     }
 
     const [users, total] = await Promise.all([
-      prisma.user.findMany({
+      prisma.users.findMany({
         where,
         select: {
           id: true,
           email: true,
-          fullName: true,
+          full_name: true,
           phone: true,
           status: true,
-          createdAt: true,
-          lastLogin: true
+          created_at: true,
+          last_login: true
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { created_at: 'desc' },
         take: query.limit ?? 20,
         skip: query.offset ?? 0
       }),
-      prisma.user.count({ where })
+      prisma.users.count({ where })
     ])
 
     return { users, total }

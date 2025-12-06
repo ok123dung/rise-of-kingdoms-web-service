@@ -26,9 +26,9 @@ interface DiscordEmbedField {
 }
 
 interface PaymentNotificationData {
-  bookingId: string
+  booking_id: string
   amount: number
-  paymentMethod: string
+  payment_method: string
   status: 'pending' | 'completed' | 'failed' | 'cancelled'
   customerEmail?: string
   customerName?: string
@@ -38,12 +38,12 @@ interface PaymentNotificationData {
 
 interface LeadNotificationData {
   leadId: string
-  fullName?: string | null
+  full_name?: string | null
   email?: string | null
   phone?: string | null
-  serviceInterest?: string | null
+  service_interest?: string | null
   source?: string | null
-  leadScore: number
+  lead_score: number
 }
 
 class DiscordNotifier {
@@ -79,7 +79,7 @@ class DiscordNotifier {
         throw new Error(`Discord webhook failed: ${response.status} ${response.statusText}`)
       }
 
-      getLogger().debug('Discord notification sent', { bookingId: data.bookingId })
+      getLogger().debug('Discord notification sent', { booking_id: data.booking_id })
     } catch (error) {
       getLogger().error('Failed to send Discord notification', error as Error)
       // Don't throw - notification failures shouldn't break payment flow
@@ -107,7 +107,7 @@ class DiscordNotifier {
       fields: [
         {
           name: '📋 Booking ID',
-          value: data.bookingId,
+          value: data.booking_id,
           inline: true
         },
         {
@@ -117,7 +117,7 @@ class DiscordNotifier {
         },
         {
           name: '💳 Phương thức',
-          value: data.paymentMethod.toUpperCase(),
+          value: data.payment_method.toUpperCase(),
           inline: true
         }
       ],
@@ -181,7 +181,7 @@ class DiscordNotifier {
         fields: [
           {
             name: '👤 Họ tên',
-            value: data.fullName || 'Không có',
+            value: data.full_name || 'Không có',
             inline: true
           },
           {
@@ -196,7 +196,7 @@ class DiscordNotifier {
           },
           {
             name: '🎮 Dịch vụ quan tâm',
-            value: data.serviceInterest || 'Chung',
+            value: data.service_interest || 'Chung',
             inline: true
           },
           {
@@ -206,7 +206,7 @@ class DiscordNotifier {
           },
           {
             name: '⭐ Lead Score',
-            value: data.leadScore.toString(),
+            value: data.lead_score.toString(),
             inline: true
           }
         ],

@@ -7,7 +7,7 @@ import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface AuthenticatedSocket extends Socket {
-  userId?: string
+  user_id?: string
   userRole?: string
 }
 
@@ -42,16 +42,16 @@ export class WebSocketServer {
         // Verify JWT token
         const decoded = verifyToken(token)
 
-        if (!decoded?.userId) {
+        if (!decoded?.user_id) {
           return next(new Error('Invalid token'))
         }
 
         // Attach user info to socket
-        socket.userId = decoded.userId
+        socket.user_id = decoded.user_id
         socket.userRole = decoded.role
 
         // Track user connections
-        this.addUserSocket(decoded.userId, socket.id)
+        this.addUserSocket(decoded.user_id, socket.id)
 
         next()
       } catch (error) {
@@ -65,12 +65,12 @@ export class WebSocketServer {
     this.io.on('connection', (socket: AuthenticatedSocket) => {
       getLogger().info('WebSocket client connected', {
         socketId: socket.id,
-        userId: socket.userId
+        user_id: socket.user_id
       })
 
       // Join user-specific room
-      if (socket.userId) {
-        socket.join(`user:${socket.userId}`)
+      if (socket.user_id) {
+        socket.join(`user:${socket.user_id}`)
 
         // Join role-specific room
         if (socket.userRole) {
@@ -79,19 +79,19 @@ export class WebSocketServer {
       }
 
       // Handle booking status updates
-      socket.on('booking:subscribe', async (bookingId: string) => {
+      socket.on('booking:subscribe', async (booking_id: string) => {
         try {
           // Verify user has access to this booking
-          const booking = await prisma.booking.findFirst({
+          const booking = await prisma.bookings.findFirst({
             where: {
-              id: bookingId,
-              userId: socket.userId // Only allow users to access their own bookings
+              id: booking_id,
+              user_id: socket.user_id // Only allow users to access their own bookings
             }
           })
 
           if (booking) {
-            socket.join(`booking:${bookingId}`)
-            socket.emit('booking:subscribed', { bookingId })
+            socket.join(`booking:${booking_id}`)
+            socket.emit('booking:subscribed', { booking_id })
           } else {
             socket.emit('error', { message: 'Access denied to booking' })
           }
@@ -102,25 +102,25 @@ export class WebSocketServer {
       })
 
       // Handle chat messages
-      socket.on('chat:send', async (data: { bookingId: string; message: string }) => {
+      socket.on('chat:send', async (data: { booking_id: string; message: string }) => {
         try {
-          if (!socket.userId) return
+          if (!socket.user_id) return
 
           // Verify access and save message
-          const message = await prisma.communication.create({
+          const message = await prisma.communications.create({
             data: {
-              type: 'chat',
+          id: crypto.randomUUID(),
+          type: 'chat',
               content: data.message,
-              userId: socket.userId,
-              bookingId: data.bookingId,
+              user_id: socket.user_id,
+              booking_id: data.booking_id,
               channel:
                 socket.userRole === 'staff' || socket.userRole === 'admin' ? 'staff' : 'customer'
             },
-            include: {
-              user: {
+            include: { users: {
                 select: {
                   id: true,
-                  fullName: true,
+                  full_name: true,
                   email: true
                 }
               }
@@ -128,7 +128,7 @@ export class WebSocketServer {
           })
 
           // Emit to all users in the booking room
-          this.io.to(`booking:${data.bookingId}`).emit('chat:message', message)
+          this.io.to(`booking:${data.booking_id}`).emit('chat:message', message)
         } catch (error) {
           getLogger().error('Chat message error', error as Error)
           socket.emit('error', { message: 'Failed to send message' })
@@ -136,9 +136,9 @@ export class WebSocketServer {
       })
 
       // Handle typing indicators
-      socket.on('chat:typing', (data: { bookingId: string; isTyping: boolean }) => {
-        socket.to(`booking:${data.bookingId}`).emit('chat:typing', {
-          userId: socket.userId,
+      socket.on('chat:typing', (data: { booking_id: string; isTyping: boolean }) => {
+        socket.to(`booking:${data.booking_id}`).emit('chat:typing', {
+          user_id: socket.user_id,
           isTyping: data.isTyping
         })
       })
@@ -147,65 +147,65 @@ export class WebSocketServer {
       socket.on('disconnect', () => {
         getLogger().info('WebSocket client disconnected', {
           socketId: socket.id,
-          userId: socket.userId
+          user_id: socket.user_id
         })
 
-        if (socket.userId) {
-          this.removeUserSocket(socket.userId, socket.id)
+        if (socket.user_id) {
+          this.removeUserSocket(socket.user_id, socket.id)
         }
       })
     })
   }
 
   // Track user connections
-  private addUserSocket(userId: string, socketId: string) {
-    if (!this.userSockets.has(userId)) {
-      this.userSockets.set(userId, new Set())
+  private addUserSocket(user_id: string, socketId: string) {
+    if (!this.userSockets.has(user_id)) {
+      this.userSockets.set(user_id, new Set())
     }
-    this.userSockets.get(userId)!.add(socketId)
+    this.userSockets.get(user_id)!.add(socketId)
   }
 
-  private removeUserSocket(userId: string, socketId: string) {
-    const sockets = this.userSockets.get(userId)
+  private removeUserSocket(user_id: string, socketId: string) {
+    const sockets = this.userSockets.get(user_id)
     if (sockets) {
       sockets.delete(socketId)
       if (sockets.size === 0) {
-        this.userSockets.delete(userId)
+        this.userSockets.delete(user_id)
       }
     }
   }
 
   // Public methods for server-side events
-  public emitToUser(userId: string, event: string, data: Record<string, unknown>) {
-    this.io.to(`user:${userId}`).emit(event, data)
+  public emitToUser(user_id: string, event: string, data: Record<string, unknown>) {
+    this.io.to(`user:${user_id}`).emit(event, data)
   }
 
   public emitToRole(role: string, event: string, data: Record<string, unknown>) {
     this.io.to(`role:${role}`).emit(event, data)
   }
 
-  public emitToBooking(bookingId: string, event: string, data: Record<string, unknown>) {
-    this.io.to(`booking:${bookingId}`).emit(event, data)
+  public emitToBooking(booking_id: string, event: string, data: Record<string, unknown>) {
+    this.io.to(`booking:${booking_id}`).emit(event, data)
   }
 
-  public emitBookingStatusUpdate(bookingId: string, status: string, userId: string) {
-    this.emitToBooking(bookingId, 'booking:statusUpdate', { bookingId, status })
-    this.emitToUser(userId, 'booking:statusUpdate', { bookingId, status })
+  public emitBookingStatusUpdate(booking_id: string, status: string, user_id: string) {
+    this.emitToBooking(booking_id, 'booking:statusUpdate', { booking_id, status })
+    this.emitToUser(user_id, 'booking:statusUpdate', { booking_id, status })
   }
 
-  public emitPaymentUpdate(userId: string, paymentData: Record<string, unknown>) {
-    this.emitToUser(userId, 'payment:update', paymentData)
+  public emitPaymentUpdate(user_id: string, paymentData: Record<string, unknown>) {
+    this.emitToUser(user_id, 'payment:update', paymentData)
   }
 
-  public emitNotification(userId: string, notification: Record<string, unknown>) {
-    this.emitToUser(userId, 'notification:new', notification)
+  public emitNotification(user_id: string, notification: Record<string, unknown>) {
+    this.emitToUser(user_id, 'notification:new', notification)
   }
 
-  public isUserOnline(userId: string): boolean {
-    return this.userSockets.has(userId)
+  public isUserOnline(user_id: string): boolean {
+    return this.userSockets.has(user_id)
   }
 
-  public getUserSocketCount(userId: string): number {
-    return this.userSockets.get(userId)?.size || 0
+  public getUserSocketCount(user_id: string): number {
+    return this.userSockets.get(user_id)?.size || 0
   }
 }

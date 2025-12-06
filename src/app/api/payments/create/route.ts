@@ -18,8 +18,8 @@ import { VNPayPayment } from '@/lib/payments/vnpay'
 import { ZaloPayPayment } from '@/lib/payments/zalopay'
 
 const createPaymentSchema = z.object({
-  bookingId: z.string().min(1, 'Booking ID is required'),
-  paymentMethod: z.enum(['momo', 'zalopay', 'vnpay', 'banking'], {
+  booking_id: z.string().min(1, 'Booking ID is required'),
+  payment_method: z.enum(['momo', 'zalopay', 'vnpay', 'banking'], {
     errorMap: () => ({ message: 'Invalid payment method' })
   }),
   returnUrl: z.string().url().optional(),
@@ -27,8 +27,8 @@ const createPaymentSchema = z.object({
 })
 
 interface CreatePaymentBody {
-  bookingId: string
-  paymentMethod: string
+  booking_id: string
+  payment_method: string
   returnUrl?: string
   cancelUrl?: string
 }
@@ -50,11 +50,11 @@ async function createPaymentHandler(request: NextRequest) {
     const userIsStaff = await isStaff()
 
     // Verify booking exists with all needed relations in a single query (fix N+1)
-    const booking = await prisma.booking.findUnique({
-      where: { id: validatedData.bookingId },
+    const booking = await prisma.bookings.findUnique({
+      where: { id: validatedData.booking_id },
       include: {
         user: true,
-        serviceTier: {
+        service_tiers: {
           include: {
             service: true
           }
@@ -73,7 +73,7 @@ async function createPaymentHandler(request: NextRequest) {
     }
 
     // Check if user owns this booking (unless admin)
-    if (booking.userId !== session?.user?.id && !userIsStaff) {
+    if (booking.user_id !== session?.user?.id && !userIsStaff) {
       throw new AuthorizationError('You do not have access to this booking')
     }
 
@@ -87,15 +87,15 @@ async function createPaymentHandler(request: NextRequest) {
       throw new PaymentError('Payment already exists for this booking')
     }
 
-    const amount = Math.round(Number(booking.finalAmount.toString()))
-    const orderInfo = `Thanh toán dịch vụ ${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
+    const amount = Math.round(Number(booking.final_amount.toString()))
+    const orderInfo = `Thanh toán dịch vụ ${booking.service_tiers.services.name} - ${booking.service_tiers.name}`
 
     // Log payment attempt
     getLogger().info('Creating payment', {
-      bookingId: validatedData.bookingId,
-      paymentMethod: validatedData.paymentMethod,
+      booking_id: validatedData.booking_id,
+      payment_method: validatedData.payment_method,
       amount,
-      userId: session?.user?.id
+      user_id: session?.user?.id
     })
 
     interface PaymentResult {
@@ -121,11 +121,11 @@ async function createPaymentHandler(request: NextRequest) {
 
     let paymentResult: PaymentResult
 
-    switch (validatedData.paymentMethod) {
+    switch (validatedData.payment_method) {
       case 'momo': {
         const momoPayment = new MoMoPayment()
         paymentResult = await momoPayment.createPayment({
-          bookingId: validatedData.bookingId,
+          booking_id: validatedData.booking_id,
           amount,
           orderInfo,
           redirectUrl: validatedData.returnUrl,
@@ -137,7 +137,7 @@ async function createPaymentHandler(request: NextRequest) {
       case 'zalopay': {
         const zaloPayment = new ZaloPayPayment()
         paymentResult = await zaloPayment.createOrder({
-          bookingId: validatedData.bookingId,
+          booking_id: validatedData.booking_id,
           amount,
           description: orderInfo,
           callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
@@ -148,7 +148,7 @@ async function createPaymentHandler(request: NextRequest) {
       case 'vnpay': {
         const vnpayInstance = new VNPayPayment()
         paymentResult = await vnpayInstance.createPaymentUrl({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: amount,
           orderInfo: orderInfo,
           returnUrl: `${process.env.NEXTAUTH_URL}/api/payments/vnpay/return`
@@ -160,11 +160,11 @@ async function createPaymentHandler(request: NextRequest) {
         // For banking, create payment record and send instructions
         const bankingInstance = new BankingTransfer()
         paymentResult = await bankingInstance.createTransferOrder({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: amount,
-          customerName: booking.user.fullName,
-          customerEmail: booking.user.email,
-          customerPhone: booking.user.phone ?? undefined
+          customerName: booking.users.full_name,
+          customerEmail: booking.users.email,
+          customerPhone: booking.users.phone ?? undefined
         })
         break
       }
@@ -175,7 +175,7 @@ async function createPaymentHandler(request: NextRequest) {
 
     if (!paymentResult.success) {
       throw new PaymentError(paymentResult.error ?? ErrorMessages.PAYMENT_FAILED, {
-        paymentMethod: validatedData.paymentMethod
+        payment_method: validatedData.payment_method
       })
     }
 
@@ -183,8 +183,8 @@ async function createPaymentHandler(request: NextRequest) {
     const paymentUrl = paymentResult.data?.payUrl ?? paymentResult.data?.order_url
 
     getLogger().info('Payment created successfully', {
-      bookingId: validatedData.bookingId,
-      paymentMethod: validatedData.paymentMethod,
+      booking_id: validatedData.booking_id,
+      payment_method: validatedData.payment_method,
       orderId: paymentResult.data?.orderId ?? paymentResult.data?.app_trans_id
     })
 
@@ -192,10 +192,10 @@ async function createPaymentHandler(request: NextRequest) {
       success: true,
       data: {
         paymentUrl,
-        paymentMethod: validatedData.paymentMethod,
+        payment_method: validatedData.payment_method,
         amount,
         orderId: paymentResult.data?.orderId ?? paymentResult.data?.app_trans_id,
-        bookingId: validatedData.bookingId
+        booking_id: validatedData.booking_id
       },
       message: 'Payment created successfully'
     })

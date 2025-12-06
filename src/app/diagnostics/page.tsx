@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 interface DiagnosticInfo {
-  userAgent: string
+  user_agent: string
   onLine: boolean
   cookieEnabled: boolean
   language: string
@@ -41,7 +41,7 @@ export default function DiagnosticsPage() {
     // Collect diagnostic information
     const runDiagnostics = async () => {
       const diag: DiagnosticInfo = {
-        userAgent: navigator.userAgent,
+        user_agent: navigator.userAgent,
         onLine: navigator.onLine,
         cookieEnabled: navigator.cookieEnabled,
         language: navigator.language,

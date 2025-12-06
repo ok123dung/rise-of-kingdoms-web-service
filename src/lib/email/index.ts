@@ -120,7 +120,7 @@ export async function sendWelcomeEmail(
 export async function sendBookingConfirmationEmail(
   customerEmail: string,
   customerName: string,
-  bookingNumber: string,
+  booking_number: string,
   serviceName: string,
   amount: number,
   bookingDate: Date
@@ -128,7 +128,7 @@ export async function sendBookingConfirmationEmail(
   try {
     const template = getBookingConfirmationTemplate(
       customerName,
-      bookingNumber,
+      booking_number,
       serviceName,
       amount,
       bookingDate
@@ -159,19 +159,19 @@ export async function sendBookingConfirmationEmail(
 export async function sendPaymentConfirmationEmail(
   customerEmail: string,
   customerName: string,
-  bookingNumber: string,
+  booking_number: string,
   serviceName: string,
   amount: number,
-  paymentMethod: string,
+  payment_method: string,
   paymentDate: Date
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const template = getPaymentConfirmationTemplate(
       customerName,
-      bookingNumber,
+      booking_number,
       serviceName,
       amount,
-      paymentMethod,
+      payment_method,
       paymentDate
     )
 
@@ -201,7 +201,7 @@ export async function sendLeadNotificationEmail(
   leadName: string,
   leadEmail: string,
   leadPhone: string | null,
-  serviceInterest: string,
+  service_interest: string,
   source: string,
   notes: string | null
 ): Promise<{ success: boolean; error?: string }> {
@@ -210,7 +210,7 @@ export async function sendLeadNotificationEmail(
       leadName,
       leadEmail,
       leadPhone,
-      serviceInterest,
+      service_interest,
       source,
       notes
     )

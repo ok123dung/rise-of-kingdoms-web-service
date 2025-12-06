@@ -129,12 +129,12 @@ RoK Services Team
 // Booking confirmation email template
 export function getBookingConfirmationTemplate(
   customerName: string,
-  bookingNumber: string,
+  booking_number: string,
   serviceName: string,
   amount: number,
   bookingDate: Date
 ): EmailTemplate {
-  const subject = `Xác nhận đặt dịch vụ #${bookingNumber} - RoK Services`
+  const subject = `Xác nhận đặt dịch vụ #${booking_number} - RoK Services`
 
   const formattedAmount = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -171,7 +171,7 @@ export function getBookingConfirmationTemplate(
     <body>
       <div class="header">
         <h1>✅ Đặt dịch vụ thành công!</h1>
-        <p>Mã đơn hàng: <strong>#${bookingNumber}</strong></p>
+        <p>Mã đơn hàng: <strong>#${booking_number}</strong></p>
       </div>
       
       <div class="content">
@@ -188,7 +188,7 @@ export function getBookingConfirmationTemplate(
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Mã đơn hàng:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">#${bookingNumber}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">#${booking_number}</td>
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Dịch vụ:</strong></td>
@@ -244,7 +244,7 @@ export function getBookingConfirmationTemplate(
 Xin chào ${customerName},
 
 Đơn hàng của bạn đã được xác nhận:
-- Mã đơn hàng: #${bookingNumber}
+- Mã đơn hàng: #${booking_number}
 - Dịch vụ: ${serviceName}
 - Thời gian: ${formattedDate}
 - Tổng tiền: ${formattedAmount}
@@ -272,13 +272,13 @@ Trân trọng,
 // Payment confirmation email template
 export function getPaymentConfirmationTemplate(
   customerName: string,
-  bookingNumber: string,
+  booking_number: string,
   serviceName: string,
   amount: number,
-  paymentMethod: string,
+  payment_method: string,
   paymentDate: Date
 ): EmailTemplate {
-  const subject = `Thanh toán thành công #${bookingNumber} - RoK Services`
+  const subject = `Thanh toán thành công #${booking_number} - RoK Services`
 
   const formattedAmount = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -294,7 +294,7 @@ export function getPaymentConfirmationTemplate(
     minute: '2-digit'
   }).format(paymentDate)
 
-  const paymentMethodNames: { [key: string]: string } = {
+  const payment_methodNames: { [key: string]: string } = {
     momo: 'Ví MoMo',
     zalopay: 'ZaloPay',
     vnpay: 'VNPay',
@@ -322,7 +322,7 @@ export function getPaymentConfirmationTemplate(
     <body>
       <div class="header">
         <h1>💳 Thanh toán thành công!</h1>
-        <p>Đơn hàng #${bookingNumber}</p>
+        <p>Đơn hàng #${booking_number}</p>
       </div>
       
       <div class="content">
@@ -341,7 +341,7 @@ export function getPaymentConfirmationTemplate(
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Mã đơn hàng:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">#${bookingNumber}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">#${booking_number}</td>
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Dịch vụ:</strong></td>
@@ -353,7 +353,7 @@ export function getPaymentConfirmationTemplate(
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Phương thức:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${paymentMethodNames[paymentMethod] || paymentMethod}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${payment_methodNames[payment_method] || payment_method}</td>
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Thời gian:</strong></td>
@@ -385,7 +385,7 @@ export function getPaymentConfirmationTemplate(
         </ul>
         
         <p style="background: #e0e7ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <strong>💡 Lưu ý:</strong> Vui lòng lưu lại email này làm biên lai thanh toán. Nếu có bất kỳ vấn đề gì, hãy liên hệ với chúng tôi kèm theo mã đơn hàng #${bookingNumber}
+          <strong>💡 Lưu ý:</strong> Vui lòng lưu lại email này làm biên lai thanh toán. Nếu có bất kỳ vấn đề gì, hãy liên hệ với chúng tôi kèm theo mã đơn hàng #${booking_number}
         </p>
       </div>
       
@@ -408,10 +408,10 @@ Xin chào ${customerName},
 Giao dịch của bạn đã được xử lý thành công:
 
 Thông tin thanh toán:
-- Mã đơn hàng: #${bookingNumber}
+- Mã đơn hàng: #${booking_number}
 - Dịch vụ: ${serviceName}
 - Số tiền: ${formattedAmount}
-- Phương thức: ${paymentMethodNames[paymentMethod] || paymentMethod}
+- Phương thức: ${payment_methodNames[payment_method] || payment_method}
 - Thời gian: ${formattedDate}
 - Trạng thái: ✅ THÀNH CÔNG
 
@@ -442,11 +442,11 @@ export function getLeadNotificationTemplate(
   leadName: string,
   leadEmail: string,
   leadPhone: string | null,
-  serviceInterest: string,
+  service_interest: string,
   source: string,
   notes: string | null
 ): EmailTemplate {
-  const subject = `🔥 Lead mới: ${leadName} quan tâm ${serviceInterest}`
+  const subject = `🔥 Lead mới: ${leadName} quan tâm ${service_interest}`
 
   const serviceNames: { [key: string]: string } = {
     strategy: 'Tư vấn chiến thuật',
@@ -507,7 +507,7 @@ export function getLeadNotificationTemplate(
             }
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Quan tâm:</strong></td>
-              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><span style="background: #F59E0B; color: white; padding: 4px 8px; border-radius: 4px;">${serviceNames[serviceInterest] || serviceInterest}</span></td>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><span style="background: #F59E0B; color: white; padding: 4px 8px; border-radius: 4px;">${serviceNames[service_interest] || service_interest}</span></td>
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Nguồn:</strong></td>
@@ -537,7 +537,7 @@ export function getLeadNotificationTemplate(
           <h3>🚀 Hành động ngay:</h3>
           <ol>
             <li><strong>Gọi điện ngay:</strong> ${leadPhone ? `<a href="tel:${leadPhone}">${leadPhone}</a>` : 'Không có SĐT'}</li>
-            <li><strong>Gửi email:</strong> <a href="mailto:${leadEmail}?subject=Chào bạn ${leadName} - RoK Services&body=Xin chào ${leadName},%0A%0ACảm ơn bạn đã quan tâm đến dịch vụ ${serviceNames[serviceInterest]} của chúng tôi...">Soạn email ngay</a></li>
+            <li><strong>Gửi email:</strong> <a href="mailto:${leadEmail}?subject=Chào bạn ${leadName} - RoK Services&body=Xin chào ${leadName},%0A%0ACảm ơn bạn đã quan tâm đến dịch vụ ${serviceNames[service_interest]} của chúng tôi...">Soạn email ngay</a></li>
             <li><strong>Cập nhật CRM:</strong> Ghi nhận lead vào hệ thống quản lý</li>
             <li><strong>Follow up:</strong> Đặt lịch nhắc nhở follow up sau 1 giờ nếu chưa liên lạc được</li>
           </ol>
@@ -546,7 +546,7 @@ export function getLeadNotificationTemplate(
         <p><strong>💡 Tips bán hàng:</strong></p>
         <ul>
           <li>Gọi điện trong vòng 15 phút để tăng tỷ lệ conversion</li>
-          <li>Tập trung vào pain point của khách về ${serviceNames[serviceInterest]}</li>
+          <li>Tập trung vào pain point của khách về ${serviceNames[service_interest]}</li>
           <li>Đề xuất tư vấn miễn phí 15 phút để build trust</li>
           <li>Sử dụng case study và testimonial phù hợp</li>
         </ul>
@@ -562,7 +562,7 @@ Thông tin khách hàng:
 - Tên: ${leadName}
 - Email: ${leadEmail}
 - SĐT: ${leadPhone || 'Không có'}
-- Quan tâm: ${serviceNames[serviceInterest] || serviceInterest}
+- Quan tâm: ${serviceNames[service_interest] || service_interest}
 - Nguồn: ${source}
 - Thời gian: ${new Date().toLocaleString('vi-VN')}
 

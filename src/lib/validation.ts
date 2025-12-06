@@ -19,19 +19,19 @@ export const phoneSchema = z
   .optional()
 
 // RoK Player ID validation (9-10 digits)
-export const rokPlayerIdSchema = z
+export const rok_player_idSchema = z
   .string()
   .regex(/^\d{9,10}$/, 'RoK Player ID must be 9-10 digits')
   .optional()
 
 // RoK Kingdom validation (4 digits)
-export const rokKingdomSchema = z
+export const rok_kingdomSchema = z
   .string()
   .regex(/^\d{4}$/, 'Kingdom must be 4 digits (e.g., 1234)')
   .optional()
 
 // RoK Power validation (must be positive integer)
-export const rokPowerSchema = z
+export const rok_powerSchema = z
   .bigint()
   .min(BigInt(0), 'Power cannot be negative')
   .optional()
@@ -47,24 +47,24 @@ export const rokPowerSchema = z
 export const userValidationSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
-  fullName: z
+  full_name: z
     .string()
     .min(2, 'Full name must be at least 2 characters')
     .max(100, 'Full name must be less than 100 characters')
     .regex(/^[a-zA-ZÀ-ỹ\s]+$/, 'Full name can only contain letters and spaces'),
   phone: phoneSchema,
-  discordUsername: z
+  discord_username: z
     .string()
     .regex(/^.{3,32}#\d{4}$/, 'Discord username must be in format username#1234')
     .optional(),
-  rokPlayerId: rokPlayerIdSchema,
-  rokKingdom: rokKingdomSchema,
-  rokPower: rokPowerSchema
+  rok_player_id: rok_player_idSchema,
+  rok_kingdom: rok_kingdomSchema,
+  rok_power: rok_powerSchema
 })
 
 // Signup validation schema (using strong password validation)
 export const signupSchema = z.object({
-  fullName: z
+  full_name: z
     .string()
     .min(2, 'Họ tên phải có ít nhất 2 ký tự')
     .max(100, 'Họ tên không được quá 100 ký tự')
@@ -89,43 +89,43 @@ export const signupSchema = z.object({
 export const leadValidationSchema = z.object({
   email: emailSchema.optional(),
   phone: phoneSchema,
-  fullName: z
+  full_name: z
     .string()
     .min(2, 'Full name must be at least 2 characters')
     .max(100, 'Full name must be less than 100 characters')
     .optional(),
-  serviceInterest: z
+  service_interest: z
     .enum(['strategy', 'farming', 'kvk', 'alliance', 'premium', 'coaching'])
     .optional(),
   source: z
     .enum(['website', 'discord', 'facebook', 'referral', 'google_ads', 'other'])
     .default('website'),
-  utmSource: z.string().max(100).optional(),
-  utmMedium: z.string().max(100).optional(),
-  utmCampaign: z.string().max(100).optional(),
+  utm_source: z.string().max(100).optional(),
+  utm_medium: z.string().max(100).optional(),
+  utm_campaign: z.string().max(100).optional(),
   notes: z.string().max(1000).optional()
 })
 
 // Booking validation schema
 export const bookingValidationSchema = z.object({
-  serviceTierId: z.string().cuid('Invalid service tier ID'),
-  customerRequirements: z
+  service_tier_id: z.string().cuid('Invalid service tier ID'),
+  customer_requirements: z
     .string()
     .min(10, 'Requirements must be at least 10 characters')
     .max(2000, 'Requirements must be less than 2000 characters')
     .optional(),
-  bookingDetails: z.record(z.unknown()).optional()
+  booking_details: z.record(z.unknown()).optional()
 })
 
 // Payment validation schema
 export const paymentValidationSchema = z.object({
-  bookingId: z.string().cuid('Invalid booking ID'),
+  booking_id: z.string().cuid('Invalid booking ID'),
   amount: z
     .number()
     .positive('Amount must be positive')
     .max(10000000, 'Amount cannot exceed 10M VNĐ'),
   currency: z.enum(['VND']).default('VND'),
-  paymentMethod: z.enum(['momo', 'zalopay', 'vnpay', 'banking'])
+  payment_method: z.enum(['momo', 'zalopay', 'vnpay', 'banking'])
 })
 
 // Service validation schema (admin only)
@@ -144,11 +144,11 @@ export const serviceValidationSchema = z.object({
     .min(10, 'Description must be at least 10 characters')
     .max(2000, 'Description must be less than 2000 characters')
     .optional(),
-  shortDescription: z
+  short_description: z
     .string()
     .max(200, 'Short description must be less than 200 characters')
     .optional(),
-  basePrice: z
+  base_price: z
     .number()
     .positive('Base price must be positive')
     .max(10000000, 'Base price cannot exceed 10M VNĐ'),
@@ -159,8 +159,8 @@ export const serviceValidationSchema = z.object({
 })
 
 // Service tier validation schema
-export const serviceTierValidationSchema = z.object({
-  serviceId: z.string().cuid('Invalid service ID'),
+export const service_tiersValidationSchema = z.object({
+  service_id: z.string().cuid('Invalid service ID'),
   name: z
     .string()
     .min(3, 'Tier name must be at least 3 characters')
@@ -169,7 +169,7 @@ export const serviceTierValidationSchema = z.object({
     .string()
     .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens'),
   price: z.number().positive('Price must be positive').max(10000000, 'Price cannot exceed 10M VNĐ'),
-  originalPrice: z
+  original_price: z
     .number()
     .positive('Original price must be positive')
     .max(10000000, 'Original price cannot exceed 10M VNĐ')
@@ -178,7 +178,7 @@ export const serviceTierValidationSchema = z.object({
     .array(z.string().min(3, 'Feature must be at least 3 characters'))
     .min(1, 'At least one feature is required'),
   limitations: z.array(z.string()).optional(),
-  maxCustomers: z.number().int().positive('Max customers must be positive').optional()
+  max_customers: z.number().int().positive('Max customers must be positive').optional()
 })
 
 // Validation helper functions
@@ -214,21 +214,21 @@ export function validateRoKData(data: {
   const errors: string[] = []
 
   if (data.playerId) {
-    const playerIdResult = rokPlayerIdSchema.safeParse(data.playerId)
+    const playerIdResult = rok_player_idSchema.safeParse(data.playerId)
     if (!playerIdResult.success) {
       errors.push('Invalid Player ID format')
     }
   }
 
   if (data.kingdom) {
-    const kingdomResult = rokKingdomSchema.safeParse(data.kingdom)
+    const kingdomResult = rok_kingdomSchema.safeParse(data.kingdom)
     if (!kingdomResult.success) {
       errors.push('Invalid Kingdom format')
     }
   }
 
   if (data.power) {
-    const powerResult = rokPowerSchema.safeParse(data.power)
+    const powerResult = rok_powerSchema.safeParse(data.power)
     if (!powerResult.success) {
       errors.push('Invalid Power value')
     }
@@ -277,5 +277,5 @@ export {
   bookingValidationSchema as bookingSchema,
   paymentValidationSchema as paymentSchema,
   serviceValidationSchema as serviceSchema,
-  serviceTierValidationSchema as serviceTierSchema
+  service_tiersValidationSchema as service_tiersSchema
 }

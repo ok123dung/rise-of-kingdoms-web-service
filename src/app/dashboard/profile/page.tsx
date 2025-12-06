@@ -18,15 +18,15 @@ import { AvatarUpload } from '@/components/AvatarUpload'
 import TwoFactorAuth from '@/components/profile/TwoFactorAuth'
 
 const profileSchema = z.object({
-  fullName: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự'),
+  full_name: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự'),
   phone: z
     .string()
     .regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ')
     .optional()
     .or(z.literal('')),
-  discordUsername: z.string().optional(),
-  rokPlayerId: z.string().optional(),
-  rokKingdom: z.string().optional()
+  discord_username: z.string().optional(),
+  rok_player_id: z.string().optional(),
+  rok_kingdom: z.string().optional()
 })
 type ProfileFormData = z.infer<typeof profileSchema>
 
@@ -66,11 +66,11 @@ export default function ProfilePage() {
   })
 
   interface ProfileData {
-    fullName: string
+    full_name: string
     phone: string
-    discordUsername: string
-    rokPlayerId: string
-    rokKingdom: string
+    discord_username: string
+    rok_player_id: string
+    rok_kingdom: string
   }
 
   interface ProfileResponse {
@@ -86,11 +86,11 @@ export default function ProfilePage() {
         .then(data => {
           if (data.success && data.data) {
             reset({
-              fullName: data.data.fullName ?? '',
+              full_name: data.data.full_name ?? '',
               phone: data.data.phone ?? '',
-              discordUsername: data.data.discordUsername ?? '',
-              rokPlayerId: data.data.rokPlayerId ?? '',
-              rokKingdom: data.data.rokKingdom ?? ''
+              discord_username: data.data.discord_username ?? '',
+              rok_player_id: data.data.rok_player_id ?? '',
+              rok_kingdom: data.data.rok_kingdom ?? ''
             })
           }
         })
@@ -221,7 +221,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700" htmlFor="fullName">
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="full_name">
                     Họ và tên
                   </label>
                   <div className="relative mt-1 rounded-md shadow-sm">
@@ -229,14 +229,14 @@ export default function ProfilePage() {
                       <UserCircleIcon className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
-                      {...register('fullName')}
+                      {...register('full_name')}
                       className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
-                      id="fullName"
+                      id="full_name"
                       type="text"
                     />
                   </div>
-                  {errors.fullName && (
-                    <p className="mt-1 text-sm text-red-600">{errors.fullName.message}</p>
+                  {errors.full_name && (
+                    <p className="mt-1 text-sm text-red-600">{errors.full_name.message}</p>
                   )}
                 </div>
 
@@ -267,14 +267,14 @@ export default function ProfilePage() {
                     <div>
                       <label
                         className="block text-sm font-medium text-gray-700"
-                        htmlFor="discordUsername"
+                        htmlFor="discord_username"
                       >
                         Discord Username
                       </label>
                       <input
-                        {...register('discordUsername')}
+                        {...register('discord_username')}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
-                        id="discordUsername"
+                        id="discord_username"
                         placeholder="username#1234"
                         type="text"
                       />
@@ -282,14 +282,14 @@ export default function ProfilePage() {
                     <div>
                       <label
                         className="block text-sm font-medium text-gray-700"
-                        htmlFor="rokPlayerId"
+                        htmlFor="rok_player_id"
                       >
                         ROK Player ID
                       </label>
                       <input
-                        {...register('rokPlayerId')}
+                        {...register('rok_player_id')}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
-                        id="rokPlayerId"
+                        id="rok_player_id"
                         placeholder="12345678"
                         type="text"
                       />
@@ -297,7 +297,7 @@ export default function ProfilePage() {
                     <div>
                       <label
                         className="block text-sm font-medium text-gray-700"
-                        htmlFor="rokKingdom"
+                        htmlFor="rok_kingdom"
                       >
                         Kingdom
                       </label>
@@ -306,9 +306,9 @@ export default function ProfilePage() {
                           <GlobeAsiaAustraliaIcon className="h-5 w-5 text-gray-400" />
                         </div>
                         <input
-                          {...register('rokKingdom')}
+                          {...register('rok_kingdom')}
                           className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 focus:border-amber-500 focus:outline-none focus:ring-amber-500 sm:text-sm"
-                          id="rokKingdom"
+                          id="rok_kingdom"
                           placeholder="1234"
                           type="text"
                         />

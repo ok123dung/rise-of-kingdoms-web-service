@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 interface RevenueMetrics {
   pricingAccuracy: boolean
   leadGenerationReady: boolean
-  paymentMethodsVisible: boolean
+  payment_methodsVisible: boolean
   seoOptimized: boolean
   conversionElementsActive: boolean
   mobileOptimized: boolean
@@ -15,7 +15,7 @@ export function RevenueValidation() {
   const [metrics, setMetrics] = useState<RevenueMetrics>({
     pricingAccuracy: false,
     leadGenerationReady: false,
-    paymentMethodsVisible: false,
+    payment_methodsVisible: false,
     seoOptimized: false,
     conversionElementsActive: false,
     mobileOptimized: false
@@ -32,7 +32,7 @@ export function RevenueValidation() {
       const newMetrics: RevenueMetrics = {
         pricingAccuracy: false,
         leadGenerationReady: false,
-        paymentMethodsVisible: false,
+        payment_methodsVisible: false,
         seoOptimized: false,
         conversionElementsActive: false,
         mobileOptimized: false
@@ -59,7 +59,7 @@ export function RevenueValidation() {
       paymentElements.forEach(el => {
         const text = el.textContent || ''
         if (text.includes('MoMo') || text.includes('ZaloPay') || text.includes('Banking')) {
-          newMetrics.paymentMethodsVisible = true
+          newMetrics.payment_methodsVisible = true
         }
       })
 
@@ -147,9 +147,9 @@ export function RevenueValidation() {
         </div>
 
         <div
-          className={`flex items-center space-x-2 ${metrics.paymentMethodsVisible ? 'text-green-600' : 'text-red-600'}`}
+          className={`flex items-center space-x-2 ${metrics.payment_methodsVisible ? 'text-green-600' : 'text-red-600'}`}
         >
-          <span>{metrics.paymentMethodsVisible ? '✅' : '❌'}</span>
+          <span>{metrics.payment_methodsVisible ? '✅' : '❌'}</span>
           <span>VN Payment Methods</span>
         </div>
 

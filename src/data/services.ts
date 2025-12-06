@@ -3,7 +3,7 @@ import { Target, type LucideIcon } from 'lucide-react'
 export interface ServiceData {
   slug: string
   name: string
-  shortDescription: string
+  short_description: string
   description: string
   icon: LucideIcon
   features: string[]
@@ -27,7 +27,7 @@ export const servicesData: Record<string, ServiceData> = {
   'auto-gem-farm': {
     slug: 'auto-gem-farm',
     name: 'Auto Gem & Farm RoK',
-    shortDescription: 'Auto Farm Gem & RSS 24/7',
+    short_description: 'Auto Farm Gem & RSS 24/7',
     description:
       'Dịch vụ Auto Farm Gem và Tài nguyên chuyên nghiệp, an toàn 99%, bảo hành uy tín. Hệ thống hoạt động 24/7 giúp bạn tối ưu hóa tài nguyên.',
     icon: Target,

@@ -7,13 +7,13 @@ const staticServices = [
     name: 'Tư vấn chiến thuật',
     description:
       'Phân tích và tối ưu chiến thuật cho từng tình huống trong game với đội ngũ chuyên gia top 1% server. Chúng tôi sẽ phân tích chi tiết tài khoản, tối ưu formation, và đưa ra kế hoạch phát triển cá nhân hóa.',
-    shortDescription: 'Tư vấn chiến thuật chuyên nghiệp',
-    basePrice: 500000,
+    short_description: 'Tư vấn chiến thuật chuyên nghiệp',
+    base_price: 500000,
     currency: 'VND',
     category: 'STRATEGY',
-    isActive: true,
-    isFeatured: false,
-    sortOrder: 1,
+    is_active: true,
+    is_featured: false,
+    sort_order: 1,
     metadata: {
       features: [
         'Phân tích tình huống chiến đấu chi tiết',
@@ -36,13 +36,13 @@ const staticServices = [
     name: 'Quản lý liên minh',
     description:
       'Hỗ trợ toàn diện trong việc quản lý, tuyển dụng và phát triển liên minh mạnh mẽ. Từ thiết lập cấu trúc quản lý đến phát triển hệ thống event và training thành viên.',
-    shortDescription: 'Quản lý liên minh chuyên nghiệp',
-    basePrice: 1000000,
+    short_description: 'Quản lý liên minh chuyên nghiệp',
+    base_price: 1000000,
     currency: 'VND',
     category: 'MANAGEMENT',
-    isActive: true,
-    isFeatured: true,
-    sortOrder: 2,
+    is_active: true,
+    is_featured: true,
+    sort_order: 2,
     metadata: {
       features: [
         'Thiết lập cấu trúc quản lý R4/R5',
@@ -64,13 +64,13 @@ const staticServices = [
     name: 'Hỗ trợ KvK',
     description:
       'Chiến thuật và coordination chuyên nghiệp cho Kingdom vs Kingdom. Hỗ trợ từ planning phase đến execution với real-time coordination và post-KvK analysis.',
-    shortDescription: 'Hỗ trợ KvK chuyên nghiệp',
-    basePrice: 2000000,
+    short_description: 'Hỗ trợ KvK chuyên nghiệp',
+    base_price: 2000000,
     currency: 'VND',
     category: 'STRATEGY',
-    isActive: true,
-    isFeatured: true,
-    sortOrder: 3,
+    is_active: true,
+    is_featured: true,
+    sort_order: 3,
     metadata: {
       features: [
         'Chiến thuật KvK cho mọi giai đoạn',
@@ -93,13 +93,13 @@ const staticServices = [
     name: 'VIP Support 24/7',
     description:
       'Gói dịch vụ cao cấp nhất với hỗ trợ ưu tiên và tư vấn chuyên nghiệp mọi lúc mọi nơi. Bao gồm tất cả dịch vụ khác với dedicated account manager.',
-    shortDescription: 'VIP Support 24/7',
-    basePrice: 3000000,
+    short_description: 'VIP Support 24/7',
+    base_price: 3000000,
     currency: 'VND',
     category: 'PREMIUM',
-    isActive: true,
-    isFeatured: true,
-    sortOrder: 4,
+    is_active: true,
+    is_featured: true,
+    sort_order: 4,
     metadata: {
       features: [
         'Hỗ trợ 24/7 với priority response',
@@ -121,13 +121,13 @@ const staticServices = [
     name: 'Training Commander',
     description:
       'Hướng dẫn chi tiết cách build và phát triển commander hiệu quả nhất. Từ talent tree optimization đến equipment và pairing strategies.',
-    shortDescription: 'Training commander chuyên nghiệp',
-    basePrice: 300000,
+    short_description: 'Training commander chuyên nghiệp',
+    base_price: 300000,
     currency: 'VND',
     category: 'TRAINING',
-    isActive: true,
-    isFeatured: false,
-    sortOrder: 5,
+    is_active: true,
+    is_featured: false,
+    sort_order: 5,
     metadata: {
       features: [
         'Tư vấn talent build tối ưu',
@@ -149,13 +149,13 @@ const staticServices = [
     name: 'Coaching 1-on-1',
     description:
       'Hướng dẫn cá nhân hóa từ chuyên gia top player hàng đầu. Customize hoàn toàn theo nhu cầu và mục tiêu cá nhân của từng player.',
-    shortDescription: 'Coaching cá nhân 1-on-1',
-    basePrice: 200000,
+    short_description: 'Coaching cá nhân 1-on-1',
+    base_price: 200000,
     currency: 'VND',
     category: 'TRAINING',
-    isActive: true,
-    isFeatured: false,
-    sortOrder: 6,
+    is_active: true,
+    is_featured: false,
+    sort_order: 6,
     metadata: {
       features: [
         'Session 1-on-1 riêng biệt',
@@ -182,7 +182,7 @@ export function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { slug } = params
     // Find service by slug from static data
-    const service = staticServices.find(s => s.slug === slug && s.isActive)
+    const service = staticServices.find(s => s.slug === slug && s.is_active)
     if (!service) {
       return NextResponse.json(
         {

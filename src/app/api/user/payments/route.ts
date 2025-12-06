@@ -20,14 +20,14 @@ export async function GET(request: NextRequest) {
 
     interface PaymentWhereClause {
       booking: {
-        userId: string
+        user_id: string
       }
       status?: string
     }
 
     const whereClause: PaymentWhereClause = {
       booking: {
-        userId: session.user.id
+        user_id: session.user.id
       }
     }
 
@@ -35,12 +35,12 @@ export async function GET(request: NextRequest) {
       whereClause.status = status
     }
 
-    const payments = await prisma.payment.findMany({
+    const payments = await prisma.payments.findMany({
       where: whereClause,
       include: {
         booking: {
           include: {
-            serviceTier: {
+            service_tiers: {
               include: {
                 service: true
               }
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        created_at: 'desc'
       }
     })
 

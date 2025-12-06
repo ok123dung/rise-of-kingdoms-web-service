@@ -20,7 +20,7 @@ export async function POST(_request: NextRequest) {
       success: true,
       qrCode: result.qrCode,
       secret: result.secret,
-      backupCodes: result.backupCodes
+      backup_codes: result.backup_codes
     })
   } catch (error) {
     getLogger().error('2FA setup error', error as Error)
@@ -42,7 +42,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      status: status ?? { enabled: false, backupCodesRemaining: 0 }
+      status: status ?? { enabled: false, backup_codesRemaining: 0 }
     })
   } catch (error) {
     getLogger().error('2FA status error', error as Error)

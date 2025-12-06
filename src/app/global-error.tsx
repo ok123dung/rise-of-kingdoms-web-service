@@ -17,7 +17,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
       digest: error.digest,
       stack: error.stack,
       timestamp: new Date().toISOString(),
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
     })
 
     // Send to error tracking service

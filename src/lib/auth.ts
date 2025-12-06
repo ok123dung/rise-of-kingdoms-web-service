@@ -14,7 +14,7 @@ import type { NextRequest } from 'next/server'
 
 // Extended user type with staff profile
 interface UserWithStaff extends User {
-  staffProfile?: {
+  staff?: {
     id: string
     role: string
     permissions?: unknown
@@ -63,14 +63,14 @@ export const checkPasswordHistory = async (
   newPassword: string,
   historyLimit = 5
 ): Promise<boolean> => {
-  const passwordHistory = await prisma.passwordHistory.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
+  const passwordHistory = await prisma.password_history.findMany({
+    where: { user_id: userId },
+    orderBy: { created_at: 'desc' },
     take: historyLimit
   })
 
   for (const history of passwordHistory) {
-    const isMatch = await bcrypt.compare(newPassword, history.passwordHash)
+    const isMatch = await bcrypt.compare(newPassword, history.password_hash)
     if (isMatch) {
       return false // Password was used before
     }
@@ -80,23 +80,24 @@ export const checkPasswordHistory = async (
 }
 
 // Save password to history
-export const savePasswordToHistory = async (userId: string, passwordHash: string) => {
-  await prisma.passwordHistory.create({
+export const savePasswordToHistory = async (userId: string, password_hash: string) => {
+  await prisma.password_history.create({
     data: {
-      userId,
-      passwordHash
+      id: crypto.randomUUID(),
+      user_id: userId,
+      password_hash
     }
   })
 
   // Clean up old password history (keep last 10)
-  const oldPasswords = await prisma.passwordHistory.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
+  const oldPasswords = await prisma.password_history.findMany({
+    where: { user_id: userId },
+    orderBy: { created_at: 'desc' },
     skip: 10
   })
 
   if (oldPasswords.length > 0) {
-    await prisma.passwordHistory.deleteMany({
+    await prisma.password_history.deleteMany({
       where: {
         id: { in: oldPasswords.map(p => p.id) }
       }
@@ -112,14 +113,13 @@ export const getCurrentUser = async () => {
   const session = await getCurrentSession()
   if (!session?.user?.id) return null
 
-  return prisma.user.findUnique({
+  return prisma.users.findUnique({
     where: { id: session.user.id },
     include: {
-      staffProfile: true,
+      staff: true,
       bookings: {
-        include: {
-          serviceTier: {
-            include: { service: true }
+        include: { service_tiers: {
+            include: { services: true }
           }
         }
       }
@@ -128,7 +128,7 @@ export const getCurrentUser = async () => {
 }
 
 export const isAdmin = (user: UserWithStaff | null) => {
-  return user?.staffProfile?.role === 'admin' || user?.staffProfile?.role === 'manager'
+  return user?.staff?.role === 'admin' || user?.staff?.role === 'manager'
 }
 
 export const withAuth = (handler: RouteHandler) => {
@@ -182,9 +182,9 @@ export const withRateLimit = (_maxRequests = 60, _windowMs = 60000) => {
 export const isStaff = async () => {
   const user = await getCurrentUser()
   return (
-    user?.staffProfile?.role === 'admin' ||
-    user?.staffProfile?.role === 'manager' ||
-    user?.staffProfile?.role === 'staff'
+    user?.staff?.role === 'admin' ||
+    user?.staff?.role === 'manager' ||
+    user?.staff?.role === 'staff'
   )
 }
 
@@ -211,10 +211,9 @@ export const authOptions: NextAuthOptions = {
 
           const { email, password } = loginSchema.parse(credentials)
 
-          const user = await basePrisma.user.findUnique({
+          const user = await basePrisma.users.findUnique({
             where: { email },
-            include: {
-              staffProfile: true
+            include: { staff: true
             }
           })
 
@@ -252,17 +251,17 @@ export const authOptions: NextAuthOptions = {
             }
           }
 
-          await basePrisma.user.update({
+          await basePrisma.users.update({
             where: { id: user.id },
-            data: { lastLogin: new Date() }
+            data: { last_login: new Date() }
           })
 
           return {
             id: user.id,
             email: user.email,
-            name: user.fullName,
+            name: user.full_name,
             image: user.image ?? undefined,
-            role: user.staffProfile?.role || 'customer'
+            role: user.staff?.role || 'customer'
           }
         } catch (error) {
           // Log failed authentication attempt for security monitoring
@@ -301,41 +300,42 @@ export const authOptions: NextAuthOptions = {
 
       if (account?.provider === 'discord' && profile) {
         try {
-          const existingUser = await prisma.user.findFirst({
+          const existingUser = await prisma.users.findFirst({
             where: {
-              OR: [{ email: profile.email }, { discordId: (profile as DiscordProfile).id }]
+              OR: [{ email: profile.email }, { discord_id: (profile as DiscordProfile).id }]
             },
-            include: {
-              staffProfile: true
+            include: { staff: true
             }
           })
 
           if (existingUser) {
-            if (!existingUser.discordId) {
-              await prisma.user.update({
+            if (!existingUser.discord_id) {
+              await prisma.users.update({
                 where: { id: existingUser.id },
                 data: {
-                  discordId: (profile as DiscordProfile).id,
-                  discordUsername: (profile as DiscordProfile).username,
-                  lastLogin: new Date()
+                  discord_id: (profile as DiscordProfile).id,
+                  discord_username: (profile as DiscordProfile).username,
+                  last_login: new Date()
                 }
               })
             }
 
             token.userId = existingUser.id
-            token.role = existingUser.staffProfile?.role || 'customer'
+            token.role = existingUser.staff?.role || 'customer'
           } else {
-            const newUser = await prisma.user.create({
+            const newUser = await prisma.users.create({
               data: {
+              id: crypto.randomUUID(),
                 email: profile.email || '',
-                fullName:
+                full_name:
                   (profile as DiscordProfile).global_name ||
                   (profile as DiscordProfile).username ||
                   'Discord User',
-                discordId: (profile as DiscordProfile).id,
-                discordUsername: (profile as DiscordProfile).username,
+                discord_id: (profile as DiscordProfile).id,
+                discord_username: (profile as DiscordProfile).username,
                 password: '',
-                lastLogin: new Date()
+                updated_at: new Date(),
+                last_login: new Date()
               }
             })
 
@@ -381,13 +381,15 @@ export const authOptions: NextAuthOptions = {
       createUserLogger().info('New user created', { email: user.email })
 
       try {
-        await prisma.lead.create({
+        await prisma.leads.create({
           data: {
-            email: user.email,
-            fullName: user.name || '',
+          id: crypto.randomUUID(),
+          email: user.email,
+            full_name: user.name || '',
             source: 'registration',
             status: 'converted',
-            leadScore: 50
+            lead_score: 50,
+          updated_at: new Date()
           }
         })
       } catch (error) {

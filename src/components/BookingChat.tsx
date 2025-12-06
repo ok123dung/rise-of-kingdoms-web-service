@@ -10,7 +10,7 @@ import { useBookingWebSocket } from '@/hooks/useWebSocket'
 import { CommunicationType } from '@/types/enums'
 
 interface BookingChatProps {
-  bookingId: string
+  booking_id: string
   className?: string
 }
 
@@ -18,10 +18,10 @@ interface Message {
   id: string
   content: string
   senderId: string
-  createdAt: string | Date
+  created_at: string | Date
   type?: string
   sender?: {
-    fullName: string
+    full_name: string
   }
 }
 
@@ -29,7 +29,7 @@ interface ChatHistoryResponse {
   history: Message[]
 }
 
-export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
+export function BookingChat({ booking_id, className = '' }: BookingChatProps) {
   const { data: session } = useSession()
   const {
     isConnected,
@@ -38,7 +38,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
     typingUsers,
     sendMessage,
     sendTypingIndicator
-  } = useBookingWebSocket(bookingId)
+  } = useBookingWebSocket(booking_id)
 
   const [newMessage, setNewMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -51,7 +51,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await fetch(`/api/communications?bookingId=${bookingId}`)
+        const res = await fetch(`/api/communications?booking_id=${booking_id}`)
         if (res.ok) {
           const data = (await res.json()) as ChatHistoryResponse
           // Filter only chat messages
@@ -59,7 +59,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
           // Sort by date asc
           chats.sort(
             (a: Message, b: Message) =>
-              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           )
           setHistoryMessages(chats)
         }
@@ -70,10 +70,10 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
       }
     }
 
-    if (bookingId) {
+    if (booking_id) {
       void fetchHistory()
     }
-  }, [bookingId])
+  }, [booking_id])
 
   // Combine history and WS messages, removing duplicates
   const allMessages = [...historyMessages]
@@ -95,7 +95,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
     // Send typing indicator
     if (!isTyping && value.length > 0) {
       setIsTyping(true)
-      sendTypingIndicator(bookingId, true)
+      sendTypingIndicator(booking_id, true)
     }
 
     // Clear previous timeout
@@ -107,7 +107,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
     typingTimeoutRef.current = setTimeout(() => {
       if (isTyping) {
         setIsTyping(false)
-        sendTypingIndicator(bookingId, false)
+        sendTypingIndicator(booking_id, false)
       }
     }, 1000)
   }
@@ -122,7 +122,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
 
     // 1. Send via WebSocket for realtime
     if (isConnected) {
-      sendMessage(bookingId, content)
+      sendMessage(booking_id, content)
     }
 
     // 2. Persist via API (Critical for history)
@@ -131,7 +131,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bookingId,
+          booking_id,
           type: CommunicationType.CHAT,
           content
         })
@@ -146,7 +146,7 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
     // Stop typing indicator
     if (isTyping) {
       setIsTyping(false)
-      sendTypingIndicator(bookingId, false)
+      sendTypingIndicator(booking_id, false)
     }
   }
 
@@ -198,12 +198,12 @@ export function BookingChat({ bookingId, className = '' }: BookingChatProps) {
                 >
                   {!isOwnMessage && (
                     <p className="mb-1 text-xs font-medium opacity-70">
-                      {message.sender?.fullName ?? 'Nhân viên'}
+                      {message.sender?.full_name ?? 'Nhân viên'}
                     </p>
                   )}
                   <p className="text-sm">{message.content}</p>
                   <p className={`mt-1 text-xs ${isOwnMessage ? 'text-blue-100' : 'text-gray-500'}`}>
-                    {format(new Date(message.createdAt), 'HH:mm')}
+                    {format(new Date(message.created_at), 'HH:mm')}
                   </p>
                 </div>
               </div>

@@ -4,13 +4,13 @@ import { getLogger } from '@/lib/monitoring/logger'
 import { ServiceTaskStatus, ServiceTaskPriority } from '@/types/enums'
 
 export interface CreateTaskDTO {
-  bookingId: string
+  booking_id: string
   type: string
   title: string
   description?: string
   priority?: ServiceTaskPriority
-  assignedTo?: string
-  dueDate?: Date
+  assigned_to?: string
+  due_date?: Date
   metadata?: Record<string, unknown>
 }
 
@@ -19,8 +19,8 @@ export interface UpdateTaskDTO {
   description?: string
   priority?: ServiceTaskPriority
   status?: ServiceTaskStatus
-  assignedTo?: string
-  dueDate?: Date
+  assigned_to?: string
+  due_date?: Date
   metadata?: Record<string, unknown>
 }
 
@@ -30,31 +30,33 @@ export class ServiceTaskService {
   async createTask(data: CreateTaskDTO) {
     try {
       // Verify booking exists
-      const booking = await prisma.booking.findUnique({
-        where: { id: data.bookingId }
+      const booking = await prisma.bookings.findUnique({
+        where: { id: data.booking_id }
       })
 
       if (!booking) {
-        throw new NotFoundError(`Booking with ID ${data.bookingId} not found`)
+        throw new NotFoundError(`Booking with ID ${data.booking_id} not found`)
       }
 
-      const task = await prisma.serviceTask.create({
+      const task = await prisma.service_tasks.create({
         data: {
-          bookingId: data.bookingId,
+        id: crypto.randomUUID(),
+        booking_id: data.booking_id,
           type: data.type,
           title: data.title,
           description: data.description,
           priority: data.priority ?? ServiceTaskPriority.MEDIUM,
           status: ServiceTaskStatus.PENDING,
-          assignedTo: data.assignedTo,
-          dueDate: data.dueDate,
+          assigned_to: data.assigned_to,
+          due_date: data.due_date,
           metadata: data.metadata as Parameters<
-            typeof prisma.serviceTask.create
-          >[0]['data']['metadata']
+            typeof prisma.service_tasks.create
+          >[0]['data']['metadata'],
+          updated_at: new Date()
         }
       })
 
-      this.logger.info(`Created task ${task.id} for booking ${data.bookingId}`)
+      this.logger.info(`Created task ${task.id} for booking ${data.booking_id}`)
       return task
     } catch (error) {
       this.logger.error('Failed to create service task', error as Error)
@@ -64,7 +66,7 @@ export class ServiceTaskService {
 
   async updateTask(id: string, data: UpdateTaskDTO) {
     try {
-      const task = await prisma.serviceTask.findUnique({
+      const task = await prisma.service_tasks.findUnique({
         where: { id }
       })
 
@@ -72,19 +74,19 @@ export class ServiceTaskService {
         throw new NotFoundError(`Task with ID ${id} not found`)
       }
 
-      const updatedTask = await prisma.serviceTask.update({
+      const updatedTask = await prisma.service_tasks.update({
         where: { id },
         data: {
           title: data.title,
           description: data.description,
           priority: data.priority,
           status: data.status,
-          assignedTo: data.assignedTo,
-          dueDate: data.dueDate,
+          assigned_to: data.assigned_to,
+          due_date: data.due_date,
           metadata: data.metadata as Parameters<
-            typeof prisma.serviceTask.update
+            typeof prisma.service_tasks.update
           >[0]['data']['metadata'],
-          completedAt: data.status === ServiceTaskStatus.COMPLETED ? new Date() : undefined
+          completed_at: data.status === ServiceTaskStatus.COMPLETED ? new Date() : undefined
         }
       })
 
@@ -98,7 +100,7 @@ export class ServiceTaskService {
 
   async deleteTask(id: string) {
     try {
-      await prisma.serviceTask.delete({
+      await prisma.service_tasks.delete({
         where: { id }
       })
       this.logger.info(`Deleted task ${id}`)
@@ -109,13 +111,13 @@ export class ServiceTaskService {
   }
 
   async getTaskById(id: string) {
-    const task = await prisma.serviceTask.findUnique({
+    const task = await prisma.service_tasks.findUnique({
       where: { id },
       include: {
-        assignedUser: {
+        users: {
           select: {
             id: true,
-            fullName: true,
+            full_name: true,
             email: true
           }
         }
@@ -129,15 +131,15 @@ export class ServiceTaskService {
     return task
   }
 
-  async getTasksByBooking(bookingId: string) {
-    return prisma.serviceTask.findMany({
-      where: { bookingId },
-      orderBy: { createdAt: 'desc' },
+  async getTasksByBooking(booking_id: string) {
+    return prisma.service_tasks.findMany({
+      where: { booking_id },
+      orderBy: { created_at: 'desc' },
       include: {
-        assignedUser: {
+        users: {
           select: {
             id: true,
-            fullName: true,
+            full_name: true,
             email: true
           }
         }
@@ -145,18 +147,18 @@ export class ServiceTaskService {
     })
   }
 
-  async getTasksByAssignee(userId: string, status?: ServiceTaskStatus) {
-    return prisma.serviceTask.findMany({
+  async getTasksByAssignee(user_id: string, status?: ServiceTaskStatus) {
+    return prisma.service_tasks.findMany({
       where: {
-        assignedTo: userId,
+        assigned_to: user_id,
         ...(status ? { status } : {})
       },
-      orderBy: { dueDate: 'asc' },
+      orderBy: { due_date: 'asc' },
       include: {
-        booking: {
+        bookings: {
           select: {
-            bookingNumber: true,
-            serviceTier: {
+            booking_number: true,
+            service_tiers: {
               select: {
                 name: true
               }

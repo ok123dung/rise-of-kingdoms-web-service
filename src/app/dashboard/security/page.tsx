@@ -14,7 +14,7 @@ import ConfirmModal from '@/components/ui/ConfirmModal'
 
 interface TwoFactorStatus {
   enabled: boolean
-  backupCodesRemaining: number
+  backup_codesRemaining: number
 }
 
 interface TwoFactorStatusResponse {
@@ -30,7 +30,7 @@ interface DisableResponse {
 
 interface BackupCodesResponse {
   success: boolean
-  backupCodes?: string[]
+  backup_codes?: string[]
   error?: string
 }
 
@@ -115,9 +115,9 @@ export default function SecurityPage() {
 
       const data = (await response.json()) as BackupCodesResponse
 
-      if (data.success && data.backupCodes) {
+      if (data.success && data.backup_codes) {
         // Show backup codes in a modal instead of alert
-        setGeneratedBackupCodes(data.backupCodes)
+        setGeneratedBackupCodes(data.backup_codes)
         setSuccess('Backup codes regenerated successfully')
         void fetchTwoFactorStatus()
       } else {
@@ -208,7 +208,7 @@ export default function SecurityPage() {
                   <div className="flex items-center gap-2">
                     <Key className="h-5 w-5 text-gray-400" />
                     <span className="text-sm text-gray-600">
-                      Mã dự phòng còn lại: {twoFactorStatus.backupCodesRemaining}
+                      Mã dự phòng còn lại: {twoFactorStatus.backup_codesRemaining}
                     </span>
                   </div>
                   <button

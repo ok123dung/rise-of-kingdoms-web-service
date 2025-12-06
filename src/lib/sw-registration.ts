@@ -265,7 +265,7 @@ class ServiceWorkerManager {
         body: JSON.stringify({
           subscription,
           platform: this.getPlatform(),
-          userAgent: navigator.userAgent
+          user_agent: navigator.userAgent
         })
       })
     } catch (error) {
@@ -343,12 +343,12 @@ class ServiceWorkerManager {
   }
 
   private getPlatform(): string {
-    const userAgent = navigator.userAgent.toLowerCase()
+    const user_agent = navigator.userAgent.toLowerCase()
 
-    if (/android/.test(userAgent)) return 'android'
-    if (/iphone|ipad/.test(userAgent)) return 'ios'
-    if (/windows/.test(userAgent)) return 'windows'
-    if (/mac/.test(userAgent)) return 'mac'
+    if (/android/.test(user_agent)) return 'android'
+    if (/iphone|ipad/.test(user_agent)) return 'ios'
+    if (/windows/.test(user_agent)) return 'windows'
+    if (/mac/.test(user_agent)) return 'mac'
 
     return 'unknown'
   }

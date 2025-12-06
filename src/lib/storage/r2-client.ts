@@ -58,14 +58,14 @@ export const ALLOWED_FILE_TYPES = {
 // Generate unique file key
 export function generateFileKey(
   folder: string,
-  userId: string,
+  user_id: string,
   filename: string,
   timestamp = true
 ): string {
   const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_')
   const uniqueId = timestamp ? Date.now() : ''
 
-  return `${folder}/${userId}/${uniqueId ? `${uniqueId}-` : ''}${sanitizedFilename}`
+  return `${folder}/${user_id}/${uniqueId ? `${uniqueId}-` : ''}${sanitizedFilename}`
 }
 
 // Get public URL for a file
@@ -76,10 +76,10 @@ export function getPublicUrl(key: string): string {
 
 // Validate file type
 export function isValidFileType(
-  mimeType: string,
+  mime_type: string,
   category: keyof typeof ALLOWED_FILE_TYPES
 ): boolean {
-  return ALLOWED_FILE_TYPES[category]?.includes(mimeType) || false
+  return ALLOWED_FILE_TYPES[category]?.includes(mime_type) || false
 }
 
 // Validate file size

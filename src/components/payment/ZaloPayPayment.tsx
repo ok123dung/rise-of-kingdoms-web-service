@@ -6,14 +6,14 @@ import type { PaymentResponse, PaymentError } from '@/types/payment'
 
 interface ZaloPayPaymentProps {
   amount: number
-  bookingId: string
+  booking_id: string
   onSuccess?: (data: PaymentResponse) => void
   onError?: (error: PaymentError) => void
 }
 
 export default function ZaloPayPayment({
   amount,
-  bookingId,
+  booking_id,
   onSuccess,
   onError
 }: ZaloPayPaymentProps) {
@@ -28,7 +28,7 @@ export default function ZaloPayPayment({
 
       // Generate mock QR code
       setQrCode(
-        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=zalopay://pay?amount=${amount}&booking=${bookingId}`
+        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=zalopay://pay?amount=${amount}&booking=${booking_id}`
       )
 
       // Simulate payment completion after QR scan
@@ -36,7 +36,7 @@ export default function ZaloPayPayment({
         onSuccess?.({
           transactionId: `ZALOPAY_${Date.now()}`,
           amount,
-          bookingId,
+          booking_id,
           method: 'zalopay',
           status: 'completed'
         })

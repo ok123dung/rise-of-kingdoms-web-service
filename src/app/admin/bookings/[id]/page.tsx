@@ -11,12 +11,12 @@ type BookingDetail = BookingWithRelations & {
 }
 
 async function getBooking(id: string): Promise<BookingDetail> {
-  const booking = await prisma.booking.findUnique({
+  const booking = await prisma.bookings.findUnique({
     where: { id },
     include: {
       user: true,
-      serviceTier: {
-        include: { service: true }
+      service_tiers: {
+        include: { services: true }
       },
       payments: true,
       convertedLead: true
@@ -42,9 +42,9 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
             <ArrowLeft className="h-6 w-6 text-gray-600" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Booking #{booking.bookingNumber}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Booking #{booking.booking_number}</h1>
             <p className="text-sm text-gray-500">
-              Tạo ngày {new Date(booking.createdAt).toLocaleDateString('vi-VN')}
+              Tạo ngày {new Date(booking.created_at).toLocaleDateString('vi-VN')}
             </p>
           </div>
         </div>
@@ -63,16 +63,16 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
             <div className="grid gap-6 md:grid-cols-2">
               <div>
                 <p className="text-sm text-gray-500">Dịch vụ</p>
-                <p className="font-medium text-gray-900">{booking.serviceTier.service.name}</p>
+                <p className="font-medium text-gray-900">{booking.service_tiers.services.name}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Gói (Tier)</p>
-                <p className="font-medium text-gray-900">{booking.serviceTier.name}</p>
+                <p className="font-medium text-gray-900">{booking.service_tiers.name}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Giá trị</p>
                 <p className="font-medium text-gray-900">
-                  {Number(booking.finalAmount).toLocaleString()} VNĐ
+                  {Number(booking.final_amount).toLocaleString()} VNĐ
                 </p>
               </div>
               <div>
@@ -101,7 +101,7 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
             </h2>
             <div className="rounded-lg bg-gray-50 p-4">
               <p className="whitespace-pre-wrap text-gray-700">
-                {booking.customerRequirements || 'Không có ghi chú thêm'}
+                {booking.customer_requirements || 'Không có ghi chú thêm'}
               </p>
             </div>
           </div>
@@ -118,28 +118,28 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-purple-600">
-                  {booking.user.fullName.charAt(0).toUpperCase()}
+                  {booking.users.full_name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{booking.user.fullName}</p>
-                  <p className="text-xs text-gray-500">ID: {booking.user.id.slice(0, 8)}...</p>
+                  <p className="font-medium text-gray-900">{booking.users.full_name}</p>
+                  <p className="text-xs text-gray-500">ID: {booking.users.id.slice(0, 8)}...</p>
                 </div>
               </div>
               <div className="space-y-2 border-t pt-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <Mail className="mr-2 h-4 w-4" />
-                  {booking.user.email}
+                  {booking.users.email}
                 </div>
-                {booking.user.phone && (
+                {booking.users.phone && (
                   <div className="flex items-center text-sm text-gray-600">
                     <Phone className="mr-2 h-4 w-4" />
-                    {booking.user.phone}
+                    {booking.users.phone}
                   </div>
                 )}
-                {booking.user.rokKingdom && (
+                {booking.users.rok_kingdom && (
                   <div className="flex items-center text-sm text-gray-600">
                     <Shield className="mr-2 h-4 w-4" />
-                    Kingdom #{booking.user.rokKingdom}
+                    Kingdom #{booking.users.rok_kingdom}
                   </div>
                 )}
               </div>
@@ -158,20 +158,20 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
                   ${
-                    booking.paymentStatus === 'completed'
+                    booking.payment_status === 'completed'
                       ? 'bg-green-100 text-green-800'
-                      : booking.paymentStatus === 'failed'
+                      : booking.payment_status === 'failed'
                         ? 'bg-red-100 text-red-800'
                         : 'bg-yellow-100 text-yellow-800'
                   }`}
                 >
-                  {booking.paymentStatus.toUpperCase()}
+                  {booking.payment_status.toUpperCase()}
                 </span>
               </div>
               <div className="flex justify-between border-t pt-2">
                 <span className="font-medium text-gray-900">Tổng cộng</span>
                 <span className="font-bold text-green-600">
-                  {Number(booking.finalAmount).toLocaleString()} đ
+                  {Number(booking.final_amount).toLocaleString()} đ
                 </span>
               </div>
             </div>

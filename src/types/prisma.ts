@@ -8,69 +8,69 @@ export type { Prisma }
 
 // Re-export model types from Prisma client
 // These are inferred from the Prisma schema
-export type User = Prisma.UserGetPayload<object>
-export type Service = Prisma.ServiceGetPayload<object>
-export type ServiceTier = Prisma.ServiceTierGetPayload<object>
-export type Booking = Prisma.BookingGetPayload<object>
-export type Payment = Prisma.PaymentGetPayload<object>
-export type Communication = Prisma.CommunicationGetPayload<object>
-export type Lead = Prisma.LeadGetPayload<object>
-export type Staff = Prisma.StaffGetPayload<object>
-export type Account = Prisma.AccountGetPayload<object>
-export type Session = Prisma.SessionGetPayload<object>
-export type VerificationToken = Prisma.VerificationTokenGetPayload<object>
-export type SystemLog = Prisma.SystemLogGetPayload<object>
-export type SecurityLog = Prisma.SecurityLogGetPayload<object>
-export type AuditLog = Prisma.AuditLogGetPayload<object>
-export type ServiceTask = Prisma.ServiceTaskGetPayload<object>
-export type PasswordResetToken = Prisma.PasswordResetTokenGetPayload<object>
-export type TwoFactorAuth = Prisma.TwoFactorAuthGetPayload<object>
-export type FileUpload = Prisma.FileUploadGetPayload<object>
-export type WebhookEvent = Prisma.WebhookEventGetPayload<object>
-export type PasswordHistory = Prisma.PasswordHistoryGetPayload<object>
+export type User = Prisma.usersGetPayload<object>
+export type Service = Prisma.servicesGetPayload<object>
+export type ServiceTier = Prisma.service_tiersGetPayload<object>
+export type Booking = Prisma.bookingsGetPayload<object>
+export type Payment = Prisma.paymentsGetPayload<object>
+export type Communication = Prisma.communicationsGetPayload<object>
+export type Lead = Prisma.leadsGetPayload<object>
+export type Staff = Prisma.staffGetPayload<object>
+export type Account = Prisma.accountsGetPayload<object>
+export type Session = Prisma.sessionsGetPayload<object>
+export type VerificationToken = Prisma.verification_tokensGetPayload<object>
+export type SystemLog = Prisma.system_logsGetPayload<object>
+export type SecurityLog = Prisma.security_logsGetPayload<object>
+export type AuditLog = Prisma.audit_logsGetPayload<object>
+export type ServiceTask = Prisma.service_tasksGetPayload<object>
+export type PasswordResetToken = Prisma.password_reset_tokensGetPayload<object>
+export type TwoFactorAuth = Prisma.two_factor_authGetPayload<object>
+export type FileUpload = Prisma.file_uploadsGetPayload<object>
+export type WebhookEvent = Prisma.webhook_eventsGetPayload<object>
+export type PasswordHistory = Prisma.password_historyGetPayload<object>
 
 // Types with relations
-export type UserWithStaff = Prisma.UserGetPayload<{
-  include: { staffProfile: true }
+export type UserWithStaff = Prisma.usersGetPayload<{
+  include: { staff: true }
 }>
 
-export type ServiceWithTiers = Prisma.ServiceGetPayload<{
-  include: { serviceTiers: true }
+export type ServiceWithTiers = Prisma.servicesGetPayload<{
+  include: { service_tiers: true }
 }>
 
-export type ServiceTierWithService = Prisma.ServiceTierGetPayload<{
-  include: { service: true }
+export type ServiceTierWithService = Prisma.service_tiersGetPayload<{
+  include: { services: true }
 }>
 
-export type BookingWithRelations = Prisma.BookingGetPayload<{
+export type BookingWithRelations = Prisma.bookingsGetPayload<{
   include: {
-    user: true
-    serviceTier: {
-      include: { service: true }
+    users: true
+    service_tiers: {
+      include: { services: true }
     }
     payments: true
   }
 }>
 
-export type BookingWithUser = Prisma.BookingGetPayload<{
-  include: { user: true }
+export type BookingWithUser = Prisma.bookingsGetPayload<{
+  include: { users: true }
 }>
 
-export type BookingWithServiceTier = Prisma.BookingGetPayload<{
+export type BookingWithServiceTier = Prisma.bookingsGetPayload<{
   include: {
-    serviceTier: {
-      include: { service: true }
+    service_tiers: {
+      include: { services: true }
     }
   }
 }>
 
-export type PaymentWithBooking = Prisma.PaymentGetPayload<{
+export type PaymentWithBooking = Prisma.paymentsGetPayload<{
   include: {
-    booking: {
+    bookings: {
       include: {
-        user: true
-        serviceTier: {
-          include: { service: true }
+        users: true
+        service_tiers: {
+          include: { services: true }
         }
       }
     }
@@ -79,21 +79,21 @@ export type PaymentWithBooking = Prisma.PaymentGetPayload<{
 
 export type PaymentWithRelations = PaymentWithBooking
 
-export type LeadWithUser = Prisma.LeadGetPayload<{
-  include: { assignedUser: true }
+export type LeadWithUser = Prisma.leadsGetPayload<{
+  include: { users: true }
 }>
 
-export type StaffWithUser = Prisma.StaffGetPayload<{
-  include: { user: true }
+export type StaffWithUser = Prisma.staffGetPayload<{
+  include: { users: true }
 }>
 
 // Input types for queries
-export type BookingWhereInput = Prisma.BookingWhereInput
-export type BookingOrderByWithRelationInput = Prisma.BookingOrderByWithRelationInput
-export type UserWhereInput = Prisma.UserWhereInput
-export type ServiceWhereInput = Prisma.ServiceWhereInput
-export type PaymentWhereInput = Prisma.PaymentWhereInput
-export type LeadWhereInput = Prisma.LeadWhereInput
+export type BookingWhereInput = Prisma.bookingsWhereInput
+export type BookingOrderByWithRelationInput = Prisma.bookingsOrderByWithRelationInput
+export type UserWhereInput = Prisma.usersWhereInput
+export type ServiceWhereInput = Prisma.servicesWhereInput
+export type PaymentWhereInput = Prisma.paymentsWhereInput
+export type LeadWhereInput = Prisma.leadsWhereInput
 
 // Json input type
 export type InputJsonValue = Prisma.InputJsonValue

@@ -32,8 +32,8 @@ describe('Webhook Integration Tests', () => {
   beforeEach(async () => {
     // Clear webhook events before each test
     await prisma.webhookEvent.deleteMany({})
-    await prisma.payment.deleteMany({})
-    await prisma.booking.deleteMany({})
+    await prisma.payments.deleteMany({})
+    await prisma.bookings.deleteMany({})
   })
 
   afterEach(async () => {
@@ -43,25 +43,25 @@ describe('Webhook Integration Tests', () => {
   describe('VNPay Webhook', () => {
     it('should accept valid VNPay webhook', async () => {
       // Create test booking and payment
-      const booking = await prisma.booking.create({
+      const booking = await prisma.bookings.create({
         data: {
-          bookingNumber: 'BOOK001',
-          userId: 'user123',
-          serviceTierId: 'tier123',
+          booking_number: 'BOOK001',
+          user_id: 'user123',
+          service_tier_id: 'tier123',
           status: 'pending',
-          paymentStatus: 'pending',
-          totalAmount: 100000,
-          finalAmount: 100000
+          payment_status: 'pending',
+          total_amount: 100000,
+          final_amount: 100000
         }
       })
 
-      const payment = await prisma.payment.create({
+      const payment = await prisma.payments.create({
         data: {
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: 100000,
           status: 'pending',
-          paymentMethod: 'vnpay',
-          paymentNumber: 'VNPAY_BOOK001_123'
+          payment_method: 'vnpay',
+          payment_number: 'VNPAY_BOOK001_123'
         }
       })
 
@@ -107,7 +107,7 @@ describe('Webhook Integration Tests', () => {
 
       // Verify webhook event was created
       const webhookEvent = await prisma.webhookEvent.findFirst({
-        where: { eventId: { startsWith: 'vnpay_' } }
+        where: { event_id: { startsWith: 'vnpay_' } }
       })
       expect(webhookEvent).toBeTruthy()
     })
@@ -178,25 +178,25 @@ describe('Webhook Integration Tests', () => {
 
   describe('MoMo Webhook', () => {
     it('should accept valid MoMo webhook', async () => {
-      const booking = await prisma.booking.create({
+      const booking = await prisma.bookings.create({
         data: {
-          bookingNumber: 'BOOK002',
-          userId: 'user123',
-          serviceTierId: 'tier123',
+          booking_number: 'BOOK002',
+          user_id: 'user123',
+          service_tier_id: 'tier123',
           status: 'pending',
-          paymentStatus: 'pending',
-          totalAmount: 100000,
-          finalAmount: 100000
+          payment_status: 'pending',
+          total_amount: 100000,
+          final_amount: 100000
         }
       })
 
-      const payment = await prisma.payment.create({
+      const payment = await prisma.payments.create({
         data: {
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: 100000,
           status: 'pending',
-          paymentMethod: 'momo',
-          paymentNumber: 'MOMO_BOOK002_123'
+          payment_method: 'momo',
+          payment_number: 'MOMO_BOOK002_123'
         }
       })
 
@@ -256,25 +256,25 @@ describe('Webhook Integration Tests', () => {
       // This test verifies that database transactions work correctly
       // If payment update succeeds but booking update fails, both should rollback
 
-      const booking = await prisma.booking.create({
+      const booking = await prisma.bookings.create({
         data: {
-          bookingNumber: 'BOOK003',
-          userId: 'user123',
-          serviceTierId: 'tier123',
+          booking_number: 'BOOK003',
+          user_id: 'user123',
+          service_tier_id: 'tier123',
           status: 'pending',
-          paymentStatus: 'pending',
-          totalAmount: 100000,
-          finalAmount: 100000
+          payment_status: 'pending',
+          total_amount: 100000,
+          final_amount: 100000
         }
       })
 
-      const payment = await prisma.payment.create({
+      const payment = await prisma.payments.create({
         data: {
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: 100000,
           status: 'pending',
-          paymentMethod: 'vnpay',
-          paymentNumber: 'VNPAY_BOOK003_123'
+          payment_method: 'vnpay',
+          payment_number: 'VNPAY_BOOK003_123'
         }
       })
 
@@ -288,9 +288,9 @@ describe('Webhook Integration Tests', () => {
           })
 
           // Force booking update to fail
-          await tx.booking.update({
+          await tx.bookings.update({
             where: { id: 'non_existent_id' }, // This will fail
-            data: { paymentStatus: 'paid' }
+            data: { payment_status: 'paid' }
           })
         })
       } catch (error) {
@@ -298,7 +298,7 @@ describe('Webhook Integration Tests', () => {
       }
 
       // Verify payment is still pending (transaction rolled back)
-      const updatedPayment = await prisma.payment.findUnique({
+      const updatedPayment = await prisma.payments.findUnique({
         where: { id: payment.id }
       })
       expect(updatedPayment?.status).toBe('pending')

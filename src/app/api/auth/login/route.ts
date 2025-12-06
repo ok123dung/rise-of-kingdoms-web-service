@@ -77,14 +77,14 @@ const loginHandler = async function (request: NextRequest): Promise<NextResponse
 
     // Generate JWT token (default role: customer)
     const token = generateToken({
-      userId: user.id,
+      user_id: user.id,
       email: user.email,
       role: 'customer'
     })
 
     // Log successful login
     getLogger().info('User logged in', {
-      userId: user.id,
+      user_id: user.id,
       email: user.email,
       timestamp: new Date().toISOString()
     })
@@ -95,9 +95,9 @@ const loginHandler = async function (request: NextRequest): Promise<NextResponse
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.full_name,
+        full_name: user.full_name,
         role: 'customer',
-        emailVerified: user.email_verified
+        email_verified: user.email_verified
       },
       token
     })

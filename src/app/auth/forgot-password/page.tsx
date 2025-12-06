@@ -44,8 +44,8 @@ function ForgotPasswordContent() {
         setMessage(data.error ?? 'Có lỗi xảy ra. Vui lòng thử lại sau.')
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      console.error('Forgot password error:', errorMessage)
+      const error_message = error instanceof Error ? error.message : 'Unknown error'
+      console.error('Forgot password error:', error_message)
       setStatus('error')
       setMessage('Lỗi kết nối đến máy chủ. Vui lòng thử lại sau.')
     } finally {

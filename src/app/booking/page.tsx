@@ -33,10 +33,10 @@ function BookingContent() {
   ]
 
   const [formData, setFormData] = useState({
-    serviceId: '',
+    service_id: '',
     tierId: '',
     date: '',
-    fullName: '',
+    full_name: '',
     email: '',
     phone: '',
     rokId: '',
@@ -51,7 +51,7 @@ function BookingContent() {
     if (serviceParam) {
       setFormData(prev => ({
         ...prev,
-        serviceId: serviceParam,
+        service_id: serviceParam,
         tierId: tierParam ?? ''
       }))
     }
@@ -70,7 +70,7 @@ function BookingContent() {
   }
 
   interface BookingResponse {
-    bookingId?: string
+    booking_id?: string
     error?: string
   }
 
@@ -85,8 +85,8 @@ function BookingContent() {
 
       if (response.ok) {
         const data = (await response.json()) as BookingResponse
-        if (data.bookingId) {
-          router.push(`/booking/payment/${data.bookingId}`)
+        if (data.booking_id) {
+          router.push(`/booking/payment/${data.booking_id}`)
         }
       } else {
         // eslint-disable-next-line no-alert
@@ -112,7 +112,7 @@ function BookingContent() {
     features: string[]
   }
 
-  const selectedService = getServiceData(formData.serviceId)
+  const selectedService = getServiceData(formData.service_id)
   // Find tier by matching slug or name since we don't have explicit slugs in translation pricing
   const selectedTier =
     selectedService?.pricing.find(
@@ -134,7 +134,7 @@ function BookingContent() {
           <div className="mb-12">
             <div className="relative flex justify-between">
               {steps.map((step, _index) => {
-                const isActive = currentStep >= step.id
+                const is_active = currentStep >= step.id
                 const _isCurrent = currentStep === step.id
 
                 return (
@@ -143,7 +143,7 @@ function BookingContent() {
                       className={`
                         flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-300
                         ${
-                          isActive
+                          is_active
                             ? 'border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-500/30'
                             : 'border-gray-300 bg-white text-gray-400'
                         }
@@ -154,7 +154,7 @@ function BookingContent() {
                     <span
                       className={`
                         mt-3 text-sm font-medium transition-colors duration-300
-                        ${isActive ? 'text-amber-600' : 'text-gray-500'}
+                        ${is_active ? 'text-amber-600' : 'text-gray-500'}
                       `}
                     >
                       {step.name}
@@ -188,19 +188,19 @@ function BookingContent() {
                           className={`
                             cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md
                             ${
-                              formData.serviceId === slug
+                              formData.service_id === slug
                                 ? 'border-amber-500 bg-amber-50 ring-1 ring-amber-500'
                                 : 'border-gray-100 hover:border-amber-200'
                             }
                           `}
-                          onClick={() => setFormData(prev => ({ ...prev, serviceId: slug }))}
+                          onClick={() => setFormData(prev => ({ ...prev, service_id: slug }))}
                         >
                           <div className="flex items-center space-x-3">
                             <div
-                              className={`rounded-lg p-2 ${formData.serviceId === slug ? 'bg-amber-200' : 'bg-gray-100'}`}
+                              className={`rounded-lg p-2 ${formData.service_id === slug ? 'bg-amber-200' : 'bg-gray-100'}`}
                             >
                               <IconComponent
-                                className={`h-6 w-6 ${formData.serviceId === slug ? 'text-amber-700' : 'text-gray-500'}`}
+                                className={`h-6 w-6 ${formData.service_id === slug ? 'text-amber-700' : 'text-gray-500'}`}
                               />
                             </div>
                             <div>
@@ -229,8 +229,8 @@ function BookingContent() {
                         className="input-field"
                         placeholder="Nguyễn Văn A"
                         type="text"
-                        value={formData.fullName}
-                        onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                        value={formData.full_name}
+                        onChange={e => setFormData({ ...formData, full_name: e.target.value })}
                       />
                     </div>
                     <div>
@@ -329,7 +329,7 @@ function BookingContent() {
                     <div className="grid gap-4 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Name:</span>
-                        <span className="font-medium">{formData.fullName}</span>
+                        <span className="font-medium">{formData.full_name}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Email:</span>
@@ -376,10 +376,10 @@ function BookingContent() {
 
               {currentStep < 3 ? (
                 <button
-                  disabled={currentStep === 1 && !formData.serviceId}
+                  disabled={currentStep === 1 && !formData.service_id}
                   className={`
                     btn-primary flex items-center space-x-2 px-8 py-3
-                    ${currentStep === 1 && !formData.serviceId ? 'cursor-not-allowed opacity-50' : ''}
+                    ${currentStep === 1 && !formData.service_id ? 'cursor-not-allowed opacity-50' : ''}
                   `}
                   onClick={handleNext}
                 >

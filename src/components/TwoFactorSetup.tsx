@@ -15,7 +15,7 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
   const [step, setStep] = useState<'intro' | 'setup' | 'verify' | 'backup'>('intro')
   const [qrCode, setQrCode] = useState('')
   const [secret, setSecret] = useState('')
-  const [backupCodes, setBackupCodes] = useState<string[]>([])
+  const [backup_codes, setBackupCodes] = useState<string[]>([])
   const [verificationCode, setVerificationCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -34,7 +34,7 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
       interface SetupResponse {
         qrCode?: string
         secret?: string
-        backupCodes?: string[]
+        backup_codes?: string[]
         error?: string
       }
       const data = (await response.json()) as SetupResponse
@@ -42,7 +42,7 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
       if (response.ok) {
         setQrCode(data.qrCode ?? '')
         setSecret(data.secret ?? '')
-        setBackupCodes(data.backupCodes ?? [])
+        setBackupCodes(data.backup_codes ?? [])
         setStep('setup')
       } else {
         setError(data.error ?? 'Failed to start 2FA setup')
@@ -98,7 +98,7 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
 
   // Copy all backup codes
   const handleCopyAllCodes = () => {
-    const allCodes = backupCodes.join('\n')
+    const allCodes = backup_codes.join('\n')
     void navigator.clipboard.writeText(allCodes)
     setCopiedCode('all')
     setTimeout(() => setCopiedCode(null), 2000)
@@ -112,7 +112,7 @@ User: ${session?.user?.email}
 
 IMPORTANT: Keep these codes safe! Each code can only be used once.
 
-${backupCodes.join('\n')}
+${backup_codes.join('\n')}
 
 If you lose access to your authenticator app, you can use one of these codes to sign in.
 `
@@ -268,7 +268,7 @@ If you lose access to your authenticator app, you can use one of these codes to 
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {backupCodes.map((code, index) => (
+              {backup_codes.map((code, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <code className="flex-1 rounded bg-white px-3 py-2 font-mono text-sm">
                     {code}

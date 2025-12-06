@@ -19,7 +19,7 @@ import { signIn } from 'next-auth/react'
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
-    fullName: '',
+    full_name: '',
     email: '',
     phone: '',
     password: '',
@@ -46,11 +46,11 @@ export default function SignUpPage() {
   }
 
   const validateForm = () => {
-    if (!formData.fullName.trim()) {
+    if (!formData.full_name.trim()) {
       setError('Vui lòng nhập họ tên')
       return false
     }
-    if (formData.fullName.trim().length < 2) {
+    if (formData.full_name.trim().length < 2) {
       setError('Họ tên phải có ít nhất 2 ký tự')
       return false
     }
@@ -132,7 +132,7 @@ export default function SignUpPage() {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          fullName: formData.fullName,
+          full_name: formData.full_name,
           email: formData.email,
           phone: formData.phone,
           password: formData.password
@@ -218,7 +218,7 @@ export default function SignUpPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="fullName">
+              <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="full_name">
                 Họ và tên *
               </label>
               <div className="relative">
@@ -227,11 +227,11 @@ export default function SignUpPage() {
                   required
                   autoComplete="name"
                   className="relative block w-full appearance-none rounded-lg border border-gray-300 px-3 py-3 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 sm:text-sm"
-                  id="fullName"
-                  name="fullName"
+                  id="full_name"
+                  name="full_name"
                   placeholder="Nguyễn Văn A"
                   type="text"
-                  value={formData.fullName}
+                  value={formData.full_name}
                   onChange={handleChange}
                 />
               </div>

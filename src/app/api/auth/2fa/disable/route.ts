@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const { password } = disableSchema.parse(body)
 
     // Verify password
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id }
     })
 

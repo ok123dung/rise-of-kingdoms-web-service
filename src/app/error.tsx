@@ -19,7 +19,7 @@ export default function Error({ error, reset }: ErrorProps) {
       digest: error.digest,
       stack: error.stack,
       timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent
+      user_agent: navigator.userAgent
     })
 
     // Send to Sentry with enhanced context

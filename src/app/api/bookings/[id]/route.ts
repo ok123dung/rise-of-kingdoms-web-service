@@ -9,14 +9,14 @@ const updateBookingSchema = z.object({
   status: z
     .enum(['pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'refunded'])
     .optional(),
-  paymentStatus: z.enum(['pending', 'completed', 'failed', 'refunded']).optional(),
-  internalNotes: z.string().optional()
+  payment_status: z.enum(['pending', 'completed', 'failed', 'refunded']).optional(),
+  internal_notes: z.string().optional()
 })
 
 interface UpdateBookingRequest {
   status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'refunded'
-  paymentStatus?: 'pending' | 'completed' | 'failed' | 'refunded'
-  internalNotes?: string
+  payment_status?: 'pending' | 'completed' | 'failed' | 'refunded'
+  internal_notes?: string
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
@@ -30,17 +30,17 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const body = (await request.json()) as UpdateBookingRequest
     const data = updateBookingSchema.parse(body)
 
-    const booking = await prisma.booking.update({
+    const booking = await prisma.bookings.update({
       where: { id: params.id },
       data: {
         ...data,
-        updatedAt: new Date()
+        updated_at: new Date()
       }
     })
 
     // Log activity
-    getLogger().info(`Booking ${booking.bookingNumber} updated by ${user?.email}`, {
-      bookingId: booking.id,
+    getLogger().info(`Booking ${booking.booking_number} updated by ${user?.email}`, {
+      booking_id: booking.id,
       updates: JSON.stringify(data)
     })
 
@@ -58,12 +58,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    const booking = await prisma.booking.findUnique({
+    const booking = await prisma.bookings.findUnique({
       where: { id: params.id },
       include: {
         user: true,
-        serviceTier: {
-          include: { service: true }
+        service_tiers: {
+          include: { services: true }
         },
         payments: true,
         convertedLead: true

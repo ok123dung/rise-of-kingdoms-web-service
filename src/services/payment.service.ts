@@ -6,7 +6,17 @@ import { BankingTransfer } from '@/lib/payments/banking'
 import { MoMoPayment } from '@/lib/payments/momo'
 import { VNPayPayment } from '@/lib/payments/vnpay'
 import { ZaloPayPayment } from '@/lib/payments/zalopay'
-import type { Payment, Booking } from '@/types/database'
+import { Prisma } from '@prisma/client'
+import type { Payment } from '@/types/prisma'
+
+type BookingForPayment = Prisma.bookingsGetPayload<{
+  include: {
+    users: true
+    service_tiers: {
+      include: { services: true }
+    }
+  }
+}>
 
 export class PaymentService {
   private logger = getLogger()
@@ -19,36 +29,38 @@ export class PaymentService {
    * Create payment for booking
    */
   async createPayment(data: {
-    bookingId: string
-    paymentMethod: 'momo' | 'vnpay' | 'zalopay' | 'banking'
-    userId: string
+    booking_id: string
+    payment_method: 'momo' | 'vnpay' | 'zalopay' | 'banking'
+    user_id: string
     returnUrl?: string
   }) {
     // Validate booking
-    const booking = await this.validateBooking(data.bookingId, data.userId)
+    const booking = await this.validateBooking(data.booking_id, data.user_id)
 
     // Check for existing pending payment
-    const existingPayment = await this.checkExistingPayment(data.bookingId)
+    const existingPayment = await this.checkExistingPayment(data.booking_id)
     if (existingPayment) {
       throw new ConflictError('Booking already has a pending payment')
     }
 
     // Generate payment number
-    const paymentNumber = this.generatePaymentNumber()
+    const payment_number = this.generatePaymentNumber()
 
     // Create payment record
-    const payment = await prisma.payment.create({
+    const payment = await prisma.payments.create({
       data: {
-        bookingId: data.bookingId,
-        paymentNumber,
+        id: crypto.randomUUID(),
+        booking_id: data.booking_id,
+        payment_number,
         amount:
-          typeof booking.finalAmount === 'number'
-            ? booking.finalAmount
-            : booking.finalAmount.toNumber(),
+          typeof booking.final_amount === 'number'
+            ? booking.final_amount
+            : booking.final_amount.toNumber(),
         currency: booking.currency,
-        paymentMethod: data.paymentMethod,
-        paymentGateway: data.paymentMethod,
-        status: 'pending'
+        payment_method: data.payment_method,
+        payment_gateway: data.payment_method,
+        status: 'pending',
+        updated_at: new Date()
       }
     })
 
@@ -57,21 +69,21 @@ export class PaymentService {
       const result = await this.processPayment({
         payment,
         booking,
-        paymentMethod: data.paymentMethod,
+        payment_method: data.payment_method,
         returnUrl: data.returnUrl
       })
 
       this.logger.info('Payment created', {
-        paymentId: payment.id,
-        bookingId: data.bookingId,
-        method: data.paymentMethod
+        payment_id: payment.id,
+        booking_id: data.booking_id,
+        method: data.payment_method
       })
 
       return result
     } catch (error) {
       // Update payment status to failed
       await this.updatePaymentStatus(payment.id, 'failed', {
-        failureReason: error instanceof Error ? error.message : 'Unknown error'
+        failure_reason: error instanceof Error ? error.message : 'Unknown error'
       })
       throw error
     }
@@ -80,8 +92,8 @@ export class PaymentService {
   /**
    * Verify payment callback
    */
-  async verifyPaymentCallback(paymentMethod: string, callbackData: Record<string, unknown>) {
-    switch (paymentMethod) {
+  async verifyPaymentCallback(payment_method: string, callbackData: Record<string, unknown>) {
+    switch (payment_method) {
       case 'momo':
         return this.momoPayment.handleWebhook(
           callbackData as unknown as Parameters<typeof this.momoPayment.handleWebhook>[0]
@@ -102,15 +114,13 @@ export class PaymentService {
   /**
    * Get payment by ID
    */
-  async getPaymentById(paymentId: string, userId?: string): Promise<Payment> {
-    const payment = await prisma.payment.findUnique({
-      where: { id: paymentId },
-      include: {
-        booking: {
-          include: {
-            user: true,
-            serviceTier: {
-              include: { service: true }
+  async getPaymentById(payment_id: string, user_id?: string): Promise<any> {
+    const payment = await prisma.payments.findUnique({
+      where: { id: payment_id },
+      include: { bookings: {
+          include: { users: true,
+            service_tiers: {
+              include: { services: true }
             }
           }
         }
@@ -121,8 +131,8 @@ export class PaymentService {
       throw new NotFoundError('Payment')
     }
 
-    // Check ownership if userId provided
-    if (userId && payment.booking.userId !== userId) {
+    // Check ownership if user_id provided
+    if (user_id && payment.bookings.user_id !== user_id) {
       throw new ValidationError('Unauthorized access to payment')
     }
 
@@ -133,7 +143,7 @@ export class PaymentService {
    * Get user payments
    */
   async getUserPayments(
-    userId: string,
+    user_id: string,
     options?: {
       status?: string
       limit?: number
@@ -141,12 +151,12 @@ export class PaymentService {
     }
   ) {
     interface PaymentWhereInput {
-      booking: { userId: string }
+      booking: { user_id: string }
       status?: string
     }
 
     const where: PaymentWhereInput = {
-      booking: { userId }
+      booking: { user_id }
     }
 
     if (options?.status) {
@@ -154,22 +164,21 @@ export class PaymentService {
     }
 
     const [payments, total] = await Promise.all([
-      prisma.payment.findMany({
+      prisma.payments.findMany({
         where,
-        include: {
-          booking: {
+        include: { bookings: {
             include: {
-              serviceTier: {
-                include: { service: true }
+              service_tiers: {
+                include: { services: true }
               }
             }
           }
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { created_at: 'desc' },
         take: options?.limit ?? 10,
         skip: options?.offset ?? 0
       }),
-      prisma.payment.count({ where })
+      prisma.payments.count({ where })
     ])
 
     return { payments, total }
@@ -179,37 +188,37 @@ export class PaymentService {
    * Process refund
    */
   async processRefund(
-    paymentId: string,
+    payment_id: string,
     data: {
       amount: number
       reason: string
       adminId: string
     }
-  ): Promise<Payment> {
-    const payment = await this.getPaymentById(paymentId)
+  ): Promise<any> {
+    const payment = await this.getPaymentById(payment_id)
 
     // Validate refund
     if (payment.status !== 'completed') {
       throw new ValidationError('Only completed payments can be refunded')
     }
 
-    if (payment.refundAmount && Number(payment.refundAmount) > 0) {
+    if (payment.refund_amount && Number(payment.refund_amount) > 0) {
       throw new ValidationError('Payment already has refunds')
     }
 
     // Process refund based on payment method
     let refundResult
-    switch (payment.paymentMethod) {
+    switch (payment.payment_method) {
       case 'momo':
         refundResult = await this.momoPayment.refundPayment(
-          payment.gatewayTransactionId!,
+          payment.gateway_transaction_id!,
           data.amount,
           data.reason || 'Customer refund request'
         )
         break
       case 'vnpay':
         refundResult = await this.vnpayPayment.refundPayment(
-          payment.gatewayTransactionId!,
+          payment.gateway_transaction_id!,
           data.amount,
           new Date().toISOString().slice(0, 8).replace(/-/g, ''),
           data.reason || 'Customer refund request'
@@ -224,18 +233,18 @@ export class PaymentService {
     }
 
     // Update payment record
-    const updated = await prisma.payment.update({
-      where: { id: paymentId },
+    const updated = await prisma.payments.update({
+      where: { id: payment_id },
       data: {
-        refundAmount: data.amount,
-        refundedAt: new Date(),
-        refundReason: data.reason,
+        refund_amount: data.amount,
+        refunded_at: new Date(),
+        refund_reason: data.reason,
         status: 'refunded'
       }
     })
 
     this.logger.info('Payment refunded', {
-      paymentId,
+      payment_id,
       amount: data.amount,
       adminId: data.adminId
     })
@@ -246,13 +255,12 @@ export class PaymentService {
   /**
    * Private helper methods
    */
-  private async validateBooking(bookingId: string, userId: string): Promise<Booking> {
-    const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      include: {
-        user: true,
-        serviceTier: {
-          include: { service: true }
+  private async validateBooking(booking_id: string, user_id: string): Promise<BookingForPayment> {
+    const booking = await prisma.bookings.findUnique({
+      where: { id: booking_id },
+      include: { users: true,
+        service_tiers: {
+          include: { services: true }
         }
       }
     })
@@ -261,11 +269,11 @@ export class PaymentService {
       throw new NotFoundError('Booking')
     }
 
-    if (booking.userId !== userId) {
+    if (booking.user_id !== user_id) {
       throw new ValidationError('Unauthorized access to booking')
     }
 
-    if (booking.paymentStatus === 'completed') {
+    if (booking.payment_status === 'completed') {
       throw new ValidationError('Booking already paid')
     }
 
@@ -276,10 +284,10 @@ export class PaymentService {
     return booking
   }
 
-  private async checkExistingPayment(bookingId: string): Promise<boolean> {
-    const count = await prisma.payment.count({
+  private async checkExistingPayment(booking_id: string): Promise<boolean> {
+    const count = await prisma.payments.count({
       where: {
-        bookingId,
+        booking_id,
         status: { in: ['pending', 'processing'] }
       }
     })
@@ -293,44 +301,44 @@ export class PaymentService {
 
   private async processPayment(options: {
     payment: Payment
-    booking: Booking
-    paymentMethod: string
+    booking: BookingForPayment
+    payment_method: string
     returnUrl?: string
   }) {
-    const { payment, booking, paymentMethod, returnUrl } = options
+    const { payment, booking, payment_method, returnUrl } = options
 
-    switch (paymentMethod) {
+    switch (payment_method) {
       case 'momo':
         return this.momoPayment.createPayment({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
-          orderInfo: `Payment for ${booking.bookingNumber}`,
+          orderInfo: `Payment for ${booking.booking_number}`,
           redirectUrl: returnUrl
         })
 
       case 'vnpay':
         return this.vnpayPayment.createPaymentUrl({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
-          orderInfo: `Payment for booking ${booking.bookingNumber}`,
+          orderInfo: `Payment for booking ${booking.booking_number}`,
           returnUrl: returnUrl ?? `${process.env.NEXT_PUBLIC_SITE_URL}/payment/callback`
         })
 
       case 'zalopay':
         return this.zalopayPayment.createOrder({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
-          description: `Payment for ${booking.bookingNumber}`,
+          description: `Payment for ${booking.booking_number}`,
           callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
         })
 
       case 'banking':
         return this.bankingTransfer.createTransferOrder({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
-          customerName: booking.user.fullName,
-          customerEmail: booking.user.email,
-          customerPhone: booking.user.phone ?? undefined
+          customerName: booking.users.full_name,
+          customerEmail: booking.users.email,
+          customerPhone: booking.users.phone ?? undefined
         })
 
       default:
@@ -339,21 +347,21 @@ export class PaymentService {
   }
 
   private async updatePaymentStatus(
-    paymentId: string,
+    payment_id: string,
     status: string,
     data?: {
-      failureReason?: string
-      gatewayResponse?: Record<string, unknown>
+      failure_reason?: string
+      gateway_response?: Record<string, unknown>
     }
   ) {
-    await prisma.payment.update({
-      where: { id: paymentId },
+    await prisma.payments.update({
+      where: { id: payment_id },
       data: {
         status,
-        failureReason: data?.failureReason,
-        gatewayResponse: data?.gatewayResponse as Parameters<
-          typeof prisma.payment.update
-        >[0]['data']['gatewayResponse']
+        failure_reason: data?.failure_reason,
+        gateway_response: data?.gateway_response as Parameters<
+          typeof prisma.payments.update
+        >[0]['data']['gateway_response']
       }
     })
   }

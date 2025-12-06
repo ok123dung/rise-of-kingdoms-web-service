@@ -8,13 +8,13 @@ const staticServices = [
     slug: 'strategy-consulting',
     name: 'Tư vấn chiến thuật',
     description: 'Phân tích và tối ưu chiến thuật cho từng tình huống trong game',
-    shortDescription: 'Tư vấn chiến thuật chuyên nghiệp',
-    basePrice: 500000,
+    short_description: 'Tư vấn chiến thuật chuyên nghiệp',
+    base_price: 500000,
     currency: 'VND',
     category: 'STRATEGY',
-    isActive: true,
-    isFeatured: false,
-    sortOrder: 1,
+    is_active: true,
+    is_featured: false,
+    sort_order: 1,
     metadata: {
       features: [
         'Phân tích tình huống chiến đấu',
@@ -30,13 +30,13 @@ const staticServices = [
     slug: 'alliance-management',
     name: 'Quản lý liên minh',
     description: 'Hỗ trợ quản lý, tuyển dụng và phát triển liên minh mạnh mẽ',
-    shortDescription: 'Quản lý liên minh chuyên nghiệp',
-    basePrice: 1000000,
+    short_description: 'Quản lý liên minh chuyên nghiệp',
+    base_price: 1000000,
     currency: 'VND',
     category: 'MANAGEMENT',
-    isActive: true,
-    isFeatured: true,
-    sortOrder: 2,
+    is_active: true,
+    is_featured: true,
+    sort_order: 2,
     metadata: {
       features: [
         'Thiết lập cấu trúc quản lý',
@@ -51,13 +51,13 @@ const staticServices = [
     slug: 'kvk-support',
     name: 'Hỗ trợ KvK',
     description: 'Chiến thuật và coordination chuyên nghiệp cho Kingdom vs Kingdom',
-    shortDescription: 'Hỗ trợ KvK chuyên nghiệp',
-    basePrice: 2000000,
+    short_description: 'Hỗ trợ KvK chuyên nghiệp',
+    base_price: 2000000,
     currency: 'VND',
     category: 'STRATEGY',
-    isActive: true,
-    isFeatured: true,
-    sortOrder: 3,
+    is_active: true,
+    is_featured: true,
+    sort_order: 3,
     metadata: {
       features: ['Chiến thuật KvK', 'Coordination team', 'Map control', 'Migration support']
     }
@@ -67,13 +67,13 @@ const staticServices = [
     slug: 'vip-support',
     name: 'VIP Support 24/7',
     description: 'Hỗ trợ ưu tiên và tư vấn chuyên nghiệp mọi lúc mọi nơi',
-    shortDescription: 'VIP Support 24/7',
-    basePrice: 3000000,
+    short_description: 'VIP Support 24/7',
+    base_price: 3000000,
     currency: 'VND',
     category: 'PREMIUM',
-    isActive: true,
-    isFeatured: true,
-    sortOrder: 4,
+    is_active: true,
+    is_featured: true,
+    sort_order: 4,
     metadata: {
       features: ['Hỗ trợ 24/7', 'Priority response', 'All services included', 'Dedicated manager']
     }
@@ -83,13 +83,13 @@ const staticServices = [
     slug: 'commander-training',
     name: 'Training Commander',
     description: 'Hướng dẫn build và phát triển commander hiệu quả nhất',
-    shortDescription: 'Training commander chuyên nghiệp',
-    basePrice: 300000,
+    short_description: 'Training commander chuyên nghiệp',
+    base_price: 300000,
     currency: 'VND',
     category: 'TRAINING',
-    isActive: true,
-    isFeatured: false,
-    sortOrder: 5,
+    is_active: true,
+    is_featured: false,
+    sort_order: 5,
     metadata: {
       features: ['Tư vấn talent build', 'Equipment tối ưu', 'Pairing commander', 'Session 1-on-1']
     }
@@ -99,13 +99,13 @@ const staticServices = [
     slug: 'personal-coaching',
     name: 'Coaching 1-on-1',
     description: 'Hướng dẫn cá nhân hóa từ chuyên gia top player hàng đầu',
-    shortDescription: 'Coaching cá nhân 1-on-1',
-    basePrice: 200000,
+    short_description: 'Coaching cá nhân 1-on-1',
+    base_price: 200000,
     currency: 'VND',
     category: 'TRAINING',
-    isActive: true,
-    isFeatured: false,
-    sortOrder: 6,
+    is_active: true,
+    is_featured: false,
+    sort_order: 6,
     metadata: {
       features: [
         'Session 1-on-1 riêng',
@@ -123,11 +123,11 @@ export const GET = withETag(
       try {
         // Sort services by featured first, then sort order
         const sortedServices = staticServices
-          .filter(service => service.isActive)
+          .filter(service => service.is_active)
           .sort((a, b) => {
-            if (a.isFeatured && !b.isFeatured) return -1
-            if (!a.isFeatured && b.isFeatured) return 1
-            return a.sortOrder - b.sortOrder
+            if (a.is_featured && !b.is_featured) return -1
+            if (!a.is_featured && b.is_featured) return 1
+            return a.sort_order - b.sort_order
           })
         return NextResponse.json({
           success: true,

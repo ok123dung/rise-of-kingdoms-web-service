@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface MoMoPaymentRequest {
-  bookingId: string
+  booking_id: string
   amount: number
   orderInfo: string
   redirectUrl?: string
@@ -136,12 +136,12 @@ export class MoMoPayment {
     error?: string
   }> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: request.bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: request.booking_id },
         include: {
-          serviceTier: {
+          service_tiers: {
             include: {
-              service: true
+              services: true
             }
           }
         }
@@ -150,10 +150,10 @@ export class MoMoPayment {
         return { success: false, error: 'Booking not found' }
       }
 
-      const orderId = `MOMO_${booking.bookingNumber}_${Date.now()}`
+      const orderId = `MOMO_${booking.booking_number}_${Date.now()}`
       const requestId = `REQ_${Date.now()}`
       const orderInfo =
-        request.orderInfo || `Thanh toán dịch vụ RoK - ${booking.serviceTier.service.name}`
+        request.orderInfo || `Thanh toán dịch vụ RoK - ${booking.service_tiers.services.name}`
       const redirectUrl =
         request.redirectUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`
       const ipnUrl =
@@ -203,15 +203,17 @@ export class MoMoPayment {
       const responseData = (await response.json()) as MoMoResponse
 
       if (responseData.resultCode === 0) {
-        await prisma.payment.create({
+        await prisma.payments.create({
           data: {
-            bookingId: request.bookingId,
+          id: crypto.randomUUID(),
+          booking_id: request.booking_id,
             amount: request.amount,
-            paymentMethod: 'momo',
-            paymentGateway: 'momo',
-            gatewayTransactionId: orderId,
-            gatewayOrderId: orderId,
-            paymentNumber: `PAY${Date.now()}`,
+            payment_method: 'momo',
+            payment_gateway: 'momo',
+            gateway_transaction_id: orderId,
+            gateway_order_id: orderId,
+            payment_number: `PAY${Date.now()}`,
+            updated_at: new Date(),
             status: 'pending'
           }
         })
@@ -282,17 +284,17 @@ export class MoMoPayment {
 
       // Idempotency check - prevent duplicate webhook processing
       const webhookEventId = `momo_${orderId}_${transId}`
-      const existingEvent = await prisma.webhookEvent.findUnique({
-        where: { eventId: webhookEventId }
+      const existingEvent = await prisma.webhook_events.findUnique({
+        where: { event_id: webhookEventId }
       })
       if (existingEvent) {
-        getLogger().info('MoMo webhook already processed', { eventId: webhookEventId })
+        getLogger().info('MoMo webhook already processed', { event_id: webhookEventId })
         return { success: true, message: 'Webhook already processed' }
       }
 
       // Tìm payment record
-      const payment = await prisma.payment.findFirst({
-        where: { gatewayTransactionId: orderId }
+      const payment = await prisma.payments.findFirst({
+        where: { gateway_transaction_id: orderId }
       })
       if (!payment) {
         getLogger().error('Payment not found for orderId', new Error('Payment not found'))
@@ -303,13 +305,13 @@ export class MoMoPayment {
       if (resultCode === 0) {
         // Payment successful - use transaction for atomic updates
         await prisma.$transaction(async tx => {
-          await tx.payment.update({
+          await tx.payments.update({
             where: { id: payment.id },
             data: {
               status: 'completed',
-              updatedAt: new Date(),
-              paidAt: new Date(),
-              gatewayResponse: {
+              updated_at: new Date(),
+              paid_at: new Date(),
+              gateway_response: {
                 transactionId: transId,
                 ...webhookData
               }
@@ -317,39 +319,41 @@ export class MoMoPayment {
           })
 
           // Cập nhật booking status (merged into single update)
-          await tx.booking.update({
-            where: { id: payment.bookingId },
+          await tx.bookings.update({
+            where: { id: payment.booking_id },
             data: {
-              paymentStatus: 'completed',
+              payment_status: 'completed',
               status: 'confirmed',
-              updatedAt: new Date()
+              updated_at: new Date()
             }
           })
         })
 
         // Send confirmation email
-        await this.sendConfirmationEmail(payment.bookingId)
+        await this.sendConfirmationEmail(payment.booking_id)
 
         // Send Discord notification
-        await this.sendDiscordNotification(payment.bookingId, 'completed', {
+        await this.sendDiscordNotification(payment.booking_id, 'completed', {
           orderId,
           transId,
           amount,
-          paymentMethod: 'MoMo'
+          payment_method: 'MoMo'
         })
 
         // Trigger service delivery workflow
-        await this.triggerServiceDelivery(payment.bookingId)
+        await this.triggerServiceDelivery(payment.booking_id)
 
         // Record webhook event for idempotency
-        await prisma.webhookEvent.create({
+        await prisma.webhook_events.create({
           data: {
+            id: crypto.randomUUID(),
             provider: 'momo',
-            eventType: 'payment_callback',
-            eventId: webhookEventId,
+            event_type: 'payment_callback',
+            event_id: webhookEventId,
             payload: webhookData as unknown as Prisma.InputJsonValue,
             status: 'processed',
-            processedAt: new Date()
+            processed_at: new Date(),
+            updated_at: new Date()
           }
         })
 
@@ -358,33 +362,35 @@ export class MoMoPayment {
       } else {
         // Payment failed - use transaction for atomic updates
         await prisma.$transaction(async tx => {
-          await tx.payment.update({
+          await tx.payments.update({
             where: { id: payment.id },
             data: {
               status: 'failed',
-              updatedAt: new Date(),
-              gatewayResponse: {
-                failureReason: message,
+              updated_at: new Date(),
+              gateway_response: {
+                failure_reason: message,
                 ...webhookData
               }
             }
           })
 
-          await tx.booking.update({
-            where: { id: payment.bookingId },
-            data: { paymentStatus: 'failed', updatedAt: new Date() }
+          await tx.bookings.update({
+            where: { id: payment.booking_id },
+            data: { payment_status: 'failed', updated_at: new Date() }
           })
         })
 
         // Record webhook event for idempotency
-        await prisma.webhookEvent.create({
+        await prisma.webhook_events.create({
           data: {
+            id: crypto.randomUUID(),
             provider: 'momo',
-            eventType: 'payment_callback_failed',
-            eventId: webhookEventId,
+            event_type: 'payment_callback_failed',
+            event_id: webhookEventId,
             payload: webhookData as unknown as Prisma.InputJsonValue,
             status: 'processed',
-            processedAt: new Date()
+            processed_at: new Date(),
+            updated_at: new Date()
           }
         })
 
@@ -455,7 +461,7 @@ export class MoMoPayment {
   // Refund payment
   async refundPayment(
     orderId: string,
-    refundAmount: number,
+    refund_amount: number,
     description: string
   ): Promise<{
     success: boolean
@@ -464,7 +470,7 @@ export class MoMoPayment {
   }> {
     try {
       const requestId = `REFUND_${Date.now()}`
-      const rawSignature = `accessKey=${this.accessKey}&amount=${refundAmount}&description=${description}&orderId=${orderId}&partnerCode=${this.partnerCode}&requestId=${requestId}`
+      const rawSignature = `accessKey=${this.accessKey}&amount=${refund_amount}&description=${description}&orderId=${orderId}&partnerCode=${this.partnerCode}&requestId=${requestId}`
 
       const signature = crypto
         .createHmac('sha256', this.secretKey)
@@ -475,7 +481,7 @@ export class MoMoPayment {
         partnerCode: this.partnerCode,
         requestId,
         orderId,
-        amount: refundAmount,
+        amount: refund_amount,
         description,
         signature,
         lang: 'vi'
@@ -495,16 +501,16 @@ export class MoMoPayment {
 
       if (responseData.resultCode === 0) {
         // Update payment record with refund info
-        const payment = await prisma.payment.findFirst({
-          where: { gatewayTransactionId: orderId }
+        const payment = await prisma.payments.findFirst({
+          where: { gateway_transaction_id: orderId }
         })
         if (payment) {
-          await prisma.payment.update({
+          await prisma.payments.update({
             where: { id: payment.id },
             data: {
-              refundAmount: refundAmount,
-              refundReason: description,
-              refundedAt: new Date(),
+              refund_amount: refund_amount,
+              refund_reason: description,
+              refunded_at: new Date(),
               status: 'refunded'
             }
           })
@@ -527,14 +533,14 @@ export class MoMoPayment {
   }
 
   // Send confirmation email
-  private async sendConfirmationEmail(bookingId: string): Promise<void> {
+  private async sendConfirmationEmail(booking_id: string): Promise<void> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: booking_id },
         include: {
-          user: true,
-          serviceTier: {
-            include: { service: true }
+          users: true,
+          service_tiers: {
+            include: { services: true }
           }
         }
       })
@@ -542,20 +548,20 @@ export class MoMoPayment {
       if (booking) {
         const { sendEmail } = await import('@/lib/email')
         await sendEmail({
-          to: booking.user.email,
+          to: booking.users.email,
           subject: 'Xác nhận thanh toán thành công - RoK Services',
           html: `
             <h2>Thanh toán thành công!</h2>
-            <p>Xin chào ${booking.user.fullName},</p>
-            <p>Chúng tôi đã nhận được thanh toán của bạn cho dịch vụ <strong>${booking.serviceTier.service.name}</strong>.</p>
+            <p>Xin chào ${booking.users.full_name},</p>
+            <p>Chúng tôi đã nhận được thanh toán của bạn cho dịch vụ <strong>${booking.service_tiers.services.name}</strong>.</p>
             <ul>
-              <li>Mã booking: ${booking.bookingNumber}</li>
-              <li>Số tiền: ${booking.totalAmount.toLocaleString()} VNĐ</li>
+              <li>Mã booking: ${booking.booking_number}</li>
+              <li>Số tiền: ${booking.total_amount.toLocaleString()} VNĐ</li>
               <li>Phương thức: MoMo</li>
             </ul>
             <p>Cảm ơn bạn đã sử dụng dịch vụ RoK Services!</p>
           `,
-          text: `Thanh toán thành công cho dịch vụ ${booking.serviceTier.service.name}. Mã booking: ${booking.bookingNumber}`
+          text: `Thanh toán thành công cho dịch vụ ${booking.service_tiers.services.name}. Mã booking: ${booking.booking_number}`
         })
       }
     } catch (error) {
@@ -567,28 +573,28 @@ export class MoMoPayment {
 
   // Send Discord notification
   private async sendDiscordNotification(
-    bookingId: string,
+    booking_id: string,
     status: string,
-    paymentData: { orderId: string; transId?: string; amount: number; paymentMethod: string }
+    paymentData: { orderId: string; transId?: string; amount: number; payment_method: string }
   ): Promise<void> {
     try {
       const { discordNotifier } = await import('@/lib/discord')
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: booking_id },
         include: {
-          user: true,
-          serviceTier: { include: { service: true } }
+          users: true,
+          service_tiers: { include: { services: true } }
         }
       })
 
       if (booking) {
         await discordNotifier.sendPaymentNotification({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: paymentData.amount,
-          paymentMethod: paymentData.paymentMethod,
+          payment_method: paymentData.payment_method,
           status: status as 'pending' | 'completed' | 'failed' | 'cancelled',
-          customerEmail: booking.user.email,
-          customerName: booking.user.fullName,
+          customerEmail: booking.users.email,
+          customerName: booking.users.full_name,
           transactionId: paymentData.orderId
         })
       }
@@ -600,42 +606,44 @@ export class MoMoPayment {
   }
 
   // Trigger service delivery workflow
-  private async triggerServiceDelivery(bookingId: string): Promise<void> {
+  private async triggerServiceDelivery(booking_id: string): Promise<void> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: booking_id },
         include: {
-          serviceTier: {
-            include: { service: true }
+          service_tiers: {
+            include: { services: true }
           }
         }
       })
 
       if (booking) {
         // Update booking to in-progress
-        await prisma.booking.update({
-          where: { id: bookingId },
+        await prisma.bookings.update({
+          where: { id: booking_id },
           data: {
             status: 'in_progress',
-            startDate: new Date()
+            start_date: new Date()
           }
         })
 
         // Create service delivery task
-        await prisma.serviceTask.create({
+        await prisma.service_tasks.create({
           data: {
-            bookingId: bookingId,
+            id: crypto.randomUUID(),
+            booking_id: booking_id,
             type: 'delivery',
-            title: `Deliver ${booking.serviceTier.service.name}`,
-            description: `Process service delivery for booking ${booking.bookingNumber}`,
+            title: `Deliver ${booking.service_tiers.services.name}`,
+            description: `Process service delivery for booking ${booking.booking_number}`,
             priority: 'high',
             status: 'pending',
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
+            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            updated_at: new Date() // 7 days default
           }
         })
 
         getLogger().info('Service delivery workflow triggered', {
-          bookingNumber: booking.bookingNumber
+          booking_number: booking.booking_number
         })
       }
     } catch (error) {

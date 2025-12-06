@@ -33,14 +33,14 @@ declare module 'next-auth' {
       lastActivity: string
       tokenRotatedAt?: string
       ipAddress?: string
-      userAgent?: string
+      user_agent?: string
     }
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    userId: string
+    user_id: string
     role: string
     sessionId: string
     fingerprint?: string
@@ -77,10 +77,10 @@ export const authOptionsEnhanced: NextAuthOptions = {
           }
 
           // Find user with rate limit check
-          const user = await prisma.user.findUnique({
+          const user = await prisma.users.findUnique({
             where: { email },
             include: {
-              staffProfile: true
+              staff: true
             }
           })
 
@@ -102,7 +102,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
             // Record failed attempt
             const lockResult = accountLockout.recordFailedAttempt(email, {
               reason: 'invalid_password',
-              userId: user.id,
+              user_id: user.id,
               ip: (req?.headers?.['x-forwarded-for'] ?? req?.headers?.['x-real-ip']) as
                 | string
                 | undefined
@@ -110,7 +110,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
             getLogger().logSecurityEvent('login_failed', {
               email,
-              userId: user.id,
+              user_id: user.id,
               remainingAttempts: lockResult.remainingAttempts,
               isLocked: lockResult.isLocked
             })
@@ -122,27 +122,28 @@ export const authOptionsEnhanced: NextAuthOptions = {
           accountLockout.clearFailedAttempts(email)
 
           // Update user login info
-          await prisma.user.update({
+          await prisma.users.update({
             where: { id: user.id },
             data: {
-              lastLogin: new Date()
+              updated_at: new Date(),
+                last_login: new Date()
             }
           })
 
           // Log successful login
           getLogger().logSecurityEvent('login_success', {
-            userId: user.id,
+            user_id: user.id,
             email: user.email,
-            role: user.staffProfile?.role ?? 'customer',
+            role: user.staff?.role ?? 'customer',
             fingerprint
           })
 
           return {
             id: user.id,
             email: user.email,
-            name: user.fullName,
+            name: user.full_name,
             image: null,
-            role: user.staffProfile?.role ?? 'customer'
+            role: user.staff?.role ?? 'customer'
           }
         } catch (error) {
           getLogger().error('Auth error', error as Error)
@@ -183,7 +184,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
     async jwt({ token, user, trigger }) {
       // Initial sign in
       if (user) {
-        token.userId = user.id
+        token.user_id = user.id
         token.role = user.role || 'customer'
         token.sessionId = sessionTokenManager.generateSessionId(user.id)
         token.tokenIssuedAt = Date.now()
@@ -191,19 +192,19 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
       // Token rotation on role change or periodic rotation
       if (trigger === 'update' || sessionTokenManager.shouldRotate(token.tokenIssuedAt)) {
-        const rotated = sessionTokenManager.rotateToken(token.sessionId, token.userId)
+        const rotated = sessionTokenManager.rotateToken(token.sessionId, token.user_id)
 
         token.sessionId = rotated.sessionId
         token.tokenIssuedAt = Date.now()
 
         // Re-fetch user role in case it changed
-        const currentUser = await prisma.user.findUnique({
-          where: { id: token.userId },
-          include: { staffProfile: true }
+        const currentUser = await prisma.users.findUnique({
+          where: { id: token.user_id },
+          include: { staff: true }
         })
 
         if (currentUser) {
-          token.role = currentUser.staffProfile?.role || 'customer'
+          token.role = currentUser.staff?.role || 'customer'
         }
       }
 
@@ -212,7 +213,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
     session({ session, token }) {
       if (token) {
-        session.user.id = token.userId
+        session.user.id = token.user_id
         session.user.role = token.role
 
         session.security = {
@@ -238,39 +239,41 @@ export const authOptionsEnhanced: NextAuthOptions = {
           }
 
           // Check if Discord account exists or create/update
-          let existingUser = await prisma.user.findFirst({
+          let existingUser = await prisma.users.findFirst({
             where: {
-              OR: [{ email: discordProfile.email ?? '' }, { discordId: discordProfile.id ?? '' }]
+              OR: [{ email: discordProfile.email ?? '' }, { discord_id: discordProfile.id ?? '' }]
             }
           })
 
           if (!existingUser && discordProfile.email) {
             // Create new user from Discord
-            existingUser = await prisma.user.create({
+            existingUser = await prisma.users.create({
               data: {
+                id: crypto.randomUUID(),
                 email: discordProfile.email,
-                fullName: discordProfile.global_name ?? discordProfile.username ?? '',
-                discordId: discordProfile.id ?? '',
-                discordUsername: discordProfile.username ?? '',
+                full_name: discordProfile.global_name ?? discordProfile.username ?? '',
+                discord_id: discordProfile.id ?? '',
+                discord_username: discordProfile.username ?? '',
                 password: '', // No password for OAuth users
-                lastLogin: new Date()
+                updated_at: new Date(),
+                last_login: new Date()
               }
             })
-          } else if (existingUser && !existingUser.discordId) {
+          } else if (existingUser && !existingUser.discord_id) {
             // Link Discord to existing account
-            await prisma.user.update({
+            await prisma.users.update({
               where: { id: existingUser.id },
               data: {
-                discordId: discordProfile.id ?? '',
-                discordUsername: discordProfile.username ?? ''
+                discord_id: discordProfile.id ?? '',
+                discord_username: discordProfile.username ?? ''
               }
             })
           }
 
           getLogger().logSecurityEvent('oauth_login', {
             provider: 'discord',
-            userId: existingUser?.id,
-            discordId: discordProfile.id ?? ''
+            user_id: existingUser?.id,
+            discord_id: discordProfile.id ?? ''
           })
         } catch (error) {
           getLogger().error('Discord sign in error', error as Error)
@@ -285,7 +288,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
   events: {
     signIn({ user, account, isNewUser }) {
       getLogger().logSecurityEvent('signin', {
-        userId: user.id,
+        user_id: user.id,
         provider: account?.provider,
         isNewUser
       })
@@ -293,7 +296,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
     signOut({ token }) {
       getLogger().logSecurityEvent('signout', {
-        userId: token?.sub,
+        user_id: token?.sub,
         sessionId: token?.sessionId
       })
     },
@@ -301,7 +304,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
     session({ token }) {
       // Track active sessions
       getLogger().debug('Session accessed', {
-        userId: token?.sub,
+        user_id: token?.sub,
         sessionId: token?.sessionId
       })
     }

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
 
-    const payment = await prisma.payment.findUnique({
+    const payment = await prisma.payments.findUnique({
       where: {
         id: params.id
       },
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         booking: {
           include: {
             user: true,
-            serviceTier: {
+            service_tiers: {
               include: {
                 service: true
               }
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Check if payment belongs to user
-    if (payment.booking.userId !== session.user.id) {
+    if (payment.bookings.user_id !== session.user.id) {
       return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 })
     }
 

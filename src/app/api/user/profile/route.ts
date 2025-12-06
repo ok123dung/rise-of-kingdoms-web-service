@@ -12,23 +12,23 @@ import { sanitizeInput } from '@/lib/validation'
 export const dynamic = 'force-dynamic'
 
 const updateProfileSchema = z.object({
-  fullName: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự').max(100).optional(),
+  full_name: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự').max(100).optional(),
   phone: z
     .string()
     .regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ')
     .optional()
     .nullable(),
-  discordUsername: z.string().optional().nullable(),
-  rokPlayerId: z.string().optional().nullable(),
-  rokKingdom: z.string().optional().nullable()
+  discord_username: z.string().optional().nullable(),
+  rok_player_id: z.string().optional().nullable(),
+  rok_kingdom: z.string().optional().nullable()
 })
 
 interface UpdateProfileBody {
-  fullName?: string
+  full_name?: string
   phone?: string | null
-  discordUsername?: string | null
-  rokPlayerId?: string | null
-  rokKingdom?: string | null
+  discord_username?: string | null
+  rok_player_id?: string | null
+  rok_kingdom?: string | null
 }
 
 // GET /api/user/profile - Get current user profile
@@ -68,16 +68,16 @@ async function getProfileHandler(request: NextRequest): Promise<NextResponse> {
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.full_name,
+        full_name: user.full_name,
         phone: user.phone,
-        discordUsername: user.discord_username,
-        rokPlayerId: user.rok_player_id,
-        rokKingdom: user.rok_kingdom,
-        emailVerified: user.email_verified,
+        discord_username: user.discord_username,
+        rok_player_id: user.rok_player_id,
+        rok_kingdom: user.rok_kingdom,
+        email_verified: user.email_verified,
         image: user.image,
         role: authUser.role,
-        createdAt: user.created_at,
-        updatedAt: user.updated_at
+        created_at: user.created_at,
+        updated_at: user.updated_at
       }
     })
   } catch (error) {
@@ -99,11 +99,11 @@ async function updateProfileHandler(request: NextRequest): Promise<NextResponse>
     let validatedData
     try {
       validatedData = updateProfileSchema.parse({
-        fullName: body.fullName ? sanitizeInput(body.fullName) : undefined,
+        full_name: body.full_name ? sanitizeInput(body.full_name) : undefined,
         phone: body.phone ? sanitizeInput(body.phone) : body.phone,
-        discordUsername: body.discordUsername ? sanitizeInput(body.discordUsername) : body.discordUsername,
-        rokPlayerId: body.rokPlayerId ? sanitizeInput(body.rokPlayerId) : body.rokPlayerId,
-        rokKingdom: body.rokKingdom ? sanitizeInput(body.rokKingdom) : body.rokKingdom
+        discord_username: body.discord_username ? sanitizeInput(body.discord_username) : body.discord_username,
+        rok_player_id: body.rok_player_id ? sanitizeInput(body.rok_player_id) : body.rok_player_id,
+        rok_kingdom: body.rok_kingdom ? sanitizeInput(body.rok_kingdom) : body.rok_kingdom
       })
     } catch (_error) {
       throw new ValidationError(ErrorMessages.INVALID_INPUT)
@@ -128,11 +128,11 @@ async function updateProfileHandler(request: NextRequest): Promise<NextResponse>
 
     // Build update data
     const updateData: Record<string, unknown> = { updated_at: new Date() }
-    if (validatedData.fullName !== undefined) updateData.full_name = validatedData.fullName
+    if (validatedData.full_name !== undefined) updateData.full_name = validatedData.full_name
     if (validatedData.phone !== undefined) updateData.phone = validatedData.phone
-    if (validatedData.discordUsername !== undefined) updateData.discord_username = validatedData.discordUsername
-    if (validatedData.rokPlayerId !== undefined) updateData.rok_player_id = validatedData.rokPlayerId
-    if (validatedData.rokKingdom !== undefined) updateData.rok_kingdom = validatedData.rokKingdom
+    if (validatedData.discord_username !== undefined) updateData.discord_username = validatedData.discord_username
+    if (validatedData.rok_player_id !== undefined) updateData.rok_player_id = validatedData.rok_player_id
+    if (validatedData.rok_kingdom !== undefined) updateData.rok_kingdom = validatedData.rok_kingdom
 
     const updatedUser = await prisma.users.update({
       where: { id: authUser.id },
@@ -151,7 +151,7 @@ async function updateProfileHandler(request: NextRequest): Promise<NextResponse>
     })
 
     getLogger().info('User profile updated', {
-      userId: authUser.id,
+      user_id: authUser.id,
       updatedFields: Object.keys(validatedData).join(', ')
     })
 
@@ -161,14 +161,14 @@ async function updateProfileHandler(request: NextRequest): Promise<NextResponse>
       user: {
         id: updatedUser.id,
         email: updatedUser.email,
-        fullName: updatedUser.full_name,
+        full_name: updatedUser.full_name,
         phone: updatedUser.phone,
-        discordUsername: updatedUser.discord_username,
-        rokPlayerId: updatedUser.rok_player_id,
-        rokKingdom: updatedUser.rok_kingdom,
-        emailVerified: updatedUser.email_verified,
+        discord_username: updatedUser.discord_username,
+        rok_player_id: updatedUser.rok_player_id,
+        rok_kingdom: updatedUser.rok_kingdom,
+        email_verified: updatedUser.email_verified,
         role: authUser.role,
-        updatedAt: updatedUser.updated_at
+        updated_at: updatedUser.updated_at
       }
     })
   } catch (error) {

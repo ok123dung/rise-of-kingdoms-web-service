@@ -3,7 +3,7 @@
 export interface PaymentResponse {
   transactionId: string
   amount: number
-  bookingId: string
+  booking_id: string
   method: 'momo' | 'zalopay' | 'vnpay' | 'banking'
   status: 'pending' | 'completed' | 'failed' | 'cancelled'
   timestamp?: string

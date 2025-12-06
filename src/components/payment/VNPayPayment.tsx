@@ -6,12 +6,12 @@ import type { PaymentResponse, PaymentError } from '@/types/payment'
 
 interface VNPayPaymentProps {
   amount: number
-  bookingId: string
+  booking_id: string
   onSuccess?: (data: PaymentResponse) => void
   onError?: (error: PaymentError) => void
 }
 
-export default function VNPayPayment({ amount, bookingId, onSuccess, onError }: VNPayPaymentProps) {
+export default function VNPayPayment({ amount, booking_id, onSuccess, onError }: VNPayPaymentProps) {
   const [isProcessing, setIsProcessing] = useState(false)
 
   const handlePayment = async () => {
@@ -21,7 +21,7 @@ export default function VNPayPayment({ amount, bookingId, onSuccess, onError }: 
       await new Promise(resolve => setTimeout(resolve, 1500))
 
       // Redirect to VNPay gateway (mock)
-      const _paymentUrl = `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=${amount * 100}&vnp_OrderInfo=Payment for booking ${bookingId}`
+      const _paymentUrl = `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=${amount * 100}&vnp_OrderInfo=Payment for booking ${booking_id}`
 
       // In real implementation, you would redirect to VNPay
       // window.location.href = paymentUrl
@@ -31,7 +31,7 @@ export default function VNPayPayment({ amount, bookingId, onSuccess, onError }: 
         onSuccess?.({
           transactionId: `VNPAY_${Date.now()}`,
           amount,
-          bookingId,
+          booking_id,
           method: 'vnpay',
           status: 'completed'
         })

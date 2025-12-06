@@ -19,9 +19,9 @@ interface Message {
   id: string
   content: string
   senderId: string
-  createdAt: string | Date
+  created_at: string | Date
   type?: string
-  sender?: { fullName: string }
+  sender?: { full_name: string }
 }
 
 interface WsNotification {
@@ -29,7 +29,7 @@ interface WsNotification {
   type: string
   title: string
   message: string
-  createdAt: string
+  created_at: string
   read: boolean
   link?: string
 }
@@ -112,22 +112,22 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   }, [])
   // Subscribe to a booking room
   const subscribeToBooking = useCallback(
-    (bookingId: string) => {
-      emit('booking:subscribe', bookingId)
+    (booking_id: string) => {
+      emit('booking:subscribe', booking_id)
     },
     [emit]
   )
   // Send a chat message
   const sendMessage = useCallback(
-    (bookingId: string, message: string) => {
-      emit('chat:send', { bookingId, message })
+    (booking_id: string, message: string) => {
+      emit('chat:send', { booking_id, message })
     },
     [emit]
   )
   // Send typing indicator
   const sendTypingIndicator = useCallback(
-    (bookingId: string, isTyping: boolean) => {
-      emit('chat:typing', { bookingId, isTyping })
+    (booking_id: string, isTyping: boolean) => {
+      emit('chat:typing', { booking_id, isTyping })
     },
     [emit]
   )
@@ -143,15 +143,15 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   }
 }
 // Hook for booking-specific WebSocket events
-export function useBookingWebSocket(bookingId: string) {
+export function useBookingWebSocket(booking_id: string) {
   const ws = useWebSocket()
   const [messages, setMessages] = useState<Message[]>([])
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [bookingStatus, setBookingStatus] = useState<string | null>(null)
   useEffect(() => {
-    if (!ws.isConnected || !bookingId) return
+    if (!ws.isConnected || !booking_id) return
     // Subscribe to booking room
-    ws.subscribeToBooking(bookingId)
+    ws.subscribeToBooking(booking_id)
     // Set up event listeners
     const unsubscribers = [
       ws.on('booking:subscribed', (_data: unknown) => {
@@ -161,13 +161,13 @@ export function useBookingWebSocket(bookingId: string) {
         setMessages(prev => [...prev, message as Message])
       }),
       ws.on('chat:typing', (data: unknown) => {
-        const { userId, isTyping: typing } = data as { userId: string; isTyping: boolean }
+        const { user_id, isTyping: typing } = data as { user_id: string; isTyping: boolean }
         setTypingUsers(prev => {
           const newSet = new Set(prev)
           if (typing) {
-            newSet.add(userId)
+            newSet.add(user_id)
           } else {
-            newSet.delete(userId)
+            newSet.delete(user_id)
           }
           return newSet
         })
@@ -185,7 +185,7 @@ export function useBookingWebSocket(bookingId: string) {
     return () => {
       unsubscribers.forEach(unsub => unsub?.())
     }
-  }, [ws, bookingId])
+  }, [ws, booking_id])
   return {
     ...ws,
     messages,

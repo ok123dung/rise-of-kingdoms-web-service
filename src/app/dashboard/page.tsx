@@ -10,8 +10,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { getCurrentUser } from '@/lib/auth'
 import { dashboardService } from '@/services/dashboard.service'
 
-async function getDashboardData(userId: string) {
-  return dashboardService.getCustomerDashboardData(userId)
+async function getDashboardData(user_id: string) {
+  return dashboardService.getCustomerDashboardData(user_id)
 }
 
 export default async function CustomerDashboard() {
@@ -28,7 +28,7 @@ export default async function CustomerDashboard() {
       {/* Welcome header */}
       <div className="border-b border-gray-200 pb-4">
         <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-          Xin chào, {user.fullName}! 👋
+          Xin chào, {user.full_name}! 👋
         </h1>
         <p className="mt-1 text-sm text-gray-500">Quản lý dịch vụ Rise of Kingdoms của bạn</p>
       </div>

@@ -15,60 +15,60 @@ import { prisma } from '@/lib/db'
 
 async function getAdminDashboardData() {
   // 1. Overall Stats
-  const totalRevenueResult = await prisma.payment.aggregate({
+  const totalRevenueResult = await prisma.payments.aggregate({
     where: { status: 'completed' },
     _sum: { amount: true }
   })
   const totalRevenue = Number(totalRevenueResult._sum.amount || 0)
 
-  const totalBookings = await prisma.booking.count()
+  const totalBookings = await prisma.bookings.count()
   // Count users who are customers (no staff profile)
-  const totalUsers = await prisma.user.count({
+  const totalUsers = await prisma.users.count({
     where: {
-      staffProfile: {
+      staff: {
         is: null
       }
     }
   })
-  const totalLeads = await prisma.lead.count()
+  const totalLeads = await prisma.leads.count()
 
   // Conversion Rate: (Bookings / Leads) * 100 (Simplified proxy)
   const conversionRate = totalLeads > 0 ? (totalBookings / totalLeads) * 100 : 0
 
   // 2. Recent Bookings
-  const recentBookingsData = await prisma.booking.findMany({
+  const recentBookingsData = await prisma.bookings.findMany({
     take: 5,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { created_at: 'desc' },
     include: {
       user: true,
-      serviceTier: {
-        include: { service: true }
+      service_tiers: {
+        include: { services: true }
       }
     }
   })
 
   const recentBookings = recentBookingsData.map(booking => ({
     id: booking.id,
-    bookingNumber: booking.bookingNumber,
-    customerName: booking.user.fullName,
-    serviceName: booking.serviceTier.service.name,
-    amount: Number(booking.totalAmount),
+    booking_number: booking.booking_number,
+    customerName: booking.users.full_name,
+    serviceName: booking.service_tiers.services.name,
+    amount: Number(booking.total_amount),
     status: booking.status,
-    createdAt: booking.createdAt.toISOString()
+    created_at: booking.created_at.toISOString()
   }))
 
   // 3. Recent Leads
-  const recentLeadsData = await prisma.lead.findMany({
+  const recentLeadsData = await prisma.leads.findMany({
     take: 5,
-    orderBy: { createdAt: 'desc' }
+    orderBy: { created_at: 'desc' }
   })
 
   const recentLeads = recentLeadsData.map(lead => ({
     id: lead.id,
-    fullName: lead.fullName,
+    full_name: lead.full_name,
     email: lead.email,
-    serviceInterest: lead.serviceInterest,
-    leadScore: lead.leadScore,
+    service_interest: lead.service_interest,
+    lead_score: lead.lead_score,
     status: lead.status,
     source: lead.source
   }))
@@ -77,35 +77,35 @@ async function getAdminDashboardData() {
   // Prisma doesn't support complex grouping with relations easily in one go,
   // so we might need to do some manual aggregation or raw query.
   // For simplicity/performance, let's just count bookings per service tier for now.
-  const topServicesData = await prisma.booking.groupBy({
-    by: ['serviceTierId'],
+  const topServicesData = await prisma.bookings.groupBy({
+    by: ['service_tiersId'],
     _count: {
-      serviceTierId: true
+      service_tiersId: true
     },
     _sum: {
-      totalAmount: true
+      total_amount: true
     },
     orderBy: {
       _count: {
-        serviceTierId: 'desc'
+        service_tiersId: 'desc'
       }
     },
     take: 5
   })
 
   // We need to fetch service names for these IDs
-  const serviceTierIds = topServicesData.map(item => item.serviceTierId)
-  const serviceTiers = await prisma.serviceTier.findMany({
-    where: { id: { in: serviceTierIds } },
-    include: { service: true }
+  const service_tiersIds = topServicesData.map(item => item.service_tiersId)
+  const service_tiers = await prisma.service_tiers.findMany({
+    where: { id: { in: service_tiersIds } },
+    include: { services: true }
   })
 
   const topServices = topServicesData.map(item => {
-    const tier = serviceTiers.find(t => t.id === item.serviceTierId)
+    const tier = service_tiers.find(t => t.id === item.service_tiersId)
     return {
-      name: tier ? `${tier.service.name} - ${tier.name}` : 'Unknown Service',
-      bookings: item._count.serviceTierId,
-      revenue: Number(item._sum.totalAmount || 0)
+      name: tier ? `${tier.services.name} - ${tier.name}` : 'Unknown Service',
+      bookings: item._count.service_tiersId,
+      revenue: Number(item._sum.total_amount || 0)
     }
   })
 
@@ -128,7 +128,7 @@ export default async function AdminDashboard() {
     redirect('/auth/signin?callbackUrl=/admin/dashboard')
   }
 
-  const userRole = user.staffProfile?.role
+  const userRole = user.staff?.role
 
   if (userRole !== 'admin' && userRole !== 'superadmin') {
     redirect('/auth/error?error=accessdenied')
@@ -185,8 +185,8 @@ export default async function AdminDashboard() {
               <Shield className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">{user.fullName || user.email}</p>
-              <p className="text-xs capitalize text-gray-500">{user.staffProfile?.role} • Online</p>
+              <p className="text-sm font-medium text-gray-900">{user.full_name || user.email}</p>
+              <p className="text-xs capitalize text-gray-500">{user.staff?.role} • Online</p>
             </div>
           </div>
           {/* Logout Button - Client Component needed for onClick, or use Link to signout route if available. 
@@ -286,7 +286,7 @@ export default async function AdminDashboard() {
                   <div>
                     <p className="font-medium text-gray-900">{booking.customerName}</p>
                     <p className="text-sm text-gray-600">{booking.serviceName}</p>
-                    <p className="text-xs text-gray-500">{booking.bookingNumber}</p>
+                    <p className="text-xs text-gray-500">{booking.booking_number}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -347,18 +347,18 @@ export default async function AdminDashboard() {
                 <tr key={index} className="hover:bg-gray-50">
                   <td className="whitespace-nowrap px-6 py-4">
                     <div>
-                      <p className="font-medium text-gray-900">{lead.fullName}</p>
+                      <p className="font-medium text-gray-900">{lead.full_name}</p>
                       <p className="text-sm text-gray-600">{lead.email}</p>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <span className="capitalize text-gray-900">{lead.serviceInterest}</span>
+                    <span className="capitalize text-gray-900">{lead.service_interest}</span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
                     <span
-                      className={`rounded-full px-2 py-1 text-xs font-medium ${getLeadScoreColor(lead.leadScore)}`}
+                      className={`rounded-full px-2 py-1 text-xs font-medium ${getLeadScoreColor(lead.lead_score)}`}
                     >
-                      {lead.leadScore}
+                      {lead.lead_score}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">

@@ -43,7 +43,7 @@ export interface ServiceTier {
   originalPrice?: DecimalLike | null
   features: JsonValue
   limitations?: JsonValue | null
-  service: Service
+  services: Service
 }
 
 export interface Booking {
@@ -91,7 +91,7 @@ export interface Payment {
   refundReason?: string | null
   createdAt: Date
   updatedAt: Date
-  booking?: Booking
+  bookings?: Booking
 }
 
 export interface ServiceTask {
@@ -111,9 +111,9 @@ export interface ServiceTask {
 }
 
 export interface BookingWithRelations extends Booking {
-  payment?: Payment[]
+  payments?: Payment[]
   serviceTier: ServiceTier & {
-    service: Service
+    services: Service
   }
 }
 

@@ -89,7 +89,7 @@ async function main() {
   for (const serviceData of servicesData) {
     const { tiers, ...serviceInfo } = serviceData
 
-    const service = await prisma.service.upsert({
+    const service = await prisma.services.upsert({
       where: { slug: serviceInfo.slug },
       update: serviceInfo,
       create: serviceInfo
@@ -98,7 +98,7 @@ async function main() {
     console.log(`Created/Updated service: ${service.name}`)
 
     for (const tierData of tiers) {
-      await prisma.serviceTier.upsert({
+      await prisma.service_tiers.upsert({
         where: {
           serviceId_slug: {
             serviceId: service.id,

@@ -4,7 +4,7 @@ import { getLogger } from '@/lib/monitoring/logger'
 import type { Booking, PaymentWithBooking } from '@/types/database'
 
 interface BankingTransferRequest {
-  bookingId: string
+  booking_id: string
   amount: number
   customerName: string
   customerEmail: string
@@ -57,13 +57,13 @@ export class BankingTransfer {
     error?: string
   }> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: request.bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: request.booking_id },
         include: {
-          user: true,
-          serviceTier: {
+          users: true,
+          service_tiers: {
             include: {
-              service: true
+              services: true
             }
           },
           payments: true,
@@ -74,20 +74,22 @@ export class BankingTransfer {
         return { success: false, error: 'Booking not found' }
       }
 
-      const transferCode = `BANK_${booking.bookingNumber}_${Date.now()}`
-      const transferContent = `ROK ${booking.bookingNumber} ${request.customerName}`
+      const transferCode = `BANK_${booking.booking_number}_${Date.now()}`
+      const transferContent = `ROK ${booking.booking_number} ${request.customerName}`
       const expireTime = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
       // Create payment record
-      await prisma.payment.create({
+      await prisma.payments.create({
         data: {
-          bookingId: request.bookingId,
+          id: crypto.randomUUID(),
+          booking_id: request.booking_id,
           amount: request.amount,
-          paymentMethod: 'banking',
-          paymentGateway: 'manual_banking',
-          gatewayTransactionId: transferCode,
-          gatewayOrderId: transferCode,
-          paymentNumber: `PAY${Date.now()}` // Simple generation
+          payment_method: 'banking',
+          payment_gateway: 'manual_banking',
+          gateway_transaction_id: transferCode,
+          gateway_order_id: transferCode,
+          payment_number: `PAY${Date.now()}`,
+          updated_at: new Date() // Simple generation
         }
       })
 
@@ -137,8 +139,8 @@ export class BankingTransfer {
   }> {
     try {
       // Find payment record
-      const payment = await prisma.payment.findFirst({
-        where: { gatewayTransactionId: transferCode }
+      const payment = await prisma.payments.findFirst({
+        where: { gateway_transaction_id: transferCode }
       })
       if (!payment) {
         return { success: false, message: 'Transfer not found' }
@@ -149,13 +151,13 @@ export class BankingTransfer {
       }
 
       // Update payment status
-      await prisma.payment.update({
+      await prisma.payments.update({
         where: { id: payment.id },
         data: {
           status: 'completed',
-          updatedAt: new Date(),
-          paidAt: new Date(),
-          gatewayResponse: {
+          updated_at: new Date(),
+          paid_at: new Date(),
+          gateway_response: {
             confirmedAt: new Date(),
             adminNotes,
             confirmationMethod: 'manual_verification'
@@ -164,47 +166,47 @@ export class BankingTransfer {
       })
 
       // Update booking status
-      await prisma.booking.update({
-        where: { id: payment.bookingId },
-        data: { paymentStatus: 'completed', updatedAt: new Date() }
+      await prisma.bookings.update({
+        where: { id: payment.booking_id },
+        data: { payment_status: 'completed', updated_at: new Date() }
       })
-      await prisma.booking.update({
-        where: { id: payment.bookingId },
-        data: { status: 'confirmed', updatedAt: new Date() }
+      await prisma.bookings.update({
+        where: { id: payment.booking_id },
+        data: { status: 'confirmed', updated_at: new Date() }
       })
 
       // Send confirmation email
-      const paymentWithRelations = await prisma.payment.findUnique({
+      const paymentWithRelations = await prisma.payments.findUnique({
         where: { id: payment.id },
         include: {
-          booking: {
+          bookings: {
             include: {
-              user: true,
-              serviceTier: {
+              users: true,
+              service_tiers: {
                 include: {
-                  service: true
+                  services: true
                 }
               }
             }
           }
         }
       })
-      if (paymentWithRelations?.booking) {
+      if (paymentWithRelations?.bookings) {
         const emailService = getEmailService()
         await emailService.sendPaymentConfirmation(paymentWithRelations)
       }
 
       // Send Discord notification
       try {
-        if (paymentWithRelations?.booking) {
+        if (paymentWithRelations?.bookings) {
           const { discordNotifier } = await import('@/lib/discord')
           await discordNotifier.sendPaymentNotification({
-            bookingId: paymentWithRelations.booking.id,
+            booking_id: paymentWithRelations.bookings.id,
             amount: payment.amount.toNumber(),
-            paymentMethod: 'banking',
+            payment_method: 'banking',
             status: 'completed',
-            customerEmail: paymentWithRelations.booking.user.email,
-            customerName: paymentWithRelations.booking.user.fullName,
+            customerEmail: paymentWithRelations.bookings.users.email,
+            customerName: paymentWithRelations.bookings.users.full_name,
             transactionId: transferCode
           })
         }
@@ -216,23 +218,25 @@ export class BankingTransfer {
 
       // Trigger service delivery workflow
       try {
-        await prisma.serviceTask.create({
+        await prisma.service_tasks.create({
           data: {
-            bookingId: payment.bookingId,
+            id: crypto.randomUUID(),
+            booking_id: payment.booking_id,
             type: 'delivery',
-            title: `Deliver ${paymentWithRelations?.booking?.serviceTier.service.name || 'Service'}`,
-            description: `Process service delivery for booking ${paymentWithRelations?.booking?.bookingNumber || payment.bookingId}`,
+            title: `Deliver ${paymentWithRelations?.bookings?.service_tiers.services.name || 'Service'}`,
+            description: `Process service delivery for booking ${paymentWithRelations?.bookings?.booking_number || payment.booking_id}`,
             priority: 'high',
             status: 'pending',
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
+            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            updated_at: new Date() // 7 days default
           }
         })
 
-        await prisma.booking.update({
-          where: { id: payment.bookingId },
+        await prisma.bookings.update({
+          where: { id: payment.booking_id },
           data: {
             status: 'in_progress',
-            startDate: new Date()
+            start_date: new Date()
           }
         })
       } catch (error) {
@@ -262,21 +266,21 @@ export class BankingTransfer {
   }> {
     try {
       // Find payment record
-      const payment = await prisma.payment.findFirst({
-        where: { gatewayTransactionId: transferCode }
+      const payment = await prisma.payments.findFirst({
+        where: { gateway_transaction_id: transferCode }
       })
       if (!payment) {
         return { success: false, message: 'Transfer not found' }
       }
 
       // Update payment status
-      await prisma.payment.update({
+      await prisma.payments.update({
         where: { id: payment.id },
         data: {
           status: 'failed',
-          updatedAt: new Date(),
-          gatewayResponse: {
-            failureReason: reason,
+          updated_at: new Date(),
+          gateway_response: {
+            failure_reason: reason,
             rejectedAt: new Date(),
             rejectionReason: reason
           }
@@ -284,19 +288,19 @@ export class BankingTransfer {
       })
 
       // Update booking status
-      await prisma.booking.update({
-        where: { id: payment.bookingId },
-        data: { paymentStatus: 'failed', updatedAt: new Date() }
+      await prisma.bookings.update({
+        where: { id: payment.booking_id },
+        data: { payment_status: 'failed', updated_at: new Date() }
       })
 
       // Send rejection email
-      const booking = await prisma.booking.findUnique({
-        where: { id: payment.bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: payment.booking_id },
         include: {
-          user: true,
-          serviceTier: {
+          users: true,
+          service_tiers: {
             include: {
-              service: true
+              services: true
             }
           },
           payments: true,
@@ -305,8 +309,8 @@ export class BankingTransfer {
       })
       if (booking) {
         await this.sendRejectionEmail({
-          email: booking.user.email,
-          customerName: booking.user.fullName,
+          email: booking.users.email,
+          customerName: booking.users.full_name,
           transferCode,
           reason,
           booking
@@ -327,28 +331,28 @@ export class BankingTransfer {
   // Get pending transfers (Admin only)
   async getPendingTransfers(): Promise<{
     success: boolean
-    data?: PaymentWithBooking[]
+    data?: any[]
     error?: string
   }> {
     try {
-      const pendingPayments = await prisma.payment.findMany({
+      const pendingPayments = await prisma.payments.findMany({
         where: {
-          paymentMethod: 'banking',
+          payment_method: 'banking',
           status: 'pending'
         },
         include: {
-          booking: {
+          bookings: {
             include: {
-              user: true,
-              serviceTier: {
+              users: true,
+              service_tiers: {
                 include: {
-                  service: true
+                  services: true
                 }
               }
             }
           }
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { created_at: 'desc' }
       })
 
       return { success: true, data: pendingPayments }
@@ -373,7 +377,7 @@ export class BankingTransfer {
     transferContent: string
     expireTime: Date
     bankAccounts: BankAccount[]
-    booking: Booking
+    booking: any
   }) {
     const emailService = getEmailService()
 
@@ -463,7 +467,7 @@ export class BankingTransfer {
     customerName: string
     transferCode: string
     reason: string
-    booking: Booking
+    booking: any
   }) {
     const emailService = getEmailService()
 

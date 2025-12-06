@@ -42,35 +42,37 @@ export class WebhookRetryService {
   }
 
   // Store webhook event for processing
-  async storeWebhookEvent(provider: string, eventType: string, eventId: string, payload: Record<string, unknown>) {
+  async storeWebhookEvent(provider: string, event_type: string, event_id: string, payload: Record<string, unknown>) {
     const prisma = await getPrisma()
     try {
       // Check if event already exists
-      const existingEvent = await prisma.webhookEvent.findUnique({
-        where: { eventId }
+      const existingEvent = await prisma.webhook_events.findUnique({
+        where: { event_id }
       })
 
       if (existingEvent) {
-        getLogger().info('Webhook event already exists', { eventId })
+        getLogger().info('Webhook event already exists', { event_id })
         return existingEvent
       }
 
       // Create new event
-      const event = await prisma.webhookEvent.create({
+      const event = await prisma.webhook_events.create({
         data: {
+        id: crypto.randomUUID(),
           provider,
-          eventType,
-          eventId,
+          event_type,
+          event_id,
           payload: JSON.parse(JSON.stringify(payload)),
           status: 'pending',
-          attempts: 0
+          attempts: 0,
+        updated_at: new Date()
         }
       })
 
       getLogger().info('Webhook event stored', {
-        eventId,
+        event_id,
         provider,
-        eventType
+        event_type
       })
 
       return event
@@ -81,20 +83,20 @@ export class WebhookRetryService {
   }
 
   // Process webhook event
-  async processWebhookEvent(eventId: string): Promise<boolean> {
+  async processWebhookEvent(event_id: string): Promise<boolean> {
     const prisma = await getPrisma()
     try {
-      const event = await prisma.webhookEvent.findUnique({
-        where: { eventId }
+      const event = await prisma.webhook_events.findUnique({
+        where: { event_id }
       })
 
       if (!event) {
-        getLogger().error('Webhook event not found', new Error('Event not found'), { eventId })
+        getLogger().error('Webhook event not found', new Error('Event not found'), { event_id })
         return false
       }
 
       if (event.status === 'completed') {
-        getLogger().info('Webhook event already processed', { eventId })
+        getLogger().info('Webhook event already processed', { event_id })
         return true
       }
 
@@ -102,17 +104,17 @@ export class WebhookRetryService {
         getLogger().error(
           'Webhook event exceeded max attempts',
           new Error('Max attempts exceeded'),
-          { eventId }
+          { event_id }
         )
         return false
       }
 
       // Update status to processing
-      await prisma.webhookEvent.update({
+      await prisma.webhook_events.update({
         where: { id: event.id },
         data: {
           status: 'processing',
-          lastAttemptAt: new Date()
+          last_attempt_at: new Date()
         }
       })
 
@@ -121,15 +123,15 @@ export class WebhookRetryService {
 
       if (success) {
         // Mark as completed
-        await prisma.webhookEvent.update({
+        await prisma.webhook_events.update({
           where: { id: event.id },
           data: {
             status: 'completed',
-            processedAt: new Date()
+            processed_at: new Date()
           }
         })
 
-        getLogger().info('Webhook event processed successfully', { eventId })
+        getLogger().info('Webhook event processed successfully', { event_id })
         return true
       } else {
         // Schedule retry
@@ -140,11 +142,11 @@ export class WebhookRetryService {
       getLogger().error('Failed to process webhook event', error as Error)
 
       // Update error status
-      await prisma.webhookEvent.update({
-        where: { eventId },
+      await prisma.webhook_events.update({
+        where: { event_id },
         data: {
           status: 'failed',
-          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+          error_message: error instanceof Error ? error.message : 'Unknown error'
         }
       })
 
@@ -153,7 +155,7 @@ export class WebhookRetryService {
   }
 
   // Handle specific webhook event
-  private async handleWebhookEvent(event: { provider: string; payload: unknown; id: string; eventId: string; attempts: number }): Promise<boolean> {
+  private async handleWebhookEvent(event: { provider: string; payload: unknown; id: string; event_id: string; attempts: number }): Promise<boolean> {
     const eventWithPayload = { payload: event.payload as Record<string, unknown> }
     try {
       switch (event.provider) {
@@ -195,15 +197,13 @@ export class WebhookRetryService {
       }
 
       // Find payment by order ID
-      const payment = await prisma.payment.findFirst({
+      const payment = await prisma.payments.findFirst({
         where: {
-          paymentNumber: orderId,
-          paymentMethod: 'momo'
+          payment_number: orderId,
+          payment_method: 'momo'
         },
-        include: {
-          booking: {
-            include: {
-              user: true
+        include: { bookings: {
+            include: { users: true
             }
           }
         }
@@ -219,12 +219,12 @@ export class WebhookRetryService {
       // Use transaction to ensure atomicity
       await prisma.$transaction(async tx => {
         // Update payment status
-        await tx.payment.update({
+        await tx.payments.update({
           where: { id: payment.id },
           data: {
             status: 'completed',
-            gatewayTransactionId: transId,
-            gatewayResponse: {
+            gateway_transaction_id: transId,
+            gateway_response: {
               momoRequestId: requestId,
               momoMessage: message,
               momoTransId: transId
@@ -233,16 +233,16 @@ export class WebhookRetryService {
         })
 
         // Update booking payment status
-        await tx.booking.update({
-          where: { id: payment.bookingId },
-          data: { paymentStatus: 'paid' }
+        await tx.bookings.update({
+          where: { id: payment.booking_id },
+          data: { payment_status: 'paid' }
         })
       })
 
       // Send real-time notification (outside transaction)
       const emitWebSocketEvent = await getEmitWebSocketEvent()
-      emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
-        paymentId: payment.id,
+      emitWebSocketEvent('user', payment.bookings.user_id, 'payment:completed', {
+        payment_id: payment.id,
         amount: payment.amount,
         method: 'MoMo'
       })
@@ -271,15 +271,13 @@ export class WebhookRetryService {
         return true
       }
 
-      const payment = await prisma.payment.findFirst({
+      const payment = await prisma.payments.findFirst({
         where: {
-          paymentNumber: app_trans_id,
-          paymentMethod: 'zalopay'
+          payment_number: app_trans_id,
+          payment_method: 'zalopay'
         },
-        include: {
-          booking: {
-            include: {
-              user: true
+        include: { bookings: {
+            include: { users: true
             }
           }
         }
@@ -294,12 +292,12 @@ export class WebhookRetryService {
 
       // Use transaction to ensure atomicity
       await prisma.$transaction(async tx => {
-        await tx.payment.update({
+        await tx.payments.update({
           where: { id: payment.id },
           data: {
             status: 'completed',
-            gatewayTransactionId: zp_trans_id,
-            gatewayResponse: {
+            gateway_transaction_id: zp_trans_id,
+            gateway_response: {
               zaloPayTransId: zp_trans_id,
               appTransId: app_trans_id,
               status
@@ -307,16 +305,16 @@ export class WebhookRetryService {
           }
         })
 
-        await tx.booking.update({
-          where: { id: payment.bookingId },
-          data: { paymentStatus: 'paid' }
+        await tx.bookings.update({
+          where: { id: payment.booking_id },
+          data: { payment_status: 'paid' }
         })
       })
 
       // Send real-time notification (outside transaction)
       const emitWebSocketEvent = await getEmitWebSocketEvent()
-      emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
-        paymentId: payment.id,
+      emitWebSocketEvent('user', payment.bookings.user_id, 'payment:completed', {
+        payment_id: payment.id,
         amount: payment.amount,
         method: 'ZaloPay'
       })
@@ -345,15 +343,13 @@ export class WebhookRetryService {
         return true
       }
 
-      const payment = await prisma.payment.findFirst({
+      const payment = await prisma.payments.findFirst({
         where: {
-          paymentNumber: vnp_TxnRef,
-          paymentMethod: 'vnpay'
+          payment_number: vnp_TxnRef,
+          payment_method: 'vnpay'
         },
-        include: {
-          booking: {
-            include: {
-              user: true
+        include: { bookings: {
+            include: { users: true
             }
           }
         }
@@ -368,12 +364,12 @@ export class WebhookRetryService {
 
       // Use transaction to ensure atomicity
       await prisma.$transaction(async tx => {
-        await tx.payment.update({
+        await tx.payments.update({
           where: { id: payment.id },
           data: {
             status: 'completed',
-            gatewayTransactionId: vnp_TransactionNo,
-            gatewayResponse: {
+            gateway_transaction_id: vnp_TransactionNo,
+            gateway_response: {
               vnpayTransactionNo: vnp_TransactionNo,
               vnpTxnRef: vnp_TxnRef,
               vnpResponseCode: vnp_ResponseCode
@@ -381,16 +377,16 @@ export class WebhookRetryService {
           }
         })
 
-        await tx.booking.update({
-          where: { id: payment.bookingId },
-          data: { paymentStatus: 'paid' }
+        await tx.bookings.update({
+          where: { id: payment.booking_id },
+          data: { payment_status: 'paid' }
         })
       })
 
       // Send real-time notification (outside transaction)
       const emitWebSocketEvent = await getEmitWebSocketEvent()
-      emitWebSocketEvent('user', payment.booking.userId, 'payment:completed', {
-        paymentId: payment.id,
+      emitWebSocketEvent('user', payment.bookings.user_id, 'payment:completed', {
+        payment_id: payment.id,
         amount: payment.amount,
         method: 'VNPay'
       })
@@ -404,7 +400,7 @@ export class WebhookRetryService {
   }
 
   // Schedule retry for failed webhook
-  private async scheduleRetry(event: { id: string; eventId: string; attempts: number }) {
+  private async scheduleRetry(event: { id: string; event_id: string; attempts: number }) {
     const prisma = await getPrisma()
     const attempts = event.attempts + 1
     const delay = Math.min(
@@ -412,22 +408,22 @@ export class WebhookRetryService {
       this.config.maxDelay
     )
 
-    const nextRetryAt = new Date(Date.now() + delay)
+    const next_retry_at = new Date(Date.now() + delay)
 
-    await prisma.webhookEvent.update({
+    await prisma.webhook_events.update({
       where: { id: event.id },
       data: {
         status: attempts >= this.config.maxAttempts ? 'failed' : 'pending',
         attempts,
-        nextRetryAt: attempts < this.config.maxAttempts ? nextRetryAt : null,
-        errorMessage: `Retry scheduled for ${nextRetryAt.toISOString()}`
+        next_retry_at: attempts < this.config.maxAttempts ? next_retry_at : null,
+        error_message: `Retry scheduled for ${next_retry_at.toISOString()}`
       }
     })
 
     getLogger().info('Webhook retry scheduled', {
-      eventId: event.eventId,
+      event_id: event.event_id,
       attempts,
-      nextRetryAt: nextRetryAt?.toISOString()
+      next_retry_at: next_retry_at?.toISOString()
     })
   }
 
@@ -437,20 +433,20 @@ export class WebhookRetryService {
     try {
       const now = new Date()
 
-      const pendingEvents = await prisma.webhookEvent.findMany({
+      const pendingEvents = await prisma.webhook_events.findMany({
         where: {
           status: 'pending',
-          OR: [{ nextRetryAt: null }, { nextRetryAt: { lte: now } }],
+          OR: [{ next_retry_at: null }, { next_retry_at: { lte: now } }],
           attempts: { lt: this.config.maxAttempts }
         },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { created_at: 'asc' },
         take: 10 // Process 10 at a time
       })
 
       getLogger().info(`Processing ${pendingEvents.length} pending webhooks`)
 
       const results = await Promise.allSettled(
-        pendingEvents.map(event => this.processWebhookEvent(event.eventId))
+        pendingEvents.map(event => this.processWebhookEvent(event.event_id))
       )
 
       const successful = results.filter(r => r.status === 'fulfilled' && r.value).length
@@ -469,10 +465,10 @@ export class WebhookRetryService {
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)
 
-      const deleted = await prisma.webhookEvent.deleteMany({
+      const deleted = await prisma.webhook_events.deleteMany({
         where: {
           status: { in: ['completed', 'failed'] },
-          createdAt: { lt: cutoffDate }
+          created_at: { lt: cutoffDate }
         }
       })
 

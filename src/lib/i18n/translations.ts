@@ -150,7 +150,7 @@ export const translations = {
     services: {
       'auto-gem-farm': {
         name: 'Auto Gem & Farm RoK',
-        shortDescription: 'Auto Farm Gem & RSS 24/7',
+        short_description: 'Auto Farm Gem & RSS 24/7',
         description:
           'Dịch vụ Auto Farm Gem và Tài nguyên chuyên nghiệp, an toàn 99%, bảo hành uy tín. Hệ thống hoạt động 24/7 giúp bạn tối ưu hóa tài nguyên.',
         features: [
@@ -367,7 +367,7 @@ export const translations = {
     services: {
       'auto-gem-farm': {
         name: 'Auto Gem & Farm RoK',
-        shortDescription: 'Auto Farm Gem & RSS 24/7',
+        short_description: 'Auto Farm Gem & RSS 24/7',
         description:
           'Professional Auto Farm Gem and Resources service, 99% safe, reputable warranty. 24/7 system helps you optimize resources.',
         features: [

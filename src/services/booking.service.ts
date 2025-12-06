@@ -1,10 +1,9 @@
-import { Prisma } from '@prisma/client'
 
+import { Prisma } from "@prisma/client"
 import { generateSecureNumericCode } from '@/lib/crypto-utils'
 import { prisma } from '@/lib/db'
 import { NotFoundError, ValidationError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
-import type { Booking, ServiceTier } from '@/types/database'
 import { BookingStatus, PaymentStatus } from '@/types/enums'
 
 export class BookingService {
@@ -14,22 +13,22 @@ export class BookingService {
    * Create a new booking
    */
   async createBooking(data: {
-    userId: string
-    serviceTierId: string
-    customerRequirements?: string
+    user_id: string
+    service_tier_id: string
+    customer_requirements?: string
     scheduledDate?: Date
     notes?: string
-  }): Promise<Booking> {
+  }): Promise<any> {
     return prisma.$transaction(async tx => {
       // Validate service tier exists
-      const serviceTier = await this.getServiceTier(data.serviceTierId)
+      const service_tiers = await this.getServiceTier(data.service_tier_id)
 
       // Check if user has active booking for same service
       // Note: We use the transaction client 'tx' here to ensure consistency
-      const existingBookingCount = await tx.booking.count({
+      const existingBookingCount = await tx.bookings.count({
         where: {
-          userId: data.userId,
-          serviceTier: { serviceId: serviceTier.serviceId },
+          user_id: data.user_id,
+          service_tiers: { service_id: service_tiers.service_id },
           status: {
             in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.IN_PROGRESS]
           }
@@ -41,39 +40,40 @@ export class BookingService {
       }
 
       // Generate booking number
-      const bookingNumber = await this.generateBookingNumber()
+      const booking_number = await this.generateBookingNumber()
 
       // Create booking
-      const booking = await tx.booking.create({
+      const booking = await tx.bookings.create({
         data: {
-          bookingNumber,
-          userId: data.userId,
-          serviceTierId: data.serviceTierId,
+          booking_number,
+          user_id: data.user_id,
+          service_tier_id: data.service_tier_id,
           status: BookingStatus.PENDING,
-          paymentStatus: PaymentStatus.PENDING,
-          totalAmount: new Prisma.Decimal(
-            typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()
+          payment_status: PaymentStatus.PENDING,
+          total_amount: new Prisma.Decimal(
+            typeof service_tiers.price === 'number' ? service_tiers.price : service_tiers.price.toNumber()
           ),
-          finalAmount: new Prisma.Decimal(
-            typeof serviceTier.price === 'number' ? serviceTier.price : serviceTier.price.toNumber()
+          final_amount: new Prisma.Decimal(
+            typeof service_tiers.price === 'number' ? service_tiers.price : service_tiers.price.toNumber()
           ),
           currency: 'VND',
-          customerRequirements: data.customerRequirements,
-          startDate: data.scheduledDate,
-          internalNotes: data.notes
+          customer_requirements: data.customer_requirements,
+          start_date: data.scheduledDate,
+          internal_notes: data.notes,
+        id: crypto.randomUUID(),
+        updated_at: new Date()
         },
-        include: {
-          user: true,
-          serviceTier: {
-            include: { service: true }
+        include: { users: true,
+          service_tiers: {
+            include: { services: true }
           }
         }
       })
 
       this.logger.info('Booking created', {
-        bookingId: booking.id,
-        userId: data.userId,
-        serviceTierId: data.serviceTierId
+        booking_id: booking.id,
+        user_id: data.user_id,
+        service_tier_id: data.service_tier_id
       })
 
       return booking
@@ -83,13 +83,12 @@ export class BookingService {
   /**
    * Get booking by ID
    */
-  async getBookingById(bookingId: string, userId?: string): Promise<Booking> {
-    const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      include: {
-        user: true,
-        serviceTier: {
-          include: { service: true }
+  async getBookingById(booking_id: string, user_id?: string): Promise<any> {
+    const booking = await prisma.bookings.findUnique({
+      where: { id: booking_id },
+      include: { users: true,
+        service_tiers: {
+          include: { services: true }
         },
         payments: true
       }
@@ -99,8 +98,8 @@ export class BookingService {
       throw new NotFoundError('Booking')
     }
 
-    // Check ownership if userId provided
-    if (userId && booking.userId !== userId) {
+    // Check ownership if user_id provided
+    if (user_id && booking.user_id !== user_id) {
       throw new ValidationError('Unauthorized access to booking')
     }
 
@@ -111,7 +110,7 @@ export class BookingService {
    * Get user bookings
    */
   async getUserBookings(
-    userId: string,
+    user_id: string,
     options?: {
       status?: string
       limit?: number
@@ -119,30 +118,30 @@ export class BookingService {
     }
   ) {
     interface BookingWhereInput {
-      userId: string
+      user_id: string
       status?: string
     }
 
-    const where: BookingWhereInput = { userId }
+    const where: BookingWhereInput = { user_id }
 
     if (options?.status) {
       where.status = options.status
     }
 
     const [bookings, total] = await Promise.all([
-      prisma.booking.findMany({
+      prisma.bookings.findMany({
         where,
         include: {
-          serviceTier: {
-            include: { service: true }
+          service_tiers: {
+            include: { services: true }
           },
           payments: true
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { created_at: 'desc' },
         take: options?.limit ?? 10,
         skip: options?.offset ?? 0
       }),
-      prisma.booking.count({ where })
+      prisma.bookings.count({ where })
     ])
 
     return { bookings, total }
@@ -152,33 +151,32 @@ export class BookingService {
    * Update booking status
    */
   async updateBookingStatus(
-    bookingId: string,
+    booking_id: string,
     status: string,
     options?: {
-      userId?: string
+      user_id?: string
       notes?: string
     }
-  ): Promise<Booking> {
-    const booking = await this.getBookingById(bookingId, options?.userId)
+  ): Promise<any> {
+    const booking = await this.getBookingById(booking_id, options?.user_id)
 
-    const updated = await prisma.booking.update({
-      where: { id: bookingId },
+    const updated = await prisma.bookings.update({
+      where: { id: booking_id },
       data: {
         status,
-        internalNotes: options?.notes
-          ? `${booking.internalNotes}\n[${new Date().toISOString()}] ${options.notes}`
-          : booking.internalNotes
+        internal_notes: options?.notes
+          ? `${booking.internal_notes}\n[${new Date().toISOString()}] ${options.notes}`
+          : booking.internal_notes
       },
-      include: {
-        user: true,
-        serviceTier: {
-          include: { service: true }
+      include: { users: true,
+        service_tiers: {
+          include: { services: true }
         }
       }
     })
 
     this.logger.info('Booking status updated', {
-      bookingId,
+      booking_id,
       oldStatus: booking.status,
       newStatus: status
     })
@@ -189,8 +187,8 @@ export class BookingService {
   /**
    * Cancel booking
    */
-  async cancelBooking(bookingId: string, userId: string, reason: string): Promise<Booking> {
-    const booking = await this.getBookingById(bookingId, userId)
+  async cancelBooking(booking_id: string, user_id: string, reason: string): Promise<any> {
+    const booking = await this.getBookingById(booking_id, user_id)
 
     // Check if booking can be cancelled
     if (
@@ -199,23 +197,22 @@ export class BookingService {
       throw new ValidationError('Booking cannot be cancelled')
     }
 
-    const updated = await prisma.booking.update({
-      where: { id: bookingId },
+    const updated = await prisma.bookings.update({
+      where: { id: booking_id },
       data: {
         status: BookingStatus.CANCELLED,
-        internalNotes: reason ? `Cancelled: ${reason}` : 'Booking cancelled'
+        internal_notes: reason ? `Cancelled: ${reason}` : 'Booking cancelled'
       },
-      include: {
-        user: true,
-        serviceTier: {
-          include: { service: true }
+      include: { users: true,
+        service_tiers: {
+          include: { services: true }
         }
       }
     })
 
     this.logger.info('Booking cancelled', {
-      bookingId,
-      userId,
+      booking_id,
+      user_id,
       reason
     })
 
@@ -225,21 +222,21 @@ export class BookingService {
   /**
    * Private helper methods
    */
-  private async getServiceTier(serviceTierId: string): Promise<ServiceTier> {
-    const serviceTier = await prisma.serviceTier.findUnique({
-      where: { id: serviceTierId },
-      include: { service: true }
+  private async getServiceTier(service_tier_id: string): Promise<any> {
+    const service_tiers = await prisma.service_tiers.findUnique({
+      where: { id: service_tier_id },
+      include: { services: true }
     })
 
-    if (!serviceTier) {
+    if (!service_tiers) {
       throw new NotFoundError('Service tier')
     }
 
-    if (!serviceTier.isAvailable) {
+    if (!service_tiers.is_available) {
       throw new ValidationError('Service tier is not available')
     }
 
-    return serviceTier
+    return service_tiers
   }
 
   // checkExistingBooking method is removed as it's now integrated into the transaction within createBooking

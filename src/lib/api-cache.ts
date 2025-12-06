@@ -138,8 +138,8 @@ export const CacheConfigs = {
   USER_DATA: {
     ttl: 60,
     key: (req: NextRequest) => {
-      const userId = req.headers.get('x-user-id') || 'anon'
-      return `api:${req.method}:${req.url}:user:${userId}`
+      const user_id = req.headers.get('x-user-id') || 'anon'
+      return `api:${req.method}:${req.url}:user:${user_id}`
     }
   }
 }

@@ -13,12 +13,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
 
-    const bookingId = params.id
+    const booking_id = params.id
 
     // Find the booking
-    const booking = await prisma.booking.findUnique({
+    const booking = await prisma.bookings.findUnique({
       where: {
-        id: bookingId
+        id: booking_id
       }
     })
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     // Verify ownership
-    if (booking.userId !== session.user.id) {
+    if (booking.user_id !== session.user.id) {
       return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 })
     }
 
@@ -40,19 +40,19 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     // Cancel the booking
-    const updatedBooking = await prisma.booking.update({
+    const updatedBooking = await prisma.bookings.update({
       where: {
-        id: bookingId
+        id: booking_id
       },
       data: {
         status: 'cancelled',
-        updatedAt: new Date()
+        updated_at: new Date()
       }
     })
 
     getLogger().info('Booking cancelled by user', {
-      bookingId,
-      userId: session.user.id
+      booking_id,
+      user_id: session.user.id
     })
 
     return NextResponse.json({

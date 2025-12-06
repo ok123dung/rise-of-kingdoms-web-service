@@ -6,12 +6,12 @@ import type { PaymentResponse, PaymentError } from '@/types/payment'
 
 interface MoMoPaymentProps {
   amount: number
-  bookingId: string
+  booking_id: string
   onSuccess?: (data: PaymentResponse) => void
   onError?: (error: PaymentError) => void
 }
 
-export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: MoMoPaymentProps) {
+export default function MoMoPayment({ amount, booking_id, onSuccess, onError }: MoMoPaymentProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [qrCode, setQrCode] = useState<string | null>(null)
 
@@ -23,7 +23,7 @@ export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: M
 
       // Generate mock QR code
       setQrCode(
-        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=momo://pay?amount=${amount}&booking=${bookingId}`
+        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=momo://pay?amount=${amount}&booking=${booking_id}`
       )
 
       // Simulate payment completion after QR scan
@@ -31,7 +31,7 @@ export default function MoMoPayment({ amount, bookingId, onSuccess, onError }: M
         onSuccess?.({
           transactionId: `MOMO_${Date.now()}`,
           amount,
-          bookingId,
+          booking_id,
           method: 'momo',
           status: 'completed'
         })

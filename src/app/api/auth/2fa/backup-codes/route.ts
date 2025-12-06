@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const { password } = regenerateSchema.parse(body)
 
     // Verify password
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id }
     })
 
@@ -51,11 +51,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate new backup codes
-    const backupCodes = await TwoFactorAuthService.regenerateBackupCodes(session.user.id)
+    const backup_codes = await TwoFactorAuthService.regenerateBackupCodes(session.user.id)
 
     return NextResponse.json({
       success: true,
-      backupCodes,
+      backup_codes,
       message: 'Backup codes regenerated successfully'
     })
   } catch (error) {

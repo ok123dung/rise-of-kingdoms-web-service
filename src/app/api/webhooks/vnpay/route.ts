@@ -61,14 +61,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Replay protection: validate timestamp and check for duplicates
-    const eventId = `vnpay_${vnpParams.vnp_TxnRef}_${vnpParams.vnp_TransactionNo}`
+    const event_id = `vnpay_${vnpParams.vnp_TxnRef}_${vnpParams.vnp_TransactionNo}`
     // Parse VNPay timestamp (yyyyMMddHHmmss) to milliseconds
     const timestampMs = parseVNPayTimestamp(vnpParams.vnp_PayDate)
-    const replayValidation = await validateWebhookReplayProtection('vnpay', eventId, timestampMs)
+    const replayValidation = await validateWebhookReplayProtection('vnpay', event_id, timestampMs)
 
     if (!replayValidation.valid) {
       getLogger().warn('VNPay webhook replay attack detected', {
-        eventId,
+        event_id,
         error: replayValidation.error,
         isDuplicate: replayValidation.isDuplicate
       })
@@ -83,13 +83,13 @@ export async function GET(request: NextRequest) {
     const webhookService = await getWebhookService()
 
     // Store webhook event for processing
-    await webhookService.storeWebhookEvent('vnpay', 'payment_notification', eventId, vnpParams)
+    await webhookService.storeWebhookEvent('vnpay', 'payment_notification', event_id, vnpParams)
 
     // Process immediately
-    const processed = await webhookService.processWebhookEvent(eventId)
+    const processed = await webhookService.processWebhookEvent(event_id)
 
     if (!processed) {
-      getLogger().warn('VNPay webhook processing deferred', { eventId })
+      getLogger().warn('VNPay webhook processing deferred', { event_id })
     }
 
     // Always return success to VNPay

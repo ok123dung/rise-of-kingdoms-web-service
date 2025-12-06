@@ -5,7 +5,7 @@ import { sendOrderConfirmationEmail } from '@/lib/email'
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface MockPaymentBody {
-  bookingId: string
+  booking_id: string
   amount: number
   method: string
 }
@@ -13,7 +13,7 @@ interface MockPaymentBody {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as MockPaymentBody
-    const { bookingId, amount, method } = body
+    const { booking_id, amount, method } = body
 
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1500))
@@ -21,27 +21,27 @@ export async function POST(request: NextRequest) {
     // Start transaction
     const result = await prisma.$transaction(async tx => {
       // 1. Create Payment record
-      const payment = await tx.payment.create({
+      const payment = await tx.payments.create({
         data: {
-          bookingId,
-          paymentNumber: `PAY-${Date.now()}`,
+          booking_id,
+          payment_number: `PAY-${Date.now()}`,
           amount,
           currency: 'VND',
-          paymentMethod: method,
-          paymentGateway: 'MOCK_GATEWAY',
+          payment_method: method,
+          payment_gateway: 'MOCK_GATEWAY',
           status: 'completed',
-          gatewayTransactionId: `MOCK-${Date.now()}`,
-          paidAt: new Date()
+          gateway_transaction_id: `MOCK-${Date.now()}`,
+          paid_at: new Date()
         }
       })
 
       // 2. Update Booking status
-      const booking = await tx.booking.update({
-        where: { id: bookingId },
+      const booking = await tx.bookings.update({
+        where: { id: booking_id },
         data: {
           status: 'confirmed',
-          paymentStatus: 'completed',
-          updatedAt: new Date()
+          payment_status: 'completed',
+          updated_at: new Date()
         }
       })
 
@@ -49,23 +49,23 @@ export async function POST(request: NextRequest) {
     })
 
     // Fetch booking details with user and service for email
-    const bookingDetails = await prisma.booking.findUnique({
-      where: { id: bookingId },
+    const booking_details = await prisma.bookings.findUnique({
+      where: { id: booking_id },
       include: {
         user: true,
-        serviceTier: {
-          include: { service: true }
+        service_tiers: {
+          include: { services: true }
         }
       }
     })
 
-    if (bookingDetails) {
-      sendOrderConfirmationEmail(bookingDetails.user.email, bookingDetails.user.fullName, {
-        orderNumber: bookingDetails.bookingNumber,
-        serviceName: bookingDetails.serviceTier.service.name,
+    if (booking_details) {
+      sendOrderConfirmationEmail(booking_details.users.email, booking_details.users.full_name, {
+        orderNumber: booking_details.booking_number,
+        serviceName: booking_details.service_tiers.services.name,
         amount: Number(amount),
         currency: 'VND',
-        paymentMethod: method
+        payment_method: method
       }).catch((err: unknown) =>
         getLogger().error(
           'Failed to send order confirmation email',
@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    getLogger().info(`Mock payment successful for booking ${bookingId}`, {
-      paymentId: result.payment.id,
+    getLogger().info(`Mock payment successful for booking ${booking_id}`, {
+      payment_id: result.payments.id,
       amount
     })
 

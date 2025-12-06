@@ -42,11 +42,11 @@ export async function POST(request: NextRequest) {
     }
 
     const { currentPassword, newPassword } = result.data
-    const userId = session.user.id
+    const user_id = session.user.id
 
     // 1. Get user and verify current password
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
+    const user = await prisma.users.findUnique({
+      where: { id: user_id }
     })
 
     if (!user?.password) {
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Check password history
-    const isNew = await checkPasswordHistory(userId, newPassword)
+    const isNew = await checkPasswordHistory(user_id, newPassword)
     if (!isNew) {
       return NextResponse.json(
         { success: false, error: 'Bạn không thể sử dụng lại 5 mật khẩu gần nhất' },
@@ -78,9 +78,9 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await hashPassword(newPassword)
 
     await prisma.$transaction(async tx => {
-      await tx.user.update({
-        where: { id: userId },
-        data: { password: hashedPassword, updatedAt: new Date() }
+      await tx.users.update({
+        where: { id: user_id },
+        data: { password: hashedPassword, updated_at: new Date() }
       })
 
       // Save to history
@@ -91,9 +91,9 @@ export async function POST(request: NextRequest) {
     })
 
     // Save history outside transaction (or we could rewrite helper to accept tx)
-    await savePasswordToHistory(userId, hashedPassword)
+    await savePasswordToHistory(user_id, hashedPassword)
 
-    getLogger().info(`Password changed for user ${userId}`)
+    getLogger().info(`Password changed for user ${user_id}`)
 
     return NextResponse.json({ success: true, message: 'Đổi mật khẩu thành công' })
   } catch (error) {

@@ -8,7 +8,7 @@ import { verifyToken } from './jwt'
 export interface AuthenticatedUser {
   id: string
   email: string
-  fullName: string | null
+  full_name: string | null
   role: string
 }
 
@@ -34,7 +34,7 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<Authen
 
   // Fetch user from DB to ensure still exists
   const user = await prismaAdmin.users.findUnique({
-    where: { id: payload.userId },
+    where: { id: payload.user_id },
     select: {
       id: true,
       email: true,
@@ -49,7 +49,7 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<Authen
   return {
     id: user.id,
     email: user.email,
-    fullName: user.full_name,
+    full_name: user.full_name,
     role: payload.role || 'customer'
   }
 }

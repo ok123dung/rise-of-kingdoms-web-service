@@ -14,17 +14,17 @@ import { useSession } from 'next-auth/react'
 
 interface Payment {
   id: string
-  paymentNumber: string
+  payment_number: string
   amount: number
   status: string
-  paymentMethod: string
-  paymentGateway: string
-  createdAt: string
-  paidAt: string | null
+  payment_method: string
+  payment_gateway: string
+  created_at: string
+  paid_at: string | null
   booking: {
     id: string
-    bookingNumber: string
-    serviceTier: {
+    booking_number: string
+    service_tiers: {
       name: string
       service: {
         name: string
@@ -50,7 +50,7 @@ const statusColors = {
   failed: 'text-red-600 bg-red-100',
   cancelled: 'text-gray-600 bg-gray-100'
 }
-const paymentMethodNames: Record<string, string> = {
+const payment_methodNames: Record<string, string> = {
   momo: 'MoMo',
   vnpay: 'VNPay',
   zalopay: 'ZaloPay',
@@ -183,14 +183,14 @@ export default function PaymentsPage() {
                           <div className="ml-4">
                             <div className="flex items-center">
                               <span className="mr-2 text-2xl">
-                                {payment.booking.serviceTier.service.icon}
+                                {payment.bookings.service_tiers.services.icon}
                               </span>
                               <div>
                                 <p className="text-sm font-medium text-gray-900">
-                                  {payment.booking.serviceTier.service.name}
+                                  {payment.bookings.service_tiers.services.name}
                                 </p>
                                 <p className="text-sm text-gray-500">
-                                  Mã thanh toán: {payment.paymentNumber}
+                                  Mã thanh toán: {payment.payment_number}
                                 </p>
                               </div>
                             </div>
@@ -205,7 +205,7 @@ export default function PaymentsPage() {
                               }).format(payment.amount)}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {paymentMethodNames[payment.paymentMethod] || payment.paymentMethod}
+                              {payment_methodNames[payment.payment_method] || payment.payment_method}
                             </p>
                           </div>
                           <div className="text-right">
@@ -213,7 +213,7 @@ export default function PaymentsPage() {
                               {getStatusText(payment.status)}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {format(new Date(payment.createdAt), 'dd/MM/yyyy HH:mm', {
+                              {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', {
                                 locale: vi
                               })}
                             </p>
@@ -223,8 +223,8 @@ export default function PaymentsPage() {
                       {payment.booking && (
                         <div className="mt-2">
                           <p className="text-sm text-gray-500">
-                            Đơn hàng: #{payment.booking.bookingNumber} -{' '}
-                            {payment.booking.serviceTier.name}
+                            Đơn hàng: #{payment.bookings.booking_number} -{' '}
+                            {payment.bookings.service_tiers.name}
                           </p>
                         </div>
                       )}

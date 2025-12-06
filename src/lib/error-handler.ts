@@ -26,7 +26,7 @@ export {
 import { type AppError, isAppError } from '@/lib/errors'
 
 export interface ErrorContext {
-  userId?: string
+  user_id?: string
   action?: string
   metadata?: Record<string, unknown>
   tags?: Record<string, string>
@@ -50,7 +50,7 @@ export function handleErrorWithSentry(error: Error | AppError, context?: ErrorCo
     error,
     context
       ? {
-          userId: context.userId,
+          user_id: context.user_id,
           action: context.action
         }
       : undefined
@@ -76,7 +76,7 @@ export function handleErrorWithSentry(error: Error | AppError, context?: ErrorCo
             statusCode: appError.statusCode.toString(),
             ...context?.tags
           },
-          user: context?.userId ? { id: context.userId } : undefined,
+          user: context?.user_id ? { id: context.user_id } : undefined,
           extra: context?.metadata
         })
       }
@@ -95,7 +95,7 @@ export function handleErrorWithSentry(error: Error | AppError, context?: ErrorCo
           statusCode: appError.statusCode.toString(),
           ...context?.tags
         },
-        user: context?.userId ? { id: context.userId } : undefined,
+        user: context?.user_id ? { id: context.user_id } : undefined,
         extra: context?.metadata
       })
     }
@@ -107,7 +107,7 @@ export function handleErrorWithSentry(error: Error | AppError, context?: ErrorCo
         type: 'unknown',
         ...context?.tags
       },
-      user: context?.userId ? { id: context.userId } : undefined,
+      user: context?.user_id ? { id: context.user_id } : undefined,
       extra: context?.metadata
     })
   }

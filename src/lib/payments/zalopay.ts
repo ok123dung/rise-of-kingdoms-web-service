@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface ZaloPayRequest {
-  bookingId: string
+  booking_id: string
   amount: number
   description: string
   callbackUrl?: string
@@ -64,7 +64,7 @@ interface ZaloPayParsedData {
 
 // Embed data interface
 interface ZaloPayEmbedData {
-  bookingId: string
+  booking_id: string
 }
 
 export class ZaloPayPayment {
@@ -93,13 +93,13 @@ export class ZaloPayPayment {
     error?: string
   }> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: request.bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: request.booking_id },
         include: {
-          user: true,
-          serviceTier: {
+          users: true,
+          service_tiers: {
             include: {
-              service: true
+              services: true
             }
           }
         }
@@ -108,22 +108,22 @@ export class ZaloPayPayment {
         return { success: false, error: 'Booking not found' }
       }
       const transId = `${Date.now()}`
-      const appTransId = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}_${booking.bookingNumber}_${transId}`
+      const appTransId = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}_${booking.booking_number}_${transId}`
       const embedData = JSON.stringify({
-        bookingId: request.bookingId,
+        booking_id: request.booking_id,
         redirecturl: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`
       })
       const items = JSON.stringify([
         {
-          itemid: booking.serviceTier.id,
-          itemname: booking.serviceTier.service.name,
+          itemid: booking.service_tiers.id,
+          itemname: booking.service_tiers.services.name,
           itemprice: request.amount,
           itemquantity: 1
         }
       ])
       const orderData = {
         app_id: parseInt(this.appId),
-        app_user: booking.user.email,
+        app_user: booking.users.email,
         app_time: Date.now(),
         amount: request.amount,
         app_trans_id: appTransId,
@@ -158,15 +158,17 @@ export class ZaloPayPayment {
       const responseData = (await response.json()) as ZaloPayResponse
       if (responseData.return_code === 1) {
         // Tạo payment record
-        await prisma.payment.create({
+        await prisma.payments.create({
           data: {
-            bookingId: request.bookingId,
+            id: crypto.randomUUID(),
+            booking_id: request.booking_id,
             amount: request.amount,
-            paymentMethod: 'zalopay',
-            paymentGateway: 'zalopay',
-            gatewayTransactionId: appTransId,
-            gatewayOrderId: appTransId,
-            paymentNumber: `PAY${Date.now()}`
+            payment_method: 'zalopay',
+            payment_gateway: 'zalopay',
+            gateway_transaction_id: appTransId,
+            gateway_order_id: appTransId,
+            payment_number: `PAY${Date.now()}`,
+            updated_at: new Date()
           }
         })
         return {
@@ -205,24 +207,24 @@ export class ZaloPayPayment {
       const { app_trans_id, zp_trans_id, amount, embed_data } = data
       // Parse embed data
       const embedDataObj = JSON.parse(embed_data) as ZaloPayEmbedData
-      const { bookingId: _bookingId } = embedDataObj
+      const { booking_id: _booking_id } = embedDataObj
       // Tìm payment record
       // Tìm payment record
-      const payment = await prisma.payment.findFirst({
-        where: { gatewayTransactionId: app_trans_id }
+      const payment = await prisma.payments.findFirst({
+        where: { gateway_transaction_id: app_trans_id }
       })
       if (!payment) {
         getLogger().error('Payment not found for app_trans_id', undefined, { app_trans_id })
         return { success: false, message: 'Payment not found' }
       }
       // Cập nhật payment status
-      await prisma.payment.update({
+      await prisma.payments.update({
         where: { id: payment.id },
         data: {
           status: 'completed',
-          updatedAt: new Date(),
-          paidAt: new Date(),
-          gatewayResponse: {
+          updated_at: new Date(),
+          paid_at: new Date(),
+          gateway_response: {
             ...data,
             zpTransId: zp_trans_id,
             callbackAmount: amount
@@ -230,25 +232,25 @@ export class ZaloPayPayment {
         }
       })
       // Cập nhật booking status
-      await prisma.booking.update({
-        where: { id: payment.bookingId },
-        data: { paymentStatus: 'completed', updatedAt: new Date() }
+      await prisma.bookings.update({
+        where: { id: payment.booking_id },
+        data: { payment_status: 'completed', updated_at: new Date() }
       })
-      await prisma.booking.update({
-        where: { id: payment.bookingId },
-        data: { status: 'confirmed', updatedAt: new Date() }
+      await prisma.bookings.update({
+        where: { id: payment.booking_id },
+        data: { status: 'confirmed', updated_at: new Date() }
       })
       // Send confirmation email
-      await this.sendConfirmationEmail(payment.bookingId)
+      await this.sendConfirmationEmail(payment.booking_id)
       // Send Discord notification
-      await this.sendDiscordNotification(payment.bookingId, 'completed', {
+      await this.sendDiscordNotification(payment.booking_id, 'completed', {
         orderId: app_trans_id,
         transId: zp_trans_id,
         amount,
-        paymentMethod: 'ZaloPay'
+        payment_method: 'ZaloPay'
       })
       // Trigger service delivery workflow
-      await this.triggerServiceDelivery(payment.bookingId)
+      await this.triggerServiceDelivery(payment.booking_id)
       getLogger().info('ZaloPay payment completed', { app_trans_id, zp_trans_id, amount })
       return { success: true, message: 'Payment processed successfully' }
     } catch (error) {
@@ -294,7 +296,7 @@ export class ZaloPayPayment {
   // Refund payment
   async refundPayment(
     zpTransId: string,
-    refundAmount: number,
+    refund_amount: number,
     description: string
   ): Promise<{
     success: boolean
@@ -304,12 +306,12 @@ export class ZaloPayPayment {
     try {
       const timestamp = Date.now()
       const uid = `${timestamp}${generateSecureRandomInt(111, 999)}`
-      const data = `${this.appId}|${zpTransId}|${refundAmount}|${description}|${timestamp}`
+      const data = `${this.appId}|${zpTransId}|${refund_amount}|${description}|${timestamp}`
       const mac = crypto.createHmac('sha256', this.key1).update(data).digest('hex')
       const requestBody = {
         app_id: this.appId,
         zp_trans_id: zpTransId,
-        amount: refundAmount,
+        amount: refund_amount,
         description,
         timestamp,
         uid,
@@ -327,21 +329,21 @@ export class ZaloPayPayment {
       const responseData = (await response.json()) as ZaloPayRefundResponse
       if (responseData.return_code === 1) {
         // Update payment record with refund info
-        const payment = await prisma.payment.findFirst({
+        const payment = await prisma.payments.findFirst({
           where: {
-            gatewayResponse: {
+            gateway_response: {
               path: ['zpTransId'],
               equals: zpTransId
             }
           }
         })
         if (payment) {
-          await prisma.payment.update({
+          await prisma.payments.update({
             where: { id: payment.id },
             data: {
-              refundAmount: refundAmount,
-              refundReason: description,
-              refundedAt: new Date(),
+              refund_amount: refund_amount,
+              refund_reason: description,
+              refunded_at: new Date(),
               status: 'refunded'
             }
           })
@@ -398,34 +400,34 @@ export class ZaloPayPayment {
     }
   }
   // Send confirmation email
-  private async sendConfirmationEmail(bookingId: string): Promise<void> {
+  private async sendConfirmationEmail(booking_id: string): Promise<void> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: booking_id },
         include: {
-          user: true,
-          serviceTier: {
-            include: { service: true }
+          users: true,
+          service_tiers: {
+            include: { services: true }
           }
         }
       })
       if (booking) {
         const { sendEmail } = await import('@/lib/email')
         await sendEmail({
-          to: booking.user.email,
+          to: booking.users.email,
           subject: 'Xác nhận thanh toán thành công - RoK Services',
           html: `
             <h2>Thanh toán thành công!</h2>
-            <p>Xin chào ${booking.user.fullName},</p>
-            <p>Chúng tôi đã nhận được thanh toán của bạn cho dịch vụ <strong>${booking.serviceTier.service.name}</strong>.</p>
+            <p>Xin chào ${booking.users.full_name},</p>
+            <p>Chúng tôi đã nhận được thanh toán của bạn cho dịch vụ <strong>${booking.service_tiers.services.name}</strong>.</p>
             <ul>
-              <li>Mã booking: ${booking.bookingNumber}</li>
-              <li>Số tiền: ${booking.totalAmount.toLocaleString()} VNĐ</li>
+              <li>Mã booking: ${booking.booking_number}</li>
+              <li>Số tiền: ${booking.total_amount.toLocaleString()} VNĐ</li>
               <li>Phương thức: ZaloPay</li>
             </ul>
             <p>Cảm ơn bạn đã sử dụng dịch vụ RoK Services!</p>
           `,
-          text: `Thanh toán thành công cho dịch vụ ${booking.serviceTier.service.name}. Mã booking: ${booking.bookingNumber}`
+          text: `Thanh toán thành công cho dịch vụ ${booking.service_tiers.services.name}. Mã booking: ${booking.booking_number}`
         })
       }
     } catch (error) {
@@ -434,27 +436,27 @@ export class ZaloPayPayment {
   }
   // Send Discord notification
   private async sendDiscordNotification(
-    bookingId: string,
+    booking_id: string,
     status: string,
-    paymentData: { orderId: string; transId: string; amount: number; paymentMethod: string }
+    paymentData: { orderId: string; transId: string; amount: number; payment_method: string }
   ): Promise<void> {
     try {
       const { discordNotifier } = await import('@/lib/discord')
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: booking_id },
         include: {
-          user: true,
-          serviceTier: { include: { service: true } }
+          users: true,
+          service_tiers: { include: { services: true } }
         }
       })
       if (booking) {
         await discordNotifier.sendPaymentNotification({
-          bookingId: booking.id,
+          booking_id: booking.id,
           amount: paymentData.amount,
-          paymentMethod: paymentData.paymentMethod,
+          payment_method: paymentData.payment_method,
           status: status as 'pending' | 'completed' | 'failed' | 'cancelled',
-          customerEmail: booking.user.email,
-          customerName: booking.user.fullName,
+          customerEmail: booking.users.email,
+          customerName: booking.users.full_name,
           transactionId: paymentData.transId
         })
       }
@@ -463,39 +465,41 @@ export class ZaloPayPayment {
     }
   }
   // Trigger service delivery workflow
-  private async triggerServiceDelivery(bookingId: string): Promise<void> {
+  private async triggerServiceDelivery(booking_id: string): Promise<void> {
     try {
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
+      const booking = await prisma.bookings.findUnique({
+        where: { id: booking_id },
         include: {
-          serviceTier: {
-            include: { service: true }
+          service_tiers: {
+            include: { services: true }
           }
         }
       })
       if (booking) {
         // Update booking to in-progress
-        await prisma.booking.update({
-          where: { id: bookingId },
+        await prisma.bookings.update({
+          where: { id: booking_id },
           data: {
             status: 'in_progress',
-            startDate: new Date()
+            start_date: new Date()
           }
         })
         // Create service delivery task
-        await prisma.serviceTask.create({
+        await prisma.service_tasks.create({
           data: {
-            bookingId: bookingId,
+            id: crypto.randomUUID(),
+            booking_id: booking_id,
             type: 'delivery',
-            title: `Deliver ${booking.serviceTier.service.name}`,
-            description: `Process service delivery for booking ${booking.bookingNumber}`,
+            title: `Deliver ${booking.service_tiers.services.name}`,
+            description: `Process service delivery for booking ${booking.booking_number}`,
             priority: 'high',
             status: 'pending',
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
+            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            updated_at: new Date() // 7 days default
           }
         })
         getLogger().info('Service delivery workflow triggered', {
-          bookingNumber: booking.bookingNumber
+          booking_number: booking.booking_number
         })
       }
     } catch (error) {

@@ -7,12 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface ActiveBooking {
   id: string
-  bookingNumber: string
+  booking_number: string
   serviceName: string
   tierName: string
   status: string
-  startDate: string | null
-  endDate: string | null
+  start_date: string | null
+  end_date: string | null
   progress: number
   nextSession?: string
   assignedStaff?: {
@@ -143,12 +143,12 @@ export default function ActiveBookings({ bookings }: ActiveBookingsProps) {
                     <div className="mb-2 flex items-center gap-4 text-sm text-gray-600">
                       <span className="font-medium">{booking.tierName}</span>
                       <span>•</span>
-                      <span>#{booking.bookingNumber}</span>
+                      <span>#{booking.booking_number}</span>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {formatDate(booking.startDate)} - {formatDate(booking.endDate)}
+                        {formatDate(booking.start_date)} - {formatDate(booking.end_date)}
                       </div>
                       {booking.assignedStaff && (
                         <div className="flex items-center gap-2">

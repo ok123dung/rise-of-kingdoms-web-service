@@ -36,12 +36,12 @@ export enum LogLevel {
 }
 
 export interface LogContext {
-  userId?: string
-  bookingId?: string
-  paymentId?: string
+  user_id?: string
+  booking_id?: string
+  payment_id?: string
   sessionId?: string
   requestId?: string
-  userAgent?: string
+  user_agent?: string
   ip?: string
   [key: string]: string | number | boolean | null | undefined
 }
@@ -239,36 +239,36 @@ class Logger {
   // Business-specific logging methods
   logPaymentEvent(
     event: 'created' | 'completed' | 'failed' | 'refunded',
-    paymentId: string,
+    payment_id: string,
     context?: LogContext
   ): void {
     this.info(`Payment ${event}`, {
       ...context,
-      paymentId,
+      payment_id,
       event: `payment_${event}`
     })
   }
 
   logBookingEvent(
     event: 'created' | 'confirmed' | 'started' | 'completed' | 'cancelled',
-    bookingId: string,
+    booking_id: string,
     context?: LogContext
   ): void {
     this.info(`Booking ${event}`, {
       ...context,
-      bookingId,
+      booking_id,
       event: `booking_${event}`
     })
   }
 
   logUserEvent(
     event: 'registered' | 'login' | 'logout' | 'profile_updated',
-    userId: string,
+    user_id: string,
     context?: LogContext
   ): void {
     this.info(`User ${event}`, {
       ...context,
-      userId,
+      user_id,
       event: `user_${event}`
     })
   }
@@ -427,9 +427,9 @@ export function createAPILogger() {
       requestId,
       method: req.method,
       path: req.path,
-      userAgent: req.headers?.['user-agent'],
+      user_agent: req.headers?.['user-agent'],
       ip: req.ip || req.connection?.remoteAddress,
-      userId: req.user?.id
+      user_id: req.user?.id
     })
 
     // Override res.end to log response
@@ -444,8 +444,8 @@ export function createAPILogger() {
         duration,
         {
           requestId,
-          userId: req.user?.id,
-          userAgent: req.headers?.['user-agent'],
+          user_id: req.user?.id,
+          user_agent: req.headers?.['user-agent'],
           ip: req.ip || req.connection?.remoteAddress
         }
       )

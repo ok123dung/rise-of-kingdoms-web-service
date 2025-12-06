@@ -22,26 +22,26 @@ async function getBookings(searchParams: { [key: string]: string | string[] | un
 
   if (query) {
     where.OR = [
-      { bookingNumber: { contains: query, mode: 'insensitive' } },
+      { booking_number: { contains: query, mode: 'insensitive' } },
       { user: { email: { contains: query, mode: 'insensitive' } } },
-      { user: { fullName: { contains: query, mode: 'insensitive' } } }
+      { user: { full_name: { contains: query, mode: 'insensitive' } } }
     ]
   }
 
   const [bookings, total] = await Promise.all([
-    prisma.booking.findMany({
+    prisma.bookings.findMany({
       where,
       skip,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { created_at: 'desc' },
       include: {
         user: true,
-        serviceTier: {
-          include: { service: true }
+        service_tiers: {
+          include: { services: true }
         }
       }
     }),
-    prisma.booking.count({ where })
+    prisma.bookings.count({ where })
   ])
 
   return { bookings, total, totalPages: Math.ceil(total / limit) }
@@ -140,24 +140,24 @@ export default async function BookingsPage({
               bookings.map(booking => (
                 <tr key={booking.id} className="hover:bg-gray-50">
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                    {booking.bookingNumber}
+                    {booking.booking_number}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{booking.user.fullName}</div>
-                    <div className="text-sm text-gray-500">{booking.user.email}</div>
+                    <div className="text-sm font-medium text-gray-900">{booking.users.full_name}</div>
+                    <div className="text-sm text-gray-500">{booking.users.email}</div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {booking.serviceTier.service.name}
+                    {booking.service_tiers.services.name}
                     <span className="ml-1 rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
-                      {booking.serviceTier.name}
+                      {booking.service_tiers.name}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                    {Number(booking.finalAmount).toLocaleString()} đ
+                    {Number(booking.final_amount).toLocaleString()} đ
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">{getStatusBadge(booking.status)}</td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {new Date(booking.createdAt).toLocaleDateString('vi-VN')}
+                    {new Date(booking.created_at).toLocaleDateString('vi-VN')}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                     <Link

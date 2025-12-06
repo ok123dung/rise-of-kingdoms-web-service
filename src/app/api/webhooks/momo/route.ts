@@ -79,16 +79,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Replay protection: validate timestamp and check for duplicates
-    const eventId = `momo_${orderId}_${transId}`
+    const event_id = `momo_${orderId}_${transId}`
     const replayValidation = await validateWebhookReplayProtection(
       'momo',
-      eventId,
+      event_id,
       responseTime // MoMo timestamp in milliseconds
     )
 
     if (!replayValidation.valid) {
       getLogger().warn('MoMo webhook replay attack detected', {
-        eventId,
+        event_id,
         error: replayValidation.error,
         isDuplicate: replayValidation.isDuplicate
       })
@@ -103,13 +103,13 @@ export async function POST(request: NextRequest) {
     const webhookService = await getWebhookService()
 
     // Store webhook event for processing
-    await webhookService.storeWebhookEvent('momo', 'payment_notification', eventId, body as unknown as Record<string, unknown>)
+    await webhookService.storeWebhookEvent('momo', 'payment_notification', event_id, body as unknown as Record<string, unknown>)
 
     // Process immediately
-    const processed = await webhookService.processWebhookEvent(eventId)
+    const processed = await webhookService.processWebhookEvent(event_id)
 
     if (!processed) {
-      getLogger().warn('MoMo webhook processing deferred', { eventId })
+      getLogger().warn('MoMo webhook processing deferred', { event_id })
     }
 
     // Always return success to MoMo

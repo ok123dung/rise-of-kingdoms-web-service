@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer())
 
     // Delete old avatar if exists
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       include: {
         fileUploads: {
@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
     // Upload new avatar
     const result = await UploadService.uploadImage(buffer, `avatar-${Date.now()}.jpg`, {
       folder: 'avatars',
-      userId: session.user.id,
-      isPublic: true,
+      user_id: session.user.id,
+      is_public: true,
       width: 300,
       height: 300,
       quality: 90,
@@ -73,11 +73,11 @@ export async function POST(request: NextRequest) {
     // Note: User model doesn't have 'image' field in current schema
     // Avatar URL is stored in CloudinaryUpload model instead
     // Saved avatar URL to user profile
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: session.user.id },
       data: {
         image: result.url,
-        updatedAt: new Date()
+        updated_at: new Date()
       }
     })
 

@@ -5,7 +5,7 @@ import { getLogger } from '@/lib/monitoring/logger'
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key'
 
 interface TokenPayload {
-  userId: string
+  user_id: string
   email: string
   role?: string
 }
@@ -26,6 +26,6 @@ export function verifyToken(token: string): TokenPayload | null {
   }
 }
 
-export function generateWebSocketToken(userId: string, email: string, role?: string): string {
-  return generateToken({ userId, email, role })
+export function generateWebSocketToken(user_id: string, email: string, role?: string): string {
+  return generateToken({ user_id, email, role })
 }

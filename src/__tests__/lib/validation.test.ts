@@ -119,7 +119,7 @@ describe('Validation Schemas', () => {
   describe('signupSchema', () => {
     it('should validate correct signup data', () => {
       const validData = {
-        fullName: 'Nguyễn Văn A',
+        full_name: 'Nguyễn Văn A',
         email: 'test@example.com',
         password: 'password123',
         phone: '0987654321'
@@ -131,7 +131,7 @@ describe('Validation Schemas', () => {
 
     it('should reject invalid signup data', () => {
       const invalidData = {
-        fullName: 'A', // too short
+        full_name: 'A', // too short
         email: 'invalid-email',
         password: '123', // too short
         phone: '123' // invalid format
@@ -148,10 +148,10 @@ describe('Validation Schemas', () => {
   describe('leadSchema', () => {
     it('should validate correct lead data', () => {
       const validData = {
-        fullName: 'Nguyễn Văn B',
+        full_name: 'Nguyễn Văn B',
         email: 'lead@example.com',
         phone: '0987654321',
-        serviceInterest: 'strategy',
+        service_interest: 'strategy',
         source: 'website',
         notes: 'Interested in professional coaching'
       }
@@ -164,10 +164,10 @@ describe('Validation Schemas', () => {
   describe('paymentSchema', () => {
     it('should validate correct payment data', () => {
       const validData = {
-        bookingId: 'clk1234567890abcdef',
+        booking_id: 'clk1234567890abcdef',
         amount: 750000,
         currency: 'VND',
-        paymentMethod: 'momo'
+        payment_method: 'momo'
       }
 
       const result = paymentSchema.safeParse(validData)
@@ -176,10 +176,10 @@ describe('Validation Schemas', () => {
 
     it('should reject invalid payment amounts', () => {
       const invalidData = {
-        bookingId: 'clk1234567890abcdef',
+        booking_id: 'clk1234567890abcdef',
         amount: -1000, // negative amount
         currency: 'VND',
-        paymentMethod: 'momo'
+        payment_method: 'momo'
       }
 
       const result = paymentSchema.safeParse(invalidData)

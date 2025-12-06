@@ -15,15 +15,15 @@ import {
 interface WebhookEvent {
   id: string
   provider: string
-  eventType: string
-  eventId: string
+  event_type: string
+  event_id: string
   status: string
   attempts: number
-  lastAttemptAt?: string
-  nextRetryAt?: string
-  errorMessage?: string
-  createdAt: string
-  processedAt?: string
+  last_attempt_at?: string
+  next_retry_at?: string
+  error_message?: string
+  created_at: string
+  processed_at?: string
 }
 interface WebhookStats {
   total: number
@@ -58,13 +58,13 @@ export function WebhookMonitor() {
       setLoading(false)
     }
   }
-  const retryWebhook = async (eventId: string) => {
-    setRetrying(eventId)
+  const retryWebhook = async (event_id: string) => {
+    setRetrying(event_id)
     try {
       const response = await fetch('/api/admin/webhooks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId })
+        body: JSON.stringify({ event_id })
       })
       if (response.ok) {
         void fetchWebhooks()
@@ -201,23 +201,23 @@ export function WebhookMonitor() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <code className="rounded bg-gray-100 px-2 py-1 text-xs">{webhook.eventId}</code>
+                  <code className="rounded bg-gray-100 px-2 py-1 text-xs">{webhook.event_id}</code>
                 </td>
                 <td className="px-4 py-3 text-sm">{webhook.attempts}/5</td>
                 <td className="px-4 py-3 text-sm text-gray-600">
-                  {format(new Date(webhook.createdAt), 'dd/MM HH:mm')}
+                  {format(new Date(webhook.created_at), 'dd/MM HH:mm')}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-600">
-                  {webhook.nextRetryAt ? format(new Date(webhook.nextRetryAt), 'dd/MM HH:mm') : '-'}
+                  {webhook.next_retry_at ? format(new Date(webhook.next_retry_at), 'dd/MM HH:mm') : '-'}
                 </td>
                 <td className="px-4 py-3">
                   {webhook.status === 'failed' && (
                     <button
                       className="text-blue-600 hover:text-blue-700"
-                      disabled={retrying === webhook.eventId}
-                      onClick={() => void retryWebhook(webhook.eventId)}
+                      disabled={retrying === webhook.event_id}
+                      onClick={() => void retryWebhook(webhook.event_id)}
                     >
-                      {retrying === webhook.eventId ? (
+                      {retrying === webhook.event_id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <RotateCcw className="h-4 w-4" />

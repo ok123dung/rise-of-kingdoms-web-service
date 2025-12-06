@@ -91,23 +91,24 @@ export class EmailService {
       const template = this.getBookingConfirmationTemplate(booking)
 
       const result = await this.sendEmail({
-        to: booking.user.email,
+        to: booking.users.email,
         subject: template.subject,
         html: template.html,
         text: template.text
       })
 
       // Log communication
-      await prisma.communication.create({
+      await prisma.communications.create({
         data: {
-          userId: booking.user.id,
-          bookingId: booking.id,
+          id: crypto.randomUUID(),
+          user_id: booking.users.id,
+          booking_id: booking.id,
           type: 'email',
-          channel: booking.user.email,
+          channel: booking.users.email,
           subject: template.subject,
           content: template.html,
-          templateId: 'booking_confirmation',
-          templateData: {
+          template_id: 'booking_confirmation',
+          template_data: {
             success: result.success,
             error: result.error
           }
@@ -127,23 +128,24 @@ export class EmailService {
       const template = this.getPaymentConfirmationTemplate(payment)
 
       const result = await this.sendEmail({
-        to: payment.booking.user.email,
+        to: payment.bookings.users.email,
         subject: template.subject,
         html: template.html,
         text: template.text
       })
 
       // Log communication
-      await prisma.communication.create({
+      await prisma.communications.create({
         data: {
-          userId: payment.booking.user.id,
-          bookingId: payment.booking.id,
+          id: crypto.randomUUID(),
+          user_id: payment.bookings.users.id,
+          booking_id: payment.bookings.id,
           type: 'email',
-          channel: payment.booking.user.email,
+          channel: payment.bookings.users.email,
           subject: template.subject,
           content: template.html,
-          templateId: 'payment_confirmation',
-          templateData: {
+          template_id: 'payment_confirmation',
+          template_data: {
             success: result.success,
             error: result.error
           }
@@ -170,15 +172,16 @@ export class EmailService {
       })
 
       // Log communication
-      await prisma.communication.create({
+      await prisma.communications.create({
         data: {
-          userId: user.id,
+          id: crypto.randomUUID(),
+          user_id: user.id,
           type: 'email',
           channel: user.email,
           subject: template.subject,
           content: template.html,
-          templateId: 'welcome',
-          templateData: {
+          template_id: 'welcome',
+          template_data: {
             success: result.success,
             error: result.error
           }
@@ -198,23 +201,24 @@ export class EmailService {
       const template = this.getServiceReminderTemplate(booking)
 
       const result = await this.sendEmail({
-        to: booking.user.email,
+        to: booking.users.email,
         subject: template.subject,
         html: template.html,
         text: template.text
       })
 
       // Log communication
-      await prisma.communication.create({
+      await prisma.communications.create({
         data: {
-          userId: booking.user.id,
-          bookingId: booking.id,
+          id: crypto.randomUUID(),
+          user_id: booking.users.id,
+          booking_id: booking.id,
           type: 'email',
-          channel: booking.user.email,
+          channel: booking.users.email,
           subject: template.subject,
           content: template.html,
-          templateId: 'service_reminder',
-          templateData: {
+          template_id: 'service_reminder',
+          template_data: {
             success: result.success,
             error: result.error
           }
@@ -245,16 +249,17 @@ export class EmailService {
       })
 
       // Log communication if lead is assigned
-      if (lead.assignedTo) {
-        await prisma.communication.create({
+      if (lead.assigned_to) {
+        await prisma.communications.create({
           data: {
-            userId: lead.assignedTo,
+          id: crypto.randomUUID(),
+          user_id: lead.assigned_to,
             type: 'email',
             channel: lead.email,
             subject: template.subject,
             content: template.html,
-            templateId: 'lead_followup',
-            templateData: {
+            template_id: 'lead_followup',
+            template_data: {
               success: result.success,
               error: result.error
             }
@@ -271,11 +276,11 @@ export class EmailService {
 
   // Email templates
   private getBookingConfirmationTemplate(booking: BookingWithRelations): EmailTemplate {
-    const serviceName = `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
-    const amount = booking.finalAmount.toLocaleString()
+    const serviceName = `${booking.service_tiers.services.name} - ${booking.service_tiers.name}`
+    const amount = booking.final_amount.toLocaleString()
 
     return {
-      subject: `Xác nhận đặt dịch vụ ${booking.serviceTier.service.name} - ${booking.bookingNumber}`,
+      subject: `Xác nhận đặt dịch vụ ${booking.service_tiers.services.name} - ${booking.booking_number}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -293,11 +298,11 @@ export class EmailService {
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
               <h3>Thông tin đặt dịch vụ:</h3>
               <ul style="list-style: none; padding: 0;">
-                <li><strong>Mã booking:</strong> ${booking.bookingNumber}</li>
+                <li><strong>Mã booking:</strong> ${booking.booking_number}</li>
                 <li><strong>Dịch vụ:</strong> ${serviceName}</li>
                 <li><strong>Số tiền:</strong> ${amount} VNĐ</li>
                 <li><strong>Trạng thái:</strong> ${booking.status}</li>
-                <li><strong>Ngày đặt:</strong> ${new Date(booking.createdAt).toLocaleDateString('vi-VN')}</li>
+                <li><strong>Ngày đặt:</strong> ${new Date(booking.created_at).toLocaleDateString('vi-VN')}</li>
               </ul>
             </div>
 
@@ -329,7 +334,7 @@ export class EmailService {
       text: `
         Xác nhận đặt dịch vụ ${serviceName}
         
-        Mã booking: ${booking.bookingNumber}
+        Mã booking: ${booking.booking_number}
         Dịch vụ: ${serviceName}
         Số tiền: ${amount} VNĐ
         Trạng thái: ${booking.status}
@@ -347,11 +352,11 @@ export class EmailService {
   }
 
   private getPaymentConfirmationTemplate(payment: PaymentWithRelations): EmailTemplate {
-    const serviceName = `${payment.booking.serviceTier.service.name} - ${payment.booking.serviceTier.name}`
+    const serviceName = `${payment.bookings.service_tiers.services.name} - ${payment.bookings.service_tiers.name}`
     const amount = payment.amount.toLocaleString()
 
     return {
-      subject: `Thanh toán thành công - ${payment.paymentNumber}`,
+      subject: `Thanh toán thành công - ${payment.payment_number}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -369,12 +374,12 @@ export class EmailService {
             <div style="background: #ecfdf5; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
               <h3>Thông tin thanh toán:</h3>
               <ul style="list-style: none; padding: 0;">
-                <li><strong>Mã thanh toán:</strong> ${payment.paymentNumber}</li>
-                <li><strong>Mã booking:</strong> ${payment.booking.bookingNumber}</li>
+                <li><strong>Mã thanh toán:</strong> ${payment.payment_number}</li>
+                <li><strong>Mã booking:</strong> ${payment.bookings.booking_number}</li>
                 <li><strong>Dịch vụ:</strong> ${serviceName}</li>
                 <li><strong>Số tiền:</strong> ${amount} VNĐ</li>
-                <li><strong>Phương thức:</strong> ${payment.paymentMethod.toUpperCase()}</li>
-                <li><strong>Thời gian:</strong> ${payment.paidAt ? new Date(payment.paidAt).toLocaleString('vi-VN') : 'N/A'}</li>
+                <li><strong>Phương thức:</strong> ${payment.payment_method.toUpperCase()}</li>
+                <li><strong>Thời gian:</strong> ${payment.paid_at ? new Date(payment.paid_at).toLocaleString('vi-VN') : 'N/A'}</li>
               </ul>
             </div>
 
@@ -410,11 +415,11 @@ export class EmailService {
       text: `
         Thanh toán thành công!
         
-        Mã thanh toán: ${payment.paymentNumber}
-        Mã booking: ${payment.booking.bookingNumber}
+        Mã thanh toán: ${payment.payment_number}
+        Mã booking: ${payment.bookings.booking_number}
         Dịch vụ: ${serviceName}
         Số tiền: ${amount} VNĐ
-        Phương thức: ${payment.paymentMethod.toUpperCase()}
+        Phương thức: ${payment.payment_method.toUpperCase()}
         
         Tiếp theo:
         1. Team sẽ liên hệ trong vòng 2-4 giờ
@@ -441,7 +446,7 @@ export class EmailService {
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
               <h1 style="color: #2563eb;">🎮 RoK Services</h1>
-              <h2 style="color: #059669;">Chào mừng ${user.fullName}!</h2>
+              <h2 style="color: #059669;">Chào mừng ${user.full_name}!</h2>
             </div>
             
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
@@ -483,7 +488,7 @@ export class EmailService {
         </html>
       `,
       text: `
-        Chào mừng ${user.fullName} đến với RoK Services!
+        Chào mừng ${user.full_name} đến với RoK Services!
         
         Cảm ơn bạn đã đăng ký tài khoản. Với RoK Services, bạn có thể:
         - Tư vấn chiến thuật từ top 1% players
@@ -501,15 +506,15 @@ export class EmailService {
   }
 
   private getServiceReminderTemplate(booking: BookingWithRelations): EmailTemplate {
-    const serviceName = `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`
-    const daysLeft = booking.endDate
+    const serviceName = `${booking.service_tiers.services.name} - ${booking.service_tiers.name}`
+    const daysLeft = booking.end_date
       ? Math.ceil(
-          (new Date(booking.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+          (new Date(booking.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
         )
       : 0
 
     return {
-      subject: `Nhắc nhở: Dịch vụ ${booking.serviceTier.service.name} sắp hết hạn`,
+      subject: `Nhắc nhở: Dịch vụ ${booking.service_tiers.services.name} sắp hết hạn`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -528,8 +533,8 @@ export class EmailService {
               <h3>Dịch vụ của bạn sắp hết hạn:</h3>
               <ul style="list-style: none; padding: 0;">
                 <li><strong>Dịch vụ:</strong> ${serviceName}</li>
-                <li><strong>Mã booking:</strong> ${booking.bookingNumber}</li>
-                <li><strong>Ngày hết hạn:</strong> ${booking.endDate ? new Date(booking.endDate).toLocaleDateString('vi-VN') : 'N/A'}</li>
+                <li><strong>Mã booking:</strong> ${booking.booking_number}</li>
+                <li><strong>Ngày hết hạn:</strong> ${booking.end_date ? new Date(booking.end_date).toLocaleDateString('vi-VN') : 'N/A'}</li>
                 <li><strong>Còn lại:</strong> ${daysLeft} ngày</li>
               </ul>
             </div>
@@ -567,8 +572,8 @@ export class EmailService {
         Nhắc nhở: Dịch vụ sắp hết hạn
         
         Dịch vụ: ${serviceName}
-        Mã booking: ${booking.bookingNumber}
-        Ngày hết hạn: ${booking.endDate ? new Date(booking.endDate).toLocaleDateString('vi-VN') : 'N/A'}
+        Mã booking: ${booking.booking_number}
+        Ngày hết hạn: ${booking.end_date ? new Date(booking.end_date).toLocaleDateString('vi-VN') : 'N/A'}
         Còn lại: ${daysLeft} ngày
         
         Gia hạn ngay: ${process.env.NEXT_PUBLIC_SITE_URL}/renew/${booking.id}
@@ -591,11 +596,11 @@ export class EmailService {
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
               <h1 style="color: #2563eb;">🎮 RoK Services</h1>
-              <h2 style="color: #059669;">Xin chào ${lead.fullName || 'bạn'}!</h2>
+              <h2 style="color: #059669;">Xin chào ${lead.full_name || 'bạn'}!</h2>
             </div>
             
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <p>Chúng tôi nhận thấy bạn quan tâm đến dịch vụ <strong>${lead.serviceInterest || 'Rise of Kingdoms'}</strong> của chúng tôi.</p>
+              <p>Chúng tôi nhận thấy bạn quan tâm đến dịch vụ <strong>${lead.service_interest || 'Rise of Kingdoms'}</strong> của chúng tôi.</p>
               <p>Có điều gì chúng tôi có thể hỗ trợ bạn không?</p>
             </div>
 
@@ -635,9 +640,9 @@ export class EmailService {
         </html>
       `,
       text: `
-        Xin chào ${lead.fullName || 'bạn'}!
+        Xin chào ${lead.full_name || 'bạn'}!
         
-        Chúng tôi nhận thấy bạn quan tâm đến dịch vụ ${lead.serviceInterest || 'Rise of Kingdoms'}.
+        Chúng tôi nhận thấy bạn quan tâm đến dịch vụ ${lead.service_interest || 'Rise of Kingdoms'}.
         
         Tại sao chọn RoK Services?
         - Top 1% players Việt Nam

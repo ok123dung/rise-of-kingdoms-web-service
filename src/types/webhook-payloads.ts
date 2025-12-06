@@ -79,7 +79,7 @@ export interface ZaloPayWebhookRequest {
  * ZaloPay Embed Data (parsed from embed_data field)
  */
 export interface ZaloPayEmbedData {
-  bookingId: string
+  booking_id: string
   redirecturl?: string
   [key: string]: unknown
 }
@@ -90,18 +90,18 @@ export interface ZaloPayEmbedData {
 export interface WebhookEventData {
   id: string
   provider: 'vnpay' | 'momo' | 'zalopay'
-  eventType: string
-  eventId: string
+  event_type: string
+  event_id: string
   payload: VNPayWebhookParams | MoMoWebhookPayload | ZaloPayWebhookData
   status: 'pending' | 'processing' | 'completed' | 'failed'
   attempts: number
-  lastAttemptAt?: Date
-  nextRetryAt?: Date
-  processedAt?: Date
-  errorMessage?: string
+  last_attempt_at?: Date
+  next_retry_at?: Date
+  processed_at?: Date
+  error_message?: string
   metadata?: Record<string, unknown>
-  createdAt: Date
-  updatedAt: Date
+  created_at: Date
+  updated_at: Date
 }
 
 /**
@@ -153,7 +153,7 @@ export function isZaloPayWebhookData(payload: unknown): payload is ZaloPayWebhoo
 export interface WebhookProcessingResult {
   success: boolean
   message: string
-  eventId?: string
+  event_id?: string
   retryable?: boolean
   error?: Error
 }

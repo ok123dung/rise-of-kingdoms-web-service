@@ -100,7 +100,7 @@ class RoKDiscordBot {
     const email = interaction.options.getString('email')
 
     try {
-      const user = await prisma.user.findUnique({ where: { email: email! } })
+      const user = await prisma.users.findUnique({ where: { email: email! } })
       if (!user) {
         await interaction.reply({
           content: 'Không tìm thấy tài khoản với email này.',
@@ -109,16 +109,16 @@ class RoKDiscordBot {
         return
       }
 
-      const bookings = await prisma.booking.findMany({
-        where: { userId: user.id },
+      const bookings = await prisma.bookings.findMany({
+        where: { user_id: user.id },
         include: {
-          serviceTier: {
+          service_tiers: {
             include: {
-              service: true
+              services: true
             }
           }
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { created_at: 'desc' }
       })
 
       if (bookings.length === 0) {
@@ -136,11 +136,11 @@ class RoKDiscordBot {
 
       bookings.slice(0, 5).forEach((booking, index) => {
         const statusEmoji = this.getStatusEmoji(booking.status)
-        const paymentEmoji = this.getPaymentStatusEmoji(booking.paymentStatus)
+        const paymentEmoji = this.getPaymentStatusEmoji(booking.payment_status)
 
         embed.addFields({
-          name: `${index + 1}. ${booking.serviceTier.service.name}`,
-          value: `${statusEmoji} Trạng thái: ${booking.status}\n${paymentEmoji} Thanh toán: ${booking.paymentStatus}\nSố tiền: ${booking.finalAmount.toLocaleString()} VNĐ\nMã booking: ${booking.bookingNumber}`,
+          name: `${index + 1}. ${booking.service_tiers.services.name}`,
+          value: `${statusEmoji} Trạng thái: ${booking.status}\n${paymentEmoji} Thanh toán: ${booking.payment_status}\nSố tiền: ${booking.final_amount.toLocaleString()} VNĐ\nMã booking: ${booking.booking_number}`,
           inline: true
         })
       })
@@ -160,15 +160,15 @@ class RoKDiscordBot {
 
   private async handleServices(interaction: ChatInputCommandInteraction) {
     try {
-      const services = await prisma.service.findMany({
-        where: { isActive: true },
+      const services = await prisma.services.findMany({
+        where: { is_active: true },
         include: {
-          serviceTiers: {
-            where: { isAvailable: true },
-            orderBy: { sortOrder: 'asc' }
+          service_tiers: {
+            where: { is_available: true },
+            orderBy: { sort_order: 'asc' }
           }
         },
-        orderBy: { sortOrder: 'asc' }
+        orderBy: { sort_order: 'asc' }
       })
 
       const embed = new EmbedBuilder()
@@ -178,12 +178,12 @@ class RoKDiscordBot {
         .setURL(`${process.env.NEXT_PUBLIC_SITE_URL}/services`)
 
       services.slice(0, 10).forEach(service => {
-        const minPrice = Math.min(...service.serviceTiers.map(tier => Number(tier.price)))
-        const maxPrice = Math.max(...service.serviceTiers.map(tier => Number(tier.price)))
+        const minPrice = Math.min(...service.service_tiers.map(tier => Number(tier.price)))
+        const maxPrice = Math.max(...service.service_tiers.map(tier => Number(tier.price)))
 
         embed.addFields({
           name: service.name,
-          value: `${service.shortDescription || service.description?.substring(0, 100) || 'Không có mô tả'}\n💰 Giá: ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} VNĐ`,
+          value: `${service.short_description || service.description?.substring(0, 100) || 'Không có mô tả'}\n💰 Giá: ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} VNĐ`,
           inline: false
         })
       })
@@ -264,15 +264,15 @@ class RoKDiscordBot {
         .setTitle('🎉 Booking mới!')
         .setColor(0x00ff00)
         .addFields(
-          { name: 'Khách hàng', value: booking.user.fullName, inline: true },
-          { name: 'Email', value: booking.user.email, inline: true },
+          { name: 'Khách hàng', value: booking.users.full_name, inline: true },
+          { name: 'Email', value: booking.users.email, inline: true },
           {
             name: 'Dịch vụ',
-            value: `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`,
+            value: `${booking.service_tiers.services.name} - ${booking.service_tiers.name}`,
             inline: false
           },
-          { name: 'Số tiền', value: `${booking.finalAmount.toLocaleString()} VNĐ`, inline: true },
-          { name: 'Mã booking', value: booking.bookingNumber, inline: true },
+          { name: 'Số tiền', value: `${booking.final_amount.toLocaleString()} VNĐ`, inline: true },
+          { name: 'Mã booking', value: booking.booking_number, inline: true },
           { name: 'Trạng thái', value: booking.status, inline: true }
         )
         .setTimestamp()
@@ -303,12 +303,12 @@ class RoKDiscordBot {
         .setTitle('💰 Thanh toán thành công!')
         .setColor(0x00ff00)
         .addFields(
-          { name: 'Khách hàng', value: payment.booking.user.fullName, inline: true },
+          { name: 'Khách hàng', value: payment.bookings.users.full_name, inline: true },
           { name: 'Số tiền', value: `${payment.amount.toLocaleString()} VNĐ`, inline: true },
-          { name: 'Phương thức', value: payment.paymentMethod.toUpperCase(), inline: true },
-          { name: 'Mã thanh toán', value: payment.paymentNumber, inline: true },
-          { name: 'Mã booking', value: payment.booking.bookingNumber, inline: true },
-          { name: 'Dịch vụ', value: payment.booking.serviceTier.service.name, inline: true }
+          { name: 'Phương thức', value: payment.payment_method.toUpperCase(), inline: true },
+          { name: 'Mã thanh toán', value: payment.payment_number, inline: true },
+          { name: 'Mã booking', value: payment.bookings.booking_number, inline: true },
+          { name: 'Dịch vụ', value: payment.bookings.service_tiers.services.name, inline: true }
         )
         .setTimestamp()
         .setFooter({ text: 'RoK Services - Payment System' })
@@ -345,7 +345,7 @@ class RoKDiscordBot {
       const guild = await this.client.guilds.fetch(guildId)
       const category = await guild.channels.fetch(categoryId)
 
-      const channelName = `${booking.user.fullName.toLowerCase().replace(/\s+/g, '-')}-${booking.serviceTier.service.slug}`
+      const channelName = `${booking.users.full_name.toLowerCase().replace(/\s+/g, '-')}-${booking.service_tiers.services.slug}`
 
       const channel = await guild.channels.create({
         name: channelName,
@@ -356,10 +356,10 @@ class RoKDiscordBot {
             id: guild.roles.everyone.id,
             deny: [PermissionFlagsBits.ViewChannel]
           },
-          ...(booking.user.discordId
+          ...(booking.users.discord_id
             ? [
                 {
-                  id: booking.user.discordId,
+                  id: booking.users.discord_id,
                   allow: [
                     PermissionFlagsBits.ViewChannel,
                     PermissionFlagsBits.SendMessages,
@@ -376,13 +376,13 @@ class RoKDiscordBot {
         .setTitle('🎮 Chào mừng đến với kênh hỗ trợ!')
         .setColor(0x0099ff)
         .setDescription(
-          `Xin chào ${booking.user.fullName}! Đây là kênh riêng cho dịch vụ **${booking.serviceTier.service.name}** của bạn.`
+          `Xin chào ${booking.users.full_name}! Đây là kênh riêng cho dịch vụ **${booking.service_tiers.services.name}** của bạn.`
         )
         .addFields(
-          { name: 'Mã booking', value: booking.bookingNumber, inline: true },
+          { name: 'Mã booking', value: booking.booking_number, inline: true },
           {
             name: 'Dịch vụ',
-            value: `${booking.serviceTier.service.name} - ${booking.serviceTier.name}`,
+            value: `${booking.service_tiers.services.name} - ${booking.service_tiers.name}`,
             inline: true
           },
           { name: 'Trạng thái', value: booking.status, inline: true }

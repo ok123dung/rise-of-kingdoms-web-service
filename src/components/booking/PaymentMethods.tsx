@@ -9,7 +9,7 @@ import type { Decimal } from '@prisma/client/runtime/library'
 
 interface BookingData {
   id: string
-  finalAmount: number | Decimal
+  final_amount: number | Decimal
 }
 
 interface PaymentMethodsProps {
@@ -29,8 +29,8 @@ export default function PaymentMethods({ booking }: PaymentMethodsProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bookingId: booking.id,
-          amount: booking.finalAmount,
+          booking_id: booking.id,
+          amount: booking.final_amount,
           method: selectedMethod
         })
       })
@@ -129,7 +129,7 @@ export default function PaymentMethods({ booking }: PaymentMethodsProps) {
               Đang xử lý...
             </span>
           ) : (
-            `Thanh toán ${Number(booking.finalAmount).toLocaleString()} VNĐ`
+            `Thanh toán ${Number(booking.final_amount).toLocaleString()} VNĐ`
           )}
         </button>
       </div>

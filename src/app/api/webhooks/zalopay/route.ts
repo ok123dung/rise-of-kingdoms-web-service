@@ -52,16 +52,16 @@ export async function POST(request: NextRequest) {
     const { app_trans_id, zp_trans_id, server_time } = jsonData
 
     // Replay protection: validate timestamp and check for duplicates
-    const eventId = `zalopay_${app_trans_id}_${zp_trans_id}`
+    const event_id = `zalopay_${app_trans_id}_${zp_trans_id}`
     const replayValidation = await validateWebhookReplayProtection(
       'zalopay',
-      eventId,
+      event_id,
       server_time // ZaloPay timestamp in milliseconds
     )
 
     if (!replayValidation.valid) {
       getLogger().warn('ZaloPay webhook replay attack detected', {
-        eventId,
+        event_id,
         error: replayValidation.error,
         isDuplicate: replayValidation.isDuplicate
       })
@@ -76,13 +76,13 @@ export async function POST(request: NextRequest) {
     const webhookService = await getWebhookService()
 
     // Store webhook event for processing
-    await webhookService.storeWebhookEvent('zalopay', 'payment_notification', eventId, jsonData as unknown as Record<string, unknown>)
+    await webhookService.storeWebhookEvent('zalopay', 'payment_notification', event_id, jsonData as unknown as Record<string, unknown>)
 
     // Process immediately
-    const processed = await webhookService.processWebhookEvent(eventId)
+    const processed = await webhookService.processWebhookEvent(event_id)
 
     if (!processed) {
-      getLogger().warn('ZaloPay webhook processing deferred', { eventId })
+      getLogger().warn('ZaloPay webhook processing deferred', { event_id })
     }
 
     // Always return success to ZaloPay

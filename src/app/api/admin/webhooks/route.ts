@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
 interface RetryWebhookRequest {
-  eventId: string
+  event_id: string
 }
 
 export async function GET(request: NextRequest) {
@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Check admin permission
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
-      include: { staffProfile: true }
+      include: { staff: true }
     })
 
     if (!isAdmin(user)) {
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const [webhooks, total] = await Promise.all([
       prisma.webhookEvent.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { created_at: 'desc' },
         take: limit,
         skip: offset
       }),
@@ -90,9 +90,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check admin permission
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
-      include: { staffProfile: true }
+      include: { staff: true }
     })
 
     if (!isAdmin(user)) {
@@ -100,19 +100,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = (await request.json()) as RetryWebhookRequest
-    const { eventId } = body
+    const { event_id } = body
 
-    if (!eventId) {
+    if (!event_id) {
       return NextResponse.json({ error: 'Event ID required' }, { status: 400 })
     }
 
     // Reset webhook for retry
     await prisma.webhookEvent.update({
-      where: { eventId },
+      where: { event_id },
       data: {
         status: 'pending',
-        nextRetryAt: new Date(),
-        errorMessage: null
+        next_retry_at: new Date(),
+        error_message: null
       }
     })
 

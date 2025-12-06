@@ -67,11 +67,11 @@ export async function GET(): Promise<NextResponse<DebugDbResponse>> {
 
     return NextResponse.json(response)
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const error_message = error instanceof Error ? error.message : 'Unknown error'
 
     response.success = false
     response.message = 'Connection failed'
-    response.error = errorMessage
+    response.error = error_message
 
     return NextResponse.json(response, { status: 500 })
   }

@@ -7,7 +7,7 @@ import Image from 'next/image'
 
 interface TwoFactorStatus {
   enabled: boolean
-  backupCodesRemaining: number
+  backup_codesRemaining: number
 }
 
 export default function TwoFactorAuth() {
@@ -16,7 +16,7 @@ export default function TwoFactorAuth() {
   const [setupData, setSetupData] = useState<{
     qrCode: string
     secret: string
-    backupCodes: string[]
+    backup_codes: string[]
   } | null>(null)
   const [otpCode, setOtpCode] = useState('')
   const [password, setPassword] = useState('')
@@ -51,7 +51,7 @@ export default function TwoFactorAuth() {
     success: boolean
     qrCode?: string
     secret?: string
-    backupCodes?: string[]
+    backup_codes?: string[]
     message?: string
   }
 
@@ -61,11 +61,11 @@ export default function TwoFactorAuth() {
     try {
       const res = await fetch('/api/auth/2fa/setup', { method: 'POST' })
       const data = (await res.json()) as SetupResponse
-      if (data.success && data.qrCode && data.secret && data.backupCodes) {
+      if (data.success && data.qrCode && data.secret && data.backup_codes) {
         setSetupData({
           qrCode: data.qrCode,
           secret: data.secret,
-          backupCodes: data.backupCodes
+          backup_codes: data.backup_codes
         })
         setStep('setup')
       } else {
@@ -95,7 +95,7 @@ export default function TwoFactorAuth() {
       })
       const data = (await res.json()) as VerifyResponse
       if (data.success) {
-        setStatus({ enabled: true, backupCodesRemaining: 10 })
+        setStatus({ enabled: true, backup_codesRemaining: 10 })
         setStep('backup')
         setMessage({ type: 'success', text: '2FA enabled successfully' })
       } else {
@@ -125,7 +125,7 @@ export default function TwoFactorAuth() {
       })
       const data = (await res.json()) as DisableResponse
       if (data.success) {
-        setStatus({ enabled: false, backupCodesRemaining: 0 })
+        setStatus({ enabled: false, backup_codesRemaining: 0 })
         setStep('initial')
         setPassword('')
         setMessage({ type: 'success', text: '2FA disabled successfully' })
@@ -247,7 +247,7 @@ export default function TwoFactorAuth() {
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2 rounded-md bg-gray-50 p-4 font-mono text-sm">
-                      {setupData.backupCodes.map((code, index) => (
+                      {setupData.backup_codes.map((code, index) => (
                         <div key={index} className="text-gray-700">
                           {code}
                         </div>

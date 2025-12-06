@@ -17,21 +17,21 @@ import { useSession } from 'next-auth/react'
 
 interface PaymentDetail {
   id: string
-  paymentNumber: string
+  payment_number: string
   amount: number
   status: string
-  paymentMethod: string
-  paymentGateway: string
-  gatewayTransactionId: string | null
-  gatewayOrderId: string | null
-  gatewayResponse: Record<string, unknown> | null
-  createdAt: string
-  paidAt: string | null
+  payment_method: string
+  payment_gateway: string
+  gateway_transaction_id: string | null
+  gateway_order_id: string | null
+  gateway_response: Record<string, unknown> | null
+  created_at: string
+  paid_at: string | null
   booking: {
     id: string
-    bookingNumber: string
+    booking_number: string
     status: string
-    serviceTier: {
+    service_tiers: {
       name: string
       description: string
       service: {
@@ -40,7 +40,7 @@ interface PaymentDetail {
       }
     }
     user: {
-      fullName: string
+      full_name: string
       email: string
     }
   }
@@ -71,7 +71,7 @@ const statusConfig = {
     text: 'Đã hủy'
   }
 }
-const paymentMethodNames: Record<string, string> = {
+const payment_methodNames: Record<string, string> = {
   momo: 'MoMo',
   vnpay: 'VNPay',
   zalopay: 'ZaloPay',
@@ -114,7 +114,7 @@ export default function PaymentDetailPage() {
   }
   const retryPayment = () => {
     if (payment) {
-      router.push(`/dashboard/payments/new?booking=${payment.booking.id}`)
+      router.push(`/dashboard/payments/new?booking=${payment.bookings.id}`)
     }
   }
   if (loading) {
@@ -143,10 +143,10 @@ export default function PaymentDetailPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Chi tiết thanh toán #{payment.paymentNumber}
+              Chi tiết thanh toán #{payment.payment_number}
             </h1>
             <p className="mt-1 text-sm text-gray-500">
-              Tạo lúc {format(new Date(payment.createdAt), 'dd/MM/yyyy HH:mm', { locale: vi })}
+              Tạo lúc {format(new Date(payment.created_at), 'dd/MM/yyyy HH:mm', { locale: vi })}
             </p>
           </div>
         </div>
@@ -165,12 +165,12 @@ export default function PaymentDetailPage() {
               <div>
                 <dt className="text-sm font-medium text-gray-500">Phương thức</dt>
                 <dd className="mt-1 text-sm text-gray-900">
-                  {paymentMethodNames[payment.paymentMethod] || payment.paymentMethod}
+                  {payment_methodNames[payment.payment_method] || payment.payment_method}
                 </dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Cổng thanh toán</dt>
-                <dd className="mt-1 text-sm text-gray-900">{payment.paymentGateway}</dd>
+                <dd className="mt-1 text-sm text-gray-900">{payment.payment_gateway}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Số tiền</dt>
@@ -191,16 +191,16 @@ export default function PaymentDetailPage() {
                   </span>
                 </dd>
               </div>
-              {payment.gatewayTransactionId && (
+              {payment.gateway_transaction_id && (
                 <div className="sm:col-span-2">
                   <dt className="text-sm font-medium text-gray-500">Mã giao dịch</dt>
                   <dd className="mt-1 flex items-center">
                     <code className="rounded bg-gray-100 px-2 py-1 text-sm text-gray-900">
-                      {payment.gatewayTransactionId}
+                      {payment.gateway_transaction_id}
                     </code>
                     <button
                       className="ml-2 text-gray-400 hover:text-gray-600"
-                      onClick={() => copyToClipboard(payment.gatewayTransactionId!)}
+                      onClick={() => copyToClipboard(payment.gateway_transaction_id!)}
                     >
                       <DocumentDuplicateIcon className="h-4 w-4" />
                     </button>
@@ -208,11 +208,11 @@ export default function PaymentDetailPage() {
                   </dd>
                 </div>
               )}
-              {payment.paidAt && (
+              {payment.paid_at && (
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Thời gian thanh toán</dt>
                   <dd className="mt-1 text-sm text-gray-900">
-                    {format(new Date(payment.paidAt), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}
+                    {format(new Date(payment.paid_at), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}
                   </dd>
                 </div>
               )}
@@ -223,24 +223,24 @@ export default function PaymentDetailPage() {
             <h2 className="mb-4 text-lg font-medium text-gray-900">Đơn hàng liên quan</h2>
             <Link
               className="-m-2 block rounded-lg p-2 transition-colors hover:bg-gray-50"
-              href={`/dashboard/bookings/${payment.booking.id}`}
+              href={`/dashboard/bookings/${payment.bookings.id}`}
             >
               <div className="flex items-start space-x-4">
                 <div className="bg-rok-gold/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
-                  <span className="text-2xl">{payment.booking.serviceTier.service.icon}</span>
+                  <span className="text-2xl">{payment.bookings.service_tiers.services.icon}</span>
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">
-                    {payment.booking.serviceTier.service.name} - {payment.booking.serviceTier.name}
+                    {payment.bookings.service_tiers.services.name} - {payment.bookings.service_tiers.name}
                   </p>
-                  <p className="text-sm text-gray-500">Mã đơn: #{payment.booking.bookingNumber}</p>
+                  <p className="text-sm text-gray-500">Mã đơn: #{payment.bookings.booking_number}</p>
                   <p className="mt-1 text-sm text-gray-500">
                     Trạng thái:
                     <span className="ml-1 font-medium">
-                      {payment.booking.status === 'completed' && 'Hoàn thành'}
-                      {payment.booking.status === 'processing' && 'Đang xử lý'}
-                      {payment.booking.status === 'pending' && 'Chờ xử lý'}
-                      {payment.booking.status === 'cancelled' && 'Đã hủy'}
+                      {payment.bookings.status === 'completed' && 'Hoàn thành'}
+                      {payment.bookings.status === 'processing' && 'Đang xử lý'}
+                      {payment.bookings.status === 'pending' && 'Chờ xử lý'}
+                      {payment.bookings.status === 'cancelled' && 'Đã hủy'}
                     </span>
                   </p>
                 </div>
@@ -249,13 +249,13 @@ export default function PaymentDetailPage() {
             </Link>
           </div>
           {/* Gateway Response (for debugging, only show in development) */}
-          {process.env.NODE_ENV === 'development' && payment.gatewayResponse && (
+          {process.env.NODE_ENV === 'development' && payment.gateway_response && (
             <div className="rounded-lg bg-white p-6 shadow">
               <h2 className="mb-4 text-lg font-medium text-gray-900">
                 Gateway Response (Dev Only)
               </h2>
               <pre className="overflow-auto rounded bg-gray-50 p-4 text-xs text-gray-600">
-                {JSON.stringify(payment.gatewayResponse, null, 2)}
+                {JSON.stringify(payment.gateway_response, null, 2)}
               </pre>
             </div>
           )}
@@ -293,11 +293,11 @@ export default function PaymentDetailPage() {
             <dl className="space-y-3">
               <div>
                 <dt className="text-sm font-medium text-gray-500">Họ tên</dt>
-                <dd className="mt-1 text-sm text-gray-900">{payment.booking.user.fullName}</dd>
+                <dd className="mt-1 text-sm text-gray-900">{payment.bookings.users.full_name}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Email</dt>
-                <dd className="mt-1 text-sm text-gray-900">{payment.booking.user.email}</dd>
+                <dd className="mt-1 text-sm text-gray-900">{payment.bookings.users.email}</dd>
               </div>
             </dl>
           </div>
