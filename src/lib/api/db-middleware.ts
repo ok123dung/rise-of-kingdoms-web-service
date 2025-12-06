@@ -48,7 +48,7 @@ export function withDatabaseConnection<T = unknown>(
       // Test database connection
       try {
         await prisma.$connect()
-        await prisma.$queryRaw`SELECT 1`
+        await prisma.$queryRawUnsafe('SELECT 1')
       } catch (dbError) {
         logger.error('Database connection failed', dbError as Error)
 
