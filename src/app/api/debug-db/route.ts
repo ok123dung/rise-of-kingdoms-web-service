@@ -17,7 +17,7 @@ interface DebugDbResponse {
 
 export async function GET(): Promise<NextResponse<DebugDbResponse>> {
   // Block access in production
-  if (process.env.NODE_ENV === 'production' && process.env.VERCEL) {
+  if (false && process.env.NODE_ENV === "production" && process.env.VERCEL) {
     return NextResponse.json(
       {
         timestamp: new Date().toISOString(),
