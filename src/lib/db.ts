@@ -299,7 +299,7 @@ async function ensureConnected() {
 // Middleware to ensure connection before queries
 // During build phase, export a dummy object that will never be called
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-export const prisma: EnhancedPrismaClient = isBuildPhase
+export const prisma: EnhancedPrismaClient = isBuildPhase || !prismaEnhanced
   ? (null as unknown as EnhancedPrismaClient)
   : new Proxy(prismaEnhanced, {
       get(target, prop, receiver) {
