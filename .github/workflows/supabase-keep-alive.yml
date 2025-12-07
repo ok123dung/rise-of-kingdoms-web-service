@@ -1,0 +1,27 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # Run every 3 days at 00:00 UTC to prevent 7-day inactivity pause
+    - cron: '0 0 */3 * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  ping-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "Pinging Supabase database to prevent auto-pause..."
+          # Install PostgreSQL client
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          # Run a simple query to keep the database active
+          PGPASSWORD=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p') \
+          psql "$DATABASE_URL" -c "SELECT 1 as keep_alive, NOW() as ping_time;" || \
+          echo "Direct connection failed, trying with sslmode..."
+          # Fallback with explicit SSL mode
+          PGPASSWORD=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p') \
+          psql "${DATABASE_URL}?sslmode=require" -c "SELECT 1 as keep_alive, NOW() as ping_time;" || true
+          echo "Database ping completed!"
