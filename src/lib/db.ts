@@ -269,27 +269,49 @@ class EnhancedPrismaClient extends PrismaClient {
 // Only check NEXT_PHASE - not VERCEL_ENV as it causes issues in serverless runtime
 const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
 
-// Global instance management
+// Global instance management with lazy initialization
 const globalForPrisma = globalThis as unknown as {
   prismaEnhanced: EnhancedPrismaClient | undefined
+  prismaProxy: EnhancedPrismaClient | undefined
 }
 
-// Only instantiate if not in build phase
-export const prismaEnhanced = isBuildPhase
+// Lazy getter for EnhancedPrismaClient - only creates on first access
+function getEnhancedPrismaClient(): EnhancedPrismaClient {
+  if (isBuildPhase) {
+    throw new Error('Database not available during build phase')
+  }
+
+  if (!globalForPrisma.prismaEnhanced) {
+    globalForPrisma.prismaEnhanced = new EnhancedPrismaClient()
+  }
+
+  return globalForPrisma.prismaEnhanced
+}
+
+// Export prismaEnhanced as a getter for backwards compatibility
+export const prismaEnhanced: EnhancedPrismaClient = isBuildPhase
   ? (null as unknown as EnhancedPrismaClient)
-  : (globalForPrisma.prismaEnhanced ?? new EnhancedPrismaClient())
-
-if (process.env.NODE_ENV !== 'production' && !isBuildPhase) {
-  globalForPrisma.prismaEnhanced = prismaEnhanced
-}
+  : new Proxy({} as EnhancedPrismaClient, {
+      get(_target, prop, receiver) {
+        const client = getEnhancedPrismaClient()
+        const value = Reflect.get(client, prop, receiver)
+        if (typeof value === 'function') {
+          return value.bind(client)
+        }
+        return value
+      }
+    })
 
 // Auto-connect on first use
 let isConnecting = false
 async function ensureConnected() {
+  if (isBuildPhase) return
+
   if (!isConnecting) {
     isConnecting = true
     try {
-      await prismaEnhanced.$connect()
+      const client = getEnhancedPrismaClient()
+      await client.$connect()
     } finally {
       isConnecting = false
     }
@@ -297,15 +319,17 @@ async function ensureConnected() {
 }
 
 // Middleware to ensure connection before queries
-// During build phase, export a dummy object that will never be called
+// Uses lazy proxy pattern to avoid "Cannot create proxy with non-object" errors
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-export const prisma: EnhancedPrismaClient = isBuildPhase || !prismaEnhanced
+export const prisma: EnhancedPrismaClient = isBuildPhase
   ? (null as unknown as EnhancedPrismaClient)
-  : new Proxy(prismaEnhanced, {
-      get(target, prop, receiver) {
+  : new Proxy({} as EnhancedPrismaClient, {
+      get(_target, prop, receiver) {
+        const client = getEnhancedPrismaClient()
+
         // For model operations, ensure connected first
-        if (typeof prop === 'string' && prop in target && !prop.startsWith('$')) {
-          const modelProxy = Reflect.get(target, prop, receiver) as object
+        if (typeof prop === 'string' && prop in client && !prop.startsWith('$')) {
+          const modelProxy = Reflect.get(client, prop, receiver) as object
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return new Proxy(modelProxy, {
             get(modelTarget, modelProp) {
@@ -326,17 +350,17 @@ export const prisma: EnhancedPrismaClient = isBuildPhase || !prismaEnhanced
         // For $-prefixed methods
         if (typeof prop === 'string' && prop.startsWith('$') && prop !== '$connect') {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const value = Reflect.get(target, prop, receiver)
+          const value = Reflect.get(client, prop, receiver)
           if (typeof value === 'function') {
             return async (...args: unknown[]) => {
               await ensureConnected()
-              return (value as (...args: unknown[]) => unknown).apply(target, args)
+              return (value as (...args: unknown[]) => unknown).apply(client, args)
             }
           }
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return Reflect.get(target, prop, receiver)
+        return Reflect.get(client, prop, receiver)
       }
     })
 
