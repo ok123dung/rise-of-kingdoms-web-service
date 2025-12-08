@@ -269,100 +269,29 @@ class EnhancedPrismaClient extends PrismaClient {
 // Only check NEXT_PHASE - not VERCEL_ENV as it causes issues in serverless runtime
 const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
 
-// Global instance management with lazy initialization
+// Global instance management - simple pattern recommended by Prisma for serverless
 const globalForPrisma = globalThis as unknown as {
-  prismaEnhanced: EnhancedPrismaClient | undefined
-  prismaProxy: EnhancedPrismaClient | undefined
+  prisma: EnhancedPrismaClient | undefined
 }
 
-// Lazy getter for EnhancedPrismaClient - only creates on first access
-function getEnhancedPrismaClient(): EnhancedPrismaClient {
-  if (isBuildPhase) {
-    throw new Error('Database not available during build phase')
-  }
-
-  if (!globalForPrisma.prismaEnhanced) {
-    globalForPrisma.prismaEnhanced = new EnhancedPrismaClient()
-  }
-
-  return globalForPrisma.prismaEnhanced
-}
-
-// Export prismaEnhanced as a getter for backwards compatibility
+// Create the Prisma client instance - only during runtime, not build
+// Using the standard Prisma serverless pattern without Proxy wrappers
 export const prismaEnhanced: EnhancedPrismaClient = isBuildPhase
   ? (null as unknown as EnhancedPrismaClient)
-  : new Proxy({} as EnhancedPrismaClient, {
-      get(_target, prop, receiver) {
-        const client = getEnhancedPrismaClient()
-        const value = Reflect.get(client, prop, receiver)
-        if (typeof value === 'function') {
-          return value.bind(client)
-        }
-        return value
-      }
-    })
+  : globalForPrisma.prisma ?? new EnhancedPrismaClient()
 
-// Auto-connect on first use
-let isConnecting = false
-async function ensureConnected() {
-  if (isBuildPhase) return
-
-  if (!isConnecting) {
-    isConnecting = true
-    try {
-      const client = getEnhancedPrismaClient()
-      await client.$connect()
-    } finally {
-      isConnecting = false
-    }
-  }
+// Cache instance in development to prevent too many connections
+if (!isBuildPhase && process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prismaEnhanced
 }
 
-// Middleware to ensure connection before queries
-// Uses lazy proxy pattern to avoid "Cannot create proxy with non-object" errors
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-export const prisma: EnhancedPrismaClient = isBuildPhase
-  ? (null as unknown as EnhancedPrismaClient)
-  : new Proxy({} as EnhancedPrismaClient, {
-      get(_target, prop, receiver) {
-        const client = getEnhancedPrismaClient()
+// Also cache in production for serverless function reuse
+if (!isBuildPhase && process.env.NODE_ENV === 'production') {
+  globalForPrisma.prisma = prismaEnhanced
+}
 
-        // For model operations, ensure connected first
-        if (typeof prop === 'string' && prop in client && !prop.startsWith('$')) {
-          const modelProxy = Reflect.get(client, prop, receiver) as object
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return new Proxy(modelProxy, {
-            get(modelTarget, modelProp) {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              const value = Reflect.get(modelTarget, modelProp)
-              if (typeof value === 'function') {
-                return async (...args: unknown[]) => {
-                  await ensureConnected()
-                  return (value as (...args: unknown[]) => unknown).apply(modelTarget, args)
-                }
-              }
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-              return value
-            }
-          })
-        }
-
-        // For $-prefixed methods
-        if (typeof prop === 'string' && prop.startsWith('$') && prop !== '$connect') {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const value = Reflect.get(client, prop, receiver)
-          if (typeof value === 'function') {
-            return async (...args: unknown[]) => {
-              await ensureConnected()
-              return (value as (...args: unknown[]) => unknown).apply(client, args)
-            }
-          }
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return Reflect.get(client, prop, receiver)
-      }
-    })
+// Export prisma as alias for prismaEnhanced (simpler, no Proxy)
+export const prisma: EnhancedPrismaClient = prismaEnhanced
 
 // Export health check function
 export async function checkDatabaseHealth() {
