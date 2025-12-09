@@ -1,6 +1,7 @@
 'use client'
 
 import { Calendar, Clock, AlertCircle, CheckCircle, PlayCircle, PauseCircle } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -152,11 +153,13 @@ export default function ActiveBookings({ bookings }: ActiveBookingsProps) {
                       </div>
                       {booking.assignedStaff && (
                         <div className="flex items-center gap-2">
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-xs font-semibold text-white">
+                          <div className="relative flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-xs font-semibold text-white">
                             {booking.assignedStaff.avatar ? (
-                              <img
+                              <Image
+                                fill
                                 alt={booking.assignedStaff.name}
-                                className="h-full w-full rounded-full object-cover"
+                                className="rounded-full object-cover"
+                                sizes="20px"
                                 src={booking.assignedStaff.avatar}
                               />
                             ) : (

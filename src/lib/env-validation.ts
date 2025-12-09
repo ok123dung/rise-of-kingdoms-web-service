@@ -94,7 +94,7 @@ export function validateEnv() {
       nodeEnv: env.NODE_ENV,
       hasDatabase: !!env.DATABASE_URL,
       hasEmail: !!env.RESEND_API_KEY,
-      hasPayment: !!(env.MOMO_PARTNER_CODE || env.VNPAY_TMN_CODE || env.ZALOPAY_APP_ID),
+      hasPayment: !!(env.MOMO_PARTNER_CODE ?? env.VNPAY_TMN_CODE ?? env.ZALOPAY_APP_ID),
       hasStorage: !!env.R2_ACCOUNT_ID,
       hasMonitoring: !!env.SENTRY_DSN
     })
@@ -125,10 +125,10 @@ export function getSafeEnv(): Record<string, string | undefined> {
 // Check if a key is sensitive
 export function isSensitiveKey(key: string): boolean {
   return (
-    SENSITIVE_KEYS.includes(key) ||
-    key.includes('SECRET') ||
-    key.includes('KEY') ||
-    key.includes('TOKEN') ||
+    SENSITIVE_KEYS.includes(key) ??
+    key.includes('SECRET') ??
+    key.includes('KEY') ??
+    key.includes('TOKEN') ??
     key.includes('PASSWORD')
   )
 }
@@ -166,14 +166,14 @@ export const env = {
 
   // Site
   siteUrl: getEnvVar('NEXT_PUBLIC_SITE_URL', true)!,
-  appUrl: getEnvVar('NEXT_PUBLIC_APP_URL', false) || getEnvVar('NEXT_PUBLIC_SITE_URL', true)!,
+  appUrl: getEnvVar('NEXT_PUBLIC_APP_URL', false) ?? getEnvVar('NEXT_PUBLIC_SITE_URL', true)!,
 
   // Email
   resendApiKey: getEnvVar('RESEND_API_KEY', true)!,
   resendFromEmail: getEnvVar('RESEND_FROM_EMAIL', true)!,
 
   // Node
-  nodeEnv: (getEnvVar('NODE_ENV', false) || 'development') as 'development' | 'test' | 'production',
+  nodeEnv: (getEnvVar('NODE_ENV', false) ?? 'development') as 'development' | 'test' | 'production',
   isDevelopment: process.env.NODE_ENV === 'development',
   isProduction: process.env.NODE_ENV === 'production',
   isTest: process.env.NODE_ENV === 'test',

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { Shield, Smartphone, Copy, AlertCircle, CheckCircle } from 'lucide-react'
+import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 
 interface TwoFactorSetupProps {
@@ -185,7 +186,9 @@ If you lose access to your authenticator app, you can use one of these codes to 
           </div>
 
           <div className="rounded-lg border-2 border-gray-200 bg-white p-4">
-            <img alt="2FA QR Code" className="mx-auto" src={qrCode} />
+            <div className="relative mx-auto h-[256px] w-[256px]">
+              <Image fill alt="2FA QR Code" className="object-contain" sizes="256px" src={qrCode} />
+            </div>
           </div>
 
           <div className="rounded-lg bg-gray-50 p-4">

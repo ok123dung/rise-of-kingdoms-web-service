@@ -4,6 +4,7 @@ import { Fragment } from 'react'
 
 import { Menu, Transition } from '@headlessui/react'
 import { User, LogOut, LayoutDashboard } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 
@@ -29,9 +30,15 @@ export default function UserMenu() {
       <div>
         <Menu.Button className="flex items-center gap-2 rounded-full bg-white/50 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
           <span className="sr-only">Open user menu</span>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+          <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
             {session.user?.image ? (
-              <img alt="" className="h-8 w-8 rounded-full object-cover" src={session.user.image} />
+              <Image
+                fill
+                alt=""
+                className="rounded-full object-cover"
+                sizes="32px"
+                src={session.user.image}
+              />
             ) : (
               <User className="h-5 w-5" />
             )}

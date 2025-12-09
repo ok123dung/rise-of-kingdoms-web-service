@@ -20,9 +20,11 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File
     const folder = (formData.get('folder') as string) || 'images'
     const is_public = formData.get('is_public') === 'true'
-    const width = formData.get('width') ? parseInt(formData.get('width') as string) : undefined
-    const height = formData.get('height') ? parseInt(formData.get('height') as string) : undefined
-    const quality = formData.get('quality') ? parseInt(formData.get('quality') as string) : 85
+    const width = formData.get('width') ? parseInt(formData.get('width') as string, 10) : undefined
+    const height = formData.get('height')
+      ? parseInt(formData.get('height') as string, 10)
+      : undefined
+    const quality = formData.get('quality') ? parseInt(formData.get('quality') as string, 10) : 85
     const generateThumbnail = formData.get('generateThumbnail') === 'true'
 
     if (!file) {

@@ -129,7 +129,7 @@ export const getCurrentUser = async () => {
 }
 
 export const isAdmin = (user: UserWithStaff | null) => {
-  return user?.staff?.role === 'admin' || user?.staff?.role === 'manager'
+  return user?.staff?.role === 'admin' ?? user?.staff?.role === 'manager'
 }
 
 export const withAuth = (handler: RouteHandler) => {
@@ -145,7 +145,7 @@ export const withAuth = (handler: RouteHandler) => {
     // Add user context to request
     req.user = {
       id: session.user.id,
-      email: session.user.email || '',
+      email: session.user.email ?? '',
       role: session.user.role
     }
     return handler(req, ...args)
@@ -165,7 +165,7 @@ export const withRateLimit = (_maxRequests = 60, _windowMs = 60000) => {
       // For this refactor, we'll delegate to the standard API limiter for consistency
       // If specific limits are needed, we should define them in rate-limit.ts
 
-      const clientId = req.headers?.get?.('x-forwarded-for') || req.ip || 'anonymous'
+      const clientId = req.headers?.get?.('x-forwarded-for') ?? req.ip ?? 'anonymous'
       const result = await rateLimiters.api.isAllowed(clientId)
 
       if (!result.allowed) {
@@ -183,8 +183,8 @@ export const withRateLimit = (_maxRequests = 60, _windowMs = 60000) => {
 export const isStaff = async () => {
   const user = await getCurrentUser()
   return (
-    user?.staff?.role === 'admin' ||
-    user?.staff?.role === 'manager' ||
+    user?.staff?.role === 'admin' ??
+    user?.staff?.role === 'manager' ??
     user?.staff?.role === 'staff'
   )
 }
@@ -221,7 +221,7 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
-          const isValidPassword = await bcrypt.compare(password, user.password || '')
+          const isValidPassword = await bcrypt.compare(password, user.password ?? '')
 
           if (!isValidPassword) {
             return null
@@ -261,7 +261,7 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             name: user.full_name,
             image: user.image ?? undefined,
-            role: user.staff?.role || 'customer'
+            role: user.staff?.role ?? 'customer'
           }
         } catch (error) {
           // Log failed authentication attempt for security monitoring
@@ -277,8 +277,8 @@ export const authOptions: NextAuthOptions = {
       }
     }),
     DiscordProvider({
-      clientId: process.env.DISCORD_CLIENT_ID || '',
-      clientSecret: process.env.DISCORD_CLIENT_SECRET || '',
+      clientId: process.env.DISCORD_CLIENT_ID ?? '',
+      clientSecret: process.env.DISCORD_CLIENT_SECRET ?? '',
       authorization: {
         params: {
           scope: 'identify email guilds'
@@ -293,7 +293,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, account, profile }) {
       if (user) {
-        token.role = user.role || 'user'
+        token.role = user.role ?? 'user'
         token.userId = user.id
         token.picture = user.image
       }
@@ -320,15 +320,15 @@ export const authOptions: NextAuthOptions = {
             }
 
             token.userId = existingUser.id
-            token.role = existingUser.staff?.role || 'customer'
+            token.role = existingUser.staff?.role ?? 'customer'
           } else {
             const newUser = await prisma.users.create({
               data: {
                 id: crypto.randomUUID(),
-                email: profile.email || '',
+                email: profile.email ?? '',
                 full_name:
-                  (profile as DiscordProfile).global_name ||
-                  (profile as DiscordProfile).username ||
+                  (profile as DiscordProfile).global_name ??
+                  (profile as DiscordProfile).username ??
                   'Discord User',
                 discord_id: (profile as DiscordProfile).id,
                 discord_username: (profile as DiscordProfile).username,
@@ -384,7 +384,7 @@ export const authOptions: NextAuthOptions = {
           data: {
             id: crypto.randomUUID(),
             email: user.email,
-            full_name: user.name || '',
+            full_name: user.name ?? '',
             source: 'registration',
             status: 'converted',
             lead_score: 50,
@@ -446,7 +446,7 @@ export const enhanceSession = (session: SessionWithSecurity, request?: NextReque
   const securityContext = {
     lastActivity: new Date().toISOString(),
     userAgent: request?.headers?.get?.('user-agent'),
-    ip: request?.headers?.get?.('x-forwarded-for') || request?.ip,
+    ip: request?.headers?.get?.('x-forwarded-for') ?? request?.ip,
     sessionId: session.user.id + '_' + Date.now()
   }
 
@@ -501,7 +501,7 @@ export const checkBruteForce = (
 
 export const recordFailedAttempt = (identifier: string) => {
   const now = Date.now()
-  const attempts = failedAttempts.get(identifier) || { count: 0, lastAttempt: 0 }
+  const attempts = failedAttempts.get(identifier) ?? { count: 0, lastAttempt: 0 }
 
   // Reset count if last attempt was more than 1 hour ago
   if (now - attempts.lastAttempt > 60 * 60 * 1000) {

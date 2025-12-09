@@ -84,7 +84,7 @@ export class ZaloPayPayment {
     this.appId = appId
     this.key1 = key1
     this.key2 = key2
-    this.endpoint = process.env.ZALOPAY_ENDPOINT || 'https://sb-openapi.zalopay.vn/v2/create'
+    this.endpoint = process.env.ZALOPAY_ENDPOINT ?? 'https://sb-openapi.zalopay.vn/v2/create'
   }
   // Tạo payment order
   async createOrder(request: ZaloPayRequest): Promise<{
@@ -122,7 +122,7 @@ export class ZaloPayPayment {
         }
       ])
       const orderData = {
-        app_id: parseInt(this.appId),
+        app_id: parseInt(this.appId, 10),
         app_user: booking.users.email,
         app_time: Date.now(),
         amount: request.amount,
@@ -132,7 +132,7 @@ export class ZaloPayPayment {
         description: request.description,
         bank_code: '',
         callback_url:
-          request.callbackUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
+          request.callbackUrl ?? `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
       }
       // Tạo MAC signature
       const data = `${orderData.app_id}|${orderData.app_trans_id}|${orderData.app_user}|${orderData.amount}|${orderData.app_time}|${orderData.embed_data}|${orderData.item}`
@@ -182,7 +182,7 @@ export class ZaloPayPayment {
         })
         return {
           success: false,
-          error: responseData.return_message || 'Order creation failed'
+          error: responseData.return_message ?? 'Order creation failed'
         }
       }
     } catch (error) {

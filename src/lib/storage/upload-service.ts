@@ -121,8 +121,8 @@ export class UploadService {
           size: buffer.length,
           user_id: options.user_id,
           folder: options.folder,
-          is_public: options.is_public || false,
-          metadata: options.metadata || {},
+          is_public: options.is_public ?? false,
+          metadata: options.metadata ?? {},
           updated_at: new Date()
         }
       })
@@ -166,7 +166,7 @@ export class UploadService {
       const metadata = await processedImage.metadata()
 
       // Resize if needed
-      if (options.width || options.height) {
+      if (options.width ?? options.height) {
         processedImage = processedImage.resize(options.width, options.height, {
           fit: 'inside',
           withoutEnlargement: true
@@ -176,7 +176,7 @@ export class UploadService {
       // Convert format if specified
       if (options.format) {
         processedImage = processedImage.toFormat(options.format, {
-          quality: options.quality || 85
+          quality: options.quality ?? 85
         })
       }
 
@@ -365,7 +365,7 @@ export class UploadService {
   private static getFileCategory(mime_type: string): keyof typeof ALLOWED_FILE_TYPES {
     if (mime_type.startsWith('image/')) return 'image'
     if (mime_type.startsWith('video/')) return 'video'
-    if (mime_type.includes('pdf') || mime_type.includes('document')) return 'document'
+    if (mime_type.includes('pdf') ?? mime_type.includes('document')) return 'document'
     return 'document'
   }
 
@@ -417,7 +417,7 @@ export class UploadService {
             user_id,
             folder: sourceFile.folder,
             is_public: sourceFile.is_public,
-            metadata: sourceFile.metadata || undefined,
+            metadata: sourceFile.metadata ?? undefined,
             updated_at: new Date()
           }
         })

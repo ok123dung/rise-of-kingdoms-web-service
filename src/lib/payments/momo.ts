@@ -100,7 +100,7 @@ export class MoMoPayment {
     this.accessKey = accessKey
     this.secretKey = secretKey
     this.endpoint =
-      process.env.MOMO_ENDPOINT || 'https://test-payment.momo.vn/v2/gateway/api/create'
+      process.env.MOMO_ENDPOINT ?? 'https://test-payment.momo.vn/v2/gateway/api/create'
   }
 
   // Verify webhook signature to prevent fake callbacks
@@ -153,12 +153,12 @@ export class MoMoPayment {
       const orderId = `MOMO_${booking.booking_number}_${Date.now()}`
       const requestId = `REQ_${Date.now()}`
       const orderInfo =
-        request.orderInfo || `Thanh toán dịch vụ RoK - ${booking.service_tiers.services.name}`
+        request.orderInfo ?? `Thanh toán dịch vụ RoK - ${booking.service_tiers.services.name}`
       const redirectUrl =
-        request.redirectUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`
+        request.redirectUrl ?? `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success`
       const ipnUrl =
-        request.ipnUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/momo/webhook`
-      const extraData = request.extraData || ''
+        request.ipnUrl ?? `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/momo/webhook`
+      const extraData = request.extraData ?? ''
 
       // Tạo raw signature
       const rawSignature = `accessKey=${this.accessKey}&amount=${request.amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${this.partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=payWithATM`
@@ -225,11 +225,11 @@ export class MoMoPayment {
       } else {
         getLogger().error(
           'MoMo payment creation failed',
-          new Error(responseData.message || 'Payment creation failed')
+          new Error(responseData.message ?? 'Payment creation failed')
         )
         return {
           success: false,
-          error: responseData.message || 'Payment creation failed'
+          error: responseData.message ?? 'Payment creation failed'
         }
       }
     } catch (error) {
@@ -430,7 +430,7 @@ export class MoMoPayment {
       }
 
       const queryEndpoint =
-        process.env.MOMO_QUERY_ENDPOINT || 'https://test-payment.momo.vn/v2/gateway/api/query'
+        process.env.MOMO_QUERY_ENDPOINT ?? 'https://test-payment.momo.vn/v2/gateway/api/query'
       const response = await fetch(queryEndpoint, {
         method: 'POST',
         headers: {
@@ -488,7 +488,7 @@ export class MoMoPayment {
       }
 
       const refundEndpoint =
-        process.env.MOMO_REFUND_ENDPOINT || 'https://test-payment.momo.vn/v2/gateway/api/refund'
+        process.env.MOMO_REFUND_ENDPOINT ?? 'https://test-payment.momo.vn/v2/gateway/api/refund'
       const response = await fetch(refundEndpoint, {
         method: 'POST',
         headers: {

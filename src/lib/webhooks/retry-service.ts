@@ -465,7 +465,7 @@ export class WebhookRetryService {
       )
 
       const successful = results.filter(r => r.status === 'fulfilled' && r.value).length
-      const failed = results.filter(r => r.status === 'rejected' || !r.value).length
+      const failed = results.filter(r => r.status === 'rejected' ?? !r.value).length
 
       getLogger().info('Webhook processing completed', { successful, failed })
     } catch (error) {

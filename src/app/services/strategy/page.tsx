@@ -695,7 +695,7 @@ function CaseStudyCard({ study }: CaseStudyCardProps) {
 
       {/* Testimonial */}
       <blockquote className="border-l-4 border-primary-200 pl-4 text-sm italic leading-relaxed text-gray-600">
-        "{study.testimonial}"
+        &ldquo;{study.testimonial}&rdquo;
       </blockquote>
     </div>
   )

@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import Image from 'next/image'
+
 import type { PaymentResponse, PaymentError } from '@/types/payment'
 
 interface ZaloPayPaymentProps {
@@ -75,8 +77,14 @@ export default function ZaloPayPayment({
         </div>
       ) : (
         <div className="text-center">
-          <div className="mb-4">
-            <img alt="ZaloPay QR Code" className="mx-auto rounded-lg shadow" src={qrCode} />
+          <div className="relative mx-auto mb-4 h-[200px] w-[200px]">
+            <Image
+              fill
+              alt="ZaloPay QR Code"
+              className="rounded-lg shadow"
+              sizes="200px"
+              src={qrCode}
+            />
           </div>
           <p className="mb-2 text-sm text-gray-600">
             Mở ứng dụng ZaloPay và quét mã QR để thanh toán

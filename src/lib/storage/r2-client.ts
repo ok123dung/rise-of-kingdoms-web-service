@@ -6,11 +6,11 @@ import { getLogger } from '@/lib/monitoring/logger'
 const { R2_ACCOUNT_ID } = process.env
 const { R2_ACCESS_KEY_ID } = process.env
 const { R2_SECRET_ACCESS_KEY } = process.env
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'rokservices-files'
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME ?? 'rokservices-files'
 
 // Only show warning in non-build phase to avoid build errors
 const isBuildPhase =
-  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.NEXT_PHASE === 'phase-production-build' ??
   (process.env.VERCEL && process.env.VERCEL_ENV === undefined)
 
 if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
@@ -24,8 +24,8 @@ const s3Config: S3ClientConfig = {
   region: 'auto',
   endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID || '',
-    secretAccessKey: R2_SECRET_ACCESS_KEY || ''
+    accessKeyId: R2_ACCESS_KEY_ID ?? '',
+    secretAccessKey: R2_SECRET_ACCESS_KEY ?? ''
   },
   forcePathStyle: true
 }
@@ -70,7 +70,7 @@ export function generateFileKey(
 
 // Get public URL for a file
 export function getPublicUrl(key: string): string {
-  const publicDomain = process.env.R2_PUBLIC_URL || `https://${R2_BUCKET_NAME}.r2.dev`
+  const publicDomain = process.env.R2_PUBLIC_URL ?? `https://${R2_BUCKET_NAME}.r2.dev`
   return `${publicDomain}/${key}`
 }
 
@@ -79,11 +79,11 @@ export function isValidFileType(
   mime_type: string,
   category: keyof typeof ALLOWED_FILE_TYPES
 ): boolean {
-  return ALLOWED_FILE_TYPES[category]?.includes(mime_type) || false
+  return ALLOWED_FILE_TYPES[category]?.includes(mime_type) ?? false
 }
 
 // Validate file size
 export function isValidFileSize(size: number, category: keyof typeof FILE_SIZE_LIMITS): boolean {
-  const limit = FILE_SIZE_LIMITS[category] || FILE_SIZE_LIMITS.default
+  const limit = FILE_SIZE_LIMITS[category] ?? FILE_SIZE_LIMITS.default
   return size <= limit
 }

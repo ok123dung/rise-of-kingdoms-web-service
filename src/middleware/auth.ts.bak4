@@ -1,0 +1,160 @@
+import { NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
+
+import { validateCSRF } from '@/lib/csrf-protection'
+import { getEdgeLogger } from '@/lib/monitoring/edge-logger'
+import { createEdgeRateLimiter, type EdgeRateLimiter } from '@/lib/rate-limit-edge'
+
+import type { NextRequest } from 'next/server'
+
+// Protected routes that require authentication
+const protectedRoutes = [
+  '/api/bookings',
+  '/api/payments/create',
+  '/api/users/profile',
+  '/dashboard',
+  '/admin'
+]
+
+// Admin only routes
+const adminRoutes = ['/api/admin', '/admin']
+
+// API routes that need rate limiting
+const rateLimitedRoutes = ['/api/auth', '/api/leads', '/api/payments']
+
+// Create rate limiters for different endpoints
+const rateLimiters = new Map<string, EdgeRateLimiter>([
+  ['/api/auth', createEdgeRateLimiter({ window: 60000, max: 5, prefix: 'auth' })],
+  ['/api/leads', createEdgeRateLimiter({ window: 60000, max: 10, prefix: 'leads' })],
+  ['/api/payments', createEdgeRateLimiter({ window: 60000, max: 20, prefix: 'payments' })],
+  ['default', createEdgeRateLimiter({ window: 60000, max: 60, prefix: 'api' })]
+])
+
+export async function authMiddleware(req: NextRequest) {
+  const { pathname } = req.nextUrl
+
+  // Apply rate limiting to API routes
+  if (pathname.startsWith('/api')) {
+    const rateLimitResponse = applyRateLimit(req)
+    if (rateLimitResponse) return rateLimitResponse
+  }
+
+  // Check if route is protected
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
+
+  if (isProtectedRoute || isAdminRoute) {
+    try {
+      // Get session token
+      const token = await getToken({
+        req,
+        secret: process.env.NEXTAUTH_SECRET
+      })
+
+      if (!token) {
+        // No token, redirect to login or return 401 for API
+        if (pathname.startsWith('/api')) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+        return NextResponse.redirect(new URL('/auth/signin', req.url))
+      }
+
+      // Check admin access
+      if (isAdminRoute && token.role !== 'ADMIN') {
+        if (pathname.startsWith('/api')) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        }
+        return NextResponse.redirect(new URL('/dashboard', req.url))
+      }
+
+      // Add user info to headers for API routes
+      if (pathname.startsWith('/api')) {
+        const requestHeaders = new Headers(req.headers)
+        requestHeaders.set('x-user-id', token.sub ?? '')
+        requestHeaders.set('x-user-email', token.email ?? '')
+        requestHeaders.set('x-user-role', token.role ?? 'CUSTOMER')
+
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders
+          }
+        })
+      }
+    } catch (error) {
+      getEdgeLogger().error(
+        'Auth middleware error',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          path: pathname,
+          method: req.method
+        }
+      )
+      return NextResponse.json({ error: 'Authentication error' }, { status: 500 })
+    }
+  }
+
+  return NextResponse.next()
+}
+
+function applyRateLimit(req: NextRequest): NextResponse | null {
+  const ip = req.ip || req.headers.get('x-forwarded-for') ?? 'unknown'
+  const { pathname } = req.nextUrl
+
+  // Find matching rate limit route
+  const limitKey = rateLimitedRoutes.find(route => pathname.startsWith(route))
+  if (!limitKey) return null
+
+  // Get the appropriate rate limiter
+  const rateLimiter = rateLimiters.get(limitKey) || rateLimiters.get('default')!
+
+  // Create identifier with IP and user agent for better fingerprinting
+  const user_agent = req.headers.get('user-agent') ?? 'unknown'
+  const identifier = `${ip}:${user_agent.substring(0, 50)}`
+
+  const result = rateLimiter.checkLimit(identifier)
+
+  if (!result.success) {
+    return NextResponse.json(
+      {
+        error: 'Too many requests',
+        retryAfter: result.retryAfter
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(result.retryAfter ?? 60),
+          'X-RateLimit-Limit': String(
+            limitKey === '/api/auth'
+              ? 5
+              : limitKey === '/api/leads'
+                ? 10
+                : limitKey === '/api/payments'
+                  ? 20
+                  : 60
+          ),
+          'X-RateLimit-Remaining': String(result.remaining),
+          'X-RateLimit-Reset': String(result.reset)
+        }
+      }
+    )
+  }
+
+  return null
+}
+
+// CSRF token validation for state-changing requests
+export function validateCSRFToken(req: NextRequest): boolean {
+  const result = validateCSRF(req)
+
+  if (!result.valid) {
+    getEdgeLogger().warn('CSRF validation failed', {
+      path: req.nextUrl.pathname,
+      reason: result.reason,
+      method: req.method,
+      origin: req.headers.get('origin'),
+      ip: req.ip || req.headers.get('x-forwarded-for')
+    })
+  }
+
+  return result.valid
+}

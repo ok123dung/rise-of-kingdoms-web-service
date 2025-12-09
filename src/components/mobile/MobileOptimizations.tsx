@@ -168,7 +168,9 @@ export function MobileTestimonial({
         </div>
       </div>
 
-      <blockquote className="italic leading-relaxed text-gray-600">"{comment}"</blockquote>
+      <blockquote className="italic leading-relaxed text-gray-600">
+        &ldquo;{comment}&rdquo;
+      </blockquote>
 
       <div className="mt-4 flex text-yellow-400">
         {Array.from({ length: 5 }).map((_, i) => (

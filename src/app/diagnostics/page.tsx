@@ -214,10 +214,12 @@ export default function DiagnosticsPage() {
         <div className="mt-6 text-sm text-gray-600">
           <p>If navigation is not working:</p>
           <ol className="mt-2 list-inside list-decimal space-y-1">
-            <li>Try clicking the "Clear Service Worker & Caches" button</li>
+            <li>Try clicking the &ldquo;Clear Service Worker & Caches&rdquo; button</li>
             <li>Open DevTools (F12) and check the Console for errors</li>
             <li>In DevTools, go to Application → Service Workers and unregister any workers</li>
-            <li>In DevTools, go to Application → Storage and click "Clear site data"</li>
+            <li>
+              In DevTools, go to Application → Storage and click &ldquo;Clear site data&rdquo;
+            </li>
             <li>Try accessing the site in an incognito/private window</li>
           </ol>
         </div>

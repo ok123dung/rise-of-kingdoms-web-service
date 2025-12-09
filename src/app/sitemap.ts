@@ -2,11 +2,11 @@ import { type MetadataRoute } from 'next'
 
 // Check if we're in build phase to avoid DB access during static generation
 const isBuildPhase =
-  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.NEXT_PHASE === 'phase-production-build' ??
   (process.env.VERCEL && process.env.VERCEL_ENV === undefined)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://rokdbot.com'
 
   // Static routes - always included
   const staticRoutes = [

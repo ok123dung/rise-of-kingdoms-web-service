@@ -3,6 +3,7 @@
 import { useState, useEffect, memo, useMemo, useCallback } from 'react'
 
 import { Crown, User, TrendingUp } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -59,11 +60,13 @@ const CustomerItem = memo(
               </div>
 
               {/* Avatar */}
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white">
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white">
                 {customer.avatar ? (
-                  <img
+                  <Image
+                    fill
                     alt={customer.name}
-                    className="h-full w-full rounded-full object-cover"
+                    className="rounded-full object-cover"
+                    sizes="40px"
                     src={customer.avatar}
                   />
                 ) : (

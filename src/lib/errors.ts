@@ -96,8 +96,8 @@ function getSafeErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     // Don't expose system errors to client
     if (
-      error.message.includes('ECONNREFUSED') ||
-      error.message.includes('ETIMEDOUT') ||
+      error.message.includes('ECONNREFUSED') ??
+      error.message.includes('ETIMEDOUT') ??
       error.message.includes('ENOTFOUND')
     ) {
       return 'Service temporarily unavailable'
@@ -184,7 +184,7 @@ export function asyncHandler<T extends (...args: unknown[]) => Promise<unknown>>
       return await handler(...args)
     } catch (error) {
       const [request] = args as unknown as [Request]
-      const requestId = request?.headers?.get('x-request-id') || undefined
+      const requestId = request?.headers?.get('x-request-id') ?? undefined
       return handleApiError(error, requestId)
     }
   }) as T
@@ -200,7 +200,7 @@ export function validateRequired<T extends Record<string, unknown>>(
 
   for (const field of fields) {
     if (!data[field]) {
-      const fieldName = fieldNames?.[field] || String(field)
+      const fieldName = fieldNames?.[field] ?? String(field)
       missing.push(fieldName)
     }
   }

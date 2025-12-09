@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import Image from 'next/image'
+
 import type { PaymentResponse, PaymentError } from '@/types/payment'
 
 interface MoMoPaymentProps {
@@ -70,8 +72,14 @@ export default function MoMoPayment({ amount, booking_id, onSuccess, onError }: 
         </div>
       ) : (
         <div className="text-center">
-          <div className="mb-4">
-            <img alt="MoMo QR Code" className="mx-auto rounded-lg shadow" src={qrCode} />
+          <div className="relative mx-auto mb-4 h-[200px] w-[200px]">
+            <Image
+              fill
+              alt="MoMo QR Code"
+              className="rounded-lg shadow"
+              sizes="200px"
+              src={qrCode}
+            />
           </div>
           <p className="mb-2 text-sm text-gray-600">Mở ứng dụng MoMo và quét mã QR để thanh toán</p>
           <div className="flex items-center justify-center space-x-2 text-green-600">

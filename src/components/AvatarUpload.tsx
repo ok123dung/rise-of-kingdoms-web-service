@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { Camera, Loader2, User } from 'lucide-react'
+import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 
 interface AvatarUploadProps {
@@ -91,10 +92,10 @@ export function AvatarUpload({
     <div className="flex flex-col items-center gap-4">
       <div className="relative">
         <div
-          className={`${sizeClasses[size]} overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100`}
+          className={`${sizeClasses[size]} relative overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100`}
         >
           {avatarUrl ? (
-            <img alt="Avatar" className="h-full w-full object-cover" src={avatarUrl} />
+            <Image fill alt="Avatar" className="object-cover" sizes="128px" src={avatarUrl} />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
               <User className="h-1/2 w-1/2 text-gray-400" />

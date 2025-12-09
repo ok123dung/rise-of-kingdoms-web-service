@@ -62,7 +62,7 @@ class Logger {
 
   constructor() {
     this.service = 'rok-services-backend'
-    this.environment = process.env.NODE_ENV || 'development'
+    this.environment = process.env.NODE_ENV ?? 'development'
   }
 
   private createLogEntry(
@@ -96,7 +96,7 @@ class Logger {
   private shouldLog(level: LogLevel): boolean {
     const logLevels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL]
     const currentLevelIndex = logLevels.indexOf(
-      (process.env.LOG_LEVEL as LogLevel) || LogLevel.INFO
+      (process.env.LOG_LEVEL as LogLevel) ?? LogLevel.INFO
     )
     const messageLevelIndex = logLevels.indexOf(level)
 
@@ -107,7 +107,7 @@ class Logger {
     try {
       // Detect build phase - skip database operations during build
       const isBuildPhase =
-        process.env.NEXT_PHASE === 'phase-production-build' ||
+        process.env.NEXT_PHASE === 'phase-production-build' ??
         (process.env.VERCEL && process.env.VERCEL_ENV === undefined)
 
       // Only persist important logs to database in production (not during build)
@@ -116,8 +116,8 @@ class Logger {
         this.environment === 'production' &&
         process.env.DATABASE_URL && // Only log to DB if URL is configured
         !process.env.CI && // Skip DB logging during CI/Build
-        (entry.level === LogLevel.ERROR ||
-          entry.level === LogLevel.FATAL ||
+        (entry.level === LogLevel.ERROR ??
+          entry.level === LogLevel.FATAL ??
           entry.level === LogLevel.WARN)
       ) {
         const { prisma } = await import('@/lib/db')
@@ -207,7 +207,7 @@ class Logger {
           environment: this.environment
         },
         contexts: {
-          error_context: context || {}
+          error_context: context ?? {}
         }
       })
     } else {
@@ -232,7 +232,7 @@ class Logger {
           fatal: true
         },
         contexts: {
-          fatal_context: context || {}
+          fatal_context: context ?? {}
         }
       })
     } else {
@@ -411,7 +411,7 @@ export class PerformanceMonitor {
 // Error boundary for React components
 export function logError(error: Error, errorInfo?: { componentStack?: string }): void {
   getLogger().error('React error boundary caught error', error, {
-    errorInfo: errorInfo?.componentStack || undefined,
+    errorInfo: errorInfo?.componentStack ?? undefined,
     component: errorInfo?.componentStack,
     event: 'react_error'
   })
@@ -436,7 +436,7 @@ export function createAPILogger() {
       method: req.method,
       path: req.path,
       user_agent: req.headers?.['user-agent'],
-      ip: req.ip || req.connection?.remoteAddress,
+      ip: req.ip ?? req.connection?.remoteAddress,
       user_id: req.user?.id
     })
 
@@ -446,15 +446,15 @@ export function createAPILogger() {
       const duration = Date.now() - startTime
 
       getLogger().logAPIRequest(
-        req.method || 'UNKNOWN',
-        req.path || req.url || 'UNKNOWN',
-        res.statusCode || 0,
+        req.method ?? 'UNKNOWN',
+        req.path ?? req.url ?? 'UNKNOWN',
+        res.statusCode ?? 0,
         duration,
         {
           requestId,
           user_id: req.user?.id,
           user_agent: req.headers?.['user-agent'],
-          ip: req.ip || req.connection?.remoteAddress
+          ip: req.ip ?? req.connection?.remoteAddress
         }
       )
 
@@ -627,7 +627,7 @@ export class ApplicationMonitor {
     )
 
     const unhealthy = results.filter(
-      r => r.status === 'rejected' || r.value?.status === 'unhealthy'
+      r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value?.status === 'unhealthy')
     )
 
     return {

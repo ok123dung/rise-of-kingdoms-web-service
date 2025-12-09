@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -139,12 +140,14 @@ export default function CustomerHeader({
           <div className="flex items-center gap-4">
             {/* Avatar */}
             <div
-              className={`h-12 w-12 rounded-full ${getTierColor(customer.tier)} flex items-center justify-center text-lg font-bold text-white shadow-lg`}
+              className={`relative h-12 w-12 rounded-full ${getTierColor(customer.tier)} flex items-center justify-center text-lg font-bold text-white shadow-lg`}
             >
               {customer.avatar ? (
-                <img
+                <Image
+                  fill
                   alt={customer.name}
-                  className="h-full w-full rounded-full object-cover"
+                  className="rounded-full object-cover"
+                  sizes="48px"
                   src={customer.avatar}
                 />
               ) : (

@@ -1,0 +1,394 @@
+import { type Prisma } from '@prisma/client'
+
+import { generateSecurePaymentRef } from '@/lib/crypto-utils'
+import { prisma } from '@/lib/db'
+import { NotFoundError, ValidationError, PaymentError, ConflictError } from '@/lib/errors'
+import { getLogger } from '@/lib/monitoring/logger'
+import { BankingTransfer } from '@/lib/payments/banking'
+import { MoMoPayment } from '@/lib/payments/momo'
+import { VNPayPayment } from '@/lib/payments/vnpay'
+import { ZaloPayPayment } from '@/lib/payments/zalopay'
+import type { Payment } from '@/types/prisma'
+
+type BookingForPayment = Prisma.bookingsGetPayload<{
+  include: {
+    users: true
+    service_tiers: {
+      include: { services: true }
+    }
+  }
+}>
+
+export class PaymentService {
+  private logger = getLogger()
+  private momoPayment = new MoMoPayment()
+  private vnpayPayment = new VNPayPayment()
+  private zalopayPayment = new ZaloPayPayment()
+  private bankingTransfer = new BankingTransfer()
+
+  /**
+   * Create payment for booking
+   */
+  async createPayment(data: {
+    booking_id: string
+    payment_method: 'momo' | 'vnpay' | 'zalopay' | 'banking'
+    user_id: string
+    returnUrl?: string
+  }) {
+    // Validate booking
+    const booking = await this.validateBooking(data.booking_id, data.user_id)
+
+    // Check for existing pending payment
+    const existingPayment = await this.checkExistingPayment(data.booking_id)
+    if (existingPayment) {
+      throw new ConflictError('Booking already has a pending payment')
+    }
+
+    // Generate payment number
+    const payment_number = this.generatePaymentNumber()
+
+    // Create payment record
+    const payment = await prisma.payments.create({
+      data: {
+        id: crypto.randomUUID(),
+        booking_id: data.booking_id,
+        payment_number,
+        amount:
+          typeof booking.final_amount === 'number'
+            ? booking.final_amount
+            : booking.final_amount.toNumber(),
+        currency: booking.currency,
+        payment_method: data.payment_method,
+        payment_gateway: data.payment_method,
+        status: 'pending',
+        updated_at: new Date()
+      }
+    })
+
+    try {
+      // Process payment based on method
+      const result = await this.processPayment({
+        payment,
+        booking,
+        payment_method: data.payment_method,
+        returnUrl: data.returnUrl
+      })
+
+      this.logger.info('Payment created', {
+        payment_id: payment.id,
+        booking_id: data.booking_id,
+        method: data.payment_method
+      })
+
+      return result
+    } catch (error) {
+      // Update payment status to failed
+      await this.updatePaymentStatus(payment.id, 'failed', {
+        failure_reason: error instanceof Error ? error.message : 'Unknown error'
+      })
+      throw error
+    }
+  }
+
+  /**
+   * Verify payment callback
+   */
+  async verifyPaymentCallback(payment_method: string, callbackData: Record<string, unknown>) {
+    switch (payment_method) {
+      case 'momo':
+        return this.momoPayment.handleWebhook(
+          callbackData as unknown as Parameters<typeof this.momoPayment.handleWebhook>[0]
+        )
+      case 'vnpay':
+        return this.vnpayPayment.verifyReturnUrl(
+          callbackData as Parameters<typeof this.vnpayPayment.verifyReturnUrl>[0]
+        )
+      case 'zalopay':
+        return this.zalopayPayment.handleCallback(
+          callbackData as unknown as Parameters<typeof this.zalopayPayment.handleCallback>[0]
+        )
+      default:
+        throw new ValidationError('Invalid payment method')
+    }
+  }
+
+  /**
+   * Get payment by ID
+   */
+  async getPaymentById(
+    payment_id: string,
+    user_id?: string
+  ): Promise<
+    Prisma.paymentsGetPayload<{
+      include: {
+        bookings: {
+          include: {
+            users: true
+            service_tiers: {
+              include: { services: true }
+            }
+          }
+        }
+      }
+    }>
+  > {
+    const payment = await prisma.payments.findUnique({
+      where: { id: payment_id },
+      include: {
+        bookings: {
+          include: {
+            users: true,
+            service_tiers: {
+              include: { services: true }
+            }
+          }
+        }
+      }
+    })
+
+    if (!payment) {
+      throw new NotFoundError('Payment')
+    }
+
+    // Check ownership if user_id provided
+    if (user_id && payment.bookings.user_id !== user_id) {
+      throw new ValidationError('Unauthorized access to payment')
+    }
+
+    return payment
+  }
+
+  /**
+   * Get user payments
+   */
+  async getUserPayments(
+    user_id: string,
+    options?: {
+      status?: string
+      limit?: number
+      offset?: number
+    }
+  ) {
+    interface PaymentWhereInput {
+      booking: { user_id: string }
+      status?: string
+    }
+
+    const where: PaymentWhereInput = {
+      booking: { user_id }
+    }
+
+    if (options?.status) {
+      where.status = options.status
+    }
+
+    const [payments, total] = await Promise.all([
+      prisma.payments.findMany({
+        where,
+        include: {
+          bookings: {
+            include: {
+              service_tiers: {
+                include: { services: true }
+              }
+            }
+          }
+        },
+        orderBy: { created_at: 'desc' },
+        take: options?.limit ?? 10,
+        skip: options?.offset ?? 0
+      }),
+      prisma.payments.count({ where })
+    ])
+
+    return { payments, total }
+  }
+
+  /**
+   * Process refund
+   */
+  async processRefund(
+    payment_id: string,
+    data: {
+      amount: number
+      reason: string
+      adminId: string
+    }
+  ): Promise<unknown> {
+    const payment = await this.getPaymentById(payment_id)
+
+    // Validate refund
+    if (payment.status !== 'completed') {
+      throw new ValidationError('Only completed payments can be refunded')
+    }
+
+    const refundAmountNumber =
+      typeof payment.refund_amount === 'number'
+        ? payment.refund_amount
+        : payment.refund_amount.toNumber()
+
+    if (payment.refund_amount && refundAmountNumber > 0) {
+      throw new ValidationError('Payment already has refunds')
+    }
+
+    // Process refund based on payment method
+    let refundResult
+    switch (payment.payment_method) {
+      case 'momo':
+        refundResult = await this.momoPayment.refundPayment(
+          payment.gateway_transaction_id ?? '',
+          data.amount,
+          data.reason || 'Customer refund request'
+        )
+        break
+      case 'vnpay':
+        refundResult = await this.vnpayPayment.refundPayment(
+          payment.gateway_transaction_id ?? '',
+          data.amount,
+          new Date().toISOString().slice(0, 8).replace(/-/g, ''),
+          data.reason || 'Customer refund request'
+        )
+        break
+      default:
+        throw new ValidationError('Refund not supported for this payment method')
+    }
+
+    if (!refundResult.success) {
+      throw new PaymentError('Refund failed: ' + refundResult.error)
+    }
+
+    // Update payment record
+    const updated = await prisma.payments.update({
+      where: { id: payment_id },
+      data: {
+        refund_amount: data.amount,
+        refunded_at: new Date(),
+        refund_reason: data.reason,
+        status: 'refunded'
+      }
+    })
+
+    this.logger.info('Payment refunded', {
+      payment_id,
+      amount: data.amount,
+      adminId: data.adminId
+    })
+
+    return updated
+  }
+
+  /**
+   * Private helper methods
+   */
+  private async validateBooking(booking_id: string, user_id: string): Promise<BookingForPayment> {
+    const booking = await prisma.bookings.findUnique({
+      where: { id: booking_id },
+      include: {
+        users: true,
+        service_tiers: {
+          include: { services: true }
+        }
+      }
+    })
+
+    if (!booking) {
+      throw new NotFoundError('Booking')
+    }
+
+    if (booking.user_id !== user_id) {
+      throw new ValidationError('Unauthorized access to booking')
+    }
+
+    if (booking.payment_status === 'completed') {
+      throw new ValidationError('Booking already paid')
+    }
+
+    if (['cancelled', 'completed'].includes(booking.status)) {
+      throw new ValidationError('Cannot create payment for this booking')
+    }
+
+    return booking
+  }
+
+  private async checkExistingPayment(booking_id: string): Promise<boolean> {
+    const count = await prisma.payments.count({
+      where: {
+        booking_id,
+        status: { in: ['pending', 'processing'] }
+      }
+    })
+
+    return count > 0
+  }
+
+  private generatePaymentNumber(): string {
+    return generateSecurePaymentRef('PAY')
+  }
+
+  private async processPayment(options: {
+    payment: Payment
+    booking: BookingForPayment
+    payment_method: string
+    returnUrl?: string
+  }) {
+    const { payment, booking, payment_method, returnUrl } = options
+
+    switch (payment_method) {
+      case 'momo':
+        return this.momoPayment.createPayment({
+          booking_id: booking.id,
+          amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
+          orderInfo: `Payment for ${booking.booking_number}`,
+          redirectUrl: returnUrl
+        })
+
+      case 'vnpay':
+        return this.vnpayPayment.createPaymentUrl({
+          booking_id: booking.id,
+          amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
+          orderInfo: `Payment for booking ${booking.booking_number}`,
+          returnUrl: returnUrl ?? `${process.env.NEXT_PUBLIC_SITE_URL}/payment/callback`
+        })
+
+      case 'zalopay':
+        return this.zalopayPayment.createOrder({
+          booking_id: booking.id,
+          amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
+          description: `Payment for ${booking.booking_number}`,
+          callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/zalopay/callback`
+        })
+
+      case 'banking':
+        return this.bankingTransfer.createTransferOrder({
+          booking_id: booking.id,
+          amount: typeof payment.amount === 'number' ? payment.amount : payment.amount.toNumber(),
+          customerName: booking.users.full_name,
+          customerEmail: booking.users.email,
+          customerPhone: booking.users.phone ?? undefined
+        })
+
+      default:
+        throw new ValidationError('Invalid payment method')
+    }
+  }
+
+  private async updatePaymentStatus(
+    payment_id: string,
+    status: string,
+    data?: {
+      failure_reason?: string
+      gateway_response?: Record<string, unknown>
+    }
+  ) {
+    await prisma.payments.update({
+      where: { id: payment_id },
+      data: {
+        status,
+        failure_reason: data?.failure_reason,
+        gateway_response: data?.gateway_response as Parameters<
+          typeof prisma.payments.update
+        >[0]['data']['gateway_response']
+      }
+    })
+  }
+}

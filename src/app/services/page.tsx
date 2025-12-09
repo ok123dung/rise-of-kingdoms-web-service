@@ -426,7 +426,9 @@ function TestimonialCard({ testimonial }: TestimonialCardProps) {
         </div>
       </div>
 
-      <p className="mb-4 italic leading-relaxed text-gray-600">"{testimonial.comment}"</p>
+      <p className="mb-4 italic leading-relaxed text-gray-600">
+        &ldquo;{testimonial.comment}&rdquo;
+      </p>
 
       <div className="border-t pt-4">
         <div className="font-semibold text-gray-900">{testimonial.name}</div>

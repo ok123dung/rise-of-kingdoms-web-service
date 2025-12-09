@@ -63,17 +63,19 @@ export default function TermsPage() {
                     </h2>
                     <div className="space-y-4">
                       <p>
-                        <strong>"RoK Services"</strong> hoặc <strong>"Chúng tôi"</strong> có nghĩa
-                        là công ty cung cấp dịch vụ tư vấn và hỗ trợ chuyên nghiệp cho game Rise of
-                        Kingdoms.
+                        <strong>&ldquo;RoK Services&rdquo;</strong> hoặc{' '}
+                        <strong>&ldquo;Chúng tôi&rdquo;</strong> có nghĩa là công ty cung cấp dịch
+                        vụ tư vấn và hỗ trợ chuyên nghiệp cho game Rise of Kingdoms.
                       </p>
                       <p>
-                        <strong>"Khách hàng"</strong> hoặc <strong>"Bạn"</strong> có nghĩa là bất kỳ
-                        cá nhân hoặc tổ chức nào sử dụng dịch vụ của chúng tôi.
+                        <strong>&ldquo;Khách hàng&rdquo;</strong> hoặc{' '}
+                        <strong>&ldquo;Bạn&rdquo;</strong> có nghĩa là bất kỳ cá nhân hoặc tổ chức
+                        nào sử dụng dịch vụ của chúng tôi.
                       </p>
                       <p>
-                        <strong>"Dịch vụ"</strong> bao gồm tất cả các loại hình tư vấn, hỗ trợ và
-                        dịch vụ liên quan đến Rise of Kingdoms được cung cấp bởi RoK Services.
+                        <strong>&ldquo;Dịch vụ&rdquo;</strong> bao gồm tất cả các loại hình tư vấn,
+                        hỗ trợ và dịch vụ liên quan đến Rise of Kingdoms được cung cấp bởi RoK
+                        Services.
                       </p>
                     </div>
                   </section>

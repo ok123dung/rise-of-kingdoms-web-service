@@ -50,10 +50,10 @@ export function trackEvent(eventName: string, data?: Record<string, unknown>) {
     const context: Record<string, string | number | boolean | null | undefined> = {}
     for (const [key, value] of Object.entries(data)) {
       if (
-        typeof value === 'string' ||
-        typeof value === 'number' ||
-        typeof value === 'boolean' ||
-        value === null ||
+        typeof value === 'string' ??
+        typeof value === 'number' ??
+        typeof value === 'boolean' ??
+        value === null ??
         value === undefined
       ) {
         context[key] = value
@@ -267,10 +267,10 @@ export function showFeedbackDialog(options?: { name?: string; email?: string; ti
   if (windowWithSentry.Sentry?.showReportDialog) {
     windowWithSentry.Sentry.showReportDialog({
       user: {
-        name: options?.name || user?.username,
-        email: options?.email || user?.email
+        name: options?.name ?? user?.username,
+        email: options?.email ?? user?.email
       },
-      title: options?.title || 'Báo cáo lỗi',
+      title: options?.title ?? 'Báo cáo lỗi',
       subtitle: 'Hãy cho chúng tôi biết lỗi bạn gặp phải',
       subtitle2: 'Chúng tôi sẽ khắc phục sớm nhất có thể',
       labelName: 'Tên',
