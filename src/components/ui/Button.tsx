@@ -87,7 +87,7 @@ export function Button({
       {loading ? (
         <span className="flex items-center gap-2" role="status">
           <LoadingSpinner />
-          <span>{loadingText || 'Đang xử lý...'}</span>
+          <span>{loadingText ?? 'Đang xử lý...'}</span>
           <span className="sr-only">Vui lòng chờ</span>
         </span>
       ) : (

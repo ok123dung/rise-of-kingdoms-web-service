@@ -92,7 +92,7 @@ async function getDashboardStats() {
 
   // Calculate growth percentages
   const revenueGrowth = lastMonthRevenue._sum.amount
-    ? ((Number(totalRevenue._sum.amount || 0) - Number(lastMonthRevenue._sum.amount)) /
+    ? ((Number(totalRevenue._sum.amount ?? 0) - Number(lastMonthRevenue._sum.amount)) /
         Number(lastMonthRevenue._sum.amount)) *
       100
     : 0
@@ -102,7 +102,7 @@ async function getDashboardStats() {
 
   return {
     revenue: {
-      current: Number(totalRevenue._sum.amount || 0),
+      current: Number(totalRevenue._sum.amount ?? 0),
       growth: revenueGrowth
     },
     bookings: {

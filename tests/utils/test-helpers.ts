@@ -139,7 +139,7 @@ export class TestHelpers {
   async checkVietnameseContent() {
     const pageText = await this.page.textContent('body')
     const hasVietnamese =
-      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(pageText || '')
+      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(pageText ?? '')
     expect(hasVietnamese).toBeTruthy()
   }
 

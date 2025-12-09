@@ -178,7 +178,7 @@ export class SecureWebSocketServer {
         void socket.join(`user:${socket.user_id}`)
 
         // Join role-specific room
-        if (socket.userRole === 'admin' ?? socket.userRole === 'staff') {
+        if (socket.userRole === 'admin' || socket.userRole === 'staff') {
           void socket.join(`role:${socket.userRole}`)
         }
       }
@@ -235,7 +235,7 @@ export class SecureWebSocketServer {
       secureHandler('booking:subscribe', async (data: { booking_id: string }) => {
         const { booking_id } = data
 
-        if (!booking_id ?? typeof booking_id !== 'string') {
+        if (!booking_id || typeof booking_id !== 'string') {
           socket.emit('error', {
             code: 'INVALID_REQUEST',
             message: 'Invalid booking ID'
@@ -271,7 +271,7 @@ export class SecureWebSocketServer {
         const { booking_id, message } = data
 
         // Validate input
-        if (!booking_id || !message ?? typeof message !== 'string') {
+        if ((!booking_id || !message) ?? typeof message !== 'string') {
           socket.emit('error', {
             code: 'INVALID_REQUEST',
             message: 'Invalid message data'

@@ -644,7 +644,8 @@ export class ApplicationMonitor {
   private checkDiskSpace(): { status: string; details?: Record<string, unknown> } {
     try {
       // Only check disk space in Node.js environment and not in Edge Runtime
-      if (typeof window === 'undefined' && typeof process !== 'undefined' && process.memoryUsage) {
+      // eslint-disable-next-line @typescript-eslint/prefer-optional-chain -- typeof check needed for Edge Runtime
+      if (typeof window === 'undefined' && typeof process !== 'undefined' && process?.memoryUsage) {
         // Simplified disk check - in production use proper disk usage tools
         const used = process.memoryUsage()
         const rss = used.rss / 1024 / 1024 // MB

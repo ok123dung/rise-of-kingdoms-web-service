@@ -1,5 +1,7 @@
 // Email utility functions for Rise of Kingdoms Services
 
+import { Resend } from 'resend'
+
 import { getLogger } from '@/lib/monitoring/logger'
 
 export interface EmailOptions {
@@ -8,8 +10,6 @@ export interface EmailOptions {
   html: string
   text?: string
 }
-
-import { Resend } from 'resend'
 
 // Initialize Resend only if API key is present to avoid build errors
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null

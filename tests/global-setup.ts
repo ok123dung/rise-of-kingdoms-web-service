@@ -16,7 +16,7 @@ async function globalSetup(config: FullConfig) {
 
   try {
     console.log('🔍 Checking if server is available...')
-    await page.goto(config.webServer?.url || 'http://localhost:3000', {
+    await page.goto(config.webServer?.url ?? 'http://localhost:3000', {
       waitUntil: 'networkidle',
       timeout: 30000
     })

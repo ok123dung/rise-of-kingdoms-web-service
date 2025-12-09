@@ -57,54 +57,57 @@ export function FileUpload({
     }
   }, [])
 
-  const handleFile = async (file: File) => {
-    // Validate file size
-    if (file.size > maxSize) {
-      onError?.(`File size must be less than ${formatFileSize(maxSize)}`)
-      return
-    }
-
-    setIsUploading(true)
-    setUploadProgress(0)
-
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('folder', folder)
-      formData.append('is_public', is_public.toString())
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      if (!response.ok) {
-        const errorData = (await response.json()) as { error?: string }
-        throw new Error(errorData.error ?? 'Upload failed')
+  const handleFile = useCallback(
+    async (file: File) => {
+      // Validate file size
+      if (file.size > maxSize) {
+        onError?.(`File size must be less than ${formatFileSize(maxSize)}`)
+        return
       }
 
-      const data = (await response.json()) as { file: UploadedFile }
+      setIsUploading(true)
+      setUploadProgress(0)
 
-      onUpload({
-        ...data.file,
-        filename: file.name
-      })
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('folder', folder)
+        formData.append('is_public', is_public.toString())
 
-      setUploadProgress(100)
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
 
-      // Reset after success
-      setTimeout(() => {
-        setUploadProgress(0)
-        if (inputRef.current) {
-          inputRef.current.value = ''
+        if (!response.ok) {
+          const errorData = (await response.json()) as { error?: string }
+          throw new Error(errorData.error ?? 'Upload failed')
         }
-      }, 1000)
-    } catch (error) {
-      onError?.(error instanceof Error ? error.message : 'Upload failed')
-    } finally {
-      setIsUploading(false)
-    }
-  }
+
+        const data = (await response.json()) as { file: UploadedFile }
+
+        onUpload({
+          ...data.file,
+          filename: file.name
+        })
+
+        setUploadProgress(100)
+
+        // Reset after success
+        setTimeout(() => {
+          setUploadProgress(0)
+          if (inputRef.current) {
+            inputRef.current.value = ''
+          }
+        }, 1000)
+      } catch (error) {
+        onError?.(error instanceof Error ? error.message : 'Upload failed')
+      } finally {
+        setIsUploading(false)
+      }
+    },
+    [maxSize, folder, is_public, onUpload, onError]
+  )
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -115,9 +118,8 @@ export function FileUpload({
       if (e.dataTransfer.files?.[0]) {
         void handleFile(e.dataTransfer.files[0])
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [maxSize, folder, is_public, onUpload, onError]
+    [handleFile]
   )
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

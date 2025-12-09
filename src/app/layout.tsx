@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     'top player RoK'
   ],
   authors: [{ name: 'RoK Services Team' }],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://rokdbot.com'),
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -113,7 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <OrganizationSchema
           description="Dịch vụ Rise of Kingdoms chuyên nghiệp #1 Việt Nam"
           name="RoK Services"
-          url={process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'}
+          url={process.env.NEXT_PUBLIC_SITE_URL ?? 'https://rokdbot.com'}
         />
         {/* Vietnamese Gaming SEO - Rich snippets for Vietnamese market */}
         <VietnameseGamingSchema />

@@ -66,7 +66,7 @@ export function RevenueValidation() {
       // Check SEO elements
       const { title } = document
       const metaDescription =
-        document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
+        document.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''
       if (title.includes('Rise of Kingdoms') && metaDescription.includes('dịch vụ')) {
         newMetrics.seoOptimized = true
       }

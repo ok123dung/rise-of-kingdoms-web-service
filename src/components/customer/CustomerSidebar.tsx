@@ -153,7 +153,7 @@ export default function CustomerSidebar() {
             <p className="mt-1 text-xs text-primary-700">Team hỗ trợ 24/7 qua Discord</p>
             <Link
               className="mt-2 inline-flex items-center text-xs font-medium text-primary-600 hover:text-primary-500"
-              href={process.env.NEXT_PUBLIC_DISCORD_INVITE || '#'}
+              href={process.env.NEXT_PUBLIC_DISCORD_INVITE ?? '#'}
             >
               Tham gia Discord
             </Link>

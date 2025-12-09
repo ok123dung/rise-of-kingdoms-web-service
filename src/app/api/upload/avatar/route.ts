@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error || 'Upload failed' }, { status: 400 })
+      return NextResponse.json({ error: result.error ?? 'Upload failed' }, { status: 400 })
     }
 
     // Update user avatar URL

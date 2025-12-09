@@ -22,7 +22,7 @@ export default function LoadingSpinner({ size = 'md', className, text }: Loading
   return (
     <div className={cn('flex flex-col items-center justify-center gap-2', className)}>
       <div
-        aria-label={text || 'Loading'}
+        aria-label={text ?? 'Loading'}
         role="status"
         className={cn(
           'animate-spin rounded-full border-2 border-gray-200 border-t-blue-600',

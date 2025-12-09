@@ -26,7 +26,7 @@ export default function Error({ error, reset }: ErrorProps) {
     Sentry.captureException(error, {
       tags: {
         component: 'app-error-boundary',
-        digest: error.digest || 'no-digest',
+        digest: error.digest ?? 'no-digest',
         type: 'unhandled_error'
       },
       contexts: {
@@ -117,7 +117,7 @@ export default function Error({ error, reset }: ErrorProps) {
             <div className="flex justify-center space-x-4 text-sm">
               <a
                 className="flex items-center gap-1 text-blue-600 hover:text-blue-500"
-                href={`mailto:support@rokdbot.com?subject=Error Report&body=Error ID: ${error.digest || 'N/A'}%0AError Message: ${encodeURIComponent(error.message)}%0ATime: ${new Date().toISOString()}`}
+                href={`mailto:support@rokdbot.com?subject=Error Report&body=Error ID: ${error.digest ?? 'N/A'}%0AError Message: ${encodeURIComponent(error.message)}%0ATime: ${new Date().toISOString()}`}
               >
                 <MessageCircle className="h-3 w-3" />
                 Báo lỗi

@@ -185,6 +185,8 @@ function BookingContent() {
                       return (
                         <div
                           key={slug}
+                          role="button"
+                          tabIndex={0}
                           className={`
                             cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md
                             ${
@@ -194,6 +196,12 @@ function BookingContent() {
                             }
                           `}
                           onClick={() => setFormData(prev => ({ ...prev, service_id: slug }))}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              setFormData(prev => ({ ...prev, service_id: slug }))
+                            }
+                          }}
                         >
                           <div className="flex items-center space-x-3">
                             <div

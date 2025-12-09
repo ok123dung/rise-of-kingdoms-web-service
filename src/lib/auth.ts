@@ -129,7 +129,7 @@ export const getCurrentUser = async () => {
 }
 
 export const isAdmin = (user: UserWithStaff | null) => {
-  return user?.staff?.role === 'admin' ?? user?.staff?.role === 'manager'
+  return user?.staff?.role === 'admin' || user?.staff?.role === 'manager'
 }
 
 export const withAuth = (handler: RouteHandler) => {
@@ -183,8 +183,8 @@ export const withRateLimit = (_maxRequests = 60, _windowMs = 60000) => {
 export const isStaff = async () => {
   const user = await getCurrentUser()
   return (
-    user?.staff?.role === 'admin' ??
-    user?.staff?.role === 'manager' ??
+    user?.staff?.role === 'admin' ||
+    user?.staff?.role === 'manager' ||
     user?.staff?.role === 'staff'
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import { ShieldCheckIcon, KeyIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
@@ -23,17 +23,13 @@ export default function TwoFactorAuth() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [step, setStep] = useState<'initial' | 'setup' | 'verify' | 'backup' | 'disable'>('initial')
 
-  useEffect(() => {
-    void fetchStatus()
-  }, [])
-
   interface TwoFactorStatusResponse {
     success: boolean
     status?: TwoFactorStatus
     error?: string
   }
 
-  const fetchStatus = async () => {
+  const fetchStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/2fa/setup')
       const data = (await res.json()) as TwoFactorStatusResponse
@@ -45,7 +41,11 @@ export default function TwoFactorAuth() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    void fetchStatus()
+  }, [fetchStatus])
 
   interface SetupResponse {
     success: boolean

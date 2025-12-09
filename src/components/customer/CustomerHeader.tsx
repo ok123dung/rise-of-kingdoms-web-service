@@ -187,7 +187,18 @@ export default function CustomerHeader({
               {/* Dropdown menu */}
               {showUserMenu && (
                 <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
+                  <div
+                    className="fixed inset-0 z-10"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setShowUserMenu(false)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setShowUserMenu(false)
+                      }
+                    }}
+                  />
                   <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-2 shadow-lg">
                     <Link
                       className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"

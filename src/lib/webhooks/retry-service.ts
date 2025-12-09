@@ -1,10 +1,15 @@
 import { getLogger } from '@/lib/monitoring/logger'
 
 // Lazy imports to avoid module-level side effects during build
-let _prisma: Awaited<typeof import('@/lib/db')>['prisma'] | null = null
-let _emitWebSocketEvent:
-  | Awaited<typeof import('@/lib/websocket/init')>['emitWebSocketEvent']
-  | null = null
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+type DbModule = typeof import('@/lib/db')
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+type WebSocketModule = typeof import('@/lib/websocket/init')
+type PrismaType = Awaited<DbModule>['prisma']
+type EmitWebSocketEventType = Awaited<WebSocketModule>['emitWebSocketEvent']
+
+let _prisma: PrismaType | null = null
+let _emitWebSocketEvent: EmitWebSocketEventType | null = null
 
 async function getPrisma() {
   if (!_prisma) {

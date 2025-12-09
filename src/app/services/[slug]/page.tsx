@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { BreadcrumbSchema } from '@/components/seo/StructuredData'
 import { servicesData } from '@/data/services'
+import { prisma } from '@/lib/db'
 
 import ServiceDetailClient from './ServiceDetailClient'
 
@@ -11,8 +12,6 @@ interface ServicePageProps {
     slug: string
   }
 }
-
-import { prisma } from '@/lib/db'
 
 export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
   const service = await prisma.services.findUnique({
@@ -28,10 +27,10 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
 
   return {
     title: `${service.name} - RoK Services Premium`,
-    description: service.description || service.short_description,
+    description: service.description ?? service.short_description,
     openGraph: {
       title: `${service.name} - Dịch vụ Rise of Kingdoms Hàng Đầu`,
-      description: service.description || service.short_description || undefined,
+      description: service.description ?? service.short_description ?? undefined,
       images: ['/og-image.png'],
       type: 'website',
       url: `/services/${service.slug}`
@@ -49,7 +48,7 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
     notFound()
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rokdbot.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://rokdbot.com'
   const breadcrumbItems = [
     { name: 'Trang chủ', url: siteUrl },
     { name: 'Dịch vụ', url: `${siteUrl}/services` },

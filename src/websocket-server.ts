@@ -6,7 +6,7 @@ import { initializeWebSocketServer } from './lib/websocket/init'
 // Load environment variables
 config()
 
-const PORT = parseInt(process.env.WS_PORT || '3002', 10)
+const PORT = parseInt(process.env.WS_PORT ?? '3002', 10)
 const logger = getLogger()
 
 // Only log in development

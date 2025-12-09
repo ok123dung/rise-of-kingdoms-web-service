@@ -102,7 +102,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 <div className="text-sm">
                   <a
                     className="font-medium text-red-600 hover:text-red-500"
-                    href={`mailto:support@rokdbot.com?subject=Critical System Error&body=Error ID: ${error.digest || 'N/A'}%0AError Message: ${encodeURIComponent(error.message)}%0ATime: ${new Date().toISOString()}`}
+                    href={`mailto:support@rokdbot.com?subject=Critical System Error&body=Error ID: ${error.digest ?? 'N/A'}%0AError Message: ${encodeURIComponent(error.message)}%0ATime: ${new Date().toISOString()}`}
                   >
                     support@rokdbot.com
                   </a>
@@ -114,7 +114,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             <div className="text-center">
               <p className="text-xs text-gray-500">
                 RoK Services • Hệ thống phát hiện lỗi tự động •
-                <span className="ml-1">ID: {error.digest?.slice(-8) || 'UNKNOWN'}</span>
+                <span className="ml-1">ID: {error.digest?.slice(-8) ?? 'UNKNOWN'}</span>
               </p>
             </div>
           </div>

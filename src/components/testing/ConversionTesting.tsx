@@ -135,8 +135,8 @@ export function useTrackCTAClicks() {
   useEffect(() => {
     const handleCTAClick = (event: Event) => {
       const target = event.target as HTMLElement
-      const ctaText = target.textContent || ''
-      const href = target.getAttribute('href') || ''
+      const ctaText = target.textContent ?? ''
+      const href = target.getAttribute('href') ?? ''
 
       // Track different types of CTAs
       if (ctaText.includes('tư vấn') || ctaText.includes('liên hệ')) {

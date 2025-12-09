@@ -316,7 +316,7 @@ export class AsyncErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        this.props.fallback || (
+        this.props.fallback ?? (
           <div className="rounded-md border border-red-200 bg-red-50 p-4">
             <div className="flex">
               <AlertTriangle className="h-5 w-5 text-red-400" />
@@ -324,7 +324,7 @@ export class AsyncErrorBoundary extends Component<Props, State> {
                 <h3 className="text-sm font-medium text-red-800">Something went wrong</h3>
                 <div className="mt-2">
                   <p className="text-sm text-red-700">
-                    {this.state.error?.message || 'An unexpected error occurred'}
+                    {this.state.error?.message ?? 'An unexpected error occurred'}
                   </p>
                 </div>
               </div>

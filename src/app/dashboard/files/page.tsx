@@ -91,7 +91,7 @@ export default function FilesPage() {
               <h2 className="mb-4 font-semibold text-gray-900">Thư mục</h2>
               <ul className="space-y-2">
                 {folders.map(folder => (
-                  <li key={folder.id || 'all'}>
+                  <li key={folder.id ?? 'all'}>
                     <button
                       className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                         currentFolder === folder.id
@@ -110,7 +110,7 @@ export default function FilesPage() {
             {/* Upload Widget */}
             <div className="mt-6">
               <FileUpload
-                folder={currentFolder || 'general'}
+                folder={currentFolder ?? 'general'}
                 maxSize={20 * 1024 * 1024} // 20MB
                 onUpload={handleUpload}
               />

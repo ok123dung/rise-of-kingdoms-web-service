@@ -24,7 +24,7 @@ export function withErrorBoundary<P extends object>(
     )
   }
 
-  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName ?? Component.name})`
 
   return WrappedComponent
 }
@@ -114,7 +114,7 @@ export function AsyncBoundary({
   errorFallback?: React.ReactNode
 }) {
   return (
-    <React.Suspense fallback={fallback || <div className="animate-pulse">Loading...</div>}>
+    <React.Suspense fallback={fallback ?? <div className="animate-pulse">Loading...</div>}>
       <ErrorBoundary fallback={errorFallback}>{children}</ErrorBoundary>
     </React.Suspense>
   )
