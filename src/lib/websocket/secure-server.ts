@@ -75,13 +75,13 @@ export class SecureWebSocketServer {
 
   private setupMiddleware() {
     // Rate limiting middleware
-    this.io.use(async (socket: AuthenticatedSocket, next) => {
+    this.io.use((socket: AuthenticatedSocket, next) => {
       if (!this.options.enableRateLimiting) {
         return next()
       }
 
       const ip = socket.handshake.address
-      const result = await this.rateLimiter.checkLimit(ip)
+      const result = this.rateLimiter.checkLimit(ip)
 
       if (!result.success) {
         return next(new Error('Too many connection attempts'))
@@ -91,17 +91,17 @@ export class SecureWebSocketServer {
     })
 
     // Authentication middleware
-    this.io.use(async (socket: AuthenticatedSocket, next) => {
+    this.io.use((socket: AuthenticatedSocket, next) => {
       try {
-        const { token } = socket.handshake.auth
-        const { sessionId } = socket.handshake.auth
+        const { token } = socket.handshake.auth as { token?: string; sessionId?: string }
+        const { sessionId } = socket.handshake.auth as { token?: string; sessionId?: string }
 
         if (!token) {
           return next(new Error('Authentication required'))
         }
 
         // Verify JWT token
-        const decoded = await verifyToken(token)
+        const decoded = verifyToken(token)
 
         if (!decoded?.user_id) {
           return next(new Error('Invalid token'))
@@ -120,7 +120,7 @@ export class SecureWebSocketServer {
         }
 
         // Generate secure session ID
-        const secureSessionId = sessionId || crypto.randomBytes(32).toString('hex')
+        const secureSessionId = (sessionId as string) || crypto.randomBytes(32).toString('hex')
 
         // Attach user info to socket
         socket.user_id = decoded.user_id
@@ -148,7 +148,7 @@ export class SecureWebSocketServer {
 
     // Activity tracking middleware
     this.io.use((socket: AuthenticatedSocket, next) => {
-      const originalEmit = socket.emit
+      const originalEmit = socket.emit.bind(socket)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       socket.emit = function (...args: any[]) {
         socket.lastActivity = Date.now()
@@ -175,11 +175,11 @@ export class SecureWebSocketServer {
 
       // Join user-specific room with validation
       if (socket.user_id) {
-        socket.join(`user:${socket.user_id}`)
+        void socket.join(`user:${socket.user_id}`)
 
         // Join role-specific room
         if (socket.userRole === 'admin' || socket.userRole === 'staff') {
-          socket.join(`role:${socket.userRole}`)
+          void socket.join(`role:${socket.userRole}`)
         }
       }
 
@@ -201,7 +201,7 @@ export class SecureWebSocketServer {
 
             // Rate limiting per event
             const rateLimitKey = `${socket.user_id}:${eventName}`
-            const result = await this.rateLimiter.checkLimit(rateLimitKey)
+            const result = this.rateLimiter.checkLimit(rateLimitKey)
 
             if (!result.success) {
               socket.emit('error', {
@@ -253,7 +253,7 @@ export class SecureWebSocketServer {
         })
 
         if (booking) {
-          socket.join(`booking:${booking_id}`)
+          void socket.join(`booking:${booking_id}`)
           socket.emit('booking:subscribed', {
             booking_id,
             status: booking.status

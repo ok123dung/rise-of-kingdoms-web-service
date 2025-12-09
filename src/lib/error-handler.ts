@@ -3,6 +3,7 @@
 
 import * as Sentry from '@sentry/nextjs'
 
+import { type AppError, isAppError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
 
 // Re-export from centralized errors
@@ -22,8 +23,6 @@ export {
   isOperationalError,
   ErrorMessages
 } from '@/lib/errors'
-
-import { type AppError, isAppError } from '@/lib/errors'
 
 export interface ErrorContext {
   user_id?: string

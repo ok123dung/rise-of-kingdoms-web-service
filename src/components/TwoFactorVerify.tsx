@@ -55,9 +55,7 @@ export default function TwoFactorVerify({ onVerify, onCancel, email }: TwoFactor
 
       <form className="space-y-4" onSubmit={e => void handleSubmit(e)}>
         <div>
-          {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
           <input
-            autoFocus
             autoComplete="off"
             className="w-full rounded-lg border px-4 py-3 text-center text-2xl tracking-widest focus:border-transparent focus:ring-2 focus:ring-blue-500"
             maxLength={useBackupCode ? 9 : 6} // XXXX-XXXX format for backup

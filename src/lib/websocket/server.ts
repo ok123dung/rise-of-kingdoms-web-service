@@ -30,17 +30,16 @@ export class WebSocketServer {
 
   private setupMiddleware() {
     // Authentication middleware
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.io.use(async (socket: AuthenticatedSocket, next) => {
+    this.io.use((socket: AuthenticatedSocket, next) => {
       try {
-        const { token } = socket.handshake.auth
+        const { token } = socket.handshake.auth as { token?: string }
 
         if (!token) {
           return next(new Error('Authentication required'))
         }
 
         // Verify JWT token
-        const decoded = verifyToken(token)
+        const decoded = verifyToken(token) as { user_id: string; role?: string } | null
 
         if (!decoded?.user_id) {
           return next(new Error('Invalid token'))
@@ -70,35 +69,37 @@ export class WebSocketServer {
 
       // Join user-specific room
       if (socket.user_id) {
-        socket.join(`user:${socket.user_id}`)
+        void socket.join(`user:${socket.user_id}`)
 
         // Join role-specific room
         if (socket.userRole) {
-          socket.join(`role:${socket.userRole}`)
+          void socket.join(`role:${socket.userRole}`)
         }
       }
 
       // Handle booking status updates
-      socket.on('booking:subscribe', async (booking_id: string) => {
-        try {
-          // Verify user has access to this booking
-          const booking = await prisma.bookings.findFirst({
-            where: {
-              id: booking_id,
-              user_id: socket.user_id // Only allow users to access their own bookings
-            }
-          })
+      socket.on('booking:subscribe', (booking_id: string) => {
+        void (async () => {
+          try {
+            // Verify user has access to this booking
+            const booking = await prisma.bookings.findFirst({
+              where: {
+                id: booking_id,
+                user_id: socket.user_id // Only allow users to access their own bookings
+              }
+            })
 
-          if (booking) {
-            socket.join(`booking:${booking_id}`)
-            socket.emit('booking:subscribed', { booking_id })
-          } else {
-            socket.emit('error', { message: 'Access denied to booking' })
+            if (booking) {
+              void socket.join(`booking:${booking_id}`)
+              socket.emit('booking:subscribed', { booking_id })
+            } else {
+              socket.emit('error', { message: 'Access denied to booking' })
+            }
+          } catch (error) {
+            getLogger().error('Booking subscription error', error as Error)
+            socket.emit('error', { message: 'Failed to subscribe to booking' })
           }
-        } catch (error) {
-          getLogger().error('Booking subscription error', error as Error)
-          socket.emit('error', { message: 'Failed to subscribe to booking' })
-        }
+        })()
       })
 
       // Handle chat messages

@@ -3,6 +3,8 @@ import { NotFoundError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
 import { type CommunicationType, CommunicationStatus } from '@/types/enums'
 
+import type { Prisma } from '@prisma/client'
+
 export interface CreateCommunicationDTO {
   user_id: string
   booking_id?: string
@@ -39,9 +41,7 @@ export class CommunicationService {
           subject: data.subject,
           content: data.content,
           template_id: data.template_id,
-          template_data: data.template_data
-            ? JSON.parse(JSON.stringify(data.template_data))
-            : undefined,
+          template_data: (data.template_data ?? undefined) as Prisma.InputJsonValue | undefined,
           status: data.status ?? CommunicationStatus.SENT,
           sent_at: new Date()
         }

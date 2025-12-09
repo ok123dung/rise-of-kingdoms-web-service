@@ -12,7 +12,6 @@ export class BookingService {
   /**
    * Create a new booking
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async createBooking(data: {
     user_id: string
     service_tier_id: string
@@ -22,7 +21,6 @@ export class BookingService {
   }): Promise<unknown> {
     return prisma.$transaction(async tx => {
       // Validate service tier exists
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const service_tiers = await this.getServiceTier(data.service_tier_id)
 
       // Check if user has active booking for same service
@@ -30,7 +28,6 @@ export class BookingService {
       const existingBookingCount = await tx.bookings.count({
         where: {
           user_id: data.user_id,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           service_tiers: { service_id: service_tiers.service_id },
           status: {
             in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.IN_PROGRESS]
@@ -43,7 +40,7 @@ export class BookingService {
       }
 
       // Generate booking number
-      const booking_number = await this.generateBookingNumber()
+      const booking_number = this.generateBookingNumber()
 
       // Create booking
       const booking = await tx.bookings.create({
@@ -235,8 +232,11 @@ export class BookingService {
   /**
    * Private helper methods
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async getServiceTier(service_tier_id: string): Promise<any> {
+  private async getServiceTier(service_tier_id: string): Promise<
+    Prisma.service_tiersGetPayload<{
+      include: { services: true }
+    }>
+  > {
     const service_tiers = await prisma.service_tiers.findUnique({
       where: { id: service_tier_id },
       include: { services: true }

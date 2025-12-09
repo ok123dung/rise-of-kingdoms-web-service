@@ -69,7 +69,7 @@ export class WebhookRetryService {
           provider,
           event_type,
           event_id,
-          payload: JSON.parse(JSON.stringify(payload)),
+          payload: JSON.parse(JSON.stringify(payload)) as Record<string, unknown>,
           status: 'pending',
           attempts: 0,
           updated_at: new Date()

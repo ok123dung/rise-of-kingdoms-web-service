@@ -330,7 +330,7 @@ export class BankingTransfer {
   // Get pending transfers (Admin only)
   async getPendingTransfers(): Promise<{
     success: boolean
-    data?: any[]
+    data?: Array<Record<string, unknown>>
     error?: string
   }> {
     try {
@@ -376,7 +376,7 @@ export class BankingTransfer {
     transferContent: string
     expireTime: Date
     bankAccounts: BankAccount[]
-    booking: any
+    booking: Record<string, unknown>
   }) {
     const emailService = getEmailService()
 
@@ -466,7 +466,7 @@ export class BankingTransfer {
     customerName: string
     transferCode: string
     reason: string
-    booking: any
+    booking: Record<string, unknown>
   }) {
     const emailService = getEmailService()
 

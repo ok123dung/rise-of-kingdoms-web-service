@@ -11,11 +11,6 @@ interface VNPayRequest {
   ipnUrl?: string
   locale?: string
 }
-interface VNPayCreateResponse {
-  vnp_Url?: string
-  vnp_ResponseCode?: string
-  vnp_Message?: string
-}
 interface VNPayReturnData {
   vnp_Amount: string
   vnp_BankCode: string

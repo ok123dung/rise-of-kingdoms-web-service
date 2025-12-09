@@ -129,15 +129,17 @@ class Logger {
             message: entry.message,
             service: entry.service,
             environment: entry.environment,
-            context: entry.context ? JSON.parse(JSON.stringify(entry.context)) : undefined,
+            context: entry.context
+              ? (JSON.parse(JSON.stringify(entry.context)) as Record<string, unknown>)
+              : undefined,
             error: entry.error
-              ? JSON.parse(
+              ? (JSON.parse(
                   JSON.stringify({
                     message: entry.error.message,
                     stack: entry.error.stack,
                     name: entry.error.name
                   })
-                )
+                ) as Record<string, unknown>)
               : undefined,
             timestamp: entry.timestamp
           }
@@ -550,11 +552,11 @@ export class ApplicationMonitor {
 
   private async runHealthChecks(): Promise<void> {
     const checks = [
-      { name: 'database', check: () => this.checkDatabase() },
-      { name: 'redis', check: () => this.checkRedis() },
+      { name: 'database', check: () => Promise.resolve(this.checkDatabase()) },
+      { name: 'redis', check: () => Promise.resolve(this.checkRedis()) },
       { name: 'external_apis', check: () => this.checkExternalAPIs() },
-      { name: 'disk_space', check: () => this.checkDiskSpace() },
-      { name: 'memory', check: () => this.checkMemory() }
+      { name: 'disk_space', check: () => Promise.resolve(this.checkDiskSpace()) },
+      { name: 'memory', check: () => Promise.resolve(this.checkMemory()) }
     ]
 
     for (const check of checks) {

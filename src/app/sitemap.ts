@@ -33,7 +33,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // Lazy import prisma only at runtime
-  const { prisma } = await import('@/lib/db')
+  const dbModule = await import('@/lib/db')
+  const { prisma } = dbModule
 
   // Fetch all active services
   let serviceUrls: Array<{
@@ -44,7 +45,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }> = []
 
   try {
-    const services = await prisma.service.findMany({
+    if (!prisma) {
+      console.warn('Sitemap: Prisma not available')
+      return staticRoutes as MetadataRoute.Sitemap
+    }
+
+    const services = await prisma.services.findMany({
       where: { is_active: true },
       select: { slug: true, updated_at: true }
     })

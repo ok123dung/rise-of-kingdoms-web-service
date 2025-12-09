@@ -78,6 +78,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 {/* Primary Action */}
                 <button
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  type="button"
                   onClick={reset}
                 >
                   <RefreshCw className="h-4 w-4" />
@@ -87,6 +88,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 {/* Secondary Action */}
                 <button
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  type="button"
                   onClick={() => (window.location.href = '/')}
                 >
                   <Home className="h-4 w-4" />

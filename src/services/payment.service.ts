@@ -115,8 +115,23 @@ export class PaymentService {
   /**
    * Get payment by ID
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getPaymentById(payment_id: string, user_id?: string): Promise<any> {
+  async getPaymentById(
+    payment_id: string,
+    user_id?: string
+  ): Promise<
+    Prisma.paymentsGetPayload<{
+      include: {
+        bookings: {
+          include: {
+            users: true
+            service_tiers: {
+              include: { services: true }
+            }
+          }
+        }
+      }
+    }>
+  > {
     const payment = await prisma.payments.findUnique({
       where: { id: payment_id },
       include: {
@@ -192,7 +207,6 @@ export class PaymentService {
   /**
    * Process refund
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async processRefund(
     payment_id: string,
     data: {
@@ -208,7 +222,12 @@ export class PaymentService {
       throw new ValidationError('Only completed payments can be refunded')
     }
 
-    if (payment.refund_amount && Number(payment.refund_amount) > 0) {
+    const refundAmountNumber =
+      typeof payment.refund_amount === 'number'
+        ? payment.refund_amount
+        : payment.refund_amount.toNumber()
+
+    if (payment.refund_amount && refundAmountNumber > 0) {
       throw new ValidationError('Payment already has refunds')
     }
 
@@ -217,14 +236,14 @@ export class PaymentService {
     switch (payment.payment_method) {
       case 'momo':
         refundResult = await this.momoPayment.refundPayment(
-          payment.gateway_transaction_id,
+          payment.gateway_transaction_id ?? '',
           data.amount,
           data.reason || 'Customer refund request'
         )
         break
       case 'vnpay':
         refundResult = await this.vnpayPayment.refundPayment(
-          payment.gateway_transaction_id,
+          payment.gateway_transaction_id ?? '',
           data.amount,
           new Date().toISOString().slice(0, 8).replace(/-/g, ''),
           data.reason || 'Customer refund request'

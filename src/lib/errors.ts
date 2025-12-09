@@ -121,24 +121,38 @@ export function logError(error: unknown, context?: Record<string, unknown>): voi
 
   if (error instanceof AppError) {
     if (error.statusCode >= 500) {
-      logger.error('Application error', error, {
+      const logContext: LogContext = {
         statusCode: String(error.statusCode),
         isOperational: String(error.isOperational),
-        ...error.context,
-        ...context
-      } as LogContext)
+        ...(error.context &&
+          Object.fromEntries(
+            Object.entries(error.context).map(([k, v]) => [k, v != null ? String(v) : ''])
+          )),
+        ...(context &&
+          Object.fromEntries(
+            Object.entries(context).map(([k, v]) => [k, v != null ? String(v) : ''])
+          ))
+      }
+      logger.error('Application error', error, logContext)
     } else {
-      logger.warn('Client error', {
+      const logContext: LogContext = {
         message: error.message,
         statusCode: String(error.statusCode),
-        ...error.context,
-        ...context
-      } as LogContext)
+        ...(error.context &&
+          Object.fromEntries(
+            Object.entries(error.context).map(([k, v]) => [k, v != null ? String(v) : ''])
+          )),
+        ...(context &&
+          Object.fromEntries(
+            Object.entries(context).map(([k, v]) => [k, v != null ? String(v) : ''])
+          ))
+      }
+      logger.warn('Client error', logContext)
     }
   } else if (error instanceof Error) {
-    logger.error('Unexpected error', error, context as LogContext)
+    logger.error('Unexpected error', error, context as LogContext | undefined)
   } else {
-    logger.error('Unknown error', new Error(String(error)), context as LogContext)
+    logger.error('Unknown error', new Error(String(error)), context as LogContext | undefined)
   }
 }
 

@@ -57,7 +57,9 @@ export default async function PaymentPage({ params }: { params: { id: string } }
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Gói</span>
-                  <span className="font-medium text-gray-900">{booking.service_tiers?.name ?? 'Tier'}</span>
+                  <span className="font-medium text-gray-900">
+                    {booking.service_tiers?.name ?? 'Tier'}
+                  </span>
                 </div>
                 <div className="flex justify-between border-t border-dashed border-gray-200 pt-4">
                   <span className="text-lg font-semibold text-gray-900">Tổng cộng</span>

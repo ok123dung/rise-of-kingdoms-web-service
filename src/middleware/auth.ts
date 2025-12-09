@@ -35,7 +35,7 @@ export async function authMiddleware(req: NextRequest) {
 
   // Apply rate limiting to API routes
   if (pathname.startsWith('/api')) {
-    const rateLimitResponse = await applyRateLimit(req)
+    const rateLimitResponse = applyRateLimit(req)
     if (rateLimitResponse) return rateLimitResponse
   }
 
@@ -96,7 +96,7 @@ export async function authMiddleware(req: NextRequest) {
   return NextResponse.next()
 }
 
-async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
+function applyRateLimit(req: NextRequest): NextResponse | null {
   const ip = req.ip || req.headers.get('x-forwarded-for') || 'unknown'
   const { pathname } = req.nextUrl
 
@@ -111,7 +111,7 @@ async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
   const user_agent = req.headers.get('user-agent') || 'unknown'
   const identifier = `${ip}:${user_agent.substring(0, 50)}`
 
-  const result = await rateLimiter.checkLimit(identifier)
+  const result = rateLimiter.checkLimit(identifier)
 
   if (!result.success) {
     return NextResponse.json(
