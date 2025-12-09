@@ -134,58 +134,58 @@ export default function ConfirmModal({
     >
       <div
         ref={modalRef}
+        aria-describedby="modal-description"
+        aria-labelledby="modal-title"
+        aria-modal="true"
         className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl"
         role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
       >
         <div className="mb-4 flex items-start justify-between">
           <div className="flex items-center gap-3">
             <AlertCircle className={`h-6 w-6 ${styles.icon}`} />
-            <h3 id="modal-title" className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900" id="modal-title">
               {title}
             </h3>
           </div>
           <button
-            onClick={onCancel}
-            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             aria-label="Close"
+            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             type="button"
+            onClick={onCancel}
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <p id="modal-description" className="mb-4 text-sm text-gray-600">
+        <p className="mb-4 text-sm text-gray-600" id="modal-description">
           {message}
         </p>
 
         {requirePassword && (
           <input
             ref={passwordInputRef}
-            type="password"
+            aria-describedby="modal-description"
             className="mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder={passwordPlaceholder}
+            type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            aria-describedby="modal-description"
           />
         )}
 
         <div className="flex gap-3">
           <button
-            type="button"
             className="flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            type="button"
             onClick={onCancel}
           >
             {cancelText}
           </button>
           <button
-            type="button"
             className={`flex-1 rounded-lg px-4 py-2 font-medium transition-colors disabled:opacity-50 ${styles.button}`}
-            onClick={handleConfirm}
             disabled={requirePassword && !password}
+            type="button"
+            onClick={handleConfirm}
           >
             {confirmText}
           </button>

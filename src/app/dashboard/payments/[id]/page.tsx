@@ -27,19 +27,20 @@ interface PaymentDetail {
   gateway_response: Record<string, unknown> | null
   created_at: string
   paid_at: string | null
-  booking: {
+  bookings: {
     id: string
     booking_number: string
     status: string
+    user_id: string
     service_tiers: {
       name: string
       description: string
-      service: {
+      services: {
         name: string
         icon: string
       }
     }
-    user: {
+    users: {
       full_name: string
       email: string
     }
@@ -231,9 +232,12 @@ export default function PaymentDetailPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">
-                    {payment.bookings.service_tiers.services.name} - {payment.bookings.service_tiers.name}
+                    {payment.bookings.service_tiers.services.name} -{' '}
+                    {payment.bookings.service_tiers.name}
                   </p>
-                  <p className="text-sm text-gray-500">Mã đơn: #{payment.bookings.booking_number}</p>
+                  <p className="text-sm text-gray-500">
+                    Mã đơn: #{payment.bookings.booking_number}
+                  </p>
                   <p className="mt-1 text-sm text-gray-500">
                     Trạng thái:
                     <span className="ml-1 font-medium">

@@ -58,7 +58,12 @@ export class UploadService {
     try {
       // Validate file type
       const fileCategory = this.getFileCategory(mime_type)
-      if (!isValidFileType(mime_type, fileCategory as 'image' | 'video' | 'avatar' | 'document' | 'screenshot')) {
+      if (
+        !isValidFileType(
+          mime_type,
+          fileCategory as 'image' | 'video' | 'avatar' | 'document' | 'screenshot'
+        )
+      ) {
         return {
           success: false,
           error: 'Invalid file type'
@@ -75,7 +80,12 @@ export class UploadService {
       }
 
       // Validate file size
-      if (!isValidFileSize(buffer.length, fileCategory as 'default' | 'image' | 'video' | 'avatar' | 'document')) {
+      if (
+        !isValidFileSize(
+          buffer.length,
+          fileCategory as 'default' | 'image' | 'video' | 'avatar' | 'document'
+        )
+      ) {
         return {
           success: false,
           error: 'File size exceeds limit'
@@ -399,8 +409,8 @@ export class UploadService {
         // Create new file record
         await prisma.file_uploads.create({
           data: {
-          id: crypto.randomUUID(),
-          key: destinationKey,
+            id: crypto.randomUUID(),
+            key: destinationKey,
             filename: sourceFile.filename,
             mime_type: sourceFile.mime_type,
             size: sourceFile.size,
@@ -408,7 +418,7 @@ export class UploadService {
             folder: sourceFile.folder,
             is_public: sourceFile.is_public,
             metadata: sourceFile.metadata || undefined,
-          updated_at: new Date()
+            updated_at: new Date()
           }
         })
       }

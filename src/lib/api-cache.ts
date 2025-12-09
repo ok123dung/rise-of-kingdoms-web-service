@@ -145,7 +145,9 @@ export const CacheConfigs = {
 }
 
 // ETags support for conditional requests
-export function withETag(handler: (req: NextRequest, context?: unknown) => Response | Promise<Response>) {
+export function withETag(
+  handler: (req: NextRequest, context?: unknown) => Response | Promise<Response>
+) {
   return async function etagHandler(req: NextRequest, context?: unknown): Promise<Response> {
     const response = await Promise.resolve(handler(req, context))
 

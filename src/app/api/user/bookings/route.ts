@@ -20,7 +20,7 @@ export async function GET(_request: NextRequest) {
       include: {
         service_tiers: {
           include: {
-            service: true
+            services: true
           }
         },
         payments: true

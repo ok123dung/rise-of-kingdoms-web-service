@@ -2,7 +2,9 @@ import { getLogger } from '@/lib/monitoring/logger'
 
 // Lazy imports to avoid module-level side effects during build
 let _prisma: Awaited<typeof import('@/lib/db')>['prisma'] | null = null
-let _emitWebSocketEvent: Awaited<typeof import('@/lib/websocket/init')>['emitWebSocketEvent'] | null = null
+let _emitWebSocketEvent:
+  | Awaited<typeof import('@/lib/websocket/init')>['emitWebSocketEvent']
+  | null = null
 
 async function getPrisma() {
   if (!_prisma) {
@@ -42,7 +44,12 @@ export class WebhookRetryService {
   }
 
   // Store webhook event for processing
-  async storeWebhookEvent(provider: string, event_type: string, event_id: string, payload: Record<string, unknown>) {
+  async storeWebhookEvent(
+    provider: string,
+    event_type: string,
+    event_id: string,
+    payload: Record<string, unknown>
+  ) {
     const prisma = await getPrisma()
     try {
       // Check if event already exists
@@ -58,14 +65,14 @@ export class WebhookRetryService {
       // Create new event
       const event = await prisma.webhook_events.create({
         data: {
-        id: crypto.randomUUID(),
+          id: crypto.randomUUID(),
           provider,
           event_type,
           event_id,
           payload: JSON.parse(JSON.stringify(payload)),
           status: 'pending',
           attempts: 0,
-        updated_at: new Date()
+          updated_at: new Date()
         }
       })
 
@@ -155,7 +162,13 @@ export class WebhookRetryService {
   }
 
   // Handle specific webhook event
-  private async handleWebhookEvent(event: { provider: string; payload: unknown; id: string; event_id: string; attempts: number }): Promise<boolean> {
+  private async handleWebhookEvent(event: {
+    provider: string
+    payload: unknown
+    id: string
+    event_id: string
+    attempts: number
+  }): Promise<boolean> {
     const eventWithPayload = { payload: event.payload as Record<string, unknown> }
     try {
       switch (event.provider) {
@@ -202,9 +215,9 @@ export class WebhookRetryService {
           payment_number: orderId,
           payment_method: 'momo'
         },
-        include: { bookings: {
-            include: { users: true
-            }
+        include: {
+          bookings: {
+            include: { users: true }
           }
         }
       })
@@ -256,7 +269,9 @@ export class WebhookRetryService {
   }
 
   // Handle ZaloPay webhook
-  private async handleZaloPayWebhook(event: { payload: Record<string, unknown> }): Promise<boolean> {
+  private async handleZaloPayWebhook(event: {
+    payload: Record<string, unknown>
+  }): Promise<boolean> {
     const prisma = await getPrisma()
     try {
       const { payload } = event
@@ -276,9 +291,9 @@ export class WebhookRetryService {
           payment_number: app_trans_id,
           payment_method: 'zalopay'
         },
-        include: { bookings: {
-            include: { users: true
-            }
+        include: {
+          bookings: {
+            include: { users: true }
           }
         }
       })
@@ -348,9 +363,9 @@ export class WebhookRetryService {
           payment_number: vnp_TxnRef,
           payment_method: 'vnpay'
         },
-        include: { bookings: {
-            include: { users: true
-            }
+        include: {
+          bookings: {
+            include: { users: true }
           }
         }
       })

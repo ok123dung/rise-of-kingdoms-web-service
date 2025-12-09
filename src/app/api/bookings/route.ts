@@ -56,12 +56,14 @@ export async function POST(request: NextRequest) {
 
       user = await prisma.users.create({
         data: {
+          id: crypto.randomUUID(),
           email: data.email,
           full_name: data.full_name,
           phone: data.phone,
           password: hashedPassword,
           rok_kingdom: data.kingdom,
-          status: 'active'
+          status: 'active',
+          updated_at: new Date()
         }
       })
 
@@ -79,7 +81,7 @@ export async function POST(request: NextRequest) {
     // The frontend sends 'service_id' which is likely the Service Slug.
     // We need to find the default (first) tier for this service.
     const service_tiers = await prisma.service_tiers.findFirst({
-      where: { service: { slug: data.service_id } },
+      where: { services: { slug: data.service_id } },
       orderBy: { sort_order: 'asc' },
       include: { services: true }
     })
@@ -93,17 +95,19 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Create Booking using Service
-    const booking = await bookingService.createBooking({
+    const bookingResult = await bookingService.createBooking({
       user_id: user.id,
-      service_tiersId: service_tiers.id,
+      service_tier_id: service_tiers.id,
       customer_requirements: data.notes,
       notes: `Kingdom: ${data.kingdom ?? 'N/A'}`
     })
+    const booking = bookingResult as { id: string; booking_number: string }
 
     // 4. Create Lead (for tracking)
     // This could be moved to an event listener or service, but keeping here for now
     await prisma.leads.create({
       data: {
+        id: crypto.randomUUID(),
         email: data.email,
         full_name: data.full_name,
         phone: data.phone,
@@ -111,21 +115,19 @@ export async function POST(request: NextRequest) {
         source: 'booking_form',
         status: 'converted',
         converted_booking_id: booking.id,
-        lead_score: 80
+        lead_score: 80,
+        updated_at: new Date()
       }
     })
 
     // Send booking received email
-    sendBookingReceivedEmail(
-      data.email,
-      data.full_name,
-      booking.booking_number,
-      service_tiers.services.name
-    ).catch((err: unknown) =>
-      getLogger().error(
-        'Failed to send booking received email',
-        err instanceof Error ? err : new Error(String(err))
-      )
+    const serviceName: string = service_tiers.services?.name ?? 'Service'
+    sendBookingReceivedEmail(data.email, data.full_name, booking.booking_number, serviceName).catch(
+      (err: unknown) =>
+        getLogger().error(
+          'Failed to send booking received email',
+          err instanceof Error ? err : new Error(String(err))
+        )
     )
 
     return NextResponse.json({

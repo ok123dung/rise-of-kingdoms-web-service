@@ -5,12 +5,7 @@ import { z } from 'zod'
 import { withDatabaseConnection } from '@/lib/api/db-middleware'
 import { generateToken } from '@/lib/auth/jwt'
 import { prismaAdmin as prisma } from '@/lib/db'
-import {
-  AuthenticationError,
-  ValidationError,
-  handleApiError,
-  ErrorMessages
-} from '@/lib/errors'
+import { AuthenticationError, ValidationError, handleApiError, ErrorMessages } from '@/lib/errors'
 import { trackRequest } from '@/lib/monitoring'
 import { getLogger } from '@/lib/monitoring/logger'
 import { rateLimiters } from '@/lib/rate-limit'
@@ -34,7 +29,10 @@ const loginHandler = async function (request: NextRequest): Promise<NextResponse
     const rateLimit = await rateLimiters.auth.isAllowed(clientId)
     if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: 'Quá nhiều yêu cầu đăng nhập. Vui lòng thử lại sau.', retryAfter: rateLimit.retryAfter },
+        {
+          error: 'Quá nhiều yêu cầu đăng nhập. Vui lòng thử lại sau.',
+          retryAfter: rateLimit.retryAfter
+        },
         { status: 429 }
       )
     }
@@ -65,7 +63,7 @@ const loginHandler = async function (request: NextRequest): Promise<NextResponse
     })
 
     // Check user exists and has password
-    if (!user || !user.password) {
+    if (!user?.password) {
       throw new AuthenticationError('Email hoặc mật khẩu không chính xác')
     }
 

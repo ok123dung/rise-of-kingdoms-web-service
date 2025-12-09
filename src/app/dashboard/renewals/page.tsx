@@ -9,12 +9,12 @@ import { useSession } from 'next-auth/react'
 
 interface Renewal {
   id: string
-  booking: {
+  bookings: {
     id: string
     booking_number: string
     service_tiers: {
       name: string
-      service: {
+      services: {
         name: string
         icon: string
       }
@@ -40,12 +40,12 @@ export default function RenewalsPage() {
       const mockRenewals: Renewal[] = [
         {
           id: '1',
-          booking: {
+          bookings: {
             id: '1',
             booking_number: 'RK241201001',
             service_tiers: {
               name: 'Gói Premium',
-              service: {
+              services: {
                 name: 'Nâng cấp VIP',
                 icon: '👑'
               }
@@ -185,7 +185,9 @@ export default function RenewalsPage() {
                             locale: vi
                           })}{' '}
                           -{' '}
-                          {format(new Date(renewal.bookings.end_date), 'dd/MM/yyyy', { locale: vi })}
+                          {format(new Date(renewal.bookings.end_date), 'dd/MM/yyyy', {
+                            locale: vi
+                          })}
                         </p>
                       </div>
                     </div>

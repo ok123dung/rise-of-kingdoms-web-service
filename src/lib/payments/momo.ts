@@ -205,8 +205,8 @@ export class MoMoPayment {
       if (responseData.resultCode === 0) {
         await prisma.payments.create({
           data: {
-          id: crypto.randomUUID(),
-          booking_id: request.booking_id,
+            id: crypto.randomUUID(),
+            booking_id: request.booking_id,
             amount: request.amount,
             payment_method: 'momo',
             payment_gateway: 'momo',

@@ -278,7 +278,7 @@ const globalForPrisma = globalThis as unknown as {
 // Using the standard Prisma serverless pattern without Proxy wrappers
 export const prismaEnhanced: EnhancedPrismaClient = isBuildPhase
   ? (null as unknown as EnhancedPrismaClient)
-  : globalForPrisma.prisma ?? new EnhancedPrismaClient()
+  : (globalForPrisma.prisma ?? new EnhancedPrismaClient())
 
 // Cache instance in development to prevent too many connections
 if (!isBuildPhase && process.env.NODE_ENV !== 'production') {

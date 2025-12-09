@@ -40,8 +40,8 @@ export class ServiceTaskService {
 
       const task = await prisma.service_tasks.create({
         data: {
-        id: crypto.randomUUID(),
-        booking_id: data.booking_id,
+          id: crypto.randomUUID(),
+          booking_id: data.booking_id,
           type: data.type,
           title: data.title,
           description: data.description,

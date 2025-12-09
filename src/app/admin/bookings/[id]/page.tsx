@@ -14,12 +14,12 @@ async function getBooking(id: string): Promise<BookingDetail> {
   const booking = await prisma.bookings.findUnique({
     where: { id },
     include: {
-      user: true,
+      users: true,
       service_tiers: {
         include: { services: true }
       },
       payments: true,
-      convertedLead: true
+      leads: true
     }
   })
 
@@ -101,7 +101,7 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
             </h2>
             <div className="rounded-lg bg-gray-50 p-4">
               <p className="whitespace-pre-wrap text-gray-700">
-                {booking.customer_requirements || 'Không có ghi chú thêm'}
+                {booking.customer_requirements ?? 'Không có ghi chú thêm'}
               </p>
             </div>
           </div>

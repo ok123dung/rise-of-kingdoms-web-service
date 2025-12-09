@@ -270,7 +270,9 @@ export class TwoFactorAuthService {
       return {
         enabled: twoFactorAuth.enabled,
         backup_codesRemaining: twoFactorAuth.backup_codes.length,
-        lastBackupCodeUsed: twoFactorAuth.last_used_backup_code ? twoFactorAuth.updated_at : undefined
+        lastBackupCodeUsed: twoFactorAuth.last_used_backup_code
+          ? twoFactorAuth.updated_at
+          : undefined
       }
     } catch (error) {
       getLogger().error('2FA status retrieval error', error as Error)

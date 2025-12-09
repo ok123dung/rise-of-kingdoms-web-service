@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/db'
 import { getEmailService } from '@/lib/email/service'
 import { getLogger } from '@/lib/monitoring/logger'
-import type { Booking, PaymentWithBooking } from '@/types/database'
 
 interface BankingTransferRequest {
   booking_id: string

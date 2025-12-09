@@ -19,7 +19,7 @@ async function getAdminDashboardData() {
     where: { status: 'completed' },
     _sum: { amount: true }
   })
-  const totalRevenue = Number(totalRevenueResult._sum.amount || 0)
+  const totalRevenue = Number(totalRevenueResult._sum.amount ?? 0)
 
   const totalBookings = await prisma.bookings.count()
   // Count users who are customers (no staff profile)
@@ -40,7 +40,7 @@ async function getAdminDashboardData() {
     take: 5,
     orderBy: { created_at: 'desc' },
     include: {
-      user: true,
+      users: true,
       service_tiers: {
         include: { services: true }
       }
@@ -50,8 +50,8 @@ async function getAdminDashboardData() {
   const recentBookings = recentBookingsData.map(booking => ({
     id: booking.id,
     booking_number: booking.booking_number,
-    customerName: booking.users.full_name,
-    serviceName: booking.service_tiers.services.name,
+    customerName: booking.users?.full_name ?? 'Unknown',
+    serviceName: booking.service_tiers?.services?.name ?? 'Unknown Service',
     amount: Number(booking.total_amount),
     status: booking.status,
     created_at: booking.created_at.toISOString()
@@ -78,34 +78,35 @@ async function getAdminDashboardData() {
   // so we might need to do some manual aggregation or raw query.
   // For simplicity/performance, let's just count bookings per service tier for now.
   const topServicesData = await prisma.bookings.groupBy({
-    by: ['service_tiersId'],
+    by: ['service_tier_id'],
     _count: {
-      service_tiersId: true
+      service_tier_id: true
     },
     _sum: {
       total_amount: true
     },
     orderBy: {
       _count: {
-        service_tiersId: 'desc'
+        service_tier_id: 'desc'
       }
     },
     take: 5
   })
 
   // We need to fetch service names for these IDs
-  const service_tiersIds = topServicesData.map(item => item.service_tiersId)
+  const service_tiersIds = topServicesData.map(item => item.service_tier_id)
   const service_tiers = await prisma.service_tiers.findMany({
     where: { id: { in: service_tiersIds } },
     include: { services: true }
   })
 
   const topServices = topServicesData.map(item => {
-    const tier = service_tiers.find(t => t.id === item.service_tiersId)
+    const tier = service_tiers.find(t => t.id === item.service_tier_id)
+    const serviceName = tier?.services?.name ?? 'Unknown'
     return {
-      name: tier ? `${tier.services.name} - ${tier.name}` : 'Unknown Service',
-      bookings: item._count.service_tiersId,
-      revenue: Number(item._sum.total_amount || 0)
+      name: tier ? `${serviceName} - ${tier.name}` : 'Unknown Service',
+      bookings: item._count.service_tier_id,
+      revenue: Number(item._sum.total_amount ?? 0)
     }
   })
 

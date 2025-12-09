@@ -252,8 +252,8 @@ export class EmailService {
       if (lead.assigned_to) {
         await prisma.communications.create({
           data: {
-          id: crypto.randomUUID(),
-          user_id: lead.assigned_to,
+            id: crypto.randomUUID(),
+            user_id: lead.assigned_to,
             type: 'email',
             channel: lead.email,
             subject: template.subject,

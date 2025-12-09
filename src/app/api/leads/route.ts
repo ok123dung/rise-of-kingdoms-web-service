@@ -66,7 +66,11 @@ export async function POST(request: NextRequest) {
     }
 
     const lead = await prisma.leads.create({
-      data: leadData
+      data: {
+        id: crypto.randomUUID(),
+        ...leadData,
+        updated_at: new Date()
+      }
     })
 
     // Trigger automated follow-up sequence
@@ -78,14 +82,15 @@ export async function POST(request: NextRequest) {
         where: { email: 'system@rokdbot.com' }
       })
 
-      if (systemUser || lead.assigned_to) {
-        await prisma.communication.create({
+      if (systemUser ?? lead.assigned_to) {
+        await prisma.communications.create({
           data: {
-            user_id: lead.assigned_to || systemUser?.id || '',
+            id: crypto.randomUUID(),
+            user_id: lead.assigned_to ?? systemUser?.id ?? '',
             type: 'system',
             channel: 'task',
-            subject: `Follow up with lead: ${lead.full_name || lead.email}`,
-            content: `Send follow-up email to lead interested in ${lead.service_interest || 'RoK services'}`,
+            subject: `Follow up with lead: ${lead.full_name ?? lead.email}`,
+            content: `Send follow-up email to lead interested in ${lead.service_interest ?? 'RoK services'}`,
             template_id: 'lead_followup_reminder',
             template_data: { leadId: lead.id, scheduledFor: followUpDate.toISOString() },
             status: 'pending'
@@ -204,7 +209,7 @@ export async function GET(request: NextRequest) {
       where: filters,
       orderBy: [{ lead_score: 'desc' }, { created_at: 'desc' }],
       include: {
-        assignedUser: {
+        users: {
           select: {
             id: true,
             full_name: true,

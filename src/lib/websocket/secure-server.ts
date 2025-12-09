@@ -149,8 +149,10 @@ export class SecureWebSocketServer {
     // Activity tracking middleware
     this.io.use((socket: AuthenticatedSocket, next) => {
       const originalEmit = socket.emit
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       socket.emit = function (...args: any[]) {
         socket.lastActivity = Date.now()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
         return originalEmit.apply(socket, args as [string, ...any[]])
       }
       next()
@@ -182,7 +184,9 @@ export class SecureWebSocketServer {
       }
 
       // Secure event handler wrapper
-      const secureHandler = (eventName: string, handler: Function) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const secureHandler = <T = any>(eventName: string, handler: (data: T) => Promise<void>) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         socket.on(eventName, async (...args: any[]) => {
           try {
             // Check session validity
@@ -212,7 +216,8 @@ export class SecureWebSocketServer {
             socket.lastActivity = Date.now()
 
             // Execute handler
-            await handler(...args)
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            await handler(args[0] as T)
           } catch (error) {
             getLogger().error(`WebSocket event error: ${eventName}`, error as Error, {
               user_id: socket.user_id,
@@ -288,14 +293,15 @@ export class SecureWebSocketServer {
           // Store message in database
           const chatMessage = await prisma.communications.create({
             data: {
-          id: crypto.randomUUID(),
-          user_id: socket.user_id!,
+              id: crypto.randomUUID(),
+              user_id: socket.user_id!,
               booking_id,
               type: 'chat',
               content: sanitizedMessage,
               channel: `socket:${socket.id}`
             },
-            include: { users: {
+            include: {
+              users: {
                 select: {
                   id: true,
                   full_name: true
@@ -411,15 +417,15 @@ export class SecureWebSocketServer {
   }
 
   // Public methods for server-side events
-  public sendToUser(user_id: string, event: string, data: any) {
+  public sendToUser(user_id: string, event: string, data: Record<string, unknown>) {
     this.io.to(`user:${user_id}`).emit(event, data)
   }
 
-  public sendToBooking(booking_id: string, event: string, data: any) {
+  public sendToBooking(booking_id: string, event: string, data: Record<string, unknown>) {
     this.io.to(`booking:${booking_id}`).emit(event, data)
   }
 
-  public sendToRole(role: string, event: string, data: any) {
+  public sendToRole(role: string, event: string, data: Record<string, unknown>) {
     this.io.to(`role:${role}`).emit(event, data)
   }
 

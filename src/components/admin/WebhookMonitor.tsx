@@ -208,7 +208,9 @@ export function WebhookMonitor() {
                   {format(new Date(webhook.created_at), 'dd/MM HH:mm')}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-600">
-                  {webhook.next_retry_at ? format(new Date(webhook.next_retry_at), 'dd/MM HH:mm') : '-'}
+                  {webhook.next_retry_at
+                    ? format(new Date(webhook.next_retry_at), 'dd/MM HH:mm')
+                    : '-'}
                 </td>
                 <td className="px-4 py-3">
                   {webhook.status === 'failed' && (

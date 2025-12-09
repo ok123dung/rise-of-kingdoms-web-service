@@ -1,5 +1,5 @@
-import { hash } from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
+import { hash } from 'bcryptjs'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -86,10 +86,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   })
 
   try {
-    const body = await request.json() as { email?: string; full_name?: string; password?: string }
-    const email = body.email || 'test' + Date.now() + '@example.com'
-    const full_name = body.full_name || 'Test User Debug'
-    const password = body.password || 'TestPass123!'
+    const body = (await request.json()) as { email?: string; full_name?: string; password?: string }
+    const email = body.email ?? 'test' + Date.now() + '@example.com'
+    const full_name = body.full_name ?? 'Test User Debug'
+    const password = body.password ?? 'TestPass123!'
 
     await prisma.$connect()
 
@@ -114,19 +114,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     await prisma.$disconnect()
 
-    return NextResponse.json({
-      success: true,
-      message: 'User created successfully',
-      user
-    }, { status: 201 })
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'User created successfully',
+        user
+      },
+      { status: 201 }
+    )
   } catch (error: unknown) {
     const error_message = error instanceof Error ? error.message : 'Unknown error'
     const error_stack = error instanceof Error ? error.stack : undefined
 
-    return NextResponse.json({
-      success: false,
-      error: error_message,
-      stack: error_stack
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: error_message,
+        stack: error_stack
+      },
+      { status: 500 }
+    )
   }
 }

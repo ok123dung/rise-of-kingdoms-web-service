@@ -166,9 +166,12 @@ class ServiceWorkerManager {
   async queueOfflineAction(action: string, data: Record<string, unknown>): Promise<void> {
     try {
       // In a real implementation, use IndexedDB
-      const queuedActions = JSON.parse(
-        localStorage.getItem('offline_queue') || '[]'
-      ) as Array<{ id: string; action: string; data: unknown; timestamp: string }>
+      const queuedActions = JSON.parse(localStorage.getItem('offline_queue') || '[]') as Array<{
+        id: string
+        action: string
+        data: unknown
+        timestamp: string
+      }>
 
       queuedActions.push({
         id: Date.now().toString(),
@@ -373,7 +376,7 @@ export const swManager = typeof window !== 'undefined' ? ServiceWorkerManager.ge
 
 // Make available globally for easy access
 if (typeof window !== 'undefined') {
-  (window as unknown as { swManager: ServiceWorkerManager | null }).swManager = swManager
+  ;(window as unknown as { swManager: ServiceWorkerManager | null }).swManager = swManager
 }
 
 // Hook into React for easy usage in components

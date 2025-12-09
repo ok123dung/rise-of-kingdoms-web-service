@@ -105,4 +105,6 @@ async function resetPasswordHandler(request: NextRequest): Promise<NextResponse>
   }
 }
 
-export const POST = trackRequest('/api/auth/reset-password')(withDatabaseConnection(resetPasswordHandler))
+export const POST = trackRequest('/api/auth/reset-password')(
+  withDatabaseConnection(resetPasswordHandler)
+)

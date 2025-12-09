@@ -31,15 +31,17 @@ export class CommunicationService {
 
       const communication = await prisma.communications.create({
         data: {
-        id: crypto.randomUUID(),
-        user_id: data.user_id,
+          id: crypto.randomUUID(),
+          user_id: data.user_id,
           booking_id: data.booking_id,
           type: data.type,
           channel: data.channel ?? 'web',
           subject: data.subject,
           content: data.content,
           template_id: data.template_id,
-          template_data: data.template_data ? JSON.parse(JSON.stringify(data.template_data)) : undefined,
+          template_data: data.template_data
+            ? JSON.parse(JSON.stringify(data.template_data))
+            : undefined,
           status: data.status ?? CommunicationStatus.SENT,
           sent_at: new Date()
         }
@@ -60,7 +62,8 @@ export class CommunicationService {
         ...(booking_id ? { booking_id } : {})
       },
       orderBy: { created_at: 'desc' },
-      include: { users: {
+      include: {
+        users: {
           select: {
             full_name: true,
             email: true,

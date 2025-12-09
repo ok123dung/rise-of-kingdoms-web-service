@@ -103,7 +103,12 @@ export async function POST(request: NextRequest) {
     const webhookService = await getWebhookService()
 
     // Store webhook event for processing
-    await webhookService.storeWebhookEvent('momo', 'payment_notification', event_id, body as unknown as Record<string, unknown>)
+    await webhookService.storeWebhookEvent(
+      'momo',
+      'payment_notification',
+      event_id,
+      body as unknown as Record<string, unknown>
+    )
 
     // Process immediately
     const processed = await webhookService.processWebhookEvent(event_id)

@@ -33,7 +33,7 @@ export default function TwoFactorVerify({ onVerify, onCancel, email }: TwoFactor
       if (!success) {
         setError('Mã xác thực không đúng')
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Có lỗi xảy ra. Vui lòng thử lại.')
     } finally {
       setLoading(false)

@@ -30,9 +30,7 @@ export class DashboardService {
         }
       }),
       prisma.payments.findMany({
-        where: { bookings: { user_id },
-          status: PaymentStatus.COMPLETED
-        },
+        where: { bookings: { user_id }, status: PaymentStatus.COMPLETED },
         select: { amount: true }
       }),
       prisma.users.findUnique({
@@ -65,20 +63,18 @@ export class DashboardService {
         },
         include: {
           service_tiers: {
-            include: { services: true
-            }
+            include: { services: true }
           }
         },
         orderBy: { created_at: 'desc' }
       }),
       prisma.payments.findMany({
-        where: { bookings: { user_id }
-        },
-        include: { bookings: {
+        where: { bookings: { user_id } },
+        include: {
+          bookings: {
             include: {
               service_tiers: {
-                include: { services: true
-                }
+                include: { services: true }
               }
             }
           }

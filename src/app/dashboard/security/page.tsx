@@ -281,16 +281,16 @@ export default function SecurityPage() {
 
           {/* Regenerate Backup Codes Confirmation Modal */}
           <ConfirmModal
-            isOpen={showRegenerateConfirm}
-            title="Tạo mã dự phòng mới"
-            message="Bạn có chắc chắn muốn tạo mã dự phòng mới? Các mã cũ sẽ không còn hoạt động."
-            confirmText="Tạo mã mới"
+            requirePassword
             cancelText="Hủy"
-            variant="warning"
-            requirePassword={true}
+            confirmText="Tạo mã mới"
+            isOpen={showRegenerateConfirm}
+            message="Bạn có chắc chắn muốn tạo mã dự phòng mới? Các mã cũ sẽ không còn hoạt động."
             passwordPlaceholder="Nhập mật khẩu của bạn"
-            onConfirm={pwd => void handleRegenerateBackupCodes(pwd)}
+            title="Tạo mã dự phòng mới"
+            variant="warning"
             onCancel={() => setShowRegenerateConfirm(false)}
+            onConfirm={pwd => void handleRegenerateBackupCodes(pwd)}
           />
 
           {/* Display Generated Backup Codes Modal */}

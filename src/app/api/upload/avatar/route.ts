@@ -41,14 +41,14 @@ export async function POST(request: NextRequest) {
     const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       include: {
-        fileUploads: {
+        file_uploads: {
           where: { folder: 'avatars' }
         }
       }
     })
 
-    if (user?.fileUploads.length) {
-      for (const oldFile of user.fileUploads) {
+    if (user?.file_uploads && user.file_uploads.length > 0) {
+      for (const oldFile of user.file_uploads) {
         await UploadService.deleteFile(oldFile.key, session.user.id)
       }
     }

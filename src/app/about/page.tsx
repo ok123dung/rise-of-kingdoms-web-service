@@ -177,7 +177,7 @@ export default function AboutPage() {
 
                 <div className="prose prose-lg mx-auto text-slate-700">
                   <p className="mb-8 text-center text-xl font-medium text-amber-600">
-                    "Từ những game thủ đam mê đến nền tảng dịch vụ hàng đầu"
+                    &ldquo;Từ những game thủ đam mê đến nền tảng dịch vụ hàng đầu&rdquo;
                   </p>
 
                   <div className="space-y-6">

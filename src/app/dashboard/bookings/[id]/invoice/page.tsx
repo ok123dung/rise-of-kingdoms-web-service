@@ -24,10 +24,10 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
       user_id: user.id // Ensure user owns the booking
     },
     include: {
-      user: true,
+      users: true,
       service_tiers: {
         include: {
-          service: true
+          services: true
         }
       },
       payments: true

@@ -139,10 +139,25 @@ export default function SignUpPage() {
         })
       })
 
-      const data = (await response.json()) as { message?: string }
+      // Safe JSON parsing - handle non-JSON responses
+      let data: { message?: string; error?: { message?: string } } = {}
+      const contentType = response.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = (await response.json()) as typeof data
+        } catch {
+          // JSON parse failed, use default error
+          data = { message: 'Có lỗi xảy ra khi xử lý phản hồi' }
+        }
+      } else {
+        // Non-JSON response (could be rate limit HTML, network error, etc.)
+        data = { message: 'Có lỗi xảy ra. Vui lòng thử lại sau.' }
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Có lỗi xảy ra')
+        // Handle both formats: { message: "..." } and { error: { message: "..." } }
+        const errorMessage = data.message ?? data.error?.message ?? 'Có lỗi xảy ra'
+        throw new Error(errorMessage)
       }
 
       setSuccess(true)
@@ -210,8 +225,12 @@ export default function SignUpPage() {
           onSubmit={e => void handleSubmit(e)}
         >
           {error && (
-            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600">
-              <AlertCircle className="h-4 w-4" />
+            <div
+              aria-live="polite"
+              className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600"
+              role="alert"
+            >
+              <AlertCircle aria-hidden="true" className="h-4 w-4 shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
           )}
@@ -294,14 +313,55 @@ export default function SignUpPage() {
                   onChange={handleChange}
                 />
                 <button
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
+                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600 focus:text-gray-600 focus:outline-none"
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff aria-hidden="true" className="h-5 w-5" />
+                  ) : (
+                    <Eye aria-hidden="true" className="h-5 w-5" />
+                  )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-gray-500">Tối thiểu 12 ký tự, chứa chữ hoa, chữ thường, số và ký tự đặc biệt</p>
+              {/* Password strength indicators */}
+              {formData.password && (
+                <div className="animate-fadeIn mt-2 space-y-1">
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span
+                      className={`rounded px-2 py-0.5 ${formData.password.length >= 12 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                    >
+                      12+ ký tự
+                    </span>
+                    <span
+                      className={`rounded px-2 py-0.5 ${/[A-Z]/.test(formData.password) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                    >
+                      Chữ hoa
+                    </span>
+                    <span
+                      className={`rounded px-2 py-0.5 ${/[a-z]/.test(formData.password) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                    >
+                      Chữ thường
+                    </span>
+                    <span
+                      className={`rounded px-2 py-0.5 ${/[0-9]/.test(formData.password) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                    >
+                      Số
+                    </span>
+                    <span
+                      className={`rounded px-2 py-0.5 ${/[^A-Za-z0-9]/.test(formData.password) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                    >
+                      Ký tự đặc biệt
+                    </span>
+                  </div>
+                </div>
+              )}
+              {!formData.password && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Tối thiểu 12 ký tự, chứa chữ hoa, chữ thường, số và ký tự đặc biệt
+                </p>
+              )}
             </div>
 
             <div>
@@ -325,17 +385,36 @@ export default function SignUpPage() {
                   onChange={handleChange}
                 />
                 <button
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
+                  aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600 focus:text-gray-600 focus:outline-none"
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff aria-hidden="true" className="h-5 w-5" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye aria-hidden="true" className="h-5 w-5" />
                   )}
                 </button>
               </div>
+              {/* Password match indicator */}
+              {formData.confirmPassword && (
+                <p
+                  className={`mt-1 flex items-center gap-1 text-xs ${formData.password === formData.confirmPassword ? 'text-green-600' : 'text-red-500'}`}
+                >
+                  {formData.password === formData.confirmPassword ? (
+                    <>
+                      <CheckCircle aria-hidden="true" className="h-3 w-3" />
+                      Mật khẩu khớp
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle aria-hidden="true" className="h-3 w-3" />
+                      Mật khẩu không khớp
+                    </>
+                  )}
+                </p>
+              )}
             </div>
           </div>
 
@@ -366,7 +445,14 @@ export default function SignUpPage() {
               id="submit-signup"
               type="submit"
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Tạo tài khoản'}
+              {isLoading ? (
+                <>
+                  <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                  <span className="sr-only">Đang tạo tài khoản...</span>
+                </>
+              ) : (
+                'Tạo tài khoản'
+              )}
             </button>
           </div>
 

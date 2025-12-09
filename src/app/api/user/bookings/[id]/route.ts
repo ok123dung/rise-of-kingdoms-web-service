@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       include: {
         service_tiers: {
           include: {
-            service: true
+            services: true
           }
         },
         payments: true

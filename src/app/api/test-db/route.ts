@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,12 +8,12 @@ export async function GET() {
     // Check env vars
     const hasDbUrl = !!process.env.DATABASE_URL
     const hasDirectUrl = !!process.env.DIRECT_URL
-    const nextPhase = process.env.NEXT_PHASE || 'none'
-    const vercelEnv = process.env.VERCEL_ENV || 'none'
-    const vercel = process.env.VERCEL || 'none'
+    const nextPhase = process.env.NEXT_PHASE ?? 'none'
+    const vercelEnv = process.env.VERCEL_ENV ?? 'none'
+    const vercel = process.env.VERCEL ?? 'none'
 
     // Create fresh PrismaClient for testing
-    const directUrl = process.env.DIRECT_URL || process.env.DATABASE_URL
+    const directUrl = process.env.DIRECT_URL ?? process.env.DATABASE_URL
     if (!directUrl) {
       return NextResponse.json({
         success: false,
@@ -47,10 +47,13 @@ export async function GET() {
       dbTest: result
     })
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack?.slice(0, 500) : undefined
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack?.slice(0, 500) : undefined
+      },
+      { status: 500 }
+    )
   }
 }

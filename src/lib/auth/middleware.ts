@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, type NextResponse } from 'next/server'
 
 import { prismaAdmin } from '@/lib/db'
 import { AuthenticationError, AuthorizationError } from '@/lib/errors'
@@ -20,7 +20,9 @@ export interface AuthenticatedRequest extends NextRequest {
  * Extract and verify JWT token from request
  * Returns user data if valid, null otherwise
  */
-export async function getAuthenticatedUser(request: NextRequest): Promise<AuthenticatedUser | null> {
+export async function getAuthenticatedUser(
+  request: NextRequest
+): Promise<AuthenticatedUser | null> {
   const authHeader = request.headers.get('authorization')
   if (!authHeader?.startsWith('Bearer ')) {
     return null
@@ -83,7 +85,7 @@ export function withRole<T extends NextRequest>(
   allowedRoles: string[],
   handler: (request: T & { user: AuthenticatedUser }) => Promise<NextResponse>
 ): (request: T) => Promise<NextResponse> {
-  return withAuth(async (request) => {
+  return withAuth(async request => {
     if (!allowedRoles.includes(request.user.role)) {
       throw new AuthorizationError('Bạn không có quyền thực hiện thao tác này')
     }

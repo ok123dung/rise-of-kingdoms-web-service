@@ -109,15 +109,16 @@ export class WebSocketServer {
           // Verify access and save message
           const message = await prisma.communications.create({
             data: {
-          id: crypto.randomUUID(),
-          type: 'chat',
+              id: crypto.randomUUID(),
+              type: 'chat',
               content: data.message,
               user_id: socket.user_id,
               booking_id: data.booking_id,
               channel:
                 socket.userRole === 'staff' || socket.userRole === 'admin' ? 'staff' : 'customer'
             },
-            include: { users: {
+            include: {
+              users: {
                 select: {
                   id: true,
                   full_name: true,

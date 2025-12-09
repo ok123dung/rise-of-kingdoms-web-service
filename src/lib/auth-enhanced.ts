@@ -126,7 +126,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
             where: { id: user.id },
             data: {
               updated_at: new Date(),
-                last_login: new Date()
+              last_login: new Date()
             }
           })
 

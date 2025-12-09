@@ -1,3 +1,5 @@
+import { type Prisma } from '@prisma/client'
+
 import { generateSecurePaymentRef } from '@/lib/crypto-utils'
 import { prisma } from '@/lib/db'
 import { NotFoundError, ValidationError, PaymentError, ConflictError } from '@/lib/errors'
@@ -6,7 +8,6 @@ import { BankingTransfer } from '@/lib/payments/banking'
 import { MoMoPayment } from '@/lib/payments/momo'
 import { VNPayPayment } from '@/lib/payments/vnpay'
 import { ZaloPayPayment } from '@/lib/payments/zalopay'
-import { Prisma } from '@prisma/client'
 import type { Payment } from '@/types/prisma'
 
 type BookingForPayment = Prisma.bookingsGetPayload<{
@@ -114,11 +115,14 @@ export class PaymentService {
   /**
    * Get payment by ID
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getPaymentById(payment_id: string, user_id?: string): Promise<any> {
     const payment = await prisma.payments.findUnique({
       where: { id: payment_id },
-      include: { bookings: {
-          include: { users: true,
+      include: {
+        bookings: {
+          include: {
+            users: true,
             service_tiers: {
               include: { services: true }
             }
@@ -166,7 +170,8 @@ export class PaymentService {
     const [payments, total] = await Promise.all([
       prisma.payments.findMany({
         where,
-        include: { bookings: {
+        include: {
+          bookings: {
             include: {
               service_tiers: {
                 include: { services: true }
@@ -187,6 +192,7 @@ export class PaymentService {
   /**
    * Process refund
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async processRefund(
     payment_id: string,
     data: {
@@ -194,7 +200,7 @@ export class PaymentService {
       reason: string
       adminId: string
     }
-  ): Promise<any> {
+  ): Promise<unknown> {
     const payment = await this.getPaymentById(payment_id)
 
     // Validate refund
@@ -211,14 +217,14 @@ export class PaymentService {
     switch (payment.payment_method) {
       case 'momo':
         refundResult = await this.momoPayment.refundPayment(
-          payment.gateway_transaction_id!,
+          payment.gateway_transaction_id,
           data.amount,
           data.reason || 'Customer refund request'
         )
         break
       case 'vnpay':
         refundResult = await this.vnpayPayment.refundPayment(
-          payment.gateway_transaction_id!,
+          payment.gateway_transaction_id,
           data.amount,
           new Date().toISOString().slice(0, 8).replace(/-/g, ''),
           data.reason || 'Customer refund request'
@@ -258,7 +264,8 @@ export class PaymentService {
   private async validateBooking(booking_id: string, user_id: string): Promise<BookingForPayment> {
     const booking = await prisma.bookings.findUnique({
       where: { id: booking_id },
-      include: { users: true,
+      include: {
+        users: true,
         service_tiers: {
           include: { services: true }
         }

@@ -1,5 +1,5 @@
+import { Prisma } from '@prisma/client'
 
-import { Prisma } from "@prisma/client"
 import { generateSecureNumericCode } from '@/lib/crypto-utils'
 import { prisma } from '@/lib/db'
 import { NotFoundError, ValidationError, ConflictError } from '@/lib/errors'
@@ -12,15 +12,17 @@ export class BookingService {
   /**
    * Create a new booking
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async createBooking(data: {
     user_id: string
     service_tier_id: string
     customer_requirements?: string
     scheduledDate?: Date
     notes?: string
-  }): Promise<any> {
+  }): Promise<unknown> {
     return prisma.$transaction(async tx => {
       // Validate service tier exists
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const service_tiers = await this.getServiceTier(data.service_tier_id)
 
       // Check if user has active booking for same service
@@ -28,6 +30,7 @@ export class BookingService {
       const existingBookingCount = await tx.bookings.count({
         where: {
           user_id: data.user_id,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           service_tiers: { service_id: service_tiers.service_id },
           status: {
             in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.IN_PROGRESS]
@@ -51,19 +54,24 @@ export class BookingService {
           status: BookingStatus.PENDING,
           payment_status: PaymentStatus.PENDING,
           total_amount: new Prisma.Decimal(
-            typeof service_tiers.price === 'number' ? service_tiers.price : service_tiers.price.toNumber()
+            typeof service_tiers.price === 'number'
+              ? service_tiers.price
+              : service_tiers.price.toNumber()
           ),
           final_amount: new Prisma.Decimal(
-            typeof service_tiers.price === 'number' ? service_tiers.price : service_tiers.price.toNumber()
+            typeof service_tiers.price === 'number'
+              ? service_tiers.price
+              : service_tiers.price.toNumber()
           ),
           currency: 'VND',
           customer_requirements: data.customer_requirements,
           start_date: data.scheduledDate,
           internal_notes: data.notes,
-        id: crypto.randomUUID(),
-        updated_at: new Date()
+          id: crypto.randomUUID(),
+          updated_at: new Date()
         },
-        include: { users: true,
+        include: {
+          users: true,
           service_tiers: {
             include: { services: true }
           }
@@ -83,10 +91,11 @@ export class BookingService {
   /**
    * Get booking by ID
    */
-  async getBookingById(booking_id: string, user_id?: string): Promise<any> {
+  async getBookingById(booking_id: string, user_id?: string) {
     const booking = await prisma.bookings.findUnique({
       where: { id: booking_id },
-      include: { users: true,
+      include: {
+        users: true,
         service_tiers: {
           include: { services: true }
         },
@@ -150,6 +159,7 @@ export class BookingService {
   /**
    * Update booking status
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async updateBookingStatus(
     booking_id: string,
     status: string,
@@ -157,7 +167,7 @@ export class BookingService {
       user_id?: string
       notes?: string
     }
-  ): Promise<any> {
+  ): Promise<unknown> {
     const booking = await this.getBookingById(booking_id, options?.user_id)
 
     const updated = await prisma.bookings.update({
@@ -168,7 +178,8 @@ export class BookingService {
           ? `${booking.internal_notes}\n[${new Date().toISOString()}] ${options.notes}`
           : booking.internal_notes
       },
-      include: { users: true,
+      include: {
+        users: true,
         service_tiers: {
           include: { services: true }
         }
@@ -187,7 +198,8 @@ export class BookingService {
   /**
    * Cancel booking
    */
-  async cancelBooking(booking_id: string, user_id: string, reason: string): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async cancelBooking(booking_id: string, user_id: string, reason: string): Promise<unknown> {
     const booking = await this.getBookingById(booking_id, user_id)
 
     // Check if booking can be cancelled
@@ -203,7 +215,8 @@ export class BookingService {
         status: BookingStatus.CANCELLED,
         internal_notes: reason ? `Cancelled: ${reason}` : 'Booking cancelled'
       },
-      include: { users: true,
+      include: {
+        users: true,
         service_tiers: {
           include: { services: true }
         }
@@ -222,6 +235,7 @@ export class BookingService {
   /**
    * Private helper methods
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async getServiceTier(service_tier_id: string): Promise<any> {
     const service_tiers = await prisma.service_tiers.findUnique({
       where: { id: service_tier_id },

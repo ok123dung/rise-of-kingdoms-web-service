@@ -18,12 +18,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         id: params.id
       },
       include: {
-        booking: {
+        bookings: {
           include: {
-            user: true,
+            users: true,
             service_tiers: {
               include: {
-                service: true
+                services: true
               }
             }
           }
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Check if payment belongs to user
-    if (payment.bookings.user_id !== session.user.id) {
+    if (payment.bookings?.user_id !== session.user.id) {
       return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 })
     }
 

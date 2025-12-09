@@ -176,7 +176,10 @@ export class ZaloPayPayment {
           data: responseData
         }
       } else {
-        getLogger().error('ZaloPay order creation failed', undefined, { returnCode: String(responseData.return_code), returnMessage: responseData.return_message })
+        getLogger().error('ZaloPay order creation failed', undefined, {
+          returnCode: String(responseData.return_code),
+          returnMessage: responseData.return_message
+        })
         return {
           success: false,
           error: responseData.return_message || 'Order creation failed'
@@ -389,7 +392,10 @@ export class ZaloPayPayment {
       if (responseData.return_code === 1) {
         return { success: true, data: responseData }
       } else {
-        return { success: false, error: responseData.return_message ?? 'Refund status query failed' }
+        return {
+          success: false,
+          error: responseData.return_message ?? 'Refund status query failed'
+        }
       }
     } catch (error) {
       getLogger().error('ZaloPay refund status error', error as Error)

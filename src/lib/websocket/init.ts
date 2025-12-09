@@ -12,7 +12,9 @@ const isVercelServerless = process.env.VERCEL && !process.env.ENABLE_WEBSOCKET
 export function initializeWebSocketServer(port = 3001) {
   // WebSocket servers don't work in Vercel's serverless environment
   if (isVercelServerless) {
-    getLogger().warn('WebSocket server not supported in Vercel serverless. Skipping initialization.')
+    getLogger().warn(
+      'WebSocket server not supported in Vercel serverless. Skipping initialization.'
+    )
     return null
   }
 

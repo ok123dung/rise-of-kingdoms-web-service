@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
       // 1. Create Payment record
       const payment = await tx.payments.create({
         data: {
+          id: crypto.randomUUID(),
           booking_id,
           payment_number: `PAY-${Date.now()}`,
           amount,
@@ -31,7 +32,8 @@ export async function POST(request: NextRequest) {
           payment_gateway: 'MOCK_GATEWAY',
           status: 'completed',
           gateway_transaction_id: `MOCK-${Date.now()}`,
-          paid_at: new Date()
+          paid_at: new Date(),
+          updated_at: new Date()
         }
       })
 
@@ -52,17 +54,18 @@ export async function POST(request: NextRequest) {
     const booking_details = await prisma.bookings.findUnique({
       where: { id: booking_id },
       include: {
-        user: true,
+        users: true,
         service_tiers: {
           include: { services: true }
         }
       }
     })
 
-    if (booking_details) {
+    if (booking_details?.users) {
+      const serviceName = booking_details.service_tiers?.services?.name ?? 'Service'
       sendOrderConfirmationEmail(booking_details.users.email, booking_details.users.full_name, {
         orderNumber: booking_details.booking_number,
-        serviceName: booking_details.service_tiers.services.name,
+        serviceName,
         amount: Number(amount),
         currency: 'VND',
         payment_method: method
@@ -75,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     getLogger().info(`Mock payment successful for booking ${booking_id}`, {
-      payment_id: result.payments.id,
+      payment_id: result.payment.id,
       amount
     })
 

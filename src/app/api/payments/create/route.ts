@@ -53,10 +53,10 @@ async function createPaymentHandler(request: NextRequest) {
     const booking = await prisma.bookings.findUnique({
       where: { id: validatedData.booking_id },
       include: {
-        user: true,
+        users: true,
         service_tiers: {
           include: {
-            service: true
+            services: true
           }
         },
         payments: {
@@ -88,7 +88,9 @@ async function createPaymentHandler(request: NextRequest) {
     }
 
     const amount = Math.round(Number(booking.final_amount.toString()))
-    const orderInfo = `Thanh toán dịch vụ ${booking.service_tiers.services.name} - ${booking.service_tiers.name}`
+    const serviceName = booking.service_tiers?.services?.name ?? 'Unknown Service'
+    const tierName = booking.service_tiers?.name ?? 'Unknown Tier'
+    const orderInfo = `Thanh toán dịch vụ ${serviceName} - ${tierName}`
 
     // Log payment attempt
     getLogger().info('Creating payment', {
@@ -162,9 +164,9 @@ async function createPaymentHandler(request: NextRequest) {
         paymentResult = await bankingInstance.createTransferOrder({
           booking_id: booking.id,
           amount: amount,
-          customerName: booking.users.full_name,
-          customerEmail: booking.users.email,
-          customerPhone: booking.users.phone ?? undefined
+          customerName: booking.users?.full_name ?? 'Customer',
+          customerEmail: booking.users?.email ?? '',
+          customerPhone: booking.users?.phone ?? undefined
         })
         break
       }

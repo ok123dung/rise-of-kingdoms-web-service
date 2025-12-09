@@ -2,6 +2,7 @@ import { hash } from 'bcryptjs'
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { withDatabaseConnection } from '@/lib/api/db-middleware'
+import { validateCSRF } from '@/lib/csrf-protection'
 import { prismaAdmin as prisma } from '@/lib/db'
 import { sendWelcomeEmail } from '@/lib/email'
 import {
@@ -25,6 +26,19 @@ interface SignupBody {
 
 const signupHandler = async function (request: NextRequest): Promise<NextResponse> {
   try {
+    // CSRF protection - prevent cross-site request forgery
+    const csrfValidation = validateCSRF(request)
+    if (!csrfValidation.valid) {
+      getLogger().warn('CSRF validation failed on signup', {
+        reason: csrfValidation.reason,
+        ip: request.headers.get('x-forwarded-for') ?? request.ip
+      })
+      return NextResponse.json(
+        { error: 'Invalid request. Please refresh and try again.' },
+        { status: 403 }
+      )
+    }
+
     // Rate limiting - prevent registration spam
     const clientId = request.headers.get('x-forwarded-for') ?? request.ip ?? 'anonymous'
     const rateLimit = await rateLimiters.auth.isAllowed(clientId)

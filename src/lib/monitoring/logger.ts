@@ -131,11 +131,13 @@ class Logger {
             environment: entry.environment,
             context: entry.context ? JSON.parse(JSON.stringify(entry.context)) : undefined,
             error: entry.error
-              ? JSON.parse(JSON.stringify({
-                  message: entry.error.message,
-                  stack: entry.error.stack,
-                  name: entry.error.name
-                }))
+              ? JSON.parse(
+                  JSON.stringify({
+                    message: entry.error.message,
+                    stack: entry.error.stack,
+                    name: entry.error.name
+                  })
+                )
               : undefined,
             timestamp: entry.timestamp
           }
@@ -375,7 +377,11 @@ export class PerformanceMonitor {
     return duration
   }
 
-  static async measureAsync<T>(name: string, fn: () => Promise<T>, context?: LogContext): Promise<T> {
+  static async measureAsync<T>(
+    name: string,
+    fn: () => Promise<T>,
+    context?: LogContext
+  ): Promise<T> {
     this.startTimer(name)
     try {
       const result = await fn()

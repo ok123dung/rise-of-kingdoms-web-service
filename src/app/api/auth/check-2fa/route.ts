@@ -17,6 +17,9 @@ interface Check2FARequest {
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  const CONSTANT_RESPONSE_TIME = 500 // ms - prevent timing attacks
+
   try {
     const body = (await request.json()) as Check2FARequest
     const { email, password } = checkSchema.parse(body)
@@ -26,17 +29,17 @@ export async function POST(request: NextRequest) {
       where: { email }
     })
 
-    if (!user) {
-      return NextResponse.json({
-        requires2FA: false,
-        error: 'Invalid credentials'
-      })
-    }
+    // Always execute password comparison to prevent timing analysis
+    const passwordHash =
+      user?.password ?? '$2a$14$invalidhashtopreventtimingattacks000000000000000000000000000000'
+    const isValidPassword = await bcrypt.compare(password, passwordHash)
 
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password || '')
+    if (!user || !isValidPassword) {
+      // Add constant-time delay before responding
+      const elapsed = Date.now() - startTime
+      const delay = Math.max(0, CONSTANT_RESPONSE_TIME - elapsed)
+      await new Promise(resolve => setTimeout(resolve, delay))
 
-    if (!isValidPassword) {
       return NextResponse.json({
         requires2FA: false,
         error: 'Invalid credentials'
@@ -46,11 +49,21 @@ export async function POST(request: NextRequest) {
     // Check if 2FA is enabled
     const is2FAEnabled = await TwoFactorAuthService.isEnabled(user.id)
 
+    // Add constant-time delay before responding
+    const elapsed = Date.now() - startTime
+    const delay = Math.max(0, CONSTANT_RESPONSE_TIME - elapsed)
+    await new Promise(resolve => setTimeout(resolve, delay))
+
+    // Do NOT leak user_id before authentication is complete
     return NextResponse.json({
-      requires2FA: is2FAEnabled,
-      user_id: user.id
+      requires2FA: is2FAEnabled
     })
   } catch (error) {
+    // Add constant-time delay before error response
+    const elapsed = Date.now() - startTime
+    const delay = Math.max(0, CONSTANT_RESPONSE_TIME - elapsed)
+    await new Promise(resolve => setTimeout(resolve, delay))
+
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Invalid input', details: error.errors }, { status: 400 })
     }

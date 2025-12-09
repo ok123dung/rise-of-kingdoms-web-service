@@ -12,9 +12,7 @@ const SIZE_LIMITS: Record<string, number> = {
   default: 10 * 1024 * 1024 // 10MB default
 }
 
-export function uploadProtectionMiddleware(
-  request: NextRequest
-): NextResponse | null {
+export function uploadProtectionMiddleware(request: NextRequest): NextResponse | null {
   // Only check POST/PUT/PATCH requests
   if (!['POST', 'PUT', 'PATCH'].includes(request.method)) {
     return null

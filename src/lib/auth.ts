@@ -19,7 +19,7 @@ interface UserWithStaff extends User {
     role: string
     permissions?: unknown
     specializations?: unknown
-    isActive: boolean
+    is_active: boolean
   } | null
 }
 
@@ -118,7 +118,8 @@ export const getCurrentUser = async () => {
     include: {
       staff: true,
       bookings: {
-        include: { service_tiers: {
+        include: {
+          service_tiers: {
             include: { services: true }
           }
         }
@@ -213,8 +214,7 @@ export const authOptions: NextAuthOptions = {
 
           const user = await basePrisma.users.findUnique({
             where: { email },
-            include: { staff: true
-            }
+            include: { staff: true }
           })
 
           if (!user) {
@@ -304,8 +304,7 @@ export const authOptions: NextAuthOptions = {
             where: {
               OR: [{ email: profile.email }, { discord_id: (profile as DiscordProfile).id }]
             },
-            include: { staff: true
-            }
+            include: { staff: true }
           })
 
           if (existingUser) {
@@ -325,7 +324,7 @@ export const authOptions: NextAuthOptions = {
           } else {
             const newUser = await prisma.users.create({
               data: {
-              id: crypto.randomUUID(),
+                id: crypto.randomUUID(),
                 email: profile.email || '',
                 full_name:
                   (profile as DiscordProfile).global_name ||
@@ -383,13 +382,13 @@ export const authOptions: NextAuthOptions = {
       try {
         await prisma.leads.create({
           data: {
-          id: crypto.randomUUID(),
-          email: user.email,
+            id: crypto.randomUUID(),
+            email: user.email,
             full_name: user.name || '',
             source: 'registration',
             status: 'converted',
             lead_score: 50,
-          updated_at: new Date()
+            updated_at: new Date()
           }
         })
       } catch (error) {

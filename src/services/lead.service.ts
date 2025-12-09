@@ -52,7 +52,8 @@ export class LeadService {
         utm_campaign: data.utmCampaign,
         notes: data.notes,
         status: 'new',
-        updated_at: new Date()}
+        updated_at: new Date()
+      }
     })
 
     // Send notification email

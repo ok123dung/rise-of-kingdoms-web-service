@@ -61,12 +61,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const booking = await prisma.bookings.findUnique({
       where: { id: params.id },
       include: {
-        user: true,
+        users: true,
         service_tiers: {
           include: { services: true }
         },
         payments: true,
-        convertedLead: true
+        leads: true
       }
     })
 

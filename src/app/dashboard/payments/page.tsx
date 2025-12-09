@@ -21,12 +21,23 @@ interface Payment {
   payment_gateway: string
   created_at: string
   paid_at: string | null
-  booking: {
+  booking?: {
     id: string
     booking_number: string
     service_tiers: {
       name: string
-      service: {
+      services: {
+        name: string
+        icon: string
+      }
+    }
+  }
+  bookings: {
+    id: string
+    booking_number: string
+    service_tiers: {
+      name: string
+      services: {
         name: string
         icon: string
       }
@@ -205,7 +216,8 @@ export default function PaymentsPage() {
                               }).format(payment.amount)}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {payment_methodNames[payment.payment_method] || payment.payment_method}
+                              {payment_methodNames[payment.payment_method] ||
+                                payment.payment_method}
                             </p>
                           </div>
                           <div className="text-right">

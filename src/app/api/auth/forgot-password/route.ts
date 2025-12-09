@@ -98,4 +98,6 @@ async function forgotPasswordHandler(request: NextRequest): Promise<NextResponse
   }
 }
 
-export const POST = trackRequest('/api/auth/forgot-password')(withDatabaseConnection(forgotPasswordHandler))
+export const POST = trackRequest('/api/auth/forgot-password')(
+  withDatabaseConnection(forgotPasswordHandler)
+)

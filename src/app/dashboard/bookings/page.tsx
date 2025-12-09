@@ -12,7 +12,7 @@ interface Booking {
   booking_number: string
   service_tiers: {
     name: string
-    service: {
+    services: {
       name: string
       slug: string
     }

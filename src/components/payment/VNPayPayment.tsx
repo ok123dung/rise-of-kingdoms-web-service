@@ -11,7 +11,12 @@ interface VNPayPaymentProps {
   onError?: (error: PaymentError) => void
 }
 
-export default function VNPayPayment({ amount, booking_id, onSuccess, onError }: VNPayPaymentProps) {
+export default function VNPayPayment({
+  amount,
+  booking_id,
+  onSuccess,
+  onError
+}: VNPayPaymentProps) {
   const [isProcessing, setIsProcessing] = useState(false)
 
   const handlePayment = async () => {

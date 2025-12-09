@@ -58,7 +58,7 @@ export async function GET(_request: NextRequest) {
     configured: !!process.env.DATABASE_URL,
     hasPooling: process.env.DATABASE_URL?.includes('pgbouncer=true') ?? false,
     hasConnectionLimit: process.env.DATABASE_URL?.includes('connection_limit=') ?? false,
-    provider: detectDatabaseProvider(process.env.DATABASE_URL || '')
+    provider: detectDatabaseProvider(process.env.DATABASE_URL ?? '')
   }
 
   // 2. Check other required env vars

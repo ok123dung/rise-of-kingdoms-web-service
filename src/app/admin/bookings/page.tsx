@@ -23,8 +23,8 @@ async function getBookings(searchParams: { [key: string]: string | string[] | un
   if (query) {
     where.OR = [
       { booking_number: { contains: query, mode: 'insensitive' } },
-      { user: { email: { contains: query, mode: 'insensitive' } } },
-      { user: { full_name: { contains: query, mode: 'insensitive' } } }
+      { users: { email: { contains: query, mode: 'insensitive' } } },
+      { users: { full_name: { contains: query, mode: 'insensitive' } } }
     ]
   }
 
@@ -35,7 +35,7 @@ async function getBookings(searchParams: { [key: string]: string | string[] | un
       take: limit,
       orderBy: { created_at: 'desc' },
       include: {
-        user: true,
+        users: true,
         service_tiers: {
           include: { services: true }
         }
@@ -143,7 +143,9 @@ export default async function BookingsPage({
                     {booking.booking_number}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{booking.users.full_name}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {booking.users.full_name}
+                    </div>
                     <div className="text-sm text-gray-500">{booking.users.email}</div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">

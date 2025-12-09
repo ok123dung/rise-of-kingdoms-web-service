@@ -101,7 +101,9 @@ async function updateProfileHandler(request: NextRequest): Promise<NextResponse>
       validatedData = updateProfileSchema.parse({
         full_name: body.full_name ? sanitizeInput(body.full_name) : undefined,
         phone: body.phone ? sanitizeInput(body.phone) : body.phone,
-        discord_username: body.discord_username ? sanitizeInput(body.discord_username) : body.discord_username,
+        discord_username: body.discord_username
+          ? sanitizeInput(body.discord_username)
+          : body.discord_username,
         rok_player_id: body.rok_player_id ? sanitizeInput(body.rok_player_id) : body.rok_player_id,
         rok_kingdom: body.rok_kingdom ? sanitizeInput(body.rok_kingdom) : body.rok_kingdom
       })
@@ -130,8 +132,10 @@ async function updateProfileHandler(request: NextRequest): Promise<NextResponse>
     const updateData: Record<string, unknown> = { updated_at: new Date() }
     if (validatedData.full_name !== undefined) updateData.full_name = validatedData.full_name
     if (validatedData.phone !== undefined) updateData.phone = validatedData.phone
-    if (validatedData.discord_username !== undefined) updateData.discord_username = validatedData.discord_username
-    if (validatedData.rok_player_id !== undefined) updateData.rok_player_id = validatedData.rok_player_id
+    if (validatedData.discord_username !== undefined)
+      updateData.discord_username = validatedData.discord_username
+    if (validatedData.rok_player_id !== undefined)
+      updateData.rok_player_id = validatedData.rok_player_id
     if (validatedData.rok_kingdom !== undefined) updateData.rok_kingdom = validatedData.rok_kingdom
 
     const updatedUser = await prisma.users.update({

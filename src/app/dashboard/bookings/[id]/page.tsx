@@ -33,7 +33,7 @@ interface BookingDetail {
   service_tiers: {
     name: string
     description: string
-    service: {
+    services: {
       name: string
       icon: string
       description: string

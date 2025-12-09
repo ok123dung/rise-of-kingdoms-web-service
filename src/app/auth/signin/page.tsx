@@ -26,13 +26,18 @@ function SignInContent() {
   }, [])
 
   useEffect(() => {
-    // Check if already signed in
+    // Check if already signed in - only run once on mount
+    let isCancelled = false
     void getSession().then(session => {
-      if (session) {
-        router.push(callbackUrl)
+      if (session && !isCancelled) {
+        window.location.href = callbackUrl
       }
     })
-  }, [router, callbackUrl])
+    return () => {
+      isCancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Only run once on mount
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,7 +55,18 @@ function SignInContent() {
           body: JSON.stringify({ email, password })
         })
 
-        const checkData = (await checkResponse.json()) as { error?: string; requires2FA?: boolean }
+        // Safe JSON parsing - handle non-JSON responses
+        let checkData: { error?: string; requires2FA?: boolean } = {}
+        const contentType = checkResponse.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            checkData = (await checkResponse.json()) as typeof checkData
+          } catch {
+            checkData = { error: 'Có lỗi xảy ra khi xử lý phản hồi' }
+          }
+        } else {
+          checkData = { error: 'Có lỗi xảy ra. Vui lòng thử lại sau.' }
+        }
 
         if (checkData.error) {
           setError('Email hoặc mật khẩu không đúng')
@@ -113,8 +129,12 @@ function SignInContent() {
         {/* Sign in form */}
         <form className="mt-8 space-y-6 rounded-xl bg-white p-8 shadow-lg" onSubmit={onFormSubmit}>
           {error && (
-            <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600">
-              <AlertCircle className="h-4 w-4" />
+            <div
+              aria-live="polite"
+              className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600"
+              role="alert"
+            >
+              <AlertCircle aria-hidden="true" className="h-4 w-4 shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
           )}
@@ -158,18 +178,23 @@ function SignInContent() {
                   onChange={e => setPassword(e.target.value)}
                 />
                 <button
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
+                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600 focus:text-gray-600 focus:outline-none"
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff aria-hidden="true" className="h-5 w-5" />
+                  ) : (
+                    <Eye aria-hidden="true" className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
 
             {/* 2FA Code Input */}
             {requires2FA && (
-              <div>
+              <div className="animate-fadeIn">
                 <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="totpCode">
                   Mã xác thực 2FA
                 </label>
@@ -225,7 +250,14 @@ function SignInContent() {
               id="submit-login"
               type="submit"
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Đăng nhập'}
+              {isLoading ? (
+                <>
+                  <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                  <span className="sr-only">Đang đăng nhập...</span>
+                </>
+              ) : (
+                'Đăng nhập'
+              )}
             </button>
           </div>
           <div className="mt-6">

@@ -30,8 +30,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl
     const status = searchParams.get('status') ?? undefined
     const provider = searchParams.get('provider') ?? undefined
-    const limit = parseInt(searchParams.get('limit') ?? '20')
-    const offset = parseInt(searchParams.get('offset') ?? '0')
+    const limit = parseInt(searchParams.get('limit') ?? '20', 10)
+    const offset = parseInt(searchParams.get('offset') ?? '0', 10)
 
     const where = {
       ...(status && { status }),
@@ -39,23 +39,23 @@ export async function GET(request: NextRequest) {
     }
 
     const [webhooks, total] = await Promise.all([
-      prisma.webhookEvent.findMany({
+      prisma.webhook_events.findMany({
         where,
         orderBy: { created_at: 'desc' },
         take: limit,
         skip: offset
       }),
-      prisma.webhookEvent.count({ where })
+      prisma.webhook_events.count({ where })
     ])
 
     // Get stats
-    const stats = await prisma.webhookEvent.groupBy({
+    const stats = await prisma.webhook_events.groupBy({
       by: ['status'],
       _count: true
     })
 
     const statusCounts = stats.reduce(
-      (acc, curr) => {
+      (acc: Record<string, number>, curr) => {
         acc[curr.status] = curr._count
         return acc
       },
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Reset webhook for retry
-    await prisma.webhookEvent.update({
+    await prisma.webhook_events.update({
       where: { event_id },
       data: {
         status: 'pending',

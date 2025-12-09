@@ -97,7 +97,7 @@ export default async function RecentBookings() {
                 </div>
               </li>
             ) : (
-              bookings.map((booking) => (
+              bookings.map(booking => (
                 <li key={booking.id} className="py-4">
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
