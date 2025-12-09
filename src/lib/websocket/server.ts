@@ -116,7 +116,7 @@ export class WebSocketServer {
               user_id: socket.user_id,
               booking_id: data.booking_id,
               channel:
-                socket.userRole === 'staff' ?? socket.userRole === 'admin' ? 'staff' : 'customer'
+                socket.userRole === 'staff' || socket.userRole === 'admin' ? 'staff' : 'customer'
             },
             include: {
               users: {
