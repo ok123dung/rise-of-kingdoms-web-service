@@ -1,7 +1,7 @@
 # Code Standards
 
 **Project:** ROK Services
-**Last Updated:** 2025-12-03
+**Last Updated:** 2025-12-09
 
 ---
 
@@ -376,7 +376,42 @@ export function sanitizeInput(input: string): string {
 
 ## 8. Database Patterns
 
-### 8.1 Query Patterns
+### 8.1 Prisma Model Naming (Dec 2025)
+
+Recent TypeScript fixes resolved 60+ type errors by correcting Prisma model and relation names:
+
+**Model Names (Prisma schema):**
+- Plural forms: `User`, `Booking`, `Service`, `Payment` (singular in schema)
+- Related model methods use plural names: `user.bookings()`, `booking.payments()`
+- Use correct database column names via `@map()` directive
+
+**Include Relations (API queries):**
+```typescript
+// CORRECT - Plural relations
+include: {
+  users: { ... },      // not "user"
+  bookings: { ... },   // not "booking"
+  services: { ... }    // not "service"
+}
+
+// Common fixes made:
+// service: {...} → services: {...}
+// booking: {...} → bookings: {...}
+// user: {...} → users: {...}
+// payment: {...} → payments: {...}
+```
+
+**Auth Types Fix:**
+```typescript
+// UserWithStaff interface corrected
+interface UserWithStaff {
+  // OLD: staffProfile: Staff
+  // NEW:
+  staff?: Staff | null  // Correct relation name from schema
+}
+```
+
+### 8.2 Query Patterns
 ```typescript
 // Include related data to prevent N+1
 const booking = await db.booking.findUnique({
@@ -384,18 +419,18 @@ const booking = await db.booking.findUnique({
   include: {
     serviceTier: { include: { service: true } },
     payments: { where: { status: 'completed' } },
-    user: { select: { id: true, email: true, fullName: true } }
+    users: { select: { id: true, email: true, fullName: true } }
   }
 })
 
 // Use transactions for atomic operations
 await db.$transaction(async (tx) => {
-  await tx.payment.update({ where: { id }, data: { status: 'completed' } })
-  await tx.booking.update({ where: { id: bookingId }, data: { paymentStatus: 'paid' } })
+  await tx.payments.update({ where: { id }, data: { status: 'completed' } })
+  await tx.bookings.update({ where: { id: bookingId }, data: { paymentStatus: 'paid' } })
 })
 ```
 
-### 8.2 Index Guidelines
+### 8.3 Index Guidelines
 - Add indexes for frequently queried fields
 - Use composite indexes for multi-column queries
 - Index foreign key columns
