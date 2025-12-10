@@ -92,9 +92,11 @@ export class TestHelpers {
    * Fill form with Vietnamese test data
    */
   async fillVietnameseForm(formData: Record<string, string>) {
-    for (const [field, value] of Object.entries(formData)) {
-      await this.page.fill(`[name="${field}"], [data-testid="${field}"], #${field}`, value)
-    }
+    await Promise.all(
+      Object.entries(formData).map(([field, value]) =>
+        this.page.fill(`[name="${field}"], [data-testid="${field}"], #${field}`, value)
+      )
+    )
   }
 
   /**

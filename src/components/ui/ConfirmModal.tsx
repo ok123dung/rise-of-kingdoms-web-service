@@ -130,11 +130,11 @@ export default function ConfirmModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="presentation"
       onClick={handleBackdropClick}
       onKeyDown={e => {
         if (e.key === 'Escape') onCancel()
       }}
-      role="presentation"
     >
       <div
         ref={modalRef}

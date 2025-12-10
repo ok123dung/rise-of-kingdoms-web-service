@@ -69,14 +69,12 @@ export const checkPasswordHistory = async (
     take: historyLimit
   })
 
-  for (const history of passwordHistory) {
-    const isMatch = await bcrypt.compare(newPassword, history.password_hash)
-    if (isMatch) {
-      return false // Password was used before
-    }
-  }
+  const matches = await Promise.all(
+    passwordHistory.map(history => bcrypt.compare(newPassword, history.password_hash))
+  )
 
-  return true // Password is new
+  // If any match is true, password was used before
+  return !matches.some(isMatch => isMatch)
 }
 
 // Save password to history

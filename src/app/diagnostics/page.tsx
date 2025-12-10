@@ -115,14 +115,11 @@ export default function DiagnosticsPage() {
   const clearServiceWorker = async () => {
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations()
-      for (const registration of registrations) {
-        await registration.unregister()
-      }
+      await Promise.all(registrations.map(registration => registration.unregister()))
+
       if ('caches' in window) {
         const cacheNames = await caches.keys()
-        for (const cacheName of cacheNames) {
-          await caches.delete(cacheName)
-        }
+        await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)))
       }
       window.location.reload()
     }

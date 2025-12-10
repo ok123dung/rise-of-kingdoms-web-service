@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
     })
 
     if (user?.file_uploads && user.file_uploads.length > 0) {
-      for (const oldFile of user.file_uploads) {
-        await UploadService.deleteFile(oldFile.key, session.user.id)
-      }
+      await Promise.all(
+        user.file_uploads.map(oldFile => UploadService.deleteFile(oldFile.key, session.user.id))
+      )
     }
 
     // Upload new avatar

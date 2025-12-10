@@ -86,9 +86,12 @@ const servicesData = [
 async function main() {
   console.log('Start seeding...')
 
+  // Service creation must be sequential because each service needs to be created before its tiers
+  // eslint-disable-next-line no-await-in-loop
   for (const serviceData of servicesData) {
     const { tiers, ...serviceInfo } = serviceData
 
+    // eslint-disable-next-line no-await-in-loop
     const service = await prisma.services.upsert({
       where: { slug: serviceInfo.slug },
       update: serviceInfo,
@@ -97,25 +100,29 @@ async function main() {
 
     console.log(`Created/Updated service: ${service.name}`)
 
-    for (const tierData of tiers) {
-      await prisma.service_tiers.upsert({
-        where: {
-          serviceId_slug: {
+    // Tiers for a service can be created in parallel
+    // eslint-disable-next-line no-await-in-loop
+    await Promise.all(
+      tiers.map(tierData =>
+        prisma.service_tiers.upsert({
+          where: {
+            serviceId_slug: {
+              serviceId: service.id,
+              slug: tierData.slug
+            }
+          },
+          update: {
+            ...tierData,
+            serviceId: service.id
+          },
+          create: {
+            ...tierData,
             serviceId: service.id,
-            slug: tierData.slug
+            features: tierData.features // Explicitly map features to Json
           }
-        },
-        update: {
-          ...tierData,
-          serviceId: service.id
-        },
-        create: {
-          ...tierData,
-          serviceId: service.id,
-          features: tierData.features // Explicitly map features to Json
-        }
-      })
-    }
+        })
+      )
+    )
   }
 
   console.log('Seeding finished.')

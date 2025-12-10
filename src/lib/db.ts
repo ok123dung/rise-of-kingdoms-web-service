@@ -1,5 +1,6 @@
 import { PrismaClient, type Prisma } from '@prisma/client'
 
+// eslint-disable-next-line import/no-cycle -- Circular dependency between db and logger is unavoidable as db needs logger for monitoring and logger needs db for persistence
 import { getLogger } from '@/lib/monitoring/logger'
 
 import type { UnwrapTuple } from '@prisma/client/runtime/library'

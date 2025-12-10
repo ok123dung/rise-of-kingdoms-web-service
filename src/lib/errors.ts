@@ -255,8 +255,11 @@ export async function retryWithBackoff<T>(
 
   let lastError: unknown
 
+  // Retries must be sequential with delays between attempts
+  // eslint-disable-next-line no-await-in-loop
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
+      // eslint-disable-next-line no-await-in-loop
       return await operation()
     } catch (error) {
       lastError = error
@@ -268,6 +271,7 @@ export async function retryWithBackoff<T>(
           onRetry(error, attempt + 1)
         }
 
+        // eslint-disable-next-line no-await-in-loop
         await new Promise(resolve => setTimeout(resolve, delay))
       }
     }

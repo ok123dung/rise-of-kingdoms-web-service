@@ -120,6 +120,7 @@ class Logger {
           entry.level === LogLevel.FATAL ??
           entry.level === LogLevel.WARN)
       ) {
+        // eslint-disable-next-line import/no-cycle -- Circular dependency between logger and db is unavoidable as logger needs db for persistence and db needs logger for monitoring
         const { prisma } = await import('@/lib/db')
         if (!prisma) return // Safety check if prisma is null during build
         await prisma.system_logs.create({
@@ -559,33 +560,35 @@ export class ApplicationMonitor {
       { name: 'memory', check: () => Promise.resolve(this.checkMemory()) }
     ]
 
-    for (const check of checks) {
-      try {
-        const result = await check.check()
-        this.healthChecks.set(check.name, {
-          status: result.status,
-          lastCheck: Date.now(),
-          details: result.details
-        })
+    await Promise.all(
+      checks.map(async check => {
+        try {
+          const result = await check.check()
+          this.healthChecks.set(check.name, {
+            status: result.status,
+            lastCheck: Date.now(),
+            details: result.details
+          })
 
-        logHealthCheck(
-          check.name,
-          result.status as 'healthy' | 'unhealthy' | 'degraded',
-          result.details
-        )
-      } catch (error) {
-        this.healthChecks.set(check.name, {
-          status: 'unhealthy',
-          lastCheck: Date.now(),
-          details: { error: error instanceof Error ? error.message : String(error) }
-        })
+          logHealthCheck(
+            check.name,
+            result.status as 'healthy' | 'unhealthy' | 'degraded',
+            result.details
+          )
+        } catch (error) {
+          this.healthChecks.set(check.name, {
+            status: 'unhealthy',
+            lastCheck: Date.now(),
+            details: { error: error instanceof Error ? error.message : String(error) }
+          })
 
-        this.logger.error(
-          `Health check failed for ${check.name}`,
-          error instanceof Error ? error : new Error(String(error))
-        )
-      }
-    }
+          this.logger.error(
+            `Health check failed for ${check.name}`,
+            error instanceof Error ? error : new Error(String(error))
+          )
+        }
+      })
+    )
   }
 
   private checkDatabase(): { status: string; details?: Record<string, unknown> } {
