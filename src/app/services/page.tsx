@@ -355,7 +355,7 @@ export default function ServicesPage() {
                   </Link>
                   <Link
                     className="inline-flex items-center justify-center space-x-2 rounded-lg border-2 border-white px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-white hover:text-primary-600"
-                    href="https://discord.gg/rokservices"
+                    href="https://discord.gg/UPuFYCw4JG"
                     target="_blank"
                   >
                     <MessageCircle className="h-4 w-4" />
@@ -379,7 +379,7 @@ export default function ServicesPage() {
           </Link>
           <Link
             className="flex-1 rounded-lg bg-primary-600 px-4 py-3 text-center font-semibold text-white"
-            href="https://discord.gg/rokservices"
+            href="https://discord.gg/UPuFYCw4JG"
             target="_blank"
           >
             Chat Discord

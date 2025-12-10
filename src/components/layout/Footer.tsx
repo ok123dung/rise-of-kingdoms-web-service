@@ -46,7 +46,7 @@ const footerSections = {
 const socialLinks = [
   {
     name: 'Discord',
-    href: 'https://discord.gg/rokservices',
+    href: 'https://discord.gg/UPuFYCw4JG',
     icon: MessageCircle,
     color: 'hover:text-indigo-500'
   },

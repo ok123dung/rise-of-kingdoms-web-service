@@ -175,7 +175,7 @@ export async function sendWelcomeEmail(email: string, full_name: string): Promis
         <p><strong>Cần hỗ trợ?</strong></p>
         <ul>
           <li>📧 Email: <a href="mailto:support@rokdbot.com">support@rokdbot.com</a></li>
-          <li>💬 Discord: <a href="https://discord.gg/rokservices">discord.gg/rokservices</a></li>
+          <li>💬 Discord: <a href="https://discord.gg/UPuFYCw4JG">discord.gg/UPuFYCw4JG</a></li>
           <li>📱 Website: <a href="${process.env.NEXTAUTH_URL ?? 'https://rokdbot.com'}">${process.env.NEXTAUTH_URL ?? 'rokdbot.com'}</a></li>
         </ul>
         
@@ -214,7 +214,7 @@ Khám phá Dashboard: ${process.env.NEXTAUTH_URL ?? 'https://rokdbot.com'}/dashb
 
 Cần hỗ trợ?
 - Email: support@rokdbot.com
-- Discord: discord.gg/rokservices
+- Discord: discord.gg/UPuFYCw4JG
 - Website: ${process.env.NEXTAUTH_URL ?? 'rokdbot.com'}
 
 Trân trọng,
@@ -316,7 +316,7 @@ export async function sendPasswordResetEmail(email: string, resetToken: string):
         <p style="font-size: 14px; color: #64748b;">
           Cần hỗ trợ? Liên hệ chúng tôi:<br>
           📧 <a href="mailto:support@rokdbot.com">support@rokdbot.com</a><br>
-          💬 <a href="https://discord.gg/rokservices">Discord Support</a>
+          💬 <a href="https://discord.gg/UPuFYCw4JG">Discord Support</a>
         </p>
       </div>
     </body>
@@ -338,7 +338,7 @@ ${resetUrl}
 
 Cần hỗ trợ?
 Email: support@rokdbot.com
-Discord: discord.gg/rokservices
+Discord: discord.gg/UPuFYCw4JG
 
 Trân trọng,
 Đội ngũ RoK Services

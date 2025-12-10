@@ -57,7 +57,7 @@ export default function BookingSuccessPage() {
               </Link>
               <Link
                 className="btn-primary flex items-center justify-center space-x-2 px-6 py-3"
-                href="https://discord.gg/rokservices"
+                href="https://discord.gg/UPuFYCw4JG"
                 target="_blank"
               >
                 <MessageCircle className="h-5 w-5" />

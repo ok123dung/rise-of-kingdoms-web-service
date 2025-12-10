@@ -57,7 +57,7 @@ export function MobileStickyActions() {
         <Link
           aria-label="Tham gia Discord"
           className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-primary-600 px-3 py-3 text-center font-semibold text-white shadow-md transition-all active:scale-95"
-          href="https://discord.gg/rokservices"
+          href="https://discord.gg/UPuFYCw4JG"
           rel="noopener noreferrer"
           target="_blank"
         >

@@ -216,6 +216,141 @@ export const translations = {
             ]
           }
         ]
+      },
+      'strategy-consulting': {
+        name: 'Tư vấn chiến thuật',
+        short_description: 'Tối ưu hóa tài khoản và chiến thuật',
+        description:
+          'Tư vấn xây dựng tài khoản, phát triển commander và equipment tối ưu nhất. Đội ngũ chuyên gia giúp bạn có lộ trình phát triển rõ ràng.',
+        features: [
+          'Phân tích tài khoản chuyên sâu',
+          'Gợi ý Commander tối ưu',
+          'Lộ trình phát triển chi tiết',
+          'Tối ưu Equipment & Talents',
+          'Support 1-1 với chuyên gia'
+        ],
+        benefits: [
+          'Tiết kiệm thời gian nghiên cứu',
+          'Tránh sai lầm người mới thường mắc',
+          'Phát triển đúng hướng ngay từ đầu',
+          'Được tư vấn bởi top player'
+        ],
+        pricing: [
+          {
+            tier: 'Cơ bản',
+            price: 500000,
+            duration: '1 tháng',
+            features: [
+              'Phân tích tài khoản',
+              'Gợi ý Commander',
+              'Lộ trình 1 tháng',
+              'Hỗ trợ qua Discord',
+              'Báo cáo tiến độ'
+            ]
+          },
+          {
+            tier: 'Nâng cao',
+            price: 1500000,
+            duration: '3 tháng',
+            features: [
+              'Phân tích chuyên sâu',
+              'Tối ưu Equipment',
+              'Lộ trình 3 tháng',
+              'Support 1-1 với chuyên gia',
+              'Review định kỳ hàng tuần'
+            ]
+          }
+        ]
+      },
+      'kvk-support': {
+        name: 'Hỗ trợ KvK',
+        short_description: 'Hỗ trợ đánh KvK chuyên nghiệp',
+        description:
+          'Dịch vụ hỗ trợ đi đánh KvK, đảm bảo kill points và death theo yêu cầu. Online 24/7 trong suốt mùa KvK.',
+        features: [
+          'Đạt mốc Kill Points yêu cầu',
+          'Đảm bảo Death theo thỏa thuận',
+          'Online 24/7 trong KvK',
+          'Livestream báo cáo tiến độ',
+          'Pilot túc trực hỗ trợ rally'
+        ],
+        benefits: [
+          'Không cần thức đêm đánh KvK',
+          'Đảm bảo đạt mục tiêu Kill Points',
+          'Có báo cáo chi tiết',
+          'Được hỗ trợ bởi đội ngũ chuyên nghiệp'
+        ],
+        pricing: [
+          {
+            tier: 'Gói T4',
+            price: 2000000,
+            duration: '1 mùa KvK',
+            features: [
+              'Đạt mốc Kill Points',
+              'Đảm bảo Death',
+              'Online 24/7',
+              'Báo cáo hàng ngày',
+              'Hỗ trợ qua Discord'
+            ]
+          },
+          {
+            tier: 'Gói T5',
+            price: 5000000,
+            duration: '1 mùa KvK',
+            features: [
+              'Đạt mốc Kill Points cao',
+              'Đảm bảo Death tối ưu',
+              'Online 24/7',
+              'Livestream báo cáo',
+              'Pilot hỗ trợ rally/garrison'
+            ]
+          }
+        ]
+      },
+      'account-maintenance': {
+        name: 'Chăm sóc tài khoản',
+        short_description: 'Daily login và làm nhiệm vụ',
+        description:
+          'Dịch vụ đăng nhập hàng ngày, làm nhiệm vụ, thu gom tài nguyên. Giúp bạn không bỏ lỡ bất kỳ phần thưởng nào.',
+        features: [
+          'Login hàng ngày',
+          'Làm daily quest đầy đủ',
+          'Thu gom resource tự động',
+          'Tham gia sự kiện',
+          'Báo cáo định kỳ'
+        ],
+        benefits: [
+          'Không bỏ lỡ daily rewards',
+          'Tối ưu resource thu thập',
+          'Tiết kiệm thời gian hàng ngày',
+          'Tài khoản luôn active'
+        ],
+        pricing: [
+          {
+            tier: 'Tuần',
+            price: 300000,
+            duration: '1 tuần',
+            features: [
+              'Login hàng ngày',
+              'Làm daily quest',
+              'Thu gom resource',
+              'Báo cáo cuối tuần',
+              'Hỗ trợ qua Discord'
+            ]
+          },
+          {
+            tier: 'Tháng',
+            price: 1000000,
+            duration: '1 tháng',
+            features: [
+              'Login hàng ngày',
+              'Full sự kiện',
+              'Tối ưu tăng tốc',
+              'Báo cáo hàng tuần',
+              'Ưu tiên support'
+            ]
+          }
+        ]
       }
     }
   },
@@ -430,6 +565,141 @@ export const translations = {
               'Run 24/7 throughout KvK season',
               'Honor Point Optimization',
               'Tactical Support'
+            ]
+          }
+        ]
+      },
+      'strategy-consulting': {
+        name: 'Strategy Consulting',
+        short_description: 'Optimize account and strategy',
+        description:
+          'Account building consultation, commander development and optimal equipment. Our expert team helps you have a clear development roadmap.',
+        features: [
+          'In-depth account analysis',
+          'Optimal Commander suggestions',
+          'Detailed development roadmap',
+          'Equipment & Talents optimization',
+          '1-1 Support with experts'
+        ],
+        benefits: [
+          'Save research time',
+          'Avoid common newbie mistakes',
+          'Develop in the right direction from the start',
+          'Consultation by top players'
+        ],
+        pricing: [
+          {
+            tier: 'Basic',
+            price: 500000,
+            duration: '1 month',
+            features: [
+              'Account analysis',
+              'Commander suggestions',
+              '1-month roadmap',
+              'Discord support',
+              'Progress reports'
+            ]
+          },
+          {
+            tier: 'Advanced',
+            price: 1500000,
+            duration: '3 months',
+            features: [
+              'In-depth analysis',
+              'Equipment optimization',
+              '3-month roadmap',
+              '1-1 expert support',
+              'Weekly review sessions'
+            ]
+          }
+        ]
+      },
+      'kvk-support': {
+        name: 'KvK Support',
+        short_description: 'Professional KvK battle support',
+        description:
+          'KvK battle support service, guaranteed kill points and death as required. Online 24/7 throughout the KvK season.',
+        features: [
+          'Achieve required Kill Points',
+          'Guaranteed Death as agreed',
+          'Online 24/7 during KvK',
+          'Livestream progress reports',
+          'Pilot standby for rally support'
+        ],
+        benefits: [
+          'No need to stay up late for KvK',
+          'Guaranteed to reach Kill Points target',
+          'Detailed reports available',
+          'Supported by professional team'
+        ],
+        pricing: [
+          {
+            tier: 'T4 Package',
+            price: 2000000,
+            duration: '1 KvK season',
+            features: [
+              'Achieve Kill Points milestone',
+              'Guaranteed Death',
+              'Online 24/7',
+              'Daily reports',
+              'Discord support'
+            ]
+          },
+          {
+            tier: 'T5 Package',
+            price: 5000000,
+            duration: '1 KvK season',
+            features: [
+              'Achieve high Kill Points',
+              'Optimal Death guarantee',
+              'Online 24/7',
+              'Livestream reports',
+              'Pilot for rally/garrison'
+            ]
+          }
+        ]
+      },
+      'account-maintenance': {
+        name: 'Account Maintenance',
+        short_description: 'Daily login and quests',
+        description:
+          'Daily login service, completing quests, collecting resources. Ensuring you never miss any rewards.',
+        features: [
+          'Daily login',
+          'Complete daily quests',
+          'Auto resource collection',
+          'Event participation',
+          'Regular reports'
+        ],
+        benefits: [
+          'Never miss daily rewards',
+          'Optimize resource collection',
+          'Save daily time',
+          'Account always active'
+        ],
+        pricing: [
+          {
+            tier: 'Weekly',
+            price: 300000,
+            duration: '1 week',
+            features: [
+              'Daily login',
+              'Daily quests',
+              'Resource collection',
+              'Weekly report',
+              'Discord support'
+            ]
+          },
+          {
+            tier: 'Monthly',
+            price: 1000000,
+            duration: '1 month',
+            features: [
+              'Daily login',
+              'Full event participation',
+              'Speedup optimization',
+              'Weekly reports',
+              'Priority support'
             ]
           }
         ]

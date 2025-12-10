@@ -36,7 +36,7 @@ export function OrganizationSchema({
       contactType: 'customer service',
       availableLanguage: ['vi', 'en']
     },
-    sameAs: ['https://discord.gg/rokservices', 'https://facebook.com/rokservices'],
+    sameAs: ['https://discord.gg/UPuFYCw4JG', 'https://facebook.com/rokservices'],
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.8',

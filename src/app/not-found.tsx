@@ -192,7 +192,7 @@ export default function NotFound() {
                 </Link>
                 <a
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/20 px-6 py-3 font-medium text-white transition-colors hover:bg-white/30"
-                  href="https://discord.gg/rokservices"
+                  href="https://discord.gg/UPuFYCw4JG"
                   rel="noopener noreferrer"
                   target="_blank"
                 >
