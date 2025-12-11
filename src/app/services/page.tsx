@@ -8,8 +8,12 @@ import {
   Award,
   UserCheck,
   Phone,
-  Target,
-  MessageCircle
+  MessageCircle,
+  Zap,
+  Crown,
+  Shield,
+  Calendar,
+  Gem
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -160,38 +164,33 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* Services Grid */}
+        {/* Pricing Tiers Grid */}
         <section className="section-padding bg-white">
           <div className="container-max">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-3xl font-bold text-gray-900">Chọn gói dịch vụ phù hợp</h2>
+              <h2 className="mb-4 text-3xl font-bold text-gray-900">
+                {t.services['auto-gem-farm'].name}
+              </h2>
               <p className="text-lg text-gray-600">
-                Mỗi gói dịch vụ được thiết kế để mang lại giá trị tối đa cho investment của bạn
+                {t.services['auto-gem-farm'].short_description}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {Object.entries(t.services).map(([slug, service]) => {
-                // Map slug to icon (since icons are not in translations)
-                const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-                  'auto-gem-farm': Target
-                }
-                const IconComponent = iconMap[slug] ?? Target
-
-                // Find lowest price
-                interface PricingItem {
-                  price: number
-                }
-                const lowestPrice = Math.min(
-                  ...(service.pricing as PricingItem[]).map((p: PricingItem) => p.price)
-                )
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+              {t.services['auto-gem-farm'].pricing.map((tier, index) => {
+                // Map tier index to icon
+                const tierIcons = [Calendar, Zap, Crown, Shield]
+                const IconComponent = tierIcons[index] ?? Gem
+                const isPopular = index === 2 // Gói V2 is popular
 
                 return (
                   <div
-                    key={slug}
-                    className="card group relative transition-all duration-300 hover:shadow-xl"
+                    key={tier.tier}
+                    className={`card group relative transition-all duration-300 hover:shadow-xl ${
+                      isPopular ? 'ring-2 ring-primary-500' : ''
+                    }`}
                   >
-                    {slug === 'strategy-consulting' && (
+                    {isPopular && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 transform">
                         <span className="rounded-full bg-primary-600 px-4 py-1 text-sm font-semibold text-white">
                           {t.pricing.popular}
@@ -203,21 +202,19 @@ export default function ServicesPage() {
                       <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
                         <IconComponent className="h-6 w-6 text-primary-600" />
                       </div>
-                      <h3 className="mb-2 text-xl font-semibold text-gray-900">{service.name}</h3>
-                      <p className="text-sm text-gray-600">{service.short_description}</p>
+                      <h3 className="mb-2 text-xl font-semibold text-gray-900">{tier.tier}</h3>
+                      <p className="text-sm text-gray-600">{tier.duration}</p>
                     </div>
 
                     <div className="mb-6 text-center">
-                      <div className="text-sm text-gray-500">Từ</div>
                       <div className="text-3xl font-bold text-primary-600">
-                        {lowestPrice.toLocaleString('vi-VN')}đ
+                        {tier.price.toLocaleString('vi-VN')}đ
                       </div>
-                      <div className="text-sm text-gray-500">{service.pricing[0].duration}</div>
                     </div>
 
                     <ul className="mb-8 space-y-3">
-                      {service.features.slice(0, 5).map((feature: string, index: number) => (
-                        <li key={index} className="flex items-start space-x-3">
+                      {tier.features.map((feature: string, featureIndex: number) => (
+                        <li key={featureIndex} className="flex items-start space-x-3">
                           <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
                           <span className="text-sm text-gray-600">{feature}</span>
                         </li>
@@ -226,16 +223,14 @@ export default function ServicesPage() {
 
                     <div className="space-y-3">
                       <Link
-                        className="block w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
-                        href={`/booking?service=${slug}`}
+                        href={`/booking?tier=${encodeURIComponent(tier.tier)}`}
+                        className={`block w-full rounded-lg px-4 py-3 text-center font-semibold text-white transition-all duration-200 ${
+                          isPopular
+                            ? 'bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800'
+                            : 'bg-gradient-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800'
+                        }`}
                       >
                         {t.common.bookNow}
-                      </Link>
-                      <Link
-                        className="btn-secondary block w-full text-center text-sm"
-                        href={`/services/${slug}`}
-                      >
-                        {t.hero.ctaPrimary}
                       </Link>
                     </div>
                   </div>
