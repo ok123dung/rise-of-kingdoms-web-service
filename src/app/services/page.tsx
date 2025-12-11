@@ -13,7 +13,9 @@ import {
   Crown,
   Shield,
   Calendar,
-  Gem
+  Gem,
+  Sword,
+  AlertCircle
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -240,8 +242,72 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* Testimonials */}
+        {/* Spam Barbarian Service */}
         <section className="section-padding bg-gray-50">
+          <div className="container-max">
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-gray-900">
+                {t.services['spam-barbarian'].name}
+              </h2>
+              <p className="text-lg text-gray-600">
+                {t.services['spam-barbarian'].short_description}
+              </p>
+            </div>
+
+            <div className="mx-auto max-w-lg">
+              {t.services['spam-barbarian'].pricing.map(tier => (
+                <div
+                  key={tier.tier}
+                  className="card group relative transition-all duration-300 hover:shadow-xl"
+                >
+                  <div className="mb-6 text-center">
+                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-red-100">
+                      <Sword className="h-6 w-6 text-red-600" />
+                    </div>
+                    <h3 className="mb-2 text-xl font-semibold text-gray-900">{tier.tier}</h3>
+                    <p className="text-sm text-gray-600">{tier.duration}</p>
+                  </div>
+
+                  <div className="mb-4 text-center">
+                    <div className="text-3xl font-bold text-primary-600">
+                      {tier.price.toLocaleString('vi-VN')}đ
+                    </div>
+                    <div className="text-sm text-gray-500">≈ ${tier.priceUsd}/month</div>
+                  </div>
+
+                  {/* Requirements Notice */}
+                  <div className="mb-6 flex items-center justify-center gap-2 rounded-lg bg-amber-50 p-3">
+                    <AlertCircle className="h-5 w-5 text-amber-600" />
+                    <span className="text-sm font-medium text-amber-800">
+                      {t.services['spam-barbarian'].requirements}
+                    </span>
+                  </div>
+
+                  <ul className="mb-8 space-y-3">
+                    {tier.features.map((feature: string, featureIndex: number) => (
+                      <li key={featureIndex} className="flex items-start space-x-3">
+                        <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm text-gray-600">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="space-y-3">
+                    <Link
+                      className="block w-full rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-red-700 hover:to-red-800"
+                      href={`/booking?service=spam-barbarian&tier=${encodeURIComponent(tier.tier)}`}
+                    >
+                      {t.common.bookNow}
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section className="section-padding bg-white">
           <div className="container-max">
             <div className="mb-16 text-center">
               <h2 className="mb-4 text-3xl font-bold text-gray-900">

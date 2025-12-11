@@ -216,6 +216,41 @@ export const translations = {
             ]
           }
         ]
+      },
+      'spam-barbarian': {
+        name: 'Spam & Kéo Man Rợ',
+        short_description: 'Dịch vụ spam man rợ chuyên nghiệp',
+        description:
+          'Dịch vụ spam man rợ và kéo man rợ chuyên nghiệp, giúp bạn farm EXP và tài nguyên hiệu quả. Yêu cầu account trước Pre-KvK 1.',
+        features: [
+          'Spam man rợ liên tục 24/7',
+          'Kéo man rợ theo yêu cầu',
+          'Tối ưu hóa AP',
+          'Farm EXP commander hiệu quả',
+          'Hỗ trợ làm sự kiện man rợ'
+        ],
+        benefits: [
+          'Tăng EXP commander nhanh chóng',
+          'Nhận thưởng man rợ tối đa',
+          'Tiết kiệm thời gian',
+          'Hỗ trợ 24/7 qua Zalo/Discord'
+        ],
+        requirements: 'Account trước Pre-KvK 1',
+        pricing: [
+          {
+            tier: 'Gói Tháng',
+            price: 900000,
+            priceUsd: 35.99,
+            duration: '1 tháng',
+            features: [
+              'Spam man rợ 24/7',
+              'Kéo man rợ theo yêu cầu',
+              'Tối ưu hóa AP hàng ngày',
+              'Farm EXP commander',
+              'Hỗ trợ sự kiện man rợ'
+            ]
+          }
+        ]
       }
     }
   },
@@ -430,6 +465,41 @@ export const translations = {
               'Run 24/7 throughout KvK season',
               'Honor Point Optimization',
               'Tactical Support'
+            ]
+          }
+        ]
+      },
+      'spam-barbarian': {
+        name: 'Spam & Pull Barbarians',
+        short_description: 'Professional barbarian farming service',
+        description:
+          'Professional barbarian spam and pull service, helping you farm EXP and resources efficiently. Requires account before Pre-KvK 1.',
+        features: [
+          'Spam barbarians 24/7',
+          'Pull barbarians on request',
+          'Optimize AP usage',
+          'Efficient commander EXP farming',
+          'Support barbarian events'
+        ],
+        benefits: [
+          'Quickly level up commanders',
+          'Maximize barbarian rewards',
+          'Save time',
+          '24/7 Support via Zalo/Discord'
+        ],
+        requirements: 'Account before Pre-KvK 1',
+        pricing: [
+          {
+            tier: 'Monthly Plan',
+            price: 900000,
+            priceUsd: 35.99,
+            duration: '1 month',
+            features: [
+              'Spam barbarians 24/7',
+              'Pull barbarians on request',
+              'Daily AP optimization',
+              'Commander EXP farming',
+              'Barbarian event support'
             ]
           }
         ]
