@@ -37,7 +37,7 @@ interface FloatingSocialButtonsProps {
 
 export function FloatingSocialButtons({
   discordUrl = 'https://discord.gg/UPuFYCw4JG',
-  zaloUrl = 'https://zalo.me/0123456789' // TODO: Replace with actual Zalo link
+  zaloUrl = 'https://zalo.me/g/rqgqyd878'
 }: FloatingSocialButtonsProps) {
   return (
     <div className="fixed bottom-24 right-4 z-40 flex flex-col gap-3 md:bottom-6">
