@@ -12,6 +12,7 @@ import {
   VietnameseKeywordsOptimization,
   VietnameseLocalBusinessSchema
 } from '@/components/seo/VietnameseGamingSEO'
+import { FloatingSocialButtons } from '@/components/social/FloatingSocialButtons'
 import { ConversionTesting } from '@/components/testing/ConversionTesting'
 
 import type { Metadata, Viewport } from 'next'
@@ -123,6 +124,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ErrorBoundary>
             <div className="flex min-h-screen flex-col">
               {children}
+              <FloatingSocialButtons />
               <MobileStickyActions />
             </div>
           </ErrorBoundary>
