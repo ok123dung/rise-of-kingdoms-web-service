@@ -1,9 +1,11 @@
 'use client'
 
-import { ArrowRight, Crown, Shield } from 'lucide-react'
+import { useState } from 'react'
+
+import { AlertCircle, ArrowRight, ChevronDown, Crown, Shield } from 'lucide-react'
 import Link from 'next/link'
 
-import { SERVICES_CONFIG, type ServiceConfig } from '@/config/services'
+import { formatPrice, SERVICES_CONFIG, type ServiceConfig } from '@/config/services'
 
 export default function Services() {
   return (
@@ -81,9 +83,11 @@ interface ServiceCardProps {
 }
 
 function ServiceCard({ service }: ServiceCardProps) {
-  const { title, description, price, icon: Icon, iconBgColor, iconColor, featured } = service
+  const [isExpanded, setIsExpanded] = useState(false)
+  const { title, description, price, icon: Icon, iconBgColor, iconColor, featured, tiers, requirement } = service
 
   const cardClass = featured ? 'card-premium' : 'card'
+  const hasTiers = tiers && tiers.length > 0
 
   return (
     <div
@@ -94,6 +98,9 @@ function ServiceCard({ service }: ServiceCardProps) {
         ${cardClass} hover-lift group relative cursor-pointer
         ${featured ? 'border-2 border-amber-200 shadow-2xl' : ''}
       `}
+      onClick={() => hasTiers && setIsExpanded(!isExpanded)}
+      onMouseEnter={() => hasTiers && setIsExpanded(true)}
+      onMouseLeave={() => hasTiers && setIsExpanded(false)}
     >
       {/* Featured Badge */}
       {featured && (
@@ -133,34 +140,87 @@ function ServiceCard({ service }: ServiceCardProps) {
 
       {/* Content */}
       <div className="space-y-4">
-        <h3
-          id={`service-title-${service.id}`}
-          className={`text-2xl font-bold transition-colors duration-300 ${
-            featured
-              ? 'text-slate-900 group-hover:text-amber-700'
-              : 'text-slate-900 group-hover:text-blue-600'
-          }`}
-        >
-          {title}
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3
+            id={`service-title-${service.id}`}
+            className={`text-2xl font-bold transition-colors duration-300 ${
+              featured
+                ? 'text-slate-900 group-hover:text-amber-700'
+                : 'text-slate-900 group-hover:text-blue-600'
+            }`}
+          >
+            {title}
+          </h3>
+          {hasTiers && (
+            <ChevronDown
+              className={`h-5 w-5 text-slate-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+            />
+          )}
+        </div>
 
         <p className="leading-relaxed text-slate-600">{description}</p>
 
+        {/* Requirement Notice */}
+        {requirement && (
+          <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2 text-sm">
+            <AlertCircle className="h-4 w-4 flex-shrink-0 text-amber-600" />
+            <span className="text-amber-800">{requirement}</span>
+          </div>
+        )}
+
         <div className="border-t border-slate-100 pt-4">
-          <div className="mb-6">
+          <div className="mb-4">
             <span
               className={`price text-3xl font-bold ${featured ? 'text-gradient' : 'text-blue-600'}`}
             >
               {price}
             </span>
-            <span className="ml-2 text-sm text-slate-500">
-              {featured ? '✨ Ưu đãi đặc biệt' : 'Giá cạnh tranh'}
-            </span>
+            {hasTiers && (
+              <span className="ml-2 text-sm text-slate-500">
+                {tiers.length} gói dịch vụ
+              </span>
+            )}
+          </div>
+
+          {/* Tiers Dropdown */}
+          <div
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${
+              isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <div className="mb-4 space-y-2">
+              {tiers?.map((tier, idx) => (
+                <div
+                  key={idx}
+                  className={`rounded-lg border p-3 transition-all hover:shadow-md ${
+                    tier.note
+                      ? 'border-amber-200 bg-amber-50'
+                      : 'border-slate-200 bg-white hover:border-blue-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-semibold text-slate-900">{tier.name}</span>
+                      <span className="ml-2 text-xs text-slate-500">({tier.duration})</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-blue-600">{formatPrice(tier.price)}</div>
+                      <div className="text-xs text-slate-400">~${tier.priceUsd}</div>
+                    </div>
+                  </div>
+                  {tier.note && (
+                    <p className="mt-1 text-xs text-amber-700">
+                      ⚠️ {tier.note}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           <Link
             aria-label={`Đặt dịch vụ ${title}`}
-            href="/contact"
+            href="/services"
             className={`
               book-now-btn block w-full transform rounded-xl px-6 py-4 text-center font-semibold transition-all duration-300
               ${
@@ -169,8 +229,9 @@ function ServiceCard({ service }: ServiceCardProps) {
                   : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25'
               }
             `}
+            onClick={e => e.stopPropagation()}
           >
-            {featured ? '🔥 Đặt ngay' : 'Đặt dịch vụ'}
+            {featured ? '🔥 Xem chi tiết' : 'Xem chi tiết'}
           </Link>
         </div>
       </div>

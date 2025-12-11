@@ -2,6 +2,14 @@ import { Bot, Sword } from 'lucide-react'
 
 import type { LucideIcon } from 'lucide-react'
 
+export interface ServiceTier {
+  name: string
+  price: number
+  priceUsd: number
+  duration: string
+  note?: string
+}
+
 export interface ServiceConfig {
   id: string
   title: string
@@ -14,6 +22,8 @@ export interface ServiceConfig {
   category?: string
   duration?: string
   level?: 'beginner' | 'intermediate' | 'advanced' | 'expert'
+  tiers?: ServiceTier[]
+  requirement?: string
 }
 
 export const SERVICES_CONFIG: ServiceConfig[] = [
@@ -21,14 +31,41 @@ export const SERVICES_CONFIG: ServiceConfig[] = [
     id: 'auto-gem-farm',
     title: 'Auto Gem & Farm RoK',
     description: 'Bot tự động farm tài nguyên, gem và hoàn thành nhiệm vụ hàng ngày 24/7',
-    price: 'Từ 150.000 VNĐ/tuần',
+    price: 'Từ 150.000 VNĐ',
     icon: Bot,
     iconBgColor: 'bg-blue-100',
     iconColor: 'text-blue-600',
     featured: true,
     category: 'automation',
     duration: 'weekly',
-    level: 'beginner'
+    level: 'beginner',
+    tiers: [
+      {
+        name: 'Gói Tuần (Dùng thử)',
+        price: 150000,
+        priceUsd: 5.99,
+        duration: '1 tuần',
+        note: 'Chỉ áp dụng cho tuần đầu tiên khi mới sử dụng dịch vụ'
+      },
+      {
+        name: 'Gói V1',
+        price: 750000,
+        priceUsd: 29.99,
+        duration: '1 tháng'
+      },
+      {
+        name: 'Gói V2',
+        price: 900000,
+        priceUsd: 35.99,
+        duration: '1 tháng'
+      },
+      {
+        name: 'Gói KvK',
+        price: 7000000,
+        priceUsd: 279.99,
+        duration: 'Trọn KvK'
+      }
+    ]
   },
   {
     id: 'spam-barbarian',
@@ -41,7 +78,16 @@ export const SERVICES_CONFIG: ServiceConfig[] = [
     featured: true,
     category: 'automation',
     duration: 'monthly',
-    level: 'intermediate'
+    level: 'intermediate',
+    requirement: 'Account trước Pre-KvK 1',
+    tiers: [
+      {
+        name: 'Gói Tháng',
+        price: 900000,
+        priceUsd: 35.99,
+        duration: '1 tháng'
+      }
+    ]
   }
 ]
 
@@ -60,6 +106,11 @@ export const getServiceById = (id: string): ServiceConfig | undefined => {
 
 export const getServicesByLevel = (level: ServiceConfig['level']): ServiceConfig[] => {
   return SERVICES_CONFIG.filter(service => service.level === level)
+}
+
+// Format price helper
+export const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('vi-VN').format(price) + ' VNĐ'
 }
 
 // Service categories
