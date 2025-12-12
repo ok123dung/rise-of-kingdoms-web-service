@@ -2,16 +2,17 @@ const { withSentryConfig } = require('@sentry/nextjs')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable ESLint during production builds
-  eslint: {
-    ignoreDuringBuilds: true
-  },
   // Skip TypeScript errors during build (temporary - legacy code has type issues)
   typescript: {
     ignoreBuildErrors: true
   },
+  // Image optimization with remotePatterns (Next.js 16)
   images: {
-    domains: ['localhost', 'rokdbot.com', 'www.rokdbot.com'],
+    remotePatterns: [
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'https', hostname: 'rokdbot.com' },
+      { protocol: 'https', hostname: 'www.rokdbot.com' }
+    ],
     formats: ['image/webp', 'image/avif']
   },
   compress: true,
@@ -23,10 +24,8 @@ const nextConfig = {
       transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}'
     }
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client'],
-    instrumentationHook: true
-  },
+  // Next.js 16: serverComponentsExternalPackages moved to top level
+  serverExternalPackages: ['@prisma/client'],
   env: {
     SITE_URL:
       process.env.NODE_ENV === 'production' ? 'https://rokdbot.com' : 'http://localhost:3000',
