@@ -104,7 +104,7 @@
     "speakeasy": "2.0.0",
     "tailwind-merge": "3.3.1",
     "tailwindcss": "^3.3.0",
-    "typescript": "^5.0.0",
+    "typescript": "^5.9.3",
     "use-debounce": "10.0.6",
     "zod": "^3.22.4"
   },
