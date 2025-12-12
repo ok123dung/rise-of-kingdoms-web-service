@@ -188,8 +188,8 @@ export const isStaff = async () => {
 }
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6)
+  email: z.string().email().toLowerCase().trim(),
+  password: z.string().min(8).max(100)
 })
 
 export const authOptions: NextAuthOptions = {
