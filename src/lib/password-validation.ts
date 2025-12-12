@@ -19,24 +19,44 @@ export const passwordSchema = z
     'Password must contain at least one special character'
   )
 
-// Check for common weak passwords
+// Top 100+ common weak passwords (source: SecLists, Have I Been Pwned)
+// Extended list to prevent common breached passwords
 const COMMON_PASSWORDS = [
-  'password123',
-  'admin123',
-  'qwerty123',
-  'letmein123',
-  '123456789012',
-  'password@123',
-  'Welcome@123',
-  'Admin@123',
-  'P@ssw0rd123',
-  'Rokservices@123'
+  // Original list
+  'password123', 'admin123', 'qwerty123', 'letmein123', '123456789012',
+  'password@123', 'Welcome@123', 'Admin@123', 'P@ssw0rd123', 'Rokservices@123',
+  // Top breached passwords (extended to 12+ chars)
+  'password1234', 'qwerty123456', '123456789abc', 'iloveyou1234',
+  'sunshine1234', 'princess1234', 'football1234', 'welcome12345',
+  'monkey123456', 'shadow123456', 'superman1234', 'michael12345',
+  'charlie12345', 'master123456', 'dragon123456', 'passw0rd1234',
+  'trustno12345', 'whatever1234', 'computer1234', 'starwars1234',
+  // Common patterns
+  'abcd12345678', '1234567890ab', 'qwertyuiop12', 'asdfghjkl123',
+  'zxcvbnm12345', '!qaz2wsx3edc', 'password!234', 'p@ssword1234',
+  'Password1234', 'PASSWORD1234', 'Passw0rd1234', 'Pa$$word1234',
+  // Keyboard patterns
+  '1qaz2wsx3edc', 'qazwsxedcrfv', 'zaq12wsx3edc', '!qaz@wsx#edc',
+  // Year-based
+  'password2023', 'password2024', 'password2025', 'welcome2023',
+  'welcome2024', 'welcome2025', 'admin2023456', 'admin2024567',
+  // Vietnamese common
+  'matkhau12345', 'taikhoan1234', 'dangky123456', 'xinchao12345',
+  'vietnam12345', 'saigon123456', 'hanoi1234567',
+  // Gaming related (RoK specific)
+  'kingdom12345', 'alliance1234', 'commander123', 'riseofking12',
+  'rokplayer123', 'gamerok12345', 'kvk123456789',
+  // Service name variations
+  'rokservice12', 'rokservices1', 'rokdbot12345',
+  // Common weak with special chars
+  'password!@#$', 'admin!@#$567', 'qwerty!@#$12', 'Welcome!@#$1',
+  'Test@1234567', 'User@1234567', 'Login@123456', 'Account@1234'
 ]
 
 export function isCommonPassword(password: string): boolean {
   const lower = password.toLowerCase()
   return COMMON_PASSWORDS.some(
-    common => lower === common.toLowerCase() ?? lower.includes(common.toLowerCase())
+    common => lower === common.toLowerCase() || lower.includes(common.toLowerCase())
   )
 }
 

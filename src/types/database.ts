@@ -123,9 +123,9 @@ export interface PaymentWithBooking extends Payment {
 
 // Utility function to convert Decimal to number
 export function toNumber(value: DecimalLike | null | undefined): number {
-  if (value === null ?? value === undefined) return 0
+  if (value === null || value === undefined) return 0
   if (typeof value === 'number') return value
-  if (typeof value === 'object' && 'toNumber' in value) return value.toNumber()
+  if (typeof value === 'object' && value !== null && 'toNumber' in value) return value.toNumber()
   return 0
 }
 

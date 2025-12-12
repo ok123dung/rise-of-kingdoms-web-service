@@ -22,7 +22,7 @@ interface ForgotPasswordRequest {
 async function forgotPasswordHandler(request: NextRequest): Promise<NextResponse> {
   try {
     // Rate limiting
-    const clientId = request.headers.get('x-forwarded-for') ?? request.ip ?? 'anonymous'
+    const clientId = request.headers.get('x-forwarded-for') ?? 'anonymous'
     const rateLimit = await rateLimiters.auth.isAllowed(clientId)
     if (!rateLimit.allowed) {
       return NextResponse.json(

@@ -77,15 +77,16 @@ export class EdgeRateLimiter {
     let entry = this.store.get(key)
 
     // Initialize or reset entry
-    if (!entry ?? now >= entry.resetTime) {
+    if (!entry || now >= entry.resetTime) {
       entry = {
-        count: 0,
+        count: 1,
         resetTime: now + this.config.window
       }
+      this.store.set(key, entry)
+    } else {
+      entry.count++
+      this.store.set(key, entry)
     }
-
-    entry.count++
-    this.store.set(key, entry)
 
     const remaining = Math.max(0, this.config.max - entry.count)
     const success = entry.count <= this.config.max

@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { QrCode, CreditCard, Smartphone, Loader2, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+import { toast } from '@/lib/toast'
+
 import type { Decimal } from '@prisma/client/runtime/library'
 
 interface BookingData {
@@ -38,13 +40,11 @@ export default function PaymentMethods({ booking }: PaymentMethodsProps) {
       if (res.ok) {
         router.push('/booking/success')
       } else {
-        // eslint-disable-next-line no-alert
-        alert('Thanh toán thất bại. Vui lòng thử lại.')
+        toast.error('Thanh toán thất bại. Vui lòng thử lại.')
       }
     } catch (error) {
       console.error(error)
-      // eslint-disable-next-line no-alert
-      alert('Có lỗi xảy ra.')
+      toast.error('Có lỗi xảy ra.')
     } finally {
       setIsProcessing(false)
     }

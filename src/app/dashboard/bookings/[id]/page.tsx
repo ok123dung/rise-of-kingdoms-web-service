@@ -16,6 +16,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 import { BookingChat } from '@/components/BookingChat'
+import { toast } from '@/lib/toast'
 
 interface BookingDetail {
   id: string
@@ -105,17 +106,14 @@ export default function BookingDetailPage() {
       if (response.ok) {
         // Refresh booking data
         void fetchBookingDetail()
-        // eslint-disable-next-line no-alert
-        alert('Đã hủy đơn hàng thành công')
+        toast.success('Đã hủy đơn hàng thành công')
       } else {
-        // eslint-disable-next-line no-alert
-        alert(data.message ?? 'Không thể hủy đơn hàng')
+        toast.error(data.message ?? 'Không thể hủy đơn hàng')
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error'
       console.error('Error cancelling booking:', message)
-      // eslint-disable-next-line no-alert
-      alert('Có lỗi xảy ra khi hủy đơn hàng')
+      toast.error('Có lỗi xảy ra khi hủy đơn hàng')
     } finally {
       setCancelling(false)
     }

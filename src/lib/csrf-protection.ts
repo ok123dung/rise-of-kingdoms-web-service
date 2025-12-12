@@ -99,7 +99,7 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
       getLogger().warn('CSRF validation failed: invalid origin', {
         origin: checkOrigin,
         path: pathname,
-        ip: req.ip ?? req.headers.get('x-forwarded-for') ?? undefined
+        ip: req.headers.get('x-forwarded-for') ?? undefined
       })
       return { valid: false, reason: 'invalid origin' }
     }
@@ -113,7 +113,11 @@ export function validateCSRF(req: NextRequest): CSRFValidationResult {
     return { valid: false, reason: 'missing CSRF token' }
   }
 
-  if (headerToken !== cookieToken) {
+  // Use constant-time comparison to prevent timing attacks
+  if (
+    headerToken.length !== cookieToken.length ||
+    !crypto.timingSafeEqual(Buffer.from(headerToken), Buffer.from(cookieToken))
+  ) {
     return { valid: false, reason: 'token mismatch' }
   }
 

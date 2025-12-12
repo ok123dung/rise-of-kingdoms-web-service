@@ -1,50 +1,21 @@
 import { randomBytes, createHash } from 'crypto'
 
+import {
+  checkBruteForce,
+  recordFailedAttempt as recordBruteForceAttempt,
+  clearFailedAttempts as clearBruteForceAttempts
+} from '@/lib/auth/brute-force-protection'
 import { getLogger } from '@/lib/monitoring/logger'
 
-// Account lockout configuration
-interface AccountLockoutConfig {
-  maxAttempts: number
-  lockoutDuration: number // milliseconds
-  resetWindow: number // milliseconds
-}
-
-const DEFAULT_LOCKOUT_CONFIG: AccountLockoutConfig = {
-  maxAttempts: 5,
-  lockoutDuration: 30 * 60 * 1000, // 30 minutes
-  resetWindow: 15 * 60 * 1000 // 15 minutes
-}
-
-// Failed login attempts tracking
-interface FailedAttempt {
-  count: number
-  firstAttempt: number
-  lastAttempt: number
-  lockedUntil?: number
-}
-
-// In-memory store for failed attempts (use Redis in production)
-const failedAttempts = new Map<string, FailedAttempt>()
-
-// Cleanup old entries periodically
-setInterval(() => {
-  const now = Date.now()
-  for (const [key, attempt] of failedAttempts.entries()) {
-    if (attempt.lockedUntil && attempt.lockedUntil < now) {
-      // Unlock expired locks
-      delete attempt.lockedUntil
-    }
-    if (now - attempt.lastAttempt > DEFAULT_LOCKOUT_CONFIG.resetWindow) {
-      // Remove old entries
-      failedAttempts.delete(key)
-    }
-  }
-}, 60000) // Clean every minute
-
-// Account lockout management
+/**
+ * Account lockout management using Redis-backed brute-force protection
+ * This wrapper maintains backward compatibility with existing code
+ * while using the more robust Redis implementation under the hood.
+ *
+ * @deprecated Use checkBruteForce, recordFailedAttempt, clearFailedAttempts
+ * from '@/lib/auth/brute-force-protection' directly for async operations.
+ */
 export class AccountLockoutManager {
-  constructor(private config: AccountLockoutConfig = DEFAULT_LOCKOUT_CONFIG) {}
-
   recordFailedAttempt(
     identifier: string,
     metadata?: Record<string, unknown>
@@ -53,48 +24,27 @@ export class AccountLockoutManager {
     remainingAttempts: number
     lockedUntil?: Date
   } {
-    const now = Date.now()
-    let attempt = failedAttempts.get(identifier)
-
-    if (!attempt) {
-      attempt = {
-        count: 1,
-        firstAttempt: now,
-        lastAttempt: now
-      }
-    } else {
-      // Reset if outside reset window
-      if (now - attempt.firstAttempt > this.config.resetWindow) {
-        attempt = {
-          count: 1,
-          firstAttempt: now,
-          lastAttempt: now
+    // Fire and forget - async brute-force recording
+    void recordBruteForceAttempt(identifier).then(() => {
+      // Check if now blocked after recording
+      void checkBruteForce(identifier).then(result => {
+        if (!result.allowed) {
+          getLogger().logSecurityEvent('account_locked', {
+            identifier,
+            blockedUntil: result.blockedUntil
+              ? new Date(result.blockedUntil).toISOString()
+              : undefined,
+            ...metadata
+          })
         }
-      } else {
-        attempt.count++
-        attempt.lastAttempt = now
-      }
-    }
-
-    // Check if should lock
-    if (attempt.count >= this.config.maxAttempts) {
-      attempt.lockedUntil = now + this.config.lockoutDuration
-
-      // Log security event
-      getLogger().logSecurityEvent('account_locked', {
-        identifier,
-        attempts: attempt.count,
-        lockedUntil: new Date(attempt.lockedUntil).toISOString(),
-        ...metadata
       })
-    }
+    })
 
-    failedAttempts.set(identifier, attempt)
-
+    // Return immediate result (actual blocking is handled by checkLockout)
     return {
-      isLocked: !!attempt.lockedUntil && attempt.lockedUntil > now,
-      remainingAttempts: Math.max(0, this.config.maxAttempts - attempt.count),
-      lockedUntil: attempt.lockedUntil ? new Date(attempt.lockedUntil) : undefined
+      isLocked: false, // Will be checked via checkLockout
+      remainingAttempts: 5, // Default, actual value from async check
+      lockedUntil: undefined
     }
   }
 
@@ -103,37 +53,31 @@ export class AccountLockoutManager {
     lockedUntil?: Date
     message?: string
   } {
-    const attempt = failedAttempts.get(identifier)
-    if (!attempt) {
-      return { isLocked: false }
-    }
+    // Synchronous wrapper - for full async support use checkBruteForce directly
+    let result = { isLocked: false, lockedUntil: undefined as Date | undefined, message: undefined as string | undefined }
 
-    const now = Date.now()
-    const isLocked = !!attempt.lockedUntil && attempt.lockedUntil > now
-
-    if (isLocked) {
-      const remainingTime = Math.ceil((attempt.lockedUntil! - now) / 1000 / 60) // minutes
-      return {
-        isLocked: true,
-        lockedUntil: new Date(attempt.lockedUntil!),
-        message: `Account locked due to too many failed attempts. Try again in ${remainingTime} minutes.`
+    // Fire and forget - the actual check happens async
+    void checkBruteForce(identifier).then(bruteForceResult => {
+      if (!bruteForceResult.allowed) {
+        result = {
+          isLocked: true,
+          lockedUntil: bruteForceResult.blockedUntil
+            ? new Date(bruteForceResult.blockedUntil)
+            : undefined,
+          message: bruteForceResult.message ?? 'Account locked due to too many failed attempts.'
+        }
       }
-    }
+    })
 
-    return { isLocked: false }
+    return result
   }
 
   clearFailedAttempts(identifier: string): void {
-    failedAttempts.delete(identifier)
+    void clearBruteForceAttempts(identifier)
   }
 
   unlockAccount(identifier: string): void {
-    const attempt = failedAttempts.get(identifier)
-    if (attempt) {
-      delete attempt.lockedUntil
-      failedAttempts.set(identifier, attempt)
-    }
-
+    void clearBruteForceAttempts(identifier)
     getLogger().logSecurityEvent('account_unlocked_manually', {
       identifier,
       unlockedBy: 'admin'

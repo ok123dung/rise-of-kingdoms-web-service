@@ -38,7 +38,7 @@ export class LRURateLimiter {
     let entry = this.store.get(key)
 
     // Initialize or reset entry
-    if (!entry ?? now >= entry.resetTime) {
+    if (!entry || now >= entry.resetTime) {
       entry = {
         count: 1,
         resetTime: now + this.config.window,
@@ -209,7 +209,7 @@ export class SlidingWindowRateLimiter {
     let removed = 0
 
     for (const [key, timestamps] of this.store.entries()) {
-      if (timestamps.length === 0 ?? Math.max(...timestamps) < now - this.config.window * 2) {
+      if (timestamps.length === 0 || Math.max(...timestamps) < now - this.config.window * 2) {
         this.store.delete(key)
         removed++
       }

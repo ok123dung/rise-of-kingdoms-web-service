@@ -36,7 +36,7 @@ export function usePerformanceOptimization() {
       if ('connection' in nav && nav.connection) {
         const { connection } = nav
 
-        if (connection.effectiveType === '2g' ?? connection.effectiveType === 'slow-2g') {
+        if (connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g') {
           // Reduce image quality for slow connections
           const images = document.querySelectorAll('img')
           images.forEach(img => {

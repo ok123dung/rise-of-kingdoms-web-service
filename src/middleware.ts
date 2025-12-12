@@ -32,13 +32,16 @@ export default withAuth(
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
     response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
 
-    // Content Security Policy
+    // Content Security Policy with nonce
     const nonce = generateCSPNonce()
     const cspHeader = buildCSPHeader(currentCSPDirectives, nonce)
     const cspHeaderName = cspReportOnly
       ? 'Content-Security-Policy-Report-Only'
       : 'Content-Security-Policy'
     response.headers.set(cspHeaderName, cspHeader)
+
+    // Pass nonce to the app via headers (for CSPNonceProvider to read)
+    response.headers.set('x-nonce', nonce)
 
     // Production security headers
     if (process.env.NODE_ENV === 'production') {

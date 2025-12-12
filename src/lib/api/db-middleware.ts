@@ -13,9 +13,10 @@ export interface DatabaseErrorResponse {
   details?: unknown
 }
 
+// Note: In Next.js 16+, params is a Promise
 export type ApiHandler<T = unknown> = (
   request: NextRequest,
-  context?: { params?: Record<string, string> }
+  context?: { params?: Promise<Record<string, string>> | Record<string, string> }
 ) => Promise<NextResponse<T | DatabaseErrorResponse>>
 
 /**
@@ -25,7 +26,7 @@ export type ApiHandler<T = unknown> = (
 export function withDatabaseConnection<T = unknown>(
   handler: ApiHandler<T>
 ): ApiHandler<T | DatabaseErrorResponse> {
-  return async (request: NextRequest, context?: { params?: Record<string, string> }) => {
+  return async (request: NextRequest, context?: { params?: Promise<Record<string, string>> | Record<string, string> }) => {
     const logger = getLogger()
 
     try {

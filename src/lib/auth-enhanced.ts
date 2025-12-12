@@ -5,7 +5,12 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import DiscordProvider from 'next-auth/providers/discord'
 import { z } from 'zod'
 
-import { accountLockout, sessionTokenManager } from '@/lib/auth-security'
+import {
+  checkBruteForce,
+  recordFailedAttempt,
+  clearFailedAttempts
+} from '@/lib/auth/brute-force-protection'
+import { sessionTokenManager } from '@/lib/auth-security'
 import { prisma, basePrisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
@@ -66,14 +71,17 @@ export const authOptionsEnhanced: NextAuthOptions = {
 
           const { email, password, fingerprint } = loginSchema.parse(credentials)
 
-          // Check account lockout first
-          const lockoutStatus = accountLockout.checkLockout(email)
-          if (lockoutStatus.isLocked) {
+          // Check brute-force protection (Redis-backed with memory fallback)
+          const bruteForceResult = await checkBruteForce(email)
+          if (!bruteForceResult.allowed) {
             getLogger().logSecurityEvent('login_attempt_while_locked', {
               email,
-              lockedUntil: lockoutStatus.lockedUntil?.toISOString()
+              blockedUntil: bruteForceResult.blockedUntil
+                ? new Date(bruteForceResult.blockedUntil).toISOString()
+                : undefined,
+              remainingAttempts: bruteForceResult.remainingAttempts
             })
-            throw new Error(lockoutStatus.message ?? 'Account is locked')
+            throw new Error(bruteForceResult.message ?? 'Too many failed attempts. Please try again later.')
           }
 
           // Find user with rate limit check
@@ -85,8 +93,10 @@ export const authOptionsEnhanced: NextAuthOptions = {
           })
 
           if (!user) {
-            // Record failed attempt
-            accountLockout.recordFailedAttempt(email, {
+            // Record failed attempt with Redis-backed brute-force protection
+            await recordFailedAttempt(email)
+            getLogger().logSecurityEvent('login_failed', {
+              email,
               reason: 'user_not_found',
               ip: (req?.headers?.['x-forwarded-for'] ?? req?.headers?.['x-real-ip']) as
                 | string
@@ -95,31 +105,27 @@ export const authOptionsEnhanced: NextAuthOptions = {
             return null
           }
 
-          // Verify password with timing attack protection
+          // Verify password with timing attack protection (bcrypt is constant-time)
           const isValidPassword = await bcrypt.compare(password, user.password ?? '')
 
           if (!isValidPassword) {
-            // Record failed attempt
-            const lockResult = accountLockout.recordFailedAttempt(email, {
-              reason: 'invalid_password',
-              user_id: user.id,
-              ip: (req?.headers?.['x-forwarded-for'] ?? req?.headers?.['x-real-ip']) as
-                | string
-                | undefined
-            })
+            // Record failed attempt with Redis-backed brute-force protection
+            await recordFailedAttempt(email)
 
             getLogger().logSecurityEvent('login_failed', {
               email,
               user_id: user.id,
-              remainingAttempts: lockResult.remainingAttempts,
-              isLocked: lockResult.isLocked
+              reason: 'invalid_password',
+              ip: (req?.headers?.['x-forwarded-for'] ?? req?.headers?.['x-real-ip']) as
+                | string
+                | undefined
             })
 
             return null
           }
 
           // Clear failed attempts on successful login
-          accountLockout.clearFailedAttempts(email)
+          await clearFailedAttempts(email)
 
           // Update user login info
           await prisma.users.update({
@@ -191,7 +197,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
       }
 
       // Token rotation on role change or periodic rotation
-      if (trigger === 'update' ?? sessionTokenManager.shouldRotate(token.tokenIssuedAt)) {
+      if (trigger === 'update' || sessionTokenManager.shouldRotate(token.tokenIssuedAt)) {
         const rotated = sessionTokenManager.rotateToken(token.sessionId, token.user_id)
 
         token.sessionId = rotated.sessionId

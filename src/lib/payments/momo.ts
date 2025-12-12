@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto, { timingSafeEqual } from 'crypto'
 
 import { type Prisma } from '@prisma/client'
 
@@ -126,7 +126,13 @@ export class MoMoPayment {
     // Generate HMAC SHA256 signature
     const signature = crypto.createHmac('sha256', this.secretKey).update(rawSignature).digest('hex')
 
-    return signature === receivedSignature
+    // Use timing-safe comparison to prevent timing attacks
+    try {
+      return timingSafeEqual(Buffer.from(signature), Buffer.from(receivedSignature))
+    } catch {
+      // If buffers have different lengths, timingSafeEqual throws
+      return false
+    }
   }
 
   // Tạo payment request

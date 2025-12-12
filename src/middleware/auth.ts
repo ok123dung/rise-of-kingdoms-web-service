@@ -97,7 +97,7 @@ export async function authMiddleware(req: NextRequest) {
 }
 
 function applyRateLimit(req: NextRequest): NextResponse | null {
-  const ip = req.ip ?? req.headers.get('x-forwarded-for') ?? 'unknown'
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
   const { pathname } = req.nextUrl
 
   // Find matching rate limit route
@@ -152,7 +152,7 @@ export function validateCSRFToken(req: NextRequest): boolean {
       reason: result.reason,
       method: req.method,
       origin: req.headers.get('origin'),
-      ip: req.ip ?? req.headers.get('x-forwarded-for')
+      ip: req.headers.get('x-forwarded-for')
     })
   }
 

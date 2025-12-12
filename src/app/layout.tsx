@@ -1,6 +1,8 @@
+import { headers } from 'next/headers'
 import { Inter, Poppins } from 'next/font/google'
 
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
+import { CSPNonceProvider } from '@/components/CSPNonceProvider'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { MobileStickyActions } from '@/components/mobile/MobileOptimizations'
 import { PerformanceMonitor } from '@/components/performance/PerformanceMonitor'
@@ -103,32 +105,39 @@ export const viewport: Viewport = {
   ]
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Get nonce from headers (set by middleware)
+  const headersList = await headers()
+  const nonce = headersList.get('x-nonce') ?? ''
+
   return (
     <html className={`${inter.variable} ${poppins.variable}`} lang="vi">
       <body className={`${inter.className} bg-gray-50 antialiased`}>
-        <GoogleAnalytics />
-        <PerformanceMonitor />
-        <ConversionTesting />
-        <RevenueValidation />
-        <OrganizationSchema
-          description="Dịch vụ Rise of Kingdoms chuyên nghiệp #1 Việt Nam"
-          name="RoK Services"
-          url={process.env.NEXT_PUBLIC_SITE_URL ?? 'https://rokdbot.com'}
-        />
-        {/* Vietnamese Gaming SEO - Rich snippets for Vietnamese market */}
-        <VietnameseGamingSchema />
-        <VietnameseKeywordsOptimization />
-        <VietnameseLocalBusinessSchema />
-        <Providers>
-          <ErrorBoundary>
-            <div className="flex min-h-screen flex-col">
-              {children}
-              <FloatingSocialButtons />
-              <MobileStickyActions />
-            </div>
-          </ErrorBoundary>
-        </Providers>
+        <CSPNonceProvider>
+          <GoogleAnalytics nonce={nonce} />
+          <PerformanceMonitor />
+          <ConversionTesting />
+          <RevenueValidation />
+          <OrganizationSchema
+            description="Dịch vụ Rise of Kingdoms chuyên nghiệp #1 Việt Nam"
+            name="RoK Services"
+            url={process.env.NEXT_PUBLIC_SITE_URL ?? 'https://rokdbot.com'}
+            nonce={nonce}
+          />
+          {/* Vietnamese Gaming SEO - Rich snippets for Vietnamese market */}
+          <VietnameseGamingSchema nonce={nonce} />
+          <VietnameseKeywordsOptimization nonce={nonce} />
+          <VietnameseLocalBusinessSchema nonce={nonce} />
+          <Providers>
+            <ErrorBoundary>
+              <div className="flex min-h-screen flex-col">
+                {children}
+                <FloatingSocialButtons />
+                <MobileStickyActions />
+              </div>
+            </ErrorBoundary>
+          </Providers>
+        </CSPNonceProvider>
       </body>
     </html>
   )

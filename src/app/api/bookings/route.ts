@@ -7,23 +7,14 @@ import { NotFoundError, ConflictError } from '@/lib/errors'
 import { getLogger } from '@/lib/monitoring/logger'
 import { BookingService } from '@/services/booking.service'
 
-// Stricter Schema validation
+// Stricter Schema validation with max length limits (DoS prevention)
 const bookingSchema = z.object({
-  service_id: z.string().min(1, 'Service ID is required'),
-  // Assuming service_id sent from frontend is actually the service SLUG.
-  // Ideally, frontend should send service_tiersId, but if it sends serviceSlug, we need to handle that.
-  // Based on previous code, it seems to expect a slug.
-
-  full_name: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().regex(/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/, 'Invalid Vietnamese phone number'),
-  kingdom: z.string().optional(),
-  notes: z.string().optional()
-  // Add gameId validation if it's part of the form, previous tests showed it might be
-  // If not in schema, we can't validate it. Assuming it's passed in metadata or notes for now based on previous code structure
-  // or if it was missing from the previous schema but present in tests.
-  // The previous schema didn't have gameId, but tests did. Let's add it as optional or required based on business logic.
-  // For now, keeping it consistent with previous schema but stricter on existing fields.
+  service_id: z.string().min(1, 'Service ID is required').max(100, 'Service ID too long'),
+  full_name: z.string().min(2, 'Full name must be at least 2 characters').max(100, 'Full name too long'),
+  email: z.string().email('Invalid email address').max(255, 'Email too long'),
+  phone: z.string().regex(/^(0|\+84)(3|5|7|8|9)[0-9]{8}$/, 'Invalid Vietnamese phone number').max(20, 'Phone too long'),
+  kingdom: z.string().max(50, 'Kingdom too long').optional(),
+  notes: z.string().max(2000, 'Notes too long').optional()
 })
 
 interface CreateBookingRequest {
@@ -42,12 +33,26 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as CreateBookingRequest
     const data = bookingSchema.parse(body)
 
-    // 1. Find or Create User
-    // We keep this logic here or move to UserService. For now, keeping it here to minimize scope creep.
-    let user = await prisma.users.findUnique({
-      where: { email: data.email }
-    })
+    // Run user lookup and service tier lookup in parallel (N+1 optimization)
+    const [existingUser, service_tiers] = await Promise.all([
+      prisma.users.findUnique({ where: { email: data.email } }),
+      prisma.service_tiers.findFirst({
+        where: { services: { slug: data.service_id } },
+        orderBy: { sort_order: 'asc' },
+        include: { services: true }
+      })
+    ])
 
+    // Validate service tier first (fail fast)
+    if (!service_tiers) {
+      return NextResponse.json(
+        { success: false, error: 'Service not found or unavailable' },
+        { status: 404 }
+      )
+    }
+
+    // Find or Create User
+    let user = existingUser
     if (!user) {
       // Create new user with random password
       const password = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
@@ -67,7 +72,7 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // Send account created email
+      // Send account created email (fire and forget)
       sendAccountCreatedEmail(data.email, data.full_name, password).catch((err: unknown) =>
         getLogger().error(
           'Failed to send account created email',
@@ -75,23 +80,6 @@ export async function POST(request: NextRequest) {
         )
       )
       getLogger().info(`Created new user for booking: ${user.email}`)
-    }
-
-    // 2. Resolve Service Tier
-    // The frontend sends 'service_id' which is likely the Service Slug.
-    // We need to find the default (first) tier for this service.
-    const service_tiers = await prisma.service_tiers.findFirst({
-      where: { services: { slug: data.service_id } },
-      orderBy: { sort_order: 'asc' },
-      include: { services: true }
-    })
-
-    if (!service_tiers) {
-      // No Self-Healing anymore. Fail if not found.
-      return NextResponse.json(
-        { success: false, error: 'Service not found or unavailable' },
-        { status: 404 }
-      )
     }
 
     // 3. Create Booking using Service

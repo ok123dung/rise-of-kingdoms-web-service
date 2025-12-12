@@ -31,7 +31,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
     if (!csrfValidation.valid) {
       getLogger().warn('CSRF validation failed on signup', {
         reason: csrfValidation.reason,
-        ip: request.headers.get('x-forwarded-for') ?? request.ip
+        ip: request.headers.get('x-forwarded-for') ?? 'unknown'
       })
       return NextResponse.json(
         { error: 'Invalid request. Please refresh and try again.' },
@@ -40,7 +40,7 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
     }
 
     // Rate limiting - prevent registration spam
-    const clientId = request.headers.get('x-forwarded-for') ?? request.ip ?? 'anonymous'
+    const clientId = request.headers.get('x-forwarded-for') ?? 'anonymous'
     const rateLimit = await rateLimiters.auth.isAllowed(clientId)
     if (!rateLimit.allowed) {
       return NextResponse.json(

@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto, { timingSafeEqual } from 'crypto'
 
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
@@ -168,9 +168,14 @@ export class VNPayPayment {
       const sortedParams = Object.keys(query).sort()
       // Create signature data
       const signData = sortedParams.map(key => `${key}=${query[key]}`).join('&')
-      // Verify signature
+      // Verify signature with timing-safe comparison
       const signature = crypto.createHmac('sha512', this.hashSecret).update(signData).digest('hex')
-      if (signature !== vnp_SecureHash) {
+      try {
+        if (!timingSafeEqual(Buffer.from(signature), Buffer.from(vnp_SecureHash))) {
+          return { success: false, error: 'Invalid signature' }
+        }
+      } catch {
+        // If buffers have different lengths, timingSafeEqual throws
         return { success: false, error: 'Invalid signature' }
       }
       return {

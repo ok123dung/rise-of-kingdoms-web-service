@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
         where: { email: 'system@rokdbot.com' }
       })
 
-      if (systemUser ?? lead.assigned_to) {
+      if (systemUser || lead.assigned_to) {
         await prisma.communications.create({
           data: {
             id: crypto.randomUUID(),

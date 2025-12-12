@@ -154,7 +154,7 @@ export const withAuth = (handler: RouteHandler) => {
 
 export const withRateLimit = (_maxRequests = 60, _windowMs = 60000) => {
   return (handler: RouteHandler) => {
-    return async (req: NextRequest & { headers?: Headers; ip?: string }, ...args: unknown[]) => {
+    return async (req: NextRequest & { headers?: Headers }, ...args: unknown[]) => {
       // Use the centralized API limiter by default, but we could create a dynamic one if needed
       // For now, we'll use the API limiter which is configured for general API use
       // Note: The original implementation allowed custom maxRequests/windowMs per route
@@ -163,7 +163,7 @@ export const withRateLimit = (_maxRequests = 60, _windowMs = 60000) => {
       // For this refactor, we'll delegate to the standard API limiter for consistency
       // If specific limits are needed, we should define them in rate-limit.ts
 
-      const clientId = req.headers?.get?.('x-forwarded-for') ?? req.ip ?? 'anonymous'
+      const clientId = req.headers?.get?.('x-forwarded-for') ?? 'anonymous'
       const result = await rateLimiters.api.isAllowed(clientId)
 
       if (!result.allowed) {
@@ -444,7 +444,7 @@ export const enhanceSession = (session: SessionWithSecurity, request?: NextReque
   const securityContext = {
     lastActivity: new Date().toISOString(),
     userAgent: request?.headers?.get?.('user-agent'),
-    ip: request?.headers?.get?.('x-forwarded-for') ?? request?.ip,
+    ip: request?.headers?.get?.('x-forwarded-for') ?? undefined,
     sessionId: session.user.id + '_' + Date.now()
   }
 
@@ -454,63 +454,10 @@ export const enhanceSession = (session: SessionWithSecurity, request?: NextReque
   }
 }
 
-// Brute force protection
-const failedAttempts = new Map<
-  string,
-  { count: number; lastAttempt: number; blockedUntil?: number }
->()
-
-export const checkBruteForce = (
-  identifier: string,
-  maxAttempts = 5,
-  blockDurationMs = 15 * 60 * 1000
-) => {
-  const now = Date.now()
-  const attempts = failedAttempts.get(identifier)
-
-  if (!attempts) {
-    return { allowed: true, remainingAttempts: maxAttempts }
-  }
-
-  if (attempts.blockedUntil && now < attempts.blockedUntil) {
-    return {
-      allowed: false,
-      remainingAttempts: 0,
-      blockedUntil: attempts.blockedUntil,
-      message: 'Account temporarily blocked due to too many failed attempts'
-    }
-  }
-
-  if (attempts.count >= maxAttempts) {
-    attempts.blockedUntil = now + blockDurationMs
-    return {
-      allowed: false,
-      remainingAttempts: 0,
-      blockedUntil: attempts.blockedUntil,
-      message: 'Too many failed attempts. Account blocked temporarily.'
-    }
-  }
-
-  return {
-    allowed: true,
-    remainingAttempts: maxAttempts - attempts.count
-  }
-}
-
-export const recordFailedAttempt = (identifier: string) => {
-  const now = Date.now()
-  const attempts = failedAttempts.get(identifier) ?? { count: 0, lastAttempt: 0 }
-
-  // Reset count if last attempt was more than 1 hour ago
-  if (now - attempts.lastAttempt > 60 * 60 * 1000) {
-    attempts.count = 0
-  }
-
-  attempts.count++
-  attempts.lastAttempt = now
-  failedAttempts.set(identifier, attempts)
-}
-
-export const clearFailedAttempts = (identifier: string) => {
-  failedAttempts.delete(identifier)
-}
+// Re-export brute force protection from dedicated module (Redis-backed)
+export {
+  checkBruteForce,
+  recordFailedAttempt,
+  clearFailedAttempts,
+  isBlocked
+} from '@/lib/auth/brute-force-protection'

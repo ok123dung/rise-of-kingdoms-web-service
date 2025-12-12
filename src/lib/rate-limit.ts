@@ -79,7 +79,7 @@ export class RateLimiter {
     }
     // Fallback to memory store
     const record = memoryStore.get(key)
-    if (!record ?? now > record.resetTime) {
+    if (!record || now > record.resetTime) {
       // Create new record
       memoryStore.set(key, {
         count: 1,

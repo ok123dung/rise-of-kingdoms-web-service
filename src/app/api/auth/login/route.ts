@@ -25,7 +25,7 @@ interface LoginBody {
 const loginHandler = async function (request: NextRequest): Promise<NextResponse> {
   try {
     // Rate limiting - prevent brute force attacks
-    const clientId = request.headers.get('x-forwarded-for') ?? request.ip ?? 'anonymous'
+    const clientId = request.headers.get('x-forwarded-for') ?? 'anonymous'
     const rateLimit = await rateLimiters.auth.isAllowed(clientId)
     if (!rateLimit.allowed) {
       return NextResponse.json(

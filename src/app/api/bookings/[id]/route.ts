@@ -19,8 +19,10 @@ interface UpdateBookingRequest {
   internal_notes?: string
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+// Note: params is async in Next.js 16+
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     // Check auth
     const user = await getCurrentUser()
     if (!isAdmin(user)) {
@@ -31,7 +33,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const data = updateBookingSchema.parse(body)
 
     const booking = await prisma.bookings.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...data,
         updated_at: new Date()
@@ -51,15 +53,16 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
     if (!isAdmin(user)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     const booking = await prisma.bookings.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         users: true,
         service_tiers: {

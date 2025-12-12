@@ -7,6 +7,7 @@ interface OrganizationSchemaProps {
   address?: string
   phone?: string
   email?: string
+  nonce?: string
 }
 
 export function OrganizationSchema({
@@ -15,7 +16,8 @@ export function OrganizationSchema({
   description,
   address = 'Hồ Chí Minh',
   phone = '+84123456789',
-  email = 'contact@rokdbot.com'
+  email = 'contact@rokdbot.com',
+  nonce
 }: OrganizationSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
@@ -50,6 +52,7 @@ export function OrganizationSchema({
     <Script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       id="organization-schema"
+      nonce={nonce}
       type="application/ld+json"
     />
   )
@@ -67,6 +70,7 @@ interface ServiceSchemaProps {
     currency: string
     description: string
   }>
+  nonce?: string
 }
 
 export function ServiceSchema({
@@ -75,7 +79,8 @@ export function ServiceSchema({
   provider,
   areaServed,
   serviceType,
-  offers
+  offers,
+  nonce
 }: ServiceSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
@@ -105,6 +110,7 @@ export function ServiceSchema({
     <Script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       id="service-schema"
+      nonce={nonce}
       type="application/ld+json"
     />
   )
@@ -115,9 +121,10 @@ interface FAQSchemaProps {
     question: string
     answer: string
   }>
+  nonce?: string
 }
 
-export function FAQSchema({ faqs }: FAQSchemaProps) {
+export function FAQSchema({ faqs, nonce }: FAQSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -135,6 +142,7 @@ export function FAQSchema({ faqs }: FAQSchemaProps) {
     <Script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       id="faq-schema"
+      nonce={nonce}
       type="application/ld+json"
     />
   )
@@ -145,9 +153,10 @@ interface BreadcrumbSchemaProps {
     name: string
     url: string
   }>
+  nonce?: string
 }
 
-export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
+export function BreadcrumbSchema({ items, nonce }: BreadcrumbSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -163,6 +172,7 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
     <Script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       id="breadcrumb-schema"
+      nonce={nonce}
       type="application/ld+json"
     />
   )

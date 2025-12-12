@@ -172,15 +172,16 @@ const staticServices = [
     }
   }
 ]
+// Note: params is async in Next.js 16+
 interface RouteParams {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 // GET /api/services/[slug] - Lấy thông tin service theo slug
-export function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
-    const { slug } = params
+    const { slug } = await params
     // Find service by slug from static data
     const service = staticServices.find(s => s.slug === slug && s.is_active)
     if (!service) {

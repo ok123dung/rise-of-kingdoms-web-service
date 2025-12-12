@@ -10,7 +10,7 @@ const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME ?? 'rokservices-files'
 
 // Only show warning in non-build phase to avoid build errors
 const isBuildPhase =
-  process.env.NEXT_PHASE === 'phase-production-build' ??
+  process.env.NEXT_PHASE === 'phase-production-build' ||
   (process.env.VERCEL && process.env.VERCEL_ENV === undefined)
 
 if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {

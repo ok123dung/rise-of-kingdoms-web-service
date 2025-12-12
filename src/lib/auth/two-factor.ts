@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import { randomBytes, timingSafeEqual } from 'crypto'
 
 import QRCode from 'qrcode'
 import speakeasy from 'speakeasy'
@@ -144,10 +144,19 @@ export class TwoFactorAuthService {
         return { verified: true }
       }
 
-      // Try backup code if TOTP fails
-      if (twoFactorAuth.backup_codes.includes(token)) {
+      // Try backup code if TOTP fails (using constant-time comparison)
+      const matchingCode = twoFactorAuth.backup_codes.find(code => {
+        if (code.length !== token.length) return false
+        try {
+          return timingSafeEqual(Buffer.from(code), Buffer.from(token))
+        } catch {
+          return false
+        }
+      })
+
+      if (matchingCode) {
         // Remove used backup code
-        const updatedCodes = twoFactorAuth.backup_codes.filter(code => code !== token)
+        const updatedCodes = twoFactorAuth.backup_codes.filter(code => code !== matchingCode)
 
         await prisma.two_factor_auth.update({
           where: { user_id },

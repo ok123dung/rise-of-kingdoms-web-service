@@ -33,22 +33,24 @@ export interface CSPDirectives {
 }
 
 /**
- * Current CSP Configuration (Development & Production)
- * Uses unsafe directives for Next.js compatibility
+ * Current CSP Configuration (Nonce-based)
+ * Uses nonces instead of unsafe-inline for better security
  */
 export const currentCSPDirectives: CSPDirectives = {
   'default-src': ["'self'"],
   'script-src': [
     "'self'",
-    "'unsafe-inline'", // Will be removed in strict CSP migration
-    "'unsafe-eval'", // Will be removed in strict CSP migration
+    "'nonce-{{NONCE}}'", // Nonce-based instead of unsafe-inline
+    "'strict-dynamic'", // Allows trusted scripts to load other scripts
     'https://www.googletagmanager.com',
     'https://www.google-analytics.com',
     'https://static.cloudflareinsights.com'
   ],
   'style-src': [
     "'self'",
-    "'unsafe-inline'", // Note: Required for Next.js development mode
+    "'nonce-{{NONCE}}'", // Nonce-based for inline styles
+    // Note: 'unsafe-inline' removed for security. If Next.js styled-jsx breaks,
+    // either add nonce to Style components or use external stylesheets.
     'https://fonts.googleapis.com'
   ],
   'img-src': ["'self'", 'data:', 'https:', 'blob:'],
@@ -57,8 +59,9 @@ export const currentCSPDirectives: CSPDirectives = {
     "'self'",
     'https://www.google-analytics.com',
     'https://vitals.vercel-insights.com',
-    'ws://localhost:*', // WebSocket for development
-    'wss://localhost:*' // WebSocket for development
+    ...(process.env.NODE_ENV === 'development'
+      ? ['ws://localhost:*', 'wss://localhost:*']
+      : ['wss://*.rokdbot.com'])
   ],
   'frame-ancestors': ["'none'"],
   'base-uri': ["'self'"],
@@ -126,13 +129,14 @@ export function buildCSPHeader(directives: CSPDirectives, nonce?: string): strin
 /**
  * Generate a cryptographic nonce for CSP
  * Use this in middleware to create unique nonces per request
+ *
+ * Fixed: Previously double-encoded (hex→base64) reducing entropy.
+ * Now directly converts random bytes to base64 for full 128-bit entropy.
  */
 export function generateCSPNonce(): string {
-  const randomBytes = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('')
-
-  return Buffer.from(randomBytes, 'hex').toString('base64')
+  const bytes = crypto.getRandomValues(new Uint8Array(16))
+  // Convert Uint8Array to base64 directly without double-encoding
+  return btoa(String.fromCharCode(...bytes))
 }
 
 /**

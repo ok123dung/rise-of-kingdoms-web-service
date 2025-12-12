@@ -82,15 +82,17 @@ export class MemorySafeRateLimiter {
     const key = this.config.prefix ? `${this.config.prefix}:${identifier}` : identifier
     let entry = this.store.get(key)
     // Initialize or reset entry
-    if (!entry ?? now >= entry.resetTime) {
+    if (!entry || now >= entry.resetTime) {
       entry = {
-        count: 0,
+        count: 1,
         resetTime: now + this.config.window,
         firstRequest: now
       }
+      this.store.set(key, entry)
+    } else {
+      entry.count++
+      this.store.set(key, entry)
     }
-    entry.count++
-    this.store.set(key, entry)
     // Enforce memory limit if needed
     if (this.store.size >= this.maxEntries) {
       this.enforceMemoryLimit()

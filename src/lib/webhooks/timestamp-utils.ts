@@ -13,7 +13,7 @@
  * @returns Timestamp in milliseconds, or current time if parsing fails
  */
 export function parseVNPayTimestamp(vnpayDate: string | undefined): number {
-  if (!vnpayDate ?? vnpayDate.length !== 14) {
+  if (!vnpayDate || vnpayDate.length !== 14) {
     // If no timestamp or invalid format, use current time
     return Date.now()
   }

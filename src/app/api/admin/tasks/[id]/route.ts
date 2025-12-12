@@ -34,8 +34,10 @@ interface UpdateTaskRequest {
   metadata?: Record<string, unknown>
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+// Note: params is async in Next.js 16+
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !['admin', 'manager', 'staff'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -44,7 +46,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const body = (await request.json()) as UpdateTaskRequest
     const data = updateTaskSchema.parse(body)
 
-    const task = await taskService.updateTask(params.id, data)
+    const task = await taskService.updateTask(id, data)
 
     return NextResponse.json({ success: true, task })
   } catch (error) {
@@ -57,26 +59,27 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     if (error instanceof NotFoundError) {
       return NextResponse.json({ error: error.message }, { status: 404 })
     }
-    logger.error(`Failed to update task ${params.id}`, error as Error)
+    logger.error('Failed to update task', error as Error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     if (!session || !['admin', 'manager'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await taskService.deleteTask(params.id)
+    await taskService.deleteTask(id)
 
     return NextResponse.json({ success: true, message: 'Task deleted' })
   } catch (error) {
     if (error instanceof NotFoundError) {
       return NextResponse.json({ error: error.message }, { status: 404 })
     }
-    logger.error(`Failed to delete task ${params.id}`, error as Error)
+    logger.error('Failed to delete task', error as Error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

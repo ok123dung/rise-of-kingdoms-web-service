@@ -4,7 +4,11 @@ import Script from 'next/script'
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
-export default function GoogleAnalytics() {
+interface GoogleAnalyticsProps {
+  nonce?: string
+}
+
+export default function GoogleAnalytics({ nonce }: GoogleAnalyticsProps) {
   if (!GA_MEASUREMENT_ID) {
     return null
   }
@@ -12,10 +16,11 @@ export default function GoogleAnalytics() {
   return (
     <>
       <Script
+        nonce={nonce}
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
         strategy="afterInteractive"
       />
-      <Script id="google-analytics" strategy="afterInteractive">
+      <Script id="google-analytics" nonce={nonce} strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}

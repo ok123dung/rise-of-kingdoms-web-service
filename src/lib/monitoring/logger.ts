@@ -107,7 +107,7 @@ class Logger {
     try {
       // Detect build phase - skip database operations during build
       const isBuildPhase =
-        process.env.NEXT_PHASE === 'phase-production-build' ??
+        process.env.NEXT_PHASE === 'phase-production-build' ||
         (process.env.VERCEL && process.env.VERCEL_ENV === undefined)
 
       // Only persist important logs to database in production (not during build)
@@ -116,8 +116,8 @@ class Logger {
         this.environment === 'production' &&
         process.env.DATABASE_URL && // Only log to DB if URL is configured
         !process.env.CI && // Skip DB logging during CI/Build
-        (entry.level === LogLevel.ERROR ??
-          entry.level === LogLevel.FATAL ??
+        (entry.level === LogLevel.ERROR ||
+          entry.level === LogLevel.FATAL ||
           entry.level === LogLevel.WARN)
       ) {
         // eslint-disable-next-line import/no-cycle -- Circular dependency between logger and db is unavoidable as logger needs db for persistence and db needs logger for monitoring
@@ -130,17 +130,15 @@ class Logger {
             message: entry.message,
             service: entry.service,
             environment: entry.environment,
-            context: entry.context
-              ? (JSON.parse(JSON.stringify(entry.context)) as Record<string, unknown>)
-              : undefined,
+            context: entry.context ? JSON.parse(JSON.stringify(entry.context)) : undefined,
             error: entry.error
-              ? (JSON.parse(
+              ? JSON.parse(
                   JSON.stringify({
                     message: entry.error.message,
                     stack: entry.error.stack,
                     name: entry.error.name
                   })
-                ) as Record<string, unknown>)
+                )
               : undefined,
             timestamp: entry.timestamp
           }

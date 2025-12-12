@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { trackCTAClick, trackContactForm } from '@/components/analytics/GoogleAnalytics'
 import { clientLogger } from '@/lib/client-logger'
+import { toast } from '@/lib/toast'
 
 // Test all conversion elements
 export function ConversionTesting() {
@@ -178,8 +179,7 @@ export function useTrackFormSubmissions() {
       event.preventDefault()
 
       // Show success message
-      // eslint-disable-next-line no-alert
-      alert('🎉 Form submitted successfully! In production, this would send to our team.')
+      toast.success('Form submitted successfully! In production, this would send to our team.')
     }
 
     const forms = document.querySelectorAll('form')

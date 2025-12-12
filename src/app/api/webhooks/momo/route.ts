@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto, { timingSafeEqual } from 'crypto'
 
 import { type NextRequest, NextResponse } from 'next/server'
 
@@ -71,7 +71,16 @@ export async function POST(request: NextRequest) {
       .update(rawSignature)
       .digest('hex')
 
-    if (signature !== expectedSignature) {
+    // Use timing-safe comparison to prevent timing attacks
+    let signatureValid = false
+    try {
+      signatureValid = timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
+    } catch {
+      // If buffers have different lengths, timingSafeEqual throws
+      signatureValid = false
+    }
+
+    if (!signatureValid) {
       getLogger().error('Invalid MoMo webhook signature', new Error('Invalid signature'), {
         orderId
       })

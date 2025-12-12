@@ -35,8 +35,9 @@ interface DiagnosticsResult {
   quickFixUrl?: string
 }
 
+// Note: headers() is async in Next.js 16+
 export async function GET(_request: NextRequest) {
-  const headersList = headers()
+  const headersList = await headers()
   const authHeader = headersList.get('authorization')
 
   // Basic protection - only allow with secret header in production

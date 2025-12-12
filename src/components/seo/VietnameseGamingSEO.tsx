@@ -2,8 +2,12 @@ import Script from 'next/script'
 
 import { OrganizationSchema, ServiceSchema, FAQSchema } from './StructuredData'
 
+interface VietnameseGamingSchemaProps {
+  nonce?: string
+}
+
 // Vietnamese gaming-specific structured data
-export function VietnameseGamingSchema() {
+export function VietnameseGamingSchema({ nonce }: VietnameseGamingSchemaProps) {
   const organizationData = {
     name: 'RoK Services Vietnam',
     url: 'https://rokdbot.com',
@@ -68,15 +72,19 @@ export function VietnameseGamingSchema() {
 
   return (
     <>
-      <OrganizationSchema {...organizationData} />
-      <ServiceSchema {...serviceData} />
-      <FAQSchema faqs={faqData} />
+      <OrganizationSchema {...organizationData} nonce={nonce} />
+      <ServiceSchema {...serviceData} nonce={nonce} />
+      <FAQSchema faqs={faqData} nonce={nonce} />
     </>
   )
 }
 
+interface VietnameseKeywordsOptimizationProps {
+  nonce?: string
+}
+
 // Vietnamese gaming keywords optimization
-export function VietnameseKeywordsOptimization() {
+export function VietnameseKeywordsOptimization({ nonce }: VietnameseKeywordsOptimizationProps) {
   const keywordSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
@@ -133,13 +141,18 @@ export function VietnameseKeywordsOptimization() {
     <Script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(keywordSchema) }}
       id="vietnamese-keywords-schema"
+      nonce={nonce}
       type="application/ld+json"
     />
   )
 }
 
+interface VietnameseLocalBusinessSchemaProps {
+  nonce?: string
+}
+
 // Local business schema for Vietnamese market
-export function VietnameseLocalBusinessSchema() {
+export function VietnameseLocalBusinessSchema({ nonce }: VietnameseLocalBusinessSchemaProps) {
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -230,13 +243,19 @@ export function VietnameseLocalBusinessSchema() {
     <Script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       id="vietnamese-local-business-schema"
+      nonce={nonce}
       type="application/ld+json"
     />
   )
 }
 
+interface GamingBreadcrumbSchemaProps {
+  items: Array<{ name: string; url: string }>
+  nonce?: string
+}
+
 // Gaming-specific breadcrumb schema
-export function GamingBreadcrumbSchema({ items }: { items: Array<{ name: string; url: string }> }) {
+export function GamingBreadcrumbSchema({ items, nonce }: GamingBreadcrumbSchemaProps) {
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -257,6 +276,7 @@ export function GamingBreadcrumbSchema({ items }: { items: Array<{ name: string;
     <Script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       id="gaming-breadcrumb-schema"
+      nonce={nonce}
       type="application/ld+json"
     />
   )

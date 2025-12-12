@@ -360,7 +360,7 @@ export function checkAdminRateLimit(
   const now = Date.now()
   const limit = adminActionLimits.get(key)
 
-  if (!limit ?? now > limit.resetTime) {
+  if (!limit || now > limit.resetTime) {
     // Reset or create new limit
     adminActionLimits.set(key, {
       count: 1,

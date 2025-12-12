@@ -1,5 +1,7 @@
 'use client'
 
+import { memo, useMemo } from 'react'
+
 import { Star, TrendingUp, Target, Users, Crown, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
@@ -26,49 +28,74 @@ interface ServiceRecommendationsProps {
   recommendations: ServiceRecommendation[]
 }
 
-export default function ServiceRecommendations({ recommendations }: ServiceRecommendationsProps) {
-  const getRecommendationBadge = (reason: string) => {
-    switch (reason) {
-      case 'popular':
-        return {
-          icon: <TrendingUp className="h-3 w-3" />,
-          text: 'Phổ biến',
-          color: 'bg-amber-100 text-amber-800'
-        }
-      case 'similar_customers':
-        return {
-          icon: <Users className="h-3 w-3" />,
-          text: 'Phù hợp với bạn',
-          color: 'bg-green-100 text-green-800'
-        }
-      case 'upgrade':
-        return {
-          icon: <Target className="h-3 w-3" />,
-          text: 'Nâng cấp',
-          color: 'bg-purple-100 text-purple-800'
-        }
-      case 'trending':
-        return {
-          icon: <Star className="h-3 w-3" />,
-          text: 'Xu hướng',
-          color: 'bg-yellow-100 text-yellow-800'
-        }
-      default:
-        return {
-          icon: <Star className="h-3 w-3" />,
-          text: 'Gợi ý',
-          color: 'bg-gray-100 text-gray-800'
-        }
-    }
-  }
+// Helper functions moved outside component
+const BADGE_CONFIG = {
+  popular: { icon: <TrendingUp className="h-3 w-3" />, text: 'Phổ biến', color: 'bg-amber-100 text-amber-800' },
+  similar_customers: { icon: <Users className="h-3 w-3" />, text: 'Phù hợp với bạn', color: 'bg-green-100 text-green-800' },
+  upgrade: { icon: <Target className="h-3 w-3" />, text: 'Nâng cấp', color: 'bg-purple-100 text-purple-800' },
+  trending: { icon: <Star className="h-3 w-3" />, text: 'Xu hướng', color: 'bg-yellow-100 text-yellow-800' },
+  default: { icon: <Star className="h-3 w-3" />, text: 'Gợi ý', color: 'bg-gray-100 text-gray-800' }
+} as const
 
-  const formatVND = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount)
-  }
+const formatVND = (amount: number) => {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
+}
 
+// Memoized service item component
+const ServiceItem = memo(({ service }: { service: ServiceRecommendation }) => {
+  const badge = useMemo(
+    () => BADGE_CONFIG[service.recommendationReason as keyof typeof BADGE_CONFIG] || BADGE_CONFIG.default,
+    [service.recommendationReason]
+  )
+
+  return (
+    <Link className="group block" href={`/services/${service.slug}`}>
+      <div className="rounded-lg border border-gray-200 p-4 transition-all duration-200 hover:border-amber-300 hover:shadow-md">
+        <div className="mb-3 flex items-start justify-between">
+          <div className="flex-1">
+            <div className="mb-1 flex items-center gap-2">
+              <h4 className="font-semibold text-gray-900 transition-colors group-hover:text-amber-600">{service.name}</h4>
+              {service.is_featured && <Crown className="h-4 w-4 text-yellow-500" />}
+              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${badge.color}`}>
+                {badge.icon}
+                {badge.text}
+              </span>
+            </div>
+            <p className="mb-2 line-clamp-2 text-sm text-gray-600">{service.description}</p>
+            <div className="flex items-center gap-4 text-xs text-gray-500">
+              <div className="flex items-center gap-1">
+                <Star className="h-3 w-3 text-yellow-400" />
+                <span>{service.rating}</span>
+                <span>({service.reviewCount})</span>
+              </div>
+              <span>•</span>
+              <span>{service.estimatedDuration}</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {service.original_price && service.discount && (
+              <span className="text-sm text-gray-500 line-through">{formatVND(service.original_price)}</span>
+            )}
+            <span className="text-lg font-bold text-gray-900">{formatVND(service.base_price)}</span>
+            {service.discount && (
+              <span className="rounded bg-red-50 px-2 py-1 text-xs font-medium text-red-600">-{service.discount}%</span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-sm font-medium text-amber-600 group-hover:text-amber-700">
+            <span>Xem chi tiết</span>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </div>
+        </div>
+      </div>
+    </Link>
+  )
+})
+
+ServiceItem.displayName = 'ServiceItem'
+
+function ServiceRecommendations({ recommendations }: ServiceRecommendationsProps) {
   if (recommendations.length === 0) {
     return (
       <Card>
@@ -103,77 +130,13 @@ export default function ServiceRecommendations({ recommendations }: ServiceRecom
 
       <CardContent className="p-0">
         <div className="space-y-4 p-6">
-          {recommendations.map(service => {
-            const badge = getRecommendationBadge(service.recommendationReason)
-
-            return (
-              <Link key={service.id} className="group block" href={`/services/${service.slug}`}>
-                <div className="rounded-lg border border-gray-200 p-4 transition-all duration-200 hover:border-amber-300 hover:shadow-md">
-                  <div className="mb-3 flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="mb-1 flex items-center gap-2">
-                        <h4 className="font-semibold text-gray-900 transition-colors group-hover:text-amber-600">
-                          {service.name}
-                        </h4>
-                        {service.is_featured && <Crown className="h-4 w-4 text-yellow-500" />}
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${badge.color}`}
-                        >
-                          {badge.icon}
-                          {badge.text}
-                        </span>
-                      </div>
-
-                      <p className="mb-2 line-clamp-2 text-sm text-gray-600">
-                        {service.description}
-                      </p>
-
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 text-yellow-400" />
-                          <span>{service.rating}</span>
-                          <span>({service.reviewCount})</span>
-                        </div>
-                        <span>•</span>
-                        <span>{service.estimatedDuration}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {service.original_price && service.discount && (
-                        <span className="text-sm text-gray-500 line-through">
-                          {formatVND(service.original_price)}
-                        </span>
-                      )}
-                      <span className="text-lg font-bold text-gray-900">
-                        {formatVND(service.base_price)}
-                      </span>
-                      {service.discount && (
-                        <span className="rounded bg-red-50 px-2 py-1 text-xs font-medium text-red-600">
-                          -{service.discount}%
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1 text-sm font-medium text-amber-600 group-hover:text-amber-700">
-                      <span>Xem chi tiết</span>
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
+          {recommendations.map(service => (
+            <ServiceItem key={service.id} service={service} />
+          ))}
         </div>
 
-        {/* View all services link */}
         <div className="border-t bg-gray-50 p-4">
-          <Link
-            className="block text-center text-sm font-medium text-amber-600 hover:text-amber-800"
-            href="/services"
-          >
+          <Link className="block text-center text-sm font-medium text-amber-600 hover:text-amber-800" href="/services">
             Khám phá tất cả dịch vụ →
           </Link>
         </div>
@@ -181,3 +144,5 @@ export default function ServiceRecommendations({ recommendations }: ServiceRecom
     </Card>
   )
 }
+
+export default memo(ServiceRecommendations)

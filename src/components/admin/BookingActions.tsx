@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { Check, X, Play, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+import { toast } from '@/lib/toast'
+
 import type { Booking } from '@/types/prisma'
 
 interface BookingActionsProps {
@@ -29,14 +31,13 @@ export default function BookingActions({ booking }: BookingActionsProps) {
 
       if (res.ok) {
         router.refresh()
+        toast.success('Cập nhật trạng thái thành công')
       } else {
-        // eslint-disable-next-line no-alert
-        alert('Có lỗi xảy ra')
+        toast.error('Có lỗi xảy ra')
       }
     } catch (error) {
       console.error(error)
-      // eslint-disable-next-line no-alert
-      alert('Có lỗi xảy ra')
+      toast.error('Có lỗi xảy ra')
     } finally {
       setIsLoading(false)
     }

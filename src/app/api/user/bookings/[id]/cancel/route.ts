@@ -5,15 +5,15 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+// Note: params is async in Next.js 16+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: booking_id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
-
-    const booking_id = params.id
 
     // Find the booking
     const booking = await prisma.bookings.findUnique({

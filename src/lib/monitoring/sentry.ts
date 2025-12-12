@@ -50,13 +50,13 @@ export function trackEvent(eventName: string, data?: Record<string, unknown>) {
     const context: Record<string, string | number | boolean | null | undefined> = {}
     for (const [key, value] of Object.entries(data)) {
       if (
-        typeof value === 'string' ??
-        typeof value === 'number' ??
-        typeof value === 'boolean' ??
-        value === null ??
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        value === null ||
         value === undefined
       ) {
-        context[key] = value
+        context[key] = value as string | number | boolean | null | undefined
       } else {
         context[key] = String(value)
       }

@@ -18,6 +18,7 @@ import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { toast } from '@/lib/toast'
 
 function BookingContent() {
   const searchParams = useSearchParams()
@@ -89,13 +90,11 @@ function BookingContent() {
           router.push(`/booking/payment/${data.booking_id}`)
         }
       } else {
-        // eslint-disable-next-line no-alert
-        alert('Có lỗi xảy ra. Vui lòng thử lại.')
+        toast.error('Có lỗi xảy ra. Vui lòng thử lại.')
       }
     } catch (error) {
       console.error('Booking error:', error)
-      // eslint-disable-next-line no-alert
-      alert('Có lỗi xảy ra. Vui lòng thử lại.')
+      toast.error('Có lỗi xảy ra. Vui lòng thử lại.')
     } finally {
       setIsSubmitting(false)
     }

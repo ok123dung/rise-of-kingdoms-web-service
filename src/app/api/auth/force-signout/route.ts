@@ -1,9 +1,9 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-// Note: cookies() returns synchronously in Next.js 14 route handlers, async not needed
-export function GET() {
-  const cookieStore = cookies()
+// Note: cookies() is async in Next.js 16+
+export async function GET() {
+  const cookieStore = await cookies()
 
   // Delete standard NextAuth session token
   cookieStore.delete('next-auth.session-token')

@@ -191,7 +191,7 @@ class EnhancedPrismaClient extends PrismaClient {
 
     try {
       await this.circuitBreaker.execute(async () => {
-        await this.$queryRawUnsafe('SELECT 1')
+        await this.$queryRaw`SELECT 1`
       })
       this.isHealthy = true
     } catch (error) {

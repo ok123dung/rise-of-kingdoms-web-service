@@ -74,7 +74,7 @@ export class WebhookRetryService {
           provider,
           event_type,
           event_id,
-          payload: JSON.parse(JSON.stringify(payload)) as Record<string, unknown>,
+          payload: JSON.parse(JSON.stringify(payload)),
           status: 'pending',
           attempts: 0,
           updated_at: new Date()
@@ -470,7 +470,7 @@ export class WebhookRetryService {
       )
 
       const successful = results.filter(r => r.status === 'fulfilled' && r.value).length
-      const failed = results.filter(r => r.status === 'rejected' ?? !r.value).length
+      const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value)).length
 
       getLogger().info('Webhook processing completed', { successful, failed })
     } catch (error) {

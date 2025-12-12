@@ -38,7 +38,7 @@ export function uploadProtectionMiddleware(request: NextRequest): NextResponse |
         path: pathname,
         size,
         limit: sizeLimit,
-        ip: request.ip ?? request.headers.get('x-forwarded-for') ?? 'unknown'
+        ip: request.headers.get('x-forwarded-for') ?? 'unknown'
       })
 
       return NextResponse.json(
