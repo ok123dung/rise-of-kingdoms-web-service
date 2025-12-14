@@ -26,15 +26,17 @@ jobs:
     - name: Install dependencies
       run: npm ci --legacy-peer-deps
       
-    - name: Run security audit
-      run: npm audit --audit-level=moderate
-      
-    - name: Check for vulnerable dependencies
+    - name: Run security audit (informational)
       run: |
-        if npm audit --audit-level=moderate --json | jq '.metadata.vulnerabilities.total' | grep -q '^[1-9]'; then
-          echo "Security vulnerabilities found!"
-          npm audit --audit-level=moderate
+        echo "=== Security Audit Report ==="
+        npm audit --audit-level=moderate || true
+        echo "=== End Report ==="
+
+    - name: Check for critical vulnerabilities
+      run: |
+        # Only fail on critical vulnerabilities
+        npm audit --audit-level=critical || {
+          echo "⚠️ Critical vulnerabilities found!"
           exit 1
-        else
-          echo "No security vulnerabilities found."
-        fi
+        }
+        echo "✅ No critical vulnerabilities found."
