@@ -24,14 +24,14 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    /* Collect trace when retrying the failed test (off in CI to save time) */
+    trace: process.env.CI ? 'off' : 'on-first-retry',
 
-    /* Take screenshot on failure */
-    screenshot: 'only-on-failure',
+    /* Take screenshot on failure (off in CI to save time) */
+    screenshot: process.env.CI ? 'off' : 'only-on-failure',
 
-    /* Record video on failure */
-    video: 'retain-on-failure',
+    /* Record video on failure (off in CI to save time) */
+    video: process.env.CI ? 'off' : 'retain-on-failure',
 
     /* Vietnamese locale for tests */
     locale: 'vi-VN',
