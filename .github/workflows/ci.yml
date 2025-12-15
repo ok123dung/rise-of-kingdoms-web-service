@@ -118,14 +118,15 @@ jobs:
         npm audit || true
         echo "Security audit completed. Known issue: form-data transitive dependency."
 
-  # E2E testing (only on main branch, informational)
+  # E2E testing - DISABLED: tests too slow for CI (>15min timeout)
+  # TODO: Optimize E2E tests or run on schedule instead of push
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: false  # Temporarily disabled - tests exceed 15min timeout
     needs: [test]
     timeout-minutes: 15
-    continue-on-error: true  # Don't fail pipeline on E2E timeout/failure
+    continue-on-error: true
 
     steps:
     - name: Checkout code
