@@ -36,6 +36,29 @@ export default function SignUpPage() {
 
   useEffect(() => {
     setIsMounted(true)
+
+    // Fetch CSRF token on mount if not already present
+    const getCsrfToken = () => {
+      const cookies = document.cookie.split(';')
+      for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split('=')
+        if (name === 'csrf-token') {
+          return value
+        }
+      }
+      return null
+    }
+
+    if (!getCsrfToken()) {
+      // Fetch CSRF token from API - this sets the cookie
+      fetch('/api/auth/csrf')
+        .then(() => {
+          // Token is now set in cookie
+        })
+        .catch(() => {
+          // Ignore errors - will retry on form submit
+        })
+    }
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

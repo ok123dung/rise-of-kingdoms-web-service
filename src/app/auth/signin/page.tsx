@@ -23,6 +23,24 @@ function SignInContent() {
 
   useEffect(() => {
     setIsMounted(true)
+
+    // Fetch CSRF token on mount if not already present
+    const getCsrfToken = () => {
+      const cookies = document.cookie.split(';')
+      for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split('=')
+        if (name === 'csrf-token') {
+          return value
+        }
+      }
+      return null
+    }
+
+    if (!getCsrfToken()) {
+      fetch('/api/auth/csrf').catch(() => {
+        // Ignore errors
+      })
+    }
   }, [])
 
   useEffect(() => {
