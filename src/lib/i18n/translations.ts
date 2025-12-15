@@ -344,7 +344,7 @@ export const translations = {
         name: 'V1 Plan',
         desc: 'Basic plan with full features',
         period: '/month',
-        discount: '3 months: 2m | 5 months: 3.25m',
+        discount: '3 months: $75 | 5 months: $120',
         features: [
           'All Weekly Plan features',
           'Collect tribal villages, explore fog',
@@ -358,10 +358,10 @@ export const translations = {
         name: 'V2 Plan',
         desc: 'Advanced plan with comprehensive optimization',
         period: '/month',
-        discount: '3 months: 2.5m | 5 months: 3.7m',
+        discount: '3 months: $100 | 5 months: $160',
         features: [
           'All V1 Plan features',
-          'Manual barbarian farming regularly',
+          'Manual barbarian chain farming (1 march)',
           'Detailed troop training & purchasing',
           'Set speedup buying (70% off)',
           'Material crafting',
@@ -421,7 +421,8 @@ export const translations = {
         pricing: [
           {
             tier: 'Weekly Plan',
-            price: 150000,
+            price: 6,
+            priceUsd: 6,
             duration: '1 week',
             features: [
               'Farm gem 4-15k/day',
@@ -433,7 +434,8 @@ export const translations = {
           },
           {
             tier: 'V1 Plan',
-            price: 750000,
+            price: 27,
+            priceUsd: 27,
             duration: '1 month',
             features: [
               'All Weekly Plan features',
@@ -445,19 +447,21 @@ export const translations = {
           },
           {
             tier: 'V2 Plan',
-            price: 900000,
+            price: 36,
+            priceUsd: 36,
             duration: '1 month',
             features: [
               'All V1 Plan features',
-              'Manual barbarian farming regularly',
+              'Manual barbarian chain farming (with 1 march)',
               'Detailed troop training & purchasing',
               'Set speedup buying (70% off)',
               'Material crafting & Dump AP on request'
             ]
           },
           {
-            tier: 'Special Plan',
-            price: 7000000,
+            tier: 'Special Plan (KvK)',
+            price: 260,
+            priceUsd: 260,
             duration: '1 KvK season',
             features: [
               'KvK Honor Ranking Boost',

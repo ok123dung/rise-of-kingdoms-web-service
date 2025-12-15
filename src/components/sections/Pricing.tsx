@@ -6,14 +6,17 @@ import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Pricing() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+
+  // USD prices for international customers
+  const isEnglish = language === 'en'
 
   const tiers = [
     {
       name: t.pricing.week.name,
       id: 'weekly',
       href: '/contact?plan=weekly',
-      price: '150.000đ',
+      price: isEnglish ? '$6' : '150.000đ',
       period: t.pricing.week.period,
       description: t.pricing.week.desc,
       features: t.pricing.week.features,
@@ -26,7 +29,7 @@ export default function Pricing() {
       name: t.pricing.v1.name,
       id: 'v1',
       href: '/contact?plan=v1',
-      price: '750.000đ',
+      price: isEnglish ? '$27' : '750.000đ',
       period: t.pricing.v1.period,
       description: t.pricing.v1.desc,
       features: t.pricing.v1.features,
@@ -40,7 +43,7 @@ export default function Pricing() {
       name: t.pricing.v2.name,
       id: 'v2',
       href: '/contact?plan=v2',
-      price: '900.000đ',
+      price: isEnglish ? '$36' : '900.000đ',
       period: t.pricing.v2.period,
       description: t.pricing.v2.desc,
       features: t.pricing.v2.features,
@@ -54,7 +57,7 @@ export default function Pricing() {
       name: t.pricing.special.name,
       id: 'special',
       href: '/contact?plan=special',
-      price: '7.000.000đ',
+      price: isEnglish ? '$260' : '7.000.000đ',
       period: t.pricing.special.period,
       description: t.pricing.special.desc,
       features: t.pricing.special.features,
@@ -116,7 +119,7 @@ export default function Pricing() {
 
               {tier.discount && (
                 <div className="mb-6 rounded-lg bg-green-50 p-3 text-center text-sm font-medium text-green-700">
-                  🎁 Ưu đãi: {tier.discount}
+                  🎁 {isEnglish ? 'Bundle Offer:' : 'Ưu đãi:'} {tier.discount}
                 </div>
               )}
 
