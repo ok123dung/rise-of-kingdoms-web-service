@@ -207,7 +207,7 @@ export default function SignUpPage() {
     }
   }
 
-  const _handleDiscordSignIn = () => {
+  const handleDiscordSignIn = () => {
     void signIn('discord', { callbackUrl: '/admin/dashboard' })
   }
 
@@ -479,7 +479,7 @@ export default function SignUpPage() {
             </button>
           </div>
 
-          {/* Social login - Temporarily disabled due to missing env vars
+          {/* Social login */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -503,7 +503,6 @@ export default function SignUpPage() {
               </button>
             </div>
           </div>
-          */}
         </form>
       </div>
     </div>
