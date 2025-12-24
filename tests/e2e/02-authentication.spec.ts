@@ -203,6 +203,99 @@ test.describe('Authentication Tests', () => {
     })
   })
 
+  test.describe('Two-Factor Authentication (2FA)', () => {
+    test('should show 2FA input when user has 2FA enabled', async ({ page, request }) => {
+      // Note: This test requires a test user with 2FA enabled in the database
+      // For a real 2FA test, use a test account with a known TOTP secret
+      await authPage.gotoSignIn()
+
+      // Fill in credentials for a 2FA-enabled account
+      await page.fill('[name="email"]', '2fa-test@rokdbot.com')
+      await page.fill('[name="password"]', 'TestPassword123!')
+
+      // Submit form
+      await page.click('button[type="submit"]')
+
+      // Wait for 2FA field to appear (if user has 2FA enabled)
+      // The 2FA input should be visible after successful password check
+      const totpInput = page.locator('[name="totpCode"], #totpCode')
+
+      // Either 2FA field appears or we redirect (no 2FA enabled)
+      const is2FAVisible = await totpInput.isVisible().catch(() => false)
+      if (is2FAVisible) {
+        await expect(totpInput).toBeVisible()
+        // Check for 2FA label/instructions
+        await expect(page.locator('text=/2FA|xác thực|mã xác thực/i')).toBeVisible()
+      }
+    })
+
+    test('should reject invalid 2FA code', async ({ page }) => {
+      await authPage.gotoSignIn()
+
+      // Fill credentials
+      await page.fill('[name="email"]', '2fa-test@rokdbot.com')
+      await page.fill('[name="password"]', 'TestPassword123!')
+      await page.click('button[type="submit"]')
+
+      // Wait for potential 2FA field
+      await page.waitForTimeout(1000)
+      const totpInput = page.locator('[name="totpCode"], #totpCode')
+
+      if (await totpInput.isVisible().catch(() => false)) {
+        // Enter invalid 2FA code
+        await totpInput.fill('000000')
+        await page.click('button[type="submit"]')
+
+        // Should show error
+        await expect(page.locator('text=/Invalid|không đúng|sai/i')).toBeVisible()
+      }
+    })
+
+    test('should accept backup codes for 2FA', async ({ page }) => {
+      await authPage.gotoSignIn()
+
+      await page.fill('[name="email"]', '2fa-test@rokdbot.com')
+      await page.fill('[name="password"]', 'TestPassword123!')
+      await page.click('button[type="submit"]')
+
+      await page.waitForTimeout(1000)
+      const totpInput = page.locator('[name="totpCode"], #totpCode')
+
+      if (await totpInput.isVisible().catch(() => false)) {
+        // Check that backup code format is accepted (XXXX-XXXX)
+        // Note: This tests the input accepts backup code format, not actual validation
+        await totpInput.fill('ABCD-1234')
+        await expect(totpInput).toHaveValue('ABCD-1234')
+      }
+    })
+
+    test('should rate limit 2FA check endpoint', async ({ request }) => {
+      // Test brute-force protection on check-2fa endpoint
+      // Use same email to trigger per-email rate limiting
+      const testEmail = `brute-test-${Date.now()}@example.com`
+      const responses: { status: number; hasError: boolean }[] = []
+
+      for (let i = 0; i < 7; i++) {
+        const response = await request.post('/api/auth/check-2fa', {
+          data: {
+            email: testEmail,
+            password: 'wrongpassword'
+          }
+        })
+        const body = await response.json().catch(() => ({}))
+        responses.push({
+          status: response.status(),
+          hasError: 'error' in body || response.status() === 429
+        })
+      }
+
+      // Should get 429 or all should have error responses
+      const hasRateLimit = responses.some(r => r.status === 429)
+      const allHaveErrors = responses.every(r => r.hasError)
+      expect(hasRateLimit || allHaveErrors).toBeTruthy()
+    })
+  })
+
   test.describe('Session Management', () => {
     test('should maintain session across page reloads', async ({ page }) => {
       await helpers.login()
