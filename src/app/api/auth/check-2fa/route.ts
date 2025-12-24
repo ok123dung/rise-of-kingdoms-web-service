@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs'
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { checkBruteForce, recordFailedAttempt } from '@/lib/auth/brute-force-protection'
 import { TwoFactorAuthService } from '@/lib/auth/two-factor'
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
@@ -24,6 +25,44 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as Check2FARequest
     const { email, password } = checkSchema.parse(body)
 
+    // Get client IP for IP-based rate limiting
+    const clientIp =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      'unknown'
+
+    // Check brute-force protection (email-based)
+    const emailBruteForceResult = await checkBruteForce(email)
+    if (!emailBruteForceResult.allowed) {
+      const elapsed = Date.now() - startTime
+      const delay = Math.max(0, CONSTANT_RESPONSE_TIME - elapsed)
+      await new Promise(resolve => setTimeout(resolve, delay))
+
+      return NextResponse.json(
+        { error: 'Too many failed attempts. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
+    // Check IP-based brute-force protection (defense in depth)
+    const ipBruteForceResult = await checkBruteForce(`ip:${clientIp}`, {
+      maxAttempts: 20, // Higher limit per IP (multiple users might share)
+      blockDurationMs: 30 * 60 * 1000, // 30 min block
+      windowMs: 60 * 60 * 1000, // 1 hour window
+      keyPrefix: 'bruteforce:ip'
+    })
+    if (!ipBruteForceResult.allowed) {
+      const elapsed = Date.now() - startTime
+      const delay = Math.max(0, CONSTANT_RESPONSE_TIME - elapsed)
+      await new Promise(resolve => setTimeout(resolve, delay))
+
+      getLogger().logSecurityEvent('rate_limit_exceeded', { ip: clientIp, type: 'ip' })
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     // Find user
     const user = await prisma.users.findUnique({
       where: { email }
@@ -35,6 +74,17 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await bcrypt.compare(password, passwordHash)
 
     if (!user || !isValidPassword) {
+      // Record failed attempts for both email and IP
+      await Promise.all([
+        recordFailedAttempt(email),
+        recordFailedAttempt(`ip:${clientIp}`, {
+          keyPrefix: 'bruteforce:ip',
+          maxAttempts: 20,
+          blockDurationMs: 30 * 60 * 1000,
+          windowMs: 60 * 60 * 1000
+        })
+      ])
+
       // Add constant-time delay before responding
       const elapsed = Date.now() - startTime
       const delay = Math.max(0, CONSTANT_RESPONSE_TIME - elapsed)

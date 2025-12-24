@@ -10,6 +10,7 @@ import {
   recordFailedAttempt,
   clearFailedAttempts
 } from '@/lib/auth/brute-force-protection'
+import { TwoFactorAuthService } from '@/lib/auth/two-factor'
 import { sessionTokenManager } from '@/lib/auth-security'
 import { prisma, basePrisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
@@ -18,6 +19,7 @@ import { getLogger } from '@/lib/monitoring/logger'
 const loginSchema = z.object({
   email: z.string().email().toLowerCase().trim(),
   password: z.string().min(8).max(100),
+  totpCode: z.string().max(20).optional(), // 6-digit TOTP or backup code (XXXX-XXXX format)
   fingerprint: z.string().optional(),
   rememberMe: z.boolean().optional()
 })
@@ -61,6 +63,7 @@ export const authOptionsEnhanced: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
+        totpCode: { label: '2FA Code', type: 'text' },
         fingerprint: { label: 'Device Fingerprint', type: 'hidden' }
       },
       async authorize(credentials, req) {
@@ -69,7 +72,13 @@ export const authOptionsEnhanced: NextAuthOptions = {
             return null
           }
 
-          const { email, password, fingerprint } = loginSchema.parse(credentials)
+          const { email, password, totpCode, fingerprint } = loginSchema.parse(credentials)
+
+          // Get client IP for defense-in-depth protection
+          const clientIp =
+            (req?.headers?.['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
+            (req?.headers?.['x-real-ip'] as string) ??
+            'unknown'
 
           // Check brute-force protection (Redis-backed with memory fallback)
           const bruteForceResult = await checkBruteForce(email)
@@ -84,6 +93,18 @@ export const authOptionsEnhanced: NextAuthOptions = {
             throw new Error(bruteForceResult.message ?? 'Too many failed attempts. Please try again later.')
           }
 
+          // Check IP-based brute-force protection (defense in depth)
+          const ipBruteForceResult = await checkBruteForce(`ip:${clientIp}`, {
+            maxAttempts: 20,
+            blockDurationMs: 30 * 60 * 1000,
+            windowMs: 60 * 60 * 1000,
+            keyPrefix: 'bruteforce:ip'
+          })
+          if (!ipBruteForceResult.allowed) {
+            getLogger().logSecurityEvent('rate_limit_exceeded', { ip: clientIp, type: 'ip' })
+            throw new Error('Too many requests. Please try again later.')
+          }
+
           // Find user with rate limit check
           const user = await prisma.users.findUnique({
             where: { email },
@@ -93,14 +114,20 @@ export const authOptionsEnhanced: NextAuthOptions = {
           })
 
           if (!user) {
-            // Record failed attempt with Redis-backed brute-force protection
-            await recordFailedAttempt(email)
+            // Record failed attempts for both email and IP
+            await Promise.all([
+              recordFailedAttempt(email),
+              recordFailedAttempt(`ip:${clientIp}`, {
+                keyPrefix: 'bruteforce:ip',
+                maxAttempts: 20,
+                blockDurationMs: 30 * 60 * 1000,
+                windowMs: 60 * 60 * 1000
+              })
+            ])
             getLogger().logSecurityEvent('login_failed', {
               email,
               reason: 'user_not_found',
-              ip: (req?.headers?.['x-forwarded-for'] ?? req?.headers?.['x-real-ip']) as
-                | string
-                | undefined
+              ip: clientIp
             })
             return null
           }
@@ -109,22 +136,66 @@ export const authOptionsEnhanced: NextAuthOptions = {
           const isValidPassword = await bcrypt.compare(password, user.password ?? '')
 
           if (!isValidPassword) {
-            // Record failed attempt with Redis-backed brute-force protection
-            await recordFailedAttempt(email)
+            // Record failed attempts for both email and IP
+            await Promise.all([
+              recordFailedAttempt(email),
+              recordFailedAttempt(`ip:${clientIp}`, {
+                keyPrefix: 'bruteforce:ip',
+                maxAttempts: 20,
+                blockDurationMs: 30 * 60 * 1000,
+                windowMs: 60 * 60 * 1000
+              })
+            ])
 
             getLogger().logSecurityEvent('login_failed', {
               email,
               user_id: user.id,
               reason: 'invalid_password',
-              ip: (req?.headers?.['x-forwarded-for'] ?? req?.headers?.['x-real-ip']) as
-                | string
-                | undefined
+              ip: clientIp
             })
 
             return null
           }
 
-          // Clear failed attempts on successful login
+          // Check if 2FA is enabled and verify if required
+          const is2FAEnabled = await TwoFactorAuthService.isEnabled(user.id)
+          if (is2FAEnabled) {
+            if (!totpCode) {
+              // 2FA required but no code provided - client should check via /api/auth/check-2fa first
+              getLogger().logSecurityEvent('login_failed', {
+                email,
+                user_id: user.id,
+                reason: '2fa_code_required'
+              })
+              return null
+            }
+
+            // Verify 2FA code
+            const twoFactorResult = await TwoFactorAuthService.verifyToken(user.id, totpCode)
+            if (!twoFactorResult.verified) {
+              // Record failed attempts for both email and IP
+              await Promise.all([
+                recordFailedAttempt(email),
+                recordFailedAttempt(`ip:${clientIp}`, {
+                  keyPrefix: 'bruteforce:ip',
+                  maxAttempts: 20,
+                  blockDurationMs: 30 * 60 * 1000,
+                  windowMs: 60 * 60 * 1000
+                })
+              ])
+
+              getLogger().logSecurityEvent('login_failed', {
+                email,
+                user_id: user.id,
+                reason: '2fa_verification_failed',
+                ip: clientIp
+              })
+
+              return null
+            }
+          }
+
+          // Clear failed attempts on successful login (email only - IP shared by many users)
           await clearFailedAttempts(email)
 
           // Update user login info
