@@ -205,7 +205,7 @@ jobs:
         echo "url=$url" >> $GITHUB_OUTPUT
         
     - name: Comment PR with preview URL
-      uses: actions/github-script@v6
+      uses: actions/github-script@v8
       with:
         script: |
           github.rest.issues.createComment({
@@ -252,7 +252,7 @@ jobs:
         echo "url=$url" >> $GITHUB_OUTPUT
         
     - name: Create deployment status
-      uses: actions/github-script@v6
+      uses: actions/github-script@v8
       with:
         script: |
           const { data: deployment } = await github.rest.repos.createDeployment({
@@ -308,7 +308,7 @@ jobs:
     
     steps:
     - name: Delete old artifacts
-      uses: actions/github-script@v6
+      uses: actions/github-script@v8
       if: github.event_name != 'pull_request'
       with:
         script: |
