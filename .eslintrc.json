@@ -7,7 +7,6 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
     "prettier"
   ],
@@ -23,7 +22,6 @@
   "plugins": [
     "@typescript-eslint",
     "react",
-    "react-hooks",
     "jsx-a11y",
     "import",
     "unused-imports",
