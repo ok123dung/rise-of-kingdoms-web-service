@@ -86,7 +86,7 @@
     "date-fns": "4.1.0",
     "discord.js": "^14.14.1",
     "jsonwebtoken": "9.0.2",
-    "lucide-react": "0.536.0",
+    "lucide-react": "0.562.0",
     "multer": "2.0.2",
     "multer-s3": "3.0.1",
     "next": "16.1.1",
@@ -103,7 +103,7 @@
     "socket.io-client": "4.8.1",
     "speakeasy": "2.0.0",
     "tailwind-merge": "3.3.1",
-    "tailwindcss": "^3.3.0",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.0.0",
     "use-debounce": "10.0.6",
     "zod": "^3.22.4"
