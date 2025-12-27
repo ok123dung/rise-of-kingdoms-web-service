@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
+import { ServiceReviews } from '@/components/reviews/ServiceReviews'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 interface ServiceDetailClientProps {
@@ -127,6 +128,9 @@ export default function ServiceDetailClient({ slug }: ServiceDetailClientProps) 
                   {/* ... other process steps can be localized later or kept static if acceptable */}
                 </div>
               </div>
+
+              {/* Customer Reviews */}
+              <ServiceReviews serviceSlug={slug} />
             </div>
 
             {/* Sidebar */}
