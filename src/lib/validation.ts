@@ -241,27 +241,43 @@ export function validateRoKData(data: {
 }
 
 // Sanitization functions
+// HTML-encode special characters to prevent XSS - safer than regex stripping
+function htmlEncode(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
+
 export function sanitizeInput(input: string): string {
+  // For plain text inputs, HTML-encode to prevent injection
+  // This is safer than trying to strip dangerous patterns
+  return htmlEncode(input.trim())
+}
+
+// For cases where you need to allow some HTML but strip dangerous content
+// Recommend using a library like DOMPurify instead of this function
+export function stripDangerousHtml(input: string): string {
   let sanitized = input.trim()
 
-  // Iteratively remove dangerous patterns until no more changes
-  // This prevents bypass attacks like "<scr<script>ipt>"
+  // Iteratively remove dangerous patterns
+  let iterations = 0
+  const maxIterations = 10 // Prevent infinite loops
   let previous: string
   do {
     previous = sanitized
-    // Remove script tags (including malformed ones)
-    sanitized = sanitized.replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '')
-    // Remove script tags without closing tag
-    sanitized = sanitized.replace(/<\s*script[^>]*>/gi, '')
-    // Remove javascript: protocol
-    sanitized = sanitized.replace(/javascript\s*:/gi, '')
-    // Remove event handlers (onclick, onload, etc.)
-    sanitized = sanitized.replace(/\bon\w+\s*=/gi, '')
-    // Remove data: protocol in URLs (can execute JS)
-    sanitized = sanitized.replace(/data\s*:/gi, '')
-    // Remove vbscript: protocol
-    sanitized = sanitized.replace(/vbscript\s*:/gi, '')
-  } while (sanitized !== previous)
+    iterations++
+    // Remove all tags that could execute scripts
+    sanitized = sanitized
+      .replace(/<script\b[^>]*>.*?<\/script>/gis, '')
+      .replace(/<script\b[^>]*>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/\bon\w+=/gi, '')
+      .replace(/data:/gi, '')
+      .replace(/vbscript:/gi, '')
+  } while (sanitized !== previous && iterations < maxIterations)
 
   return sanitized
 }
