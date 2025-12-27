@@ -13,7 +13,7 @@ interface ServicePageProps {
 }
 
 async function getService(slug: string) {
-  return prisma.services.findUnique({
+  return prisma.services.findFirst({
     where: { slug, is_active: true },
     include: {
       service_tiers: {
