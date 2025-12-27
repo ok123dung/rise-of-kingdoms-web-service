@@ -242,11 +242,28 @@ export function validateRoKData(data: {
 
 // Sanitization functions
 export function sanitizeInput(input: string): string {
-  return input
-    .trim()
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
-    .replace(/javascript:/gi, '') // Remove javascript: links
-    .replace(/on\w+\s*=/gi, '') // Remove event handlers
+  let sanitized = input.trim()
+
+  // Iteratively remove dangerous patterns until no more changes
+  // This prevents bypass attacks like "<scr<script>ipt>"
+  let previous: string
+  do {
+    previous = sanitized
+    // Remove script tags (including malformed ones)
+    sanitized = sanitized.replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '')
+    // Remove script tags without closing tag
+    sanitized = sanitized.replace(/<\s*script[^>]*>/gi, '')
+    // Remove javascript: protocol
+    sanitized = sanitized.replace(/javascript\s*:/gi, '')
+    // Remove event handlers (onclick, onload, etc.)
+    sanitized = sanitized.replace(/\bon\w+\s*=/gi, '')
+    // Remove data: protocol in URLs (can execute JS)
+    sanitized = sanitized.replace(/data\s*:/gi, '')
+    // Remove vbscript: protocol
+    sanitized = sanitized.replace(/vbscript\s*:/gi, '')
+  } while (sanitized !== previous)
+
+  return sanitized
 }
 
 export function sanitizeUserInput(input: string): string {

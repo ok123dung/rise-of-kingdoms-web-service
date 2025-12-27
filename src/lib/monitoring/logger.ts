@@ -82,15 +82,25 @@ class Logger {
     }
   }
 
+  /**
+   * Sanitize log message to prevent log injection attacks
+   * Removes newlines and control characters from user-controlled input
+   */
+  private sanitizeLogMessage(message: string): string {
+    return message.replace(/[\r\n\x00-\x1F\x7F]/g, ' ').substring(0, 2000)
+  }
+
   private formatLogEntry(entry: LogEntry): string {
     const timestamp = entry.timestamp.toISOString()
     const level = entry.level.toUpperCase().padEnd(5)
+    // Sanitize message to prevent log injection
+    const sanitizedMessage = this.sanitizeLogMessage(entry.message)
     const contextStr = entry.context ? JSON.stringify(entry.context) : ''
     const errorStr = entry.error
-      ? `\nError: ${entry.error.message}\nStack: ${entry.error.stack}`
+      ? ` | Error: ${this.sanitizeLogMessage(entry.error.message)} | Stack: ${entry.error.stack?.replace(/[\r\n]/g, ' -> ')}`
       : ''
 
-    return `[${timestamp}] ${level} ${entry.message} ${contextStr}${errorStr}`
+    return `[${timestamp}] ${level} ${sanitizedMessage} ${contextStr}${errorStr}`
   }
 
   private shouldLog(level: LogLevel): boolean {

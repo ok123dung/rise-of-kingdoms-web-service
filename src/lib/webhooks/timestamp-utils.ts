@@ -36,7 +36,9 @@ export function parseVNPayTimestamp(vnpayDate: string | undefined): number {
 
     return date.getTime()
   } catch (error) {
-    console.error('Failed to parse VNPay timestamp:', vnpayDate, error)
+    // Sanitize user input before logging to prevent log injection
+    const sanitizedDate = vnpayDate.replace(/[\r\n]/g, ' ').substring(0, 20)
+    console.error('Failed to parse VNPay timestamp:', sanitizedDate, error)
     return Date.now()
   }
 }

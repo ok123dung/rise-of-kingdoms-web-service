@@ -8,9 +8,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const query: { [key: string]: string } = {}
 
-    // Convert URLSearchParams to object
+    // Convert URLSearchParams to object safely (prevent prototype pollution)
+    const allowedKeys = new Set([
+      'vnp_TmnCode', 'vnp_Amount', 'vnp_BankCode', 'vnp_BankTranNo',
+      'vnp_CardType', 'vnp_PayDate', 'vnp_OrderInfo', 'vnp_TransactionNo',
+      'vnp_ResponseCode', 'vnp_TransactionStatus', 'vnp_TxnRef',
+      'vnp_SecureHashType', 'vnp_SecureHash'
+    ])
     searchParams.forEach((value, key) => {
-      query[key] = value
+      // Only allow known VNPay parameter keys to prevent prototype pollution
+      if (allowedKeys.has(key) && !key.startsWith('__') && key !== 'constructor' && key !== 'prototype') {
+        query[key] = value
+      }
     })
 
     getLogger().info('VNPay IPN received', {
