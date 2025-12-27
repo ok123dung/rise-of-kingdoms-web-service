@@ -4,6 +4,11 @@ import { type Prisma } from '@prisma/client'
 
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
+import {
+  emitPaymentUpdate,
+  emitOrderTracking,
+  emitAdminDashboardUpdate
+} from '@/lib/websocket/events'
 
 interface MoMoPaymentRequest {
   booking_id: string
@@ -345,6 +350,43 @@ export class MoMoPayment {
           amount,
           payment_method: 'MoMo'
         })
+
+        // Emit real-time WebSocket events
+        const booking = await prisma.bookings.findUnique({
+          where: { id: payment.booking_id },
+          include: { users: true }
+        })
+
+        if (booking) {
+          // Payment update
+          emitPaymentUpdate(booking.user_id, {
+            booking_id: payment.booking_id,
+            payment_id: payment.id,
+            status: 'completed',
+            amount,
+            payment_method: 'MoMo',
+            transactionId: transId
+          })
+
+          // Order tracking
+          emitOrderTracking(booking.user_id, {
+            booking_id: payment.booking_id,
+            booking_number: booking.booking_number,
+            event: 'payment_received',
+            message: `Thanh toán ${amount.toLocaleString()}đ qua MoMo đã được xác nhận`,
+            timestamp: new Date().toISOString()
+          })
+
+          // Admin dashboard update
+          emitAdminDashboardUpdate({
+            type: 'payment_received',
+            summary: {
+              booking_id: payment.booking_id,
+              amount,
+              payment_method: 'MoMo'
+            }
+          })
+        }
 
         // Trigger service delivery workflow
         await this.triggerServiceDelivery(payment.booking_id)

@@ -2,6 +2,11 @@ import crypto, { timingSafeEqual } from 'crypto'
 
 import { prisma } from '@/lib/db'
 import { getLogger } from '@/lib/monitoring/logger'
+import {
+  emitPaymentUpdate,
+  emitOrderTracking,
+  emitAdminDashboardUpdate
+} from '@/lib/websocket/events'
 
 interface VNPayRequest {
   booking_id: string
@@ -288,6 +293,41 @@ export class VNPayPayment {
           amount,
           payment_method: 'VNPay'
         })
+
+        // Emit real-time WebSocket events
+        const booking = await prisma.bookings.findUnique({
+          where: { id: payment.booking_id },
+          include: { users: true }
+        })
+
+        if (booking) {
+          emitPaymentUpdate(booking.user_id, {
+            booking_id: payment.booking_id,
+            payment_id: payment.id,
+            status: 'completed',
+            amount,
+            payment_method: 'VNPay',
+            transactionId: transactionNo
+          })
+
+          emitOrderTracking(booking.user_id, {
+            booking_id: payment.booking_id,
+            booking_number: booking.booking_number,
+            event: 'payment_received',
+            message: `Thanh toán ${amount.toLocaleString()}đ qua VNPay đã được xác nhận`,
+            timestamp: new Date().toISOString()
+          })
+
+          emitAdminDashboardUpdate({
+            type: 'payment_received',
+            summary: {
+              booking_id: payment.booking_id,
+              amount,
+              payment_method: 'VNPay'
+            }
+          })
+        }
+
         // Trigger service delivery workflow
         await this.triggerServiceDelivery(payment.booking_id)
 
