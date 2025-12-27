@@ -132,12 +132,50 @@ CREATE TABLE IF NOT EXISTS webhook_events (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Communications table (for banking transfer)
+CREATE TABLE IF NOT EXISTS communications (
+    id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    booking_id VARCHAR(255) REFERENCES bookings(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL,
+    channel VARCHAR(50),
+    subject VARCHAR(255),
+    content TEXT NOT NULL,
+    template_id VARCHAR(255),
+    template_data JSONB,
+    status VARCHAR(50) DEFAULT 'pending',
+    sent_at TIMESTAMP,
+    delivered_at TIMESTAMP,
+    read_at TIMESTAMP,
+    error_message TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Service tasks table (for service delivery workflow)
+CREATE TABLE IF NOT EXISTS service_tasks (
+    id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    booking_id VARCHAR(255) NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    priority VARCHAR(20) DEFAULT 'normal',
+    status VARCHAR(50) DEFAULT 'pending',
+    assigned_to VARCHAR(255),
+    due_date TIMESTAMP,
+    completed_at TIMESTAMP,
+    metadata JSONB,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_bookings_user_status ON bookings(user_id, status);
 CREATE INDEX IF NOT EXISTS idx_bookings_payment_status ON bookings(payment_status);
 CREATE INDEX IF NOT EXISTS idx_payments_booking_id ON payments(booking_id);
 CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
 CREATE INDEX IF NOT EXISTS idx_webhook_events_provider_status ON webhook_events(provider, status);
+CREATE INDEX IF NOT EXISTS idx_communications_booking_id ON communications(booking_id);
+CREATE INDEX IF NOT EXISTS idx_service_tasks_booking_id ON service_tasks(booking_id);
 
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
