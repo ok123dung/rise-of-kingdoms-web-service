@@ -2,7 +2,6 @@ import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { BreadcrumbSchema } from '@/components/seo/StructuredData'
-import { servicesData } from '@/data/services'
 import { prisma } from '@/lib/db'
 
 import ServiceDetailClient from './ServiceDetailClient'
@@ -13,10 +12,20 @@ interface ServicePageProps {
   }
 }
 
-export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
-  const service = await prisma.services.findUnique({
-    where: { slug: params.slug }
+async function getService(slug: string) {
+  return prisma.services.findUnique({
+    where: { slug, is_active: true },
+    include: {
+      service_tiers: {
+        where: { is_active: true },
+        orderBy: { sort_order: 'asc' }
+      }
+    }
   })
+}
+
+export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
+  const service = await getService(params.slug)
 
   if (!service) {
     return {
@@ -41,8 +50,8 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
   }
 }
 
-export default function ServiceDetailPage({ params }: ServicePageProps) {
-  const service = servicesData[params.slug]
+export default async function ServiceDetailPage({ params }: ServicePageProps) {
+  const service = await getService(params.slug)
 
   if (!service) {
     notFound()
@@ -55,11 +64,26 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
     { name: service.name, url: `${siteUrl}/services/${params.slug}` }
   ]
 
-  // Pass slug instead of service object to avoid serialization issues with functions (icons)
+  // Serialize service data for client component
+  const serviceData = {
+    slug: service.slug,
+    name: service.name,
+    description: service.description ?? '',
+    shortDescription: service.short_description ?? '',
+    tiers: service.service_tiers.map(tier => ({
+      id: tier.id,
+      name: tier.name,
+      slug: tier.slug,
+      price: Number(tier.price),
+      features: tier.features as string[],
+      isPopular: tier.is_popular
+    }))
+  }
+
   return (
     <>
       <BreadcrumbSchema items={breadcrumbItems} />
-      <ServiceDetailClient slug={params.slug} />
+      <ServiceDetailClient slug={params.slug} serviceData={serviceData} />
     </>
   )
 }
