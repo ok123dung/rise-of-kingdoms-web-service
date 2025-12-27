@@ -27,12 +27,28 @@ process.env.ZALOPAY_KEY2 = 'TEST_KEY2'
 process.env.VNPAY_TMN_CODE = 'TEST_TMN'
 process.env.VNPAY_HASH_SECRET = 'TEST_HASH_SECRET'
 
+// Helper to generate UUID
+const generateId = () => crypto.randomUUID()
+
 // These integration tests require RUN_INTEGRATION_TESTS=true and a real database
 // Skip by default in regular test runs
 const shouldRunIntegrationTests = process.env.RUN_INTEGRATION_TESTS === 'true'
 
+// Test database URL - can be overridden with TEST_DATABASE_URL env var
+const testDatabaseUrl =
+  process.env.TEST_DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/rok_test'
+
 // Only instantiate prisma if we're running integration tests
-const prisma = shouldRunIntegrationTests ? new PrismaClient() : (null as unknown as PrismaClient)
+// Use explicit datasource URL to avoid reading from .env
+const prisma = shouldRunIntegrationTests
+  ? new PrismaClient({
+      datasources: {
+        db: {
+          url: testDatabaseUrl
+        }
+      }
+    })
+  : (null as unknown as PrismaClient)
 
 // Skip all tests unless explicitly enabled
 const describeIfDb = shouldRunIntegrationTests ? describe : describe.skip
@@ -44,39 +60,47 @@ describeIfDb('Payment Flow Integration Tests', () => {
   let testServiceTier: any
 
   beforeEach(async () => {
-    // Create test data
+    // Create test data with all required fields per Prisma schema
     testUser = await prisma.users.create({
       data: {
+        id: generateId(),
         email: 'test@example.com',
+        password: 'hashed_test_password',
         full_name: 'Test User',
-        phone: '+84123456789'
+        phone: '+84123456789',
+        updated_at: new Date()
       }
     })
 
-    testService = await prisma.service.create({
+    testService = await prisma.services.create({
       data: {
+        id: generateId(),
         name: 'Test Service',
         slug: 'test-service',
         description: 'Test service description',
         base_price: 100000,
         currency: 'VND',
-        is_active: true
+        is_active: true,
+        updated_at: new Date()
       }
     })
 
     testServiceTier = await prisma.service_tiers.create({
       data: {
+        id: generateId(),
         service_id: testService.id,
         name: 'Test Tier',
         slug: 'test',
         price: 100000,
         features: ['Feature 1', 'Feature 2'],
-        is_available: true
+        is_available: true,
+        updated_at: new Date()
       }
     })
 
     testBooking = await prisma.bookings.create({
       data: {
+        id: generateId(),
         booking_number: 'TEST001',
         user_id: testUser.id,
         service_tier_id: testServiceTier.id,
@@ -84,7 +108,8 @@ describeIfDb('Payment Flow Integration Tests', () => {
         payment_status: 'pending',
         total_amount: 100000,
         final_amount: 100000,
-        currency: 'VND'
+        currency: 'VND',
+        updated_at: new Date()
       }
     })
   })
@@ -94,7 +119,7 @@ describeIfDb('Payment Flow Integration Tests', () => {
     await prisma.payments.deleteMany({ where: { booking_id: testBooking.id } })
     await prisma.bookings.delete({ where: { id: testBooking.id } })
     await prisma.service_tiers.delete({ where: { id: testServiceTier.id } })
-    await prisma.service.delete({ where: { id: testService.id } })
+    await prisma.services.delete({ where: { id: testService.id } })
     await prisma.users.delete({ where: { id: testUser.id } })
   })
 
@@ -341,6 +366,7 @@ describeIfDb('Payment Flow Integration Tests', () => {
       // Create payment
       const payment = await prisma.payments.create({
         data: {
+          id: generateId(),
           booking_id: testBooking.id,
           payment_number: 'TEST_PAY_001',
           amount: 100000,
@@ -348,7 +374,8 @@ describeIfDb('Payment Flow Integration Tests', () => {
           payment_method: 'momo',
           payment_gateway: 'momo',
           gateway_transaction_id: 'TEST_TXN_001',
-          status: 'pending'
+          status: 'pending',
+          updated_at: new Date()
         }
       })
 
@@ -379,7 +406,7 @@ describeIfDb('Payment Flow Integration Tests', () => {
         where: { id: payment.id }
       })
       expect(refundedPayment?.status).toBe('refunded')
-      expect(refundedPayment?.refund_amount).toBe(100000)
+      expect(Number(refundedPayment?.refund_amount)).toBe(100000) // Prisma Decimal returns string
       expect(refundedPayment?.refunded_at).toBeDefined()
     })
   })
@@ -395,36 +422,44 @@ describeIfDb('Payment Performance Tests', () => {
       Array.from({ length: 10 }, async (_, i) => {
         const user = await prisma.users.create({
           data: {
+            id: generateId(),
             email: `test${i}@example.com`,
+            password: 'hashed_test_password',
             full_name: `Test User ${i}`,
-            phone: `+8412345678${i}`
+            phone: `+8412345678${i}`,
+            updated_at: new Date()
           }
         })
 
-        const service = await prisma.service.create({
+        const service = await prisma.services.create({
           data: {
+            id: generateId(),
             name: `Test Service ${i}`,
             slug: `test-service-${i}`,
             description: 'Test service description',
             base_price: 100000,
             currency: 'VND',
-            is_active: true
+            is_active: true,
+            updated_at: new Date()
           }
         })
 
         const service_tiers = await prisma.service_tiers.create({
           data: {
+            id: generateId(),
             service_id: service.id,
             name: 'Test Tier',
             slug: 'test',
             price: 100000,
             features: ['Feature 1'],
-            is_available: true
+            is_available: true,
+            updated_at: new Date()
           }
         })
 
         return await prisma.bookings.create({
           data: {
+            id: generateId(),
             booking_number: `TEST${i.toString().padStart(3, '0')}`,
             user_id: user.id,
             service_tier_id: service_tiers.id,
@@ -432,7 +467,8 @@ describeIfDb('Payment Performance Tests', () => {
             payment_status: 'pending',
             total_amount: 100000,
             final_amount: 100000,
-            currency: 'VND'
+            currency: 'VND',
+            updated_at: new Date()
           }
         })
       })
@@ -473,7 +509,7 @@ describeIfDb('Payment Performance Tests', () => {
         })
         if (service_tiers) {
           await prisma.service_tiers.delete({ where: { id: service_tiers.id } })
-          await prisma.service.delete({ where: { id: service_tiers.service_id } })
+          await prisma.services.delete({ where: { id: service_tiers.service_id } })
         }
         await prisma.users.delete({ where: { id: booking.user_id } })
       })
