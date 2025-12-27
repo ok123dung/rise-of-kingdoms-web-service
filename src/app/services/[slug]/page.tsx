@@ -7,9 +7,9 @@ import { prisma } from '@/lib/db'
 import ServiceDetailClient from './ServiceDetailClient'
 
 interface ServicePageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 async function getService(slug: string) {
@@ -25,7 +25,8 @@ async function getService(slug: string) {
 }
 
 export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
-  const service = await getService(params.slug)
+  const { slug } = await params
+  const service = await getService(slug)
 
   if (!service) {
     return {
@@ -51,7 +52,8 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
 }
 
 export default async function ServiceDetailPage({ params }: ServicePageProps) {
-  const service = await getService(params.slug)
+  const { slug } = await params
+  const service = await getService(slug)
 
   if (!service) {
     notFound()
@@ -61,7 +63,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
   const breadcrumbItems = [
     { name: 'Trang chủ', url: siteUrl },
     { name: 'Dịch vụ', url: `${siteUrl}/services` },
-    { name: service.name, url: `${siteUrl}/services/${params.slug}` }
+    { name: service.name, url: `${siteUrl}/services/${slug}` }
   ]
 
   // Serialize service data for client component
@@ -83,7 +85,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
   return (
     <>
       <BreadcrumbSchema items={breadcrumbItems} />
-      <ServiceDetailClient slug={params.slug} serviceData={serviceData} />
+      <ServiceDetailClient slug={slug} serviceData={serviceData} />
     </>
   )
 }
