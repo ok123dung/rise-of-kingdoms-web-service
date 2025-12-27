@@ -70,32 +70,45 @@ process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
 // Mock fetch globally
 global.fetch = jest.fn()
 
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), // deprecated
-    removeListener: jest.fn(), // deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn()
-  }))
-})
+// Only set up browser mocks when window is available (jsdom environment)
+if (typeof window !== 'undefined') {
+  // Mock window.matchMedia
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(), // deprecated
+      removeListener: jest.fn(), // deprecated
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn()
+    }))
+  })
+}
 
-// Mock IntersectionObserver
-global.IntersectionObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn()
-}))
+// Mock IntersectionObserver (only in browser environment)
+if (typeof window !== 'undefined') {
+  global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn()
+  }))
+}
 
 // Mock Prisma client
 jest.mock('@/lib/db', () => ({
   prisma: {
     user: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn()
+    },
+    users: {
       findUnique: jest.fn(),
       findFirst: jest.fn(),
       findMany: jest.fn(),
@@ -109,24 +122,63 @@ jest.mock('@/lib/db', () => ({
       create: jest.fn(),
       update: jest.fn()
     },
+    bookings: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
     payment: {
       findUnique: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn()
     },
+    payments: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
     service: {
       findUnique: jest.fn(),
-      findMany: jest.fn()
+      findMany: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn()
+    },
+    service_tiers: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn()
     },
     lead: {
       create: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn()
     },
+    webhookEvent: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
     $queryRaw: jest.fn(),
+    $queryRawUnsafe: jest.fn(),
     $executeRaw: jest.fn(),
-    $transaction: jest.fn()
+    $transaction: jest.fn(),
+    $connect: jest.fn(),
+    $disconnect: jest.fn()
   },
   db: {
     user: {
@@ -165,6 +217,22 @@ jest.mock('@/lib/monitoring', () => ({
     getAverageResponseTime: jest.fn().mockReturnValue(100)
   },
   trackRequest: jest.fn(endpoint => handler => handler)
+}))
+
+// Mock Sentry
+jest.mock('@sentry/nextjs', () => ({
+  init: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  setUser: jest.fn(),
+  setContext: jest.fn(),
+  setTag: jest.fn(),
+  setTags: jest.fn(),
+  addBreadcrumb: jest.fn(),
+  withScope: jest.fn(callback => callback({ setExtra: jest.fn() })),
+  startSpan: jest.fn((options, callback) => callback?.({})),
+  Span: jest.fn(),
+  Transaction: jest.fn()
 }))
 
 // Mock Next.js Image component

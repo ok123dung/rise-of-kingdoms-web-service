@@ -1,4 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals'
+/**
+ * Payment Flow Integration Tests
+ *
+ * These are integration tests that require a real test database.
+ * They will be skipped if DATABASE_URL is not pointing to a test database.
+ *
+ * To run these tests:
+ * 1. Set DATABASE_URL to a test database (with 'test' in the URL)
+ * 2. Run: npm test -- --testPathPattern=payment-flows
+ *
+ * @jest-environment node
+ */
+
 import { PrismaClient } from '@prisma/client'
 import { MoMoPayment } from '@/lib/payments/momo'
 import { ZaloPayPayment } from '@/lib/payments/zalopay'
@@ -15,9 +27,17 @@ process.env.ZALOPAY_KEY2 = 'TEST_KEY2'
 process.env.VNPAY_TMN_CODE = 'TEST_TMN'
 process.env.VNPAY_HASH_SECRET = 'TEST_HASH_SECRET'
 
-const prisma = new PrismaClient()
+// These integration tests require RUN_INTEGRATION_TESTS=true and a real database
+// Skip by default in regular test runs
+const shouldRunIntegrationTests = process.env.RUN_INTEGRATION_TESTS === 'true'
 
-describe('Payment Flow Integration Tests', () => {
+// Only instantiate prisma if we're running integration tests
+const prisma = shouldRunIntegrationTests ? new PrismaClient() : (null as unknown as PrismaClient)
+
+// Skip all tests unless explicitly enabled
+const describeIfDb = shouldRunIntegrationTests ? describe : describe.skip
+
+describeIfDb('Payment Flow Integration Tests', () => {
   let testBooking: any
   let testUser: any
   let testService: any
@@ -365,8 +385,8 @@ describe('Payment Flow Integration Tests', () => {
   })
 })
 
-// Performance tests
-describe('Payment Performance Tests', () => {
+// Performance tests - also require test database
+describeIfDb('Payment Performance Tests', () => {
   it('should handle concurrent payment creation', async () => {
     const startTime = Date.now()
 
