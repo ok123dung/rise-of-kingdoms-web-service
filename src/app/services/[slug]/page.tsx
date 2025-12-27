@@ -17,7 +17,7 @@ async function getService(slug: string) {
     where: { slug, is_active: true },
     include: {
       service_tiers: {
-        where: { is_active: true },
+        where: { is_available: true },
         orderBy: { sort_order: 'asc' }
       }
     }
