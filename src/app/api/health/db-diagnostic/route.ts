@@ -190,12 +190,13 @@ function detectDatabaseProvider(url: string): string {
     const parsedUrl = new URL(url)
     const hostname = parsedUrl.hostname.toLowerCase()
 
-    // Match against known provider hostnames
-    if (hostname.includes('supabase.co')) return 'Supabase'
-    if (hostname.includes('railway.app') || hostname.includes('rlwy.net')) return 'Railway'
-    if (hostname.includes('neon.tech')) return 'Neon'
-    if (hostname.includes('amazonaws.com')) return 'AWS RDS'
-    if (hostname.includes('planetscale')) return 'PlanetScale'
+    // Use exact domain matching with endsWith for subdomains - safer than includes()
+    if (hostname === 'supabase.co' || hostname.endsWith('.supabase.co')) return 'Supabase'
+    if (hostname === 'railway.app' || hostname.endsWith('.railway.app') ||
+        hostname === 'rlwy.net' || hostname.endsWith('.rlwy.net')) return 'Railway'
+    if (hostname === 'neon.tech' || hostname.endsWith('.neon.tech')) return 'Neon'
+    if (hostname === 'amazonaws.com' || hostname.endsWith('.amazonaws.com')) return 'AWS RDS'
+    if (hostname === 'planetscale.com' || hostname.endsWith('.planetscale.com')) return 'PlanetScale'
     if (hostname === 'localhost' || hostname === '127.0.0.1') return 'Local'
 
     return 'Unknown'
