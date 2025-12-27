@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, memo, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, memo, useMemo, useCallback } from 'react'
 
 import { Crown, User, TrendingUp } from 'lucide-react'
 import Image from 'next/image'
@@ -34,7 +34,7 @@ const CustomerItem = memo(
     index: number
     formatVND: (amount: number) => string
     formatDate: (dateString: string) => string
-    getTierBadge: (tier: string) => JSX.Element
+    getTierBadge: (tier: string) => React.ReactNode
     getInitials: (name: string) => string
   }) => {
     const rankingClass = useMemo(() => {
@@ -116,7 +116,7 @@ const TierBadge = memo(({ tier }: { tier: string }) => {
       regular: 'Thường'
     }
 
-    let tierIcon: JSX.Element
+    let tierIcon: React.ReactNode
     switch (tier) {
       case 'vip':
         tierIcon = <Crown className="h-4 w-4 text-yellow-500" />

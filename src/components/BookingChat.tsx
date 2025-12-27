@@ -45,7 +45,7 @@ export function BookingChat({ booking_id, className = '' }: BookingChatProps) {
   const [historyMessages, setHistoryMessages] = useState<Message[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const typingTimeoutRef = useRef<NodeJS.Timeout>()
+  const typingTimeoutRef = useRef<NodeJS.Timeout>(null)
 
   // Fetch history on mount
   useEffect(() => {

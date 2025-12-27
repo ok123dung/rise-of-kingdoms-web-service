@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import React, { useCallback } from 'react'
 
 import {
   CheckCircle,
@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 
 interface BadgeConfig {
-  icon: JSX.Element
+  icon: React.ReactNode
   className: string
   label: string
 }
