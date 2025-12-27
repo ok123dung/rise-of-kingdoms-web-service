@@ -88,14 +88,23 @@ export function isValidVietnameseName(name: string): boolean {
 }
 
 /**
- * Sanitize input to prevent XSS
+ * HTML-encode special characters to prevent XSS
+ */
+function htmlEncode(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
+
+/**
+ * Sanitize input to prevent XSS - uses HTML encoding
+ * This is safer than trying to strip dangerous patterns
  */
 export function sanitizeInput(input: string): string {
-  return input
-    .trim()
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+=/gi, '') // Remove event handlers
+  return htmlEncode(input.trim())
 }
 
 /**

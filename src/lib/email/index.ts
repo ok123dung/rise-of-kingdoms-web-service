@@ -286,12 +286,27 @@ export function isValidEmail(email: string): boolean {
 }
 
 // Utility function to sanitize email content
+// Uses iterative removal to prevent bypass via nested patterns
 export function sanitizeEmailContent(content: string): string {
-  return content
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
-    .replace(/javascript:/gi, '') // Remove javascript: links
-    .replace(/on\w+\s*=/gi, '') // Remove event handlers
-    .trim()
+  let sanitized = content.trim()
+
+  // Iteratively remove dangerous patterns to prevent bypass via nesting
+  let iterations = 0
+  const maxIterations = 10
+  let previous: string
+  do {
+    previous = sanitized
+    iterations++
+    sanitized = sanitized
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<script\b[^>]*>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '')
+      .replace(/vbscript:/gi, '')
+      .replace(/data:/gi, '')
+  } while (sanitized !== previous && iterations < maxIterations)
+
+  return sanitized
 }
 
 // Test email functionality (development only)

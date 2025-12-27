@@ -271,7 +271,7 @@ export function stripDangerousHtml(input: string): string {
     iterations++
     // Remove all tags that could execute scripts
     sanitized = sanitized
-      .replace(/<script\b[^>]*>.*?<\/script>/gis, '')
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<script\b[^>]*>/gi, '')
       .replace(/javascript:/gi, '')
       .replace(/\bon\w+=/gi, '')

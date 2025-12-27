@@ -184,13 +184,25 @@ export async function GET(_request: NextRequest) {
 }
 
 function detectDatabaseProvider(url: string): string {
-  if (url.includes('supabase.co')) return 'Supabase'
-  if (url.includes('railway.app') || url.includes('rlwy.net')) return 'Railway'
-  if (url.includes('neon.tech')) return 'Neon'
-  if (url.includes('amazonaws.com')) return 'AWS RDS'
-  if (url.includes('planetscale')) return 'PlanetScale'
-  if (url.includes('localhost') || url.includes('127.0.0.1')) return 'Local'
-  return 'Unknown'
+  // Use URL parsing to safely extract hostname - prevents URL encoding bypass
+  try {
+    // Handle postgres:// and postgresql:// URLs
+    const parsedUrl = new URL(url)
+    const hostname = parsedUrl.hostname.toLowerCase()
+
+    // Match against known provider hostnames
+    if (hostname.includes('supabase.co')) return 'Supabase'
+    if (hostname.includes('railway.app') || hostname.includes('rlwy.net')) return 'Railway'
+    if (hostname.includes('neon.tech')) return 'Neon'
+    if (hostname.includes('amazonaws.com')) return 'AWS RDS'
+    if (hostname.includes('planetscale')) return 'PlanetScale'
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return 'Local'
+
+    return 'Unknown'
+  } catch {
+    // Invalid URL format - could be missing or malformed
+    return 'Unknown'
+  }
 }
 
 function getRecommendations(error_message: string): string[] {

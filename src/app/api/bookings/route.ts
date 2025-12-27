@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -54,8 +56,8 @@ export async function POST(request: NextRequest) {
     // Find or Create User
     let user = existingUser
     if (!user) {
-      // Create new user with random password
-      const password = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
+      // Create new user with cryptographically secure random password
+      const password = crypto.randomBytes(16).toString('base64url')
       const { hashPassword } = await import('@/lib/auth')
       const hashedPassword = await hashPassword(password)
 

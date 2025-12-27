@@ -86,28 +86,44 @@ export class CSRFProtection {
   }
 }
 
-// Input sanitization
+// HTML-encode special characters to prevent XSS - safer than regex stripping
+function htmlEncode(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
+}
+
+// Input sanitization - uses HTML encoding for XSS prevention
 export function sanitizeInput(input: string): string {
-  // Remove any potential script tags
-  let sanitized = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+  // HTML-encode first to prevent injection - this is safer than trying to strip patterns
+  return htmlEncode(input.trim())
+}
 
-  // Remove any event handlers
-  sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+// For cases where HTML is allowed but dangerous content must be stripped
+// Recommend using a library like DOMPurify instead of this function
+export function stripDangerousPatterns(input: string): string {
+  let sanitized = input.trim()
 
-  // Remove any javascript: URLs
-  sanitized = sanitized.replace(/javascript:/gi, '')
+  // Iteratively remove dangerous patterns to prevent bypass via nesting
+  let iterations = 0
+  const maxIterations = 10
+  let previous: string
+  do {
+    previous = sanitized
+    iterations++
+    sanitized = sanitized
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<script\b[^>]*>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/on\w+\s*=/gi, '')
+  } while (sanitized !== previous && iterations < maxIterations)
 
-  // Escape HTML entities
-  const escapeMap: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#x27;',
-    '/': '&#x2F;'
-  }
-
-  return sanitized.replace(/[&<>"'/]/g, char => escapeMap[char] ?? char)
+  return sanitized
 }
 
 // SQL injection prevention (for raw queries)
