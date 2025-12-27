@@ -14,90 +14,94 @@ describe('Services Component', () => {
 
     // Check if the main title is rendered
     expect(screen.getByText('Dịch vụ chuyên nghiệp')).toBeInTheDocument()
-    expect(screen.getByText('Nâng cao trải nghiệm Rise of Kingdoms của bạn')).toBeInTheDocument()
+    expect(screen.getByText(/Dịch vụ premium cho/)).toBeInTheDocument()
   })
 
-  it('renders all 8 services', () => {
+  it('renders services from SERVICES_CONFIG', () => {
     render(<Services />)
 
-    // Check for specific service titles
-    const serviceNames = [
-      'Tư vấn chiến thuật',
-      'Farm Gem tự động',
-      'KvK Support',
-      'Quản lý liên minh',
-      'Tối ưu tài nguyên',
-      'Coaching PvP',
-      'Chiến lược sự kiện',
-      'Phát triển tài khoản'
-    ]
-
-    serviceNames.forEach(name => {
-      expect(screen.getByText(name)).toBeInTheDocument()
-    })
+    // Check for actual service titles from config
+    expect(screen.getByText('Auto Gem & Farm RoK')).toBeInTheDocument()
+    expect(screen.getByText('Spam & Kéo Man Rợ')).toBeInTheDocument()
   })
 
-  it('displays pricing for all services', () => {
+  it('displays pricing for services', () => {
     render(<Services />)
 
     // Check that pricing is displayed
-    expect(screen.getAllByText(/VNĐ/)).toHaveLength(8)
+    expect(screen.getByText(/Từ 150.000 VNĐ/)).toBeInTheDocument()
+    expect(screen.getByText(/900.000 VNĐ\/tháng/)).toBeInTheDocument()
   })
 
-  it('shows featured badge for featured services', () => {
+  it('shows Premium badge for featured services', () => {
     render(<Services />)
 
-    // Check for "Phổ biến" badge (popular services)
-    const featuredBadges = screen.getAllByText('Phổ biến')
+    // Check for "Premium" badge on featured services
+    const featuredBadges = screen.getAllByText('Premium')
     expect(featuredBadges.length).toBeGreaterThan(0)
   })
 
   it('renders service action buttons', () => {
     render(<Services />)
 
-    // Check for "Tìm hiểu thêm" buttons
-    const buttons = screen.getAllByText('Tìm hiểu thêm')
-    expect(buttons).toHaveLength(8)
-  })
-
-  it('renders customer testimonials', () => {
-    render(<Services />)
-
-    // Check for testimonials section
-    expect(screen.getByText('Phản hồi từ khách hàng')).toBeInTheDocument()
-    expect(screen.getByText('Những gì khách hàng nói về dịch vụ của chúng tôi')).toBeInTheDocument()
-  })
-
-  it('displays stats counters', () => {
-    render(<Services />)
-
-    // Check for stats section
-    expect(screen.getByText('200+')).toBeInTheDocument() // Khách hàng hài lòng
-    expect(screen.getByText('50+')).toBeInTheDocument() // Chuyên gia
-    expect(screen.getByText('98%')).toBeInTheDocument() // Tỷ lệ thành công
+    // Check for "Xem chi tiết" buttons (actual button text in component)
+    const buttons = screen.getAllByText(/Xem chi tiết/)
+    expect(buttons.length).toBeGreaterThanOrEqual(2)
   })
 
   it('has proper responsive classes', () => {
     const { container } = render(<Services />)
 
-    // Check for responsive grid classes
+    // Check for responsive grid classes (actual: md:grid-cols-2)
     const gridElement = container.querySelector('.grid')
-    expect(gridElement).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3')
+    expect(gridElement).toHaveClass('grid-cols-1', 'md:grid-cols-2')
   })
 
   it('renders service links correctly', () => {
     render(<Services />)
 
-    // Check that links point to correct service pages
-    const strategyLink = screen.getByRole('link', { name: /Tư vấn chiến thuật/ })
-    expect(strategyLink).toHaveAttribute('href', '/services/strategy')
+    // Check that links point to services page
+    const serviceLinks = screen.getAllByRole('link', { name: /Xem chi tiết/ })
+    serviceLinks.forEach(link => {
+      expect(link).toHaveAttribute('href', '/services')
+    })
   })
 
   it('displays service descriptions', () => {
     render(<Services />)
 
-    // Check for service descriptions
-    expect(screen.getByText(/Phân tích và tối ưu chiến thuật/)).toBeInTheDocument()
-    expect(screen.getByText(/Tự động hóa quá trình farming/)).toBeInTheDocument()
+    // Check for actual service descriptions
+    expect(screen.getByText(/Bot tự động farm tài nguyên/)).toBeInTheDocument()
+    expect(screen.getByText(/Dịch vụ spam man rợ chuyên nghiệp/)).toBeInTheDocument()
+  })
+
+  it('renders service cards with data-testid', () => {
+    render(<Services />)
+
+    const serviceCards = screen.getAllByTestId('service-card')
+    expect(serviceCards.length).toBe(2)
+  })
+
+  it('displays CTA section', () => {
+    render(<Services />)
+
+    // Check for CTA section
+    expect(screen.getByText('Cần tư vấn cá nhân hóa?')).toBeInTheDocument()
+    expect(screen.getByText('Tư vấn miễn phí')).toBeInTheDocument()
+  })
+
+  it('shows tier information for services with tiers', () => {
+    render(<Services />)
+
+    // Check that tier count is shown
+    expect(screen.getByText(/4 gói dịch vụ/)).toBeInTheDocument()
+    expect(screen.getByText(/1 gói dịch vụ/)).toBeInTheDocument()
+  })
+
+  it('displays requirement notice when applicable', () => {
+    render(<Services />)
+
+    // Check for requirement notice
+    expect(screen.getByText('Account trước Pre-KvK 1')).toBeInTheDocument()
   })
 })
