@@ -1,7 +1,7 @@
 // Jest polyfills for browser APIs
 
-// TextEncoder/TextDecoder polyfill
-import { TextEncoder, TextDecoder } from 'util'
+// TextEncoder/TextDecoder polyfill (CommonJS for Jest)
+const { TextEncoder, TextDecoder } = require('util')
 
 // Polyfill for Node.js environment
 global.TextEncoder = TextEncoder

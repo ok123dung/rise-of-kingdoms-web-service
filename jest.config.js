@@ -1,4 +1,5 @@
 const nextJest = require('next/jest')
+const path = require('path')
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files
@@ -7,6 +8,8 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
+  // Force rootDir to use posix-style path to avoid Windows escaping issues
+  rootDir: path.resolve(__dirname).replace(/\\/g, '/'),
   // Setup files
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   setupFiles: ['<rootDir>/jest.polyfills.js'],
@@ -20,23 +23,25 @@ const customJestConfig = {
     // Mock CSS modules
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     // Mock static files
-    '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/__mocks__/fileMock.js'
+    '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/__mocks__/fileMock.js',
+    // Mock lucide-react ESM module
+    '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js'
   },
 
-  // Test patterns
+  // Test patterns - use relative paths to avoid Windows escaping issues
   testMatch: [
-    '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
-    '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}'
+    '**/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '**/src/**/*.{test,spec}.{js,jsx,ts,tsx}'
   ],
 
-  // Exclude Playwright tests from Jest
+  // Exclude Playwright tests from Jest - use relative paths
   testPathIgnorePatterns: [
-    '<rootDir>/.next/',
-    '<rootDir>/node_modules/',
-    '<rootDir>/coverage/',
-    '<rootDir>/tests/e2e/',
-    '<rootDir>/tests/global-setup.ts',
-    '<rootDir>/tests/global-teardown.ts'
+    '/node_modules/',
+    '/.next/',
+    '/coverage/',
+    '/tests/e2e/',
+    '/tests/global-setup.ts',
+    '/tests/global-teardown.ts'
   ],
 
   // Coverage collection
@@ -96,8 +101,11 @@ const customJestConfig = {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }]
   },
 
-  // Transform ignore patterns
-  transformIgnorePatterns: ['/node_modules/(?!(node-fetch)/)', '^.+\\.module\\.(css|sass|scss)$'],
+  // Transform ignore patterns - include ESM packages that need transformation
+  transformIgnorePatterns: [
+    '/node_modules/(?!(node-fetch|lucide-react)/)',
+    '^.+\\.module\\.(css|sass|scss)$'
+  ],
 
   // Module file extensions
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
@@ -120,4 +128,15 @@ const customJestConfig = {
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig)
+// Wrap to override next/jest's transformIgnorePatterns for lucide-react
+module.exports = async () => {
+  const jestConfig = await createJestConfig(customJestConfig)()
+
+  // Override transformIgnorePatterns to allow lucide-react transformation
+  jestConfig.transformIgnorePatterns = [
+    '/node_modules/(?!(node-fetch|lucide-react)/)',
+    '^.+\\.module\\.(css|sass|scss)$'
+  ]
+
+  return jestConfig
+}

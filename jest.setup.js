@@ -222,14 +222,24 @@ jest.mock('@/lib/monitoring', () => ({
 // Mock Sentry
 jest.mock('@sentry/nextjs', () => ({
   init: jest.fn(),
-  captureException: jest.fn(),
+  captureException: jest.fn().mockReturnValue('mock-sentry-event-id'),
   captureMessage: jest.fn(),
   setUser: jest.fn(),
   setContext: jest.fn(),
   setTag: jest.fn(),
   setTags: jest.fn(),
   addBreadcrumb: jest.fn(),
-  withScope: jest.fn(callback => callback({ setExtra: jest.fn() })),
+  withScope: jest.fn(callback =>
+    callback({
+      setExtra: jest.fn(),
+      setContext: jest.fn(),
+      setTag: jest.fn(),
+      setTags: jest.fn(),
+      setLevel: jest.fn(),
+      setUser: jest.fn(),
+      addBreadcrumb: jest.fn()
+    })
+  ),
   startSpan: jest.fn((options, callback) => callback?.({})),
   Span: jest.fn(),
   Transaction: jest.fn()
@@ -244,21 +254,7 @@ jest.mock('next/image', () => ({
   }
 }))
 
-// Mock Lucide React icons
-jest.mock('lucide-react', () => ({
-  Mail: () => <div data-testid="mail-icon" />,
-  Lock: () => <div data-testid="lock-icon" />,
-  User: () => <div data-testid="user-icon" />,
-  Phone: () => <div data-testid="phone-icon" />,
-  Eye: () => <div data-testid="eye-icon" />,
-  EyeOff: () => <div data-testid="eye-off-icon" />,
-  AlertCircle: () => <div data-testid="alert-circle-icon" />,
-  CheckCircle: () => <div data-testid="check-circle-icon" />,
-  Loader2: () => <div data-testid="loader-icon" />,
-  ArrowLeft: () => <div data-testid="arrow-left-icon" />,
-  Search: () => <div data-testid="search-icon" />,
-  Filter: () => <div data-testid="filter-icon" />
-}))
+// Note: lucide-react is mocked via moduleNameMapper in jest.config.js
 
 // Mock crypto for browser environment
 Object.defineProperty(global, 'crypto', {
