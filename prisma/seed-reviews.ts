@@ -4,8 +4,9 @@ import { randomUUID } from 'crypto'
 
 const prisma = new PrismaClient()
 
-// Vietnamese review templates for realistic data
+// Vietnamese review templates for realistic data - expanded for all services
 const reviewTemplates = [
+  // General positive reviews
   { rating: 5, feedback: 'Dịch vụ tuyệt vời! Nhân viên hỗ trợ rất nhiệt tình và chuyên nghiệp. Sẽ quay lại lần sau.' },
   { rating: 5, feedback: 'Hoàn thành đúng hẹn, chất lượng vượt mong đợi. Cảm ơn team rất nhiều!' },
   { rating: 5, feedback: 'Rất hài lòng với kết quả. Tài khoản đã được optimize tốt hơn nhiều.' },
@@ -20,7 +21,27 @@ const reviewTemplates = [
   { rating: 4, feedback: 'Equipment được tối ưu rất tốt. Sẽ tiếp tục sử dụng.' },
   { rating: 5, feedback: 'Đội ngũ chuyên nghiệp, hiểu game sâu. Recommend 100%!' },
   { rating: 4, feedback: 'Giá cả hợp lý so với chất lượng dịch vụ nhận được.' },
-  { rating: 5, feedback: 'Migration support rất smooth, không gặp vấn đề gì.' }
+  { rating: 5, feedback: 'Migration support rất smooth, không gặp vấn đề gì.' },
+  // Alliance management reviews
+  { rating: 5, feedback: 'Alliance của mình đã lên top 3 server nhờ tư vấn quản lý.' },
+  { rating: 4, feedback: 'Hệ thống tuyển dụng thành viên rất hiệu quả, alliance đông hẳn lên.' },
+  { rating: 5, feedback: 'Quản lý sự kiện alliance giờ đơn giản hơn nhiều. Worth it!' },
+  // KvK support reviews
+  { rating: 5, feedback: 'KvK vừa rồi kingdom mình thắng áp đảo nhờ chiến thuật từ team!' },
+  { rating: 4, feedback: 'Coordination team rất tốt, map control hiệu quả.' },
+  { rating: 5, feedback: 'Honor points tăng gấp đôi so với KvK trước. Cực kỳ hài lòng!' },
+  // VIP support reviews
+  { rating: 5, feedback: 'Response trong vòng 5 phút bất kể giờ nào. VIP service thực sự!' },
+  { rating: 5, feedback: 'Dedicated manager rất tận tâm, giải quyết mọi vấn đề nhanh chóng.' },
+  { rating: 4, feedback: 'All-in-one service, không cần lo gì cả. Giá hơi cao nhưng worth.' },
+  // Commander training reviews
+  { rating: 5, feedback: 'Từ noob giờ đã biết pair commander chuẩn. Session 1-1 rất hiệu quả!' },
+  { rating: 4, feedback: 'Talent build được optimize, march power tăng 20%.' },
+  { rating: 5, feedback: 'Coach giải thích rất dễ hiểu, từ cơ bản đến nâng cao.' },
+  // Personal coaching reviews
+  { rating: 5, feedback: 'Top player hướng dẫn trực tiếp, học được rất nhiều tricks.' },
+  { rating: 4, feedback: 'Session customize theo nhu cầu cá nhân rất hữu ích.' },
+  { rating: 5, feedback: 'Follow-up support sau session rất tốt, có gì hỏi đều được giải đáp.' }
 ]
 
 // Test user names (Vietnamese)
@@ -48,17 +69,22 @@ function generateBookingNumber(): string {
 async function main() {
   console.log('Seeding review data...')
 
-  // Get all service tiers
-  const serviceTiers = await prisma.service_tiers.findMany({
-    include: { services: true }
+  // Get all services with their tiers
+  const services = await prisma.services.findMany({
+    where: { is_active: true },
+    include: {
+      service_tiers: {
+        where: { is_available: true }
+      }
+    }
   })
 
-  if (serviceTiers.length === 0) {
-    console.log('No service tiers found. Run main seed first.')
+  if (services.length === 0) {
+    console.log('No services found. Run main seed first.')
     return
   }
 
-  console.log(`Found ${serviceTiers.length} service tiers`)
+  console.log(`Found ${services.length} services`)
 
   // Create test users
   const createdUsers: string[] = []
@@ -81,43 +107,55 @@ async function main() {
     console.log(`Created/Updated user: ${user.full_name}`)
   }
 
-  // Create bookings with reviews
+  // Create bookings with reviews - distribute evenly across services
   let reviewCount = 0
-  for (const review of reviewTemplates) {
-    const userId = createdUsers[Math.floor(Math.random() * createdUsers.length)]
-    const tier = serviceTiers[Math.floor(Math.random() * serviceTiers.length)]
+  const reviewsPerService = 5 // Each service gets 5 reviews
 
-    // Random date within last 60 days
-    const createdAt = new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000)
-    const completedAt = new Date(createdAt.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000)
+  for (const service of services) {
+    if (service.service_tiers.length === 0) {
+      console.log(`Skipping ${service.name} - no tiers available`)
+      continue
+    }
 
-    const booking = await prisma.bookings.create({
-      data: {
-        id: randomUUID(),
-        booking_number: generateBookingNumber(),
-        user_id: userId,
-        service_tier_id: tier.id,
-        status: 'completed',
-        payment_status: 'completed',
-        total_amount: tier.price,
-        discount_amount: 0,
-        final_amount: tier.price,
-        currency: 'VND',
-        completion_percentage: 100,
-        customer_rating: review.rating,
-        customer_feedback: review.feedback,
-        created_at: createdAt,
-        updated_at: completedAt,
-        start_date: createdAt,
-        end_date: completedAt
-      }
-    })
+    console.log(`\nSeeding reviews for: ${service.name}`)
 
-    reviewCount++
-    console.log(`Created booking ${booking.booking_number} with ${review.rating}★ review`)
+    for (let i = 0; i < reviewsPerService; i++) {
+      const userId = createdUsers[Math.floor(Math.random() * createdUsers.length)]
+      const tier = service.service_tiers[Math.floor(Math.random() * service.service_tiers.length)]
+      const review = reviewTemplates[Math.floor(Math.random() * reviewTemplates.length)]
+
+      // Random date within last 60 days
+      const createdAt = new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000)
+      const completedAt = new Date(createdAt.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000)
+
+      const booking = await prisma.bookings.create({
+        data: {
+          id: randomUUID(),
+          booking_number: generateBookingNumber(),
+          user_id: userId,
+          service_tier_id: tier.id,
+          status: 'completed',
+          payment_status: 'completed',
+          total_amount: tier.price,
+          discount_amount: 0,
+          final_amount: tier.price,
+          currency: 'VND',
+          completion_percentage: 100,
+          customer_rating: review.rating,
+          customer_feedback: review.feedback,
+          created_at: createdAt,
+          updated_at: completedAt,
+          start_date: createdAt,
+          end_date: completedAt
+        }
+      })
+
+      reviewCount++
+      console.log(`  Created ${booking.booking_number} with ${review.rating}★ for ${tier.name}`)
+    }
   }
 
-  console.log(`\nSeeding completed! Created ${reviewCount} reviews.`)
+  console.log(`\nSeeding completed! Created ${reviewCount} reviews across ${services.length} services.`)
 }
 
 void main()
