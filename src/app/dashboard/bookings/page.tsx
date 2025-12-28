@@ -115,7 +115,7 @@ export default function BookingsPage() {
                   <div className="px-4 py-4 sm:px-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <div className="bg-rok-gold/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full">
+                        <div className="bg-rok-gold/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
                           <span className="text-2xl">
                             {getServiceIcon(booking.service_tiers.services.slug || '')}
                           </span>
@@ -164,7 +164,7 @@ export default function BookingsPage() {
                       <div className="mt-2 sm:flex sm:justify-between">
                         <div className="sm:flex">
                           <p className="flex items-center text-sm text-gray-500">
-                            <ClockIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" />
+                            <ClockIcon className="mr-1.5 h-5 w-5 shrink-0 text-gray-400" />
                             Bắt đầu:{' '}
                             {format(new Date(booking.start_date), 'dd/MM/yyyy HH:mm', {
                               locale: vi

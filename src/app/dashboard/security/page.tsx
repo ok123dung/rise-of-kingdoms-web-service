@@ -132,7 +132,7 @@ export default function SecurityPage() {
 
   if (status === 'loading' || !twoFactorStatus) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         <Header />
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-amber-600" />
@@ -143,7 +143,7 @@ export default function SecurityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
       <Header />
 
       <div className="container mx-auto px-4 py-8">

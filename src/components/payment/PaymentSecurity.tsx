@@ -2,7 +2,7 @@
 
 export default function PaymentSecurity() {
   return (
-    <div className="rounded-lg border border-green-200 bg-gradient-to-r from-green-50 to-blue-50 p-6">
+    <div className="rounded-lg border border-green-200 bg-linear-to-r from-green-50 to-blue-50 p-6">
       <div className="mb-4 flex items-center space-x-3">
         <div className="h-6 w-6 text-green-600">🔒</div>
         <h4 className="font-medium text-gray-900">Bảo mật thanh toán</h4>

@@ -9,7 +9,7 @@ export default function TermsPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+      <main className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         {/* Header Section */}
         <section className="section-padding-y container-max">
           <div className="animate-fadeInUp mx-auto max-w-4xl text-center">
@@ -41,7 +41,7 @@ export default function TermsPage() {
                 {/* Introduction */}
                 <div className="mb-8 rounded-xl border-l-4 border-amber-500 bg-amber-50 p-6">
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="mt-1 h-6 w-6 flex-shrink-0 text-amber-600" />
+                    <AlertCircle className="mt-1 h-6 w-6 shrink-0 text-amber-600" />
                     <div>
                       <h3 className="mb-2 text-lg font-bold text-amber-800">Lưu ý quan trọng</h3>
                       <p className="mb-0 text-amber-700">

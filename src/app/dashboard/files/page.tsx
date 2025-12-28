@@ -77,7 +77,7 @@ export default function FilesPage() {
     { id: 'general', name: 'General', icon: Folder }
   ]
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
       <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">

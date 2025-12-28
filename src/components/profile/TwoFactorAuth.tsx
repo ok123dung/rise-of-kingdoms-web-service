@@ -235,7 +235,7 @@ export default function TwoFactorAuth() {
                   <div className="space-y-4">
                     <div className="border-l-4 border-yellow-400 bg-yellow-50 p-4">
                       <div className="flex">
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           <KeyIcon aria-hidden="true" className="h-5 w-5 text-yellow-400" />
                         </div>
                         <div className="ml-3">

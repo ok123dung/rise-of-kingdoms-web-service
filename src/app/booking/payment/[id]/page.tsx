@@ -73,7 +73,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
 
             <div className="rounded-2xl bg-blue-50 p-4">
               <div className="flex">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <Shield aria-hidden="true" className="h-5 w-5 text-blue-400" />
                 </div>
                 <div className="ml-3">

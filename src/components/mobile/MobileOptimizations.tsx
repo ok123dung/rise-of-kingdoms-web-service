@@ -121,7 +121,7 @@ export function MobilePricingCard({
       <ul className="mb-6 space-y-3">
         {features.map((feature, index) => (
           <li key={index} className="flex items-start space-x-3">
-            <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-100">
               <div className="h-2 w-2 rounded-full bg-green-500" />
             </div>
             <span className="text-sm leading-relaxed text-gray-600">{feature}</span>
@@ -130,7 +130,7 @@ export function MobilePricingCard({
       </ul>
 
       <Link
-        className="block w-full transform rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-6 py-4 text-center font-bold text-white transition-all duration-200 hover:scale-105 hover:from-accent-700 hover:to-accent-800"
+        className="block w-full transform rounded-lg bg-linear-to-r from-accent-600 to-accent-700 px-6 py-4 text-center font-bold text-white transition-all duration-200 hover:scale-105 hover:from-accent-700 hover:to-accent-800"
         href={ctaLink}
       >
         {ctaText}

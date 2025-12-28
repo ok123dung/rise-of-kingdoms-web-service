@@ -65,11 +65,11 @@ export default function CustomerHeader({
   const getTierColor = (tier: string) => {
     switch (tier) {
       case 'vip':
-        return 'bg-gradient-to-r from-yellow-400 to-yellow-600'
+        return 'bg-linear-to-r from-yellow-400 to-yellow-600'
       case 'premium':
-        return 'bg-gradient-to-r from-purple-400 to-purple-600'
+        return 'bg-linear-to-r from-purple-400 to-purple-600'
       default:
-        return 'bg-gradient-to-r from-blue-400 to-blue-600'
+        return 'bg-linear-to-r from-blue-400 to-blue-600'
     }
   }
   const getTierLabel = (tier: string) => {

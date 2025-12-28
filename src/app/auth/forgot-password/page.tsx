@@ -60,7 +60,7 @@ function ForgotPasswordContent() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         {/* Back Button */}
         <div>
@@ -211,7 +211,7 @@ function ForgotPasswordContent() {
         {/* Security Notice */}
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
           <div className="flex items-start gap-3">
-            <Shield className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+            <Shield className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
             <div className="text-sm">
               <p className="mb-1 font-medium text-amber-900">Bảo mật thông tin</p>
               <p className="text-amber-700">

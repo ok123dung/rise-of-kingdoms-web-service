@@ -45,7 +45,7 @@ export default function Error({ error, reset }: ErrorProps) {
   const isDevelopment = process.env.NODE_ENV === 'development'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-orange-100 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-red-50 to-orange-100 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div className="rounded-xl bg-white p-8 text-center shadow-lg">
           {/* Error Icon */}
@@ -64,7 +64,7 @@ export default function Error({ error, reset }: ErrorProps) {
             {isDevelopment && (
               <div className="mt-4 rounded-lg bg-gray-50 p-3 text-left">
                 <p className="mb-1 text-xs text-gray-500">Thông tin lỗi (development):</p>
-                <p className="break-words font-mono text-sm text-gray-700">{error.message}</p>
+                <p className="wrap-break-word font-mono text-sm text-gray-700">{error.message}</p>
                 {error.digest && (
                   <p className="mt-2 text-xs text-gray-500">Error ID: {error.digest}</p>
                 )}

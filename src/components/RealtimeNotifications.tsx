@@ -108,7 +108,7 @@ export function RealtimeNotifications() {
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
-                      <div className="flex-shrink-0">{getNotificationIcon(notification.type)}</div>
+                      <div className="shrink-0">{getNotificationIcon(notification.type)}</div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-gray-900">{notification.title}</p>
                         <p className="mt-1 text-sm text-gray-600">{notification.message}</p>
@@ -119,7 +119,7 @@ export function RealtimeNotifications() {
                         </p>
                       </div>
                       {!notification.read && (
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           <div className="h-2 w-2 rounded-full bg-blue-600" />
                         </div>
                       )}

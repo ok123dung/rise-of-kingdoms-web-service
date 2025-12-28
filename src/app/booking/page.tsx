@@ -163,7 +163,7 @@ function BookingContent() {
               })}
 
               {/* Progress Bar Background */}
-              <div className="absolute top-6 -z-0 h-0.5 w-full bg-gray-200">
+              <div className="absolute top-6 z-0 h-0.5 w-full bg-gray-200">
                 <div
                   className="h-full bg-amber-500 transition-all duration-500 ease-in-out"
                   style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
@@ -356,7 +356,7 @@ function BookingContent() {
                   </div>
 
                   <div className="mt-6 flex items-start space-x-3 rounded-lg bg-blue-50 p-4 text-sm text-blue-700">
-                    <Sparkles className="mt-0.5 h-5 w-5 flex-shrink-0" />
+                    <Sparkles className="mt-0.5 h-5 w-5 shrink-0" />
                     <p>{t.features.time.desc}</p>
                   </div>
                 </div>

@@ -178,7 +178,7 @@ export const DynamicPaymentSecurity = dynamic(
   () => import('@/components/payment/PaymentSecurity'),
   {
     loading: () => (
-      <div className="rounded-lg border border-green-200 bg-gradient-to-r from-green-50 to-blue-50 p-6">
+      <div className="rounded-lg border border-green-200 bg-linear-to-r from-green-50 to-blue-50 p-6">
         <div className="mb-4 flex items-center space-x-3">
           <div className="h-6 w-6 animate-pulse rounded bg-green-300" />
           <div className="h-5 w-32 rounded bg-gray-300" />

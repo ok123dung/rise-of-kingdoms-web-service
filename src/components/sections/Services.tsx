@@ -11,7 +11,7 @@ export default function Services() {
   return (
     <section className="section-padding relative overflow-hidden" data-testid="services-section">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-amber-50/20" />
+      <div className="absolute inset-0 bg-linear-to-br from-slate-50 via-white to-amber-50/20" />
       <div className="animate-float absolute right-10 top-20 opacity-10">
         <Crown className="h-32 w-32 text-amber-400" />
       </div>
@@ -105,7 +105,7 @@ function ServiceCard({ service }: ServiceCardProps) {
       {/* Featured Badge */}
       {featured && (
         <div className="absolute -right-4 -top-4 z-10">
-          <div className="animate-pulse-slow rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 text-sm font-bold text-white shadow-xl">
+          <div className="animate-pulse-slow rounded-full bg-linear-to-r from-amber-500 to-amber-600 px-4 py-2 text-sm font-bold text-white shadow-xl">
             <span className="flex items-center space-x-1">
               <Crown className="h-4 w-4" />
               <span>Premium</span>
@@ -116,7 +116,7 @@ function ServiceCard({ service }: ServiceCardProps) {
 
       {/* Shine Effect */}
       <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-        <div className="animate-shine absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="animate-shine absolute inset-0 -skew-x-12 bg-linear-to-r from-transparent via-white/20 to-transparent" />
       </div>
 
       {/* Icon */}
@@ -134,7 +134,7 @@ function ServiceCard({ service }: ServiceCardProps) {
           />
         </div>
         {featured && (
-          <div className="absolute -inset-2 -z-10 rounded-2xl bg-gradient-to-r from-amber-400/20 to-amber-600/20 blur-xl" />
+          <div className="absolute -inset-2 -z-10 rounded-2xl bg-linear-to-r from-amber-400/20 to-amber-600/20 blur-xl" />
         )}
       </div>
 
@@ -163,7 +163,7 @@ function ServiceCard({ service }: ServiceCardProps) {
         {/* Requirement Notice */}
         {requirement && (
           <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2 text-sm">
-            <AlertCircle className="h-4 w-4 flex-shrink-0 text-amber-600" />
+            <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
             <span className="text-amber-800">{requirement}</span>
           </div>
         )}
@@ -225,8 +225,8 @@ function ServiceCard({ service }: ServiceCardProps) {
               book-now-btn block w-full transform rounded-xl px-6 py-4 text-center font-semibold transition-all duration-300
               ${
                 featured
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-amber-500/25'
-                  : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25'
+                  ? 'bg-linear-to-r from-amber-500 to-amber-600 text-white shadow-lg hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-amber-500/25'
+                  : 'bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25'
               }
             `}
             onClick={e => e.stopPropagation()}

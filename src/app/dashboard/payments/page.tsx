@@ -188,7 +188,7 @@ export default function PaymentsPage() {
                     <div className="px-4 py-4 sm:px-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <div className={`flex-shrink-0 rounded-full p-2 ${statusColor}`}>
+                          <div className={`shrink-0 rounded-full p-2 ${statusColor}`}>
                             <StatusIcon className="h-6 w-6" />
                           </div>
                           <div className="ml-4">

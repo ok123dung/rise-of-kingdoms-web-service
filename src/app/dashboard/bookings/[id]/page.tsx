@@ -165,7 +165,7 @@ export default function BookingDetailPage() {
           <div className="rounded-lg bg-white p-6 shadow">
             <h2 className="mb-4 text-lg font-medium text-gray-900">Thông tin dịch vụ</h2>
             <div className="flex items-start space-x-4">
-              <div className="bg-rok-gold/10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-rok-gold/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-lg">
                 <span className="text-3xl">{booking.service_tiers.services.icon}</span>
               </div>
               <div className="flex-1">

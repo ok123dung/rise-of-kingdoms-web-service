@@ -225,7 +225,7 @@ export default function StrategyServicePage() {
       <VietnameseGamingSchema />
 
       {/* Urgency Banner */}
-      <div className="bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-white">
+      <div className="bg-linear-to-r from-accent-600 to-accent-700 px-4 py-3 text-white">
         <div className="container-max flex items-center justify-center space-x-4 text-sm font-medium">
           <Clock className="h-4 w-4 animate-pulse" />
           <span>🔥 Tháng 12: Giảm 20% tất cả gói Strategy + Tặng 1 tuần Premium coaching!</span>
@@ -235,7 +235,7 @@ export default function StrategyServicePage() {
 
       <main>
         {/* Hero Section */}
-        <section className="section-padding bg-gradient-to-br from-primary-50 via-white to-accent-50">
+        <section className="section-padding bg-linear-to-br from-primary-50 via-white to-accent-50">
           <div className="container-max">
             <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
               <div>
@@ -271,7 +271,7 @@ export default function StrategyServicePage() {
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-4 sm:flex-row">
                   <Link
-                    className="inline-flex transform items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-accent-600 to-accent-700 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all duration-200 hover:-translate-y-1 hover:from-accent-700 hover:to-accent-800 hover:shadow-xl"
+                    className="inline-flex transform items-center justify-center space-x-2 rounded-xl bg-linear-to-r from-accent-600 to-accent-700 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all duration-200 hover:-translate-y-1 hover:from-accent-700 hover:to-accent-800 hover:shadow-xl"
                     href="#pricing"
                   >
                     <Phone className="h-5 w-5" />
@@ -450,7 +450,7 @@ export default function StrategyServicePage() {
         </section>
 
         {/* Contact/Booking Section */}
-        <section className="section-padding bg-gradient-to-br from-primary-600 to-accent-600 text-white">
+        <section className="section-padding bg-linear-to-br from-primary-600 to-accent-600 text-white">
           <div className="container-max text-center">
             <h2 className="mb-4 text-3xl font-bold">Sẵn sàng tăng power 100-200%?</h2>
             <p className="mb-8 text-xl opacity-90">
@@ -482,7 +482,7 @@ export default function StrategyServicePage() {
                 />
 
                 <button
-                  className="w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-8 py-4 font-bold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
+                  className="w-full rounded-lg bg-linear-to-r from-accent-600 to-accent-700 px-8 py-4 font-bold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
                   type="submit"
                 >
                   Đặt lịch tư vấn miễn phí ngay
@@ -512,7 +512,7 @@ export default function StrategyServicePage() {
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-4 shadow-lg md:hidden">
         <div className="flex space-x-3">
           <Link
-            className="flex-1 rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white"
+            className="flex-1 rounded-lg bg-linear-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white"
             href="#pricing"
           >
             Xem giá
@@ -568,7 +568,7 @@ function PricingCard({ tier }: PricingCardProps) {
       <ul className="mb-8 space-y-3">
         {tier.features.map((feature, index) => (
           <li key={index} className="flex items-start space-x-3">
-            <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+            <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-500" />
             <span className="text-sm text-gray-600">{feature}</span>
           </li>
         ))}
@@ -576,7 +576,7 @@ function PricingCard({ tier }: PricingCardProps) {
 
       <div className="space-y-3">
         <Link
-          className="block w-full rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
+          className="block w-full rounded-lg bg-linear-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-accent-700 hover:to-accent-800"
           href="/contact"
         >
           {tier.cta}
@@ -603,7 +603,7 @@ interface MethodologyStepProps {
 function MethodologyStep({ step, index: _index }: MethodologyStepProps) {
   return (
     <div className="flex items-start space-x-6">
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-lg font-bold text-white">
           {step.step}
         </div>
@@ -688,7 +688,7 @@ function CaseStudyCard({ study }: CaseStudyCardProps) {
 
       {/* Improvement Badge */}
       <div className="mb-4 text-center">
-        <div className="inline-block rounded-lg bg-gradient-to-r from-green-500 to-blue-500 px-4 py-2 text-sm font-bold text-white">
+        <div className="inline-block rounded-lg bg-linear-to-r from-green-500 to-blue-500 px-4 py-2 text-sm font-bold text-white">
           {study.improvement}
         </div>
       </div>

@@ -97,7 +97,7 @@ export default function ServicesPage() {
       <VietnameseGamingSchema />
 
       {/* Urgency Banner */}
-      <div className="bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-white">
+      <div className="bg-linear-to-r from-accent-600 to-accent-700 px-4 py-3 text-white">
         <div className="container-max flex items-center justify-center space-x-4 text-sm font-medium">
           <Clock className="h-4 w-4 animate-pulse" />
           <span>🔥 Ưu đãi tháng 12: Chỉ còn 5 slot tư vấn miễn phí - Đăng ký ngay!</span>
@@ -107,7 +107,7 @@ export default function ServicesPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="section-padding bg-gradient-to-br from-primary-50 via-white to-accent-50">
+        <section className="section-padding bg-linear-to-br from-primary-50 via-white to-accent-50">
           <div className="container-max text-center">
             <h1 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
               Dịch vụ <span className="text-gradient">Rise of Kingdoms</span> chuyên nghiệp
@@ -136,7 +136,7 @@ export default function ServicesPage() {
             {/* Primary CTA */}
             <div className="mb-8">
               <Link
-                className="inline-flex transform items-center space-x-2 rounded-xl bg-gradient-to-r from-accent-600 to-accent-700 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all duration-200 hover:-translate-y-1 hover:from-accent-700 hover:to-accent-800 hover:shadow-xl"
+                className="inline-flex transform items-center space-x-2 rounded-xl bg-linear-to-r from-accent-600 to-accent-700 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all duration-200 hover:-translate-y-1 hover:from-accent-700 hover:to-accent-800 hover:shadow-xl"
                 href="/booking"
               >
                 <Phone className="h-5 w-5" />
@@ -217,7 +217,7 @@ export default function ServicesPage() {
                     <ul className="mb-8 space-y-3">
                       {tier.features.map((feature: string, featureIndex: number) => (
                         <li key={featureIndex} className="flex items-start space-x-3">
-                          <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                          <Check className="mt-0.5 h-5 w-5 shrink-0 text-green-500" />
                           <span className="text-sm text-gray-600">{feature}</span>
                         </li>
                       ))}
@@ -228,8 +228,8 @@ export default function ServicesPage() {
                         href={`/booking?tier=${encodeURIComponent(tier.tier)}`}
                         className={`block w-full rounded-lg px-4 py-3 text-center font-semibold text-white transition-all duration-200 ${
                           isPopular
-                            ? 'bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800'
-                            : 'bg-gradient-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800'
+                            ? 'bg-linear-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800'
+                            : 'bg-linear-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800'
                         }`}
                       >
                         {t.common.bookNow}
@@ -286,7 +286,7 @@ export default function ServicesPage() {
                   <ul className="mb-8 space-y-3">
                     {tier.features.map((feature: string, featureIndex: number) => (
                       <li key={featureIndex} className="flex items-start space-x-3">
-                        <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                        <Check className="mt-0.5 h-5 w-5 shrink-0 text-green-500" />
                         <span className="text-sm text-gray-600">{feature}</span>
                       </li>
                     ))}
@@ -294,7 +294,7 @@ export default function ServicesPage() {
 
                   <div className="space-y-3">
                     <Link
-                      className="block w-full rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-red-700 hover:to-red-800"
+                      className="block w-full rounded-lg bg-linear-to-r from-red-600 to-red-700 px-4 py-3 text-center font-semibold text-white transition-all duration-200 hover:from-red-700 hover:to-red-800"
                       href={`/booking?service=spam-barbarian&tier=${encodeURIComponent(tier.tier)}`}
                     >
                       {t.common.bookNow}
@@ -401,7 +401,7 @@ export default function ServicesPage() {
 
             {/* CTA */}
             <div className="mt-16 text-center">
-              <div className="rounded-2xl bg-gradient-to-r from-primary-600 to-accent-600 p-8 text-white">
+              <div className="rounded-2xl bg-linear-to-r from-primary-600 to-accent-600 p-8 text-white">
                 <h3 className="mb-4 text-2xl font-bold">Sẵn sàng nâng tầm gameplay của bạn?</h3>
                 <p className="mb-6 text-lg opacity-90">
                   Tham gia cùng hơn 1000+ game thủ đã thành công với dịch vụ của chúng tôi
@@ -433,7 +433,7 @@ export default function ServicesPage() {
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white p-4 shadow-lg md:hidden">
         <div className="flex space-x-3">
           <Link
-            className="flex-1 rounded-lg bg-gradient-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white"
+            className="flex-1 rounded-lg bg-linear-to-r from-accent-600 to-accent-700 px-4 py-3 text-center font-semibold text-white"
             href="/contact"
           >
             Tư vấn miễn phí

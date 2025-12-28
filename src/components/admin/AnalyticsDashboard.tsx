@@ -269,7 +269,7 @@ export function AnalyticsDashboard() {
       </div>
 
       {/* Average Order Value */}
-      <div className="rounded-lg border bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
+      <div className="rounded-lg border bg-linear-to-r from-blue-50 to-indigo-50 p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600">Giá trị đơn hàng trung bình</p>

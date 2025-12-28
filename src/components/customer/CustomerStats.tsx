@@ -175,7 +175,7 @@ export default function CustomerStats({ stats }: CustomerStatsProps) {
 
                 <div className="h-2 w-full rounded-full bg-gray-200">
                   <div
-                    className="h-2 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 transition-all duration-500"
+                    className="h-2 rounded-full bg-linear-to-r from-amber-600 to-orange-600 transition-all duration-500"
                     style={{ width: `${stats.currentTierProgress}%` }}
                   />
                 </div>

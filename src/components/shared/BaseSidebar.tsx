@@ -47,7 +47,7 @@ export default function BaseSidebar({ config }: BaseSidebarProps) {
             </div>
             <SidebarContent />
           </div>
-          <div className="w-14 flex-shrink-0" />
+          <div className="w-14 shrink-0" />
         </div>
       </div>
 

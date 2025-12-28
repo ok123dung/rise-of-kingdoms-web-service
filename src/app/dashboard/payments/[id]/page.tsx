@@ -227,7 +227,7 @@ export default function PaymentDetailPage() {
               href={`/dashboard/bookings/${payment.bookings.id}`}
             >
               <div className="flex items-start space-x-4">
-                <div className="bg-rok-gold/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-rok-gold/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <span className="text-2xl">{payment.bookings.service_tiers.services.icon}</span>
                 </div>
                 <div className="flex-1">

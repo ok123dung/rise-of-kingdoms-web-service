@@ -95,7 +95,7 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 px-4">
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-blue-50 to-purple-50 px-4">
         <div className="w-full max-w-md text-center">
           <div className="rounded-lg bg-white p-8 shadow-xl">
             <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
@@ -116,7 +116,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-blue-50 to-purple-50 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="rounded-lg bg-white p-8 shadow-xl">
           {/* Logo */}
@@ -276,7 +276,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 px-4">
+        <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-blue-50 to-purple-50 px-4">
           <div className="w-full max-w-md text-center">
             <div className="rounded-lg bg-white p-8 shadow-xl">
               <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
