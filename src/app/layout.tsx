@@ -20,17 +20,27 @@ import { ConversionTesting } from '@/components/testing/ConversionTesting'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
+// Preconnect to external resources for faster loading
+const preconnectLinks = [
+  { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+  { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+  { rel: 'dns-prefetch', href: 'https://www.googletagmanager.com' }
+]
+
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
   variable: '--font-inter',
-  display: 'swap'
+  display: 'swap',
+  preload: true
 })
 
 const poppins = Poppins({
   subsets: ['latin', 'latin-ext'],
   weight: ['500', '700'],
   variable: '--font-poppins',
-  display: 'swap'
+  display: 'swap',
+  preload: true,
+  adjustFontFallback: true
 })
 
 export const metadata: Metadata = {
@@ -112,6 +122,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html className={`${inter.variable} ${poppins.variable}`} lang="vi">
+      <head>
+        {/* Preconnect hints for faster resource loading - improves LCP */}
+        {preconnectLinks.map(link => (
+          <link
+            key={link.href}
+            rel={link.rel}
+            href={link.href}
+            crossOrigin={link.crossOrigin as 'anonymous' | undefined}
+          />
+        ))}
+      </head>
       <body className={`${inter.className} bg-gray-50 antialiased`}>
         <CSPNonceProvider>
           <GoogleAnalytics nonce={nonce} />

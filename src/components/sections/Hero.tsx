@@ -12,6 +12,7 @@ export default function Hero() {
     <section
       className="bg-gradient-hero section-padding relative overflow-hidden"
       data-testid="hero-section"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '0 800px' }}
     >
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
@@ -41,7 +42,11 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl">
+          {/* LCP Element - optimized for fast rendering */}
+          <h1
+            className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl"
+            style={{ textRendering: 'optimizeSpeed' }}
+          >
             {t.hero.title}{' '}
             <span className="text-gradient animate-glow mt-2 block">Rise of Kingdoms</span>
           </h1>
