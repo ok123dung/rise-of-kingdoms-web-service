@@ -29,7 +29,7 @@ const PAYMENT_METHODS = [
     name: 'ZaloPay',
     description: 'Ví Zalo',
     color: 'bg-blue-600',
-    textColor: 'text-blue-600',
+    textColor: 'text-blue-700', // Darker for better contrast (WCAG AA)
     bgLight: 'bg-blue-50',
     keywords: ['zalopay', 'ví zalopay', 'thanh toán zalopay']
   },
@@ -38,7 +38,7 @@ const PAYMENT_METHODS = [
     name: 'VNPay',
     description: 'Thẻ ngân hàng',
     color: 'bg-red-500',
-    textColor: 'text-red-600',
+    textColor: 'text-red-700', // Darker for better contrast (WCAG AA)
     bgLight: 'bg-red-50',
     keywords: ['vnpay', 'vnpay qr', 'thanh toán vnpay']
   },
@@ -47,7 +47,7 @@ const PAYMENT_METHODS = [
     name: 'Banking',
     description: 'Chuyển khoản',
     color: 'bg-green-600',
-    textColor: 'text-green-600',
+    textColor: 'text-green-700', // Darker for better contrast (WCAG AA)
     bgLight: 'bg-green-50',
     keywords: ['chuyển khoản', 'banking', 'ngân hàng']
   }
@@ -84,7 +84,7 @@ function PaymentBadge({ method }: { method: PaymentMethod }) {
       {/* Text */}
       <div>
         <div className={`font-semibold ${method.textColor}`}>{method.name}</div>
-        <div className="text-xs text-gray-500">{method.description}</div>
+        <div className="text-xs text-gray-600">{method.description}</div>
       </div>
     </div>
   )
