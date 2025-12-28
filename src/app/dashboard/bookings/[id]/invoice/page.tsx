@@ -6,12 +6,13 @@ import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
 interface InvoicePageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function InvoicePage({ params }: InvoicePageProps) {
+  const { id } = await params
   const user = await getCurrentUser()
 
   if (!user) {
@@ -20,7 +21,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
 
   const booking = await prisma.bookings.findUnique({
     where: {
-      id: params.id,
+      id,
       user_id: user.id // Ensure user owns the booking
     },
     include: {

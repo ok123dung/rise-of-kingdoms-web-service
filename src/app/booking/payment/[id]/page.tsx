@@ -19,8 +19,9 @@ async function getBooking(id: string) {
   return booking
 }
 
-export default async function PaymentPage({ params }: { params: { id: string } }) {
-  const booking = await getBooking(params.id)
+export default async function PaymentPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const booking = await getBooking(id)
 
   if (!booking) notFound()
 
