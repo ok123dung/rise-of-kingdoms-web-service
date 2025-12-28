@@ -64,7 +64,6 @@ export default function Services() {
               phí để tìm ra giải pháp tốt nhất cho bạn.
             </p>
             <Link
-              aria-label="Liên hệ để được tư vấn thêm về dịch vụ"
               className="btn-primary inline-flex items-center space-x-3 px-8 py-4 text-lg"
               href="/contact"
             >
@@ -219,19 +218,18 @@ function ServiceCard({ service }: ServiceCardProps) {
           </div>
 
           <Link
-            aria-label={`Đặt dịch vụ ${title}`}
             href="/services"
             className={`
               book-now-btn block w-full transform rounded-xl px-6 py-4 text-center font-semibold transition-all duration-300
               ${
                 featured
-                  ? 'bg-linear-to-r from-amber-500 to-amber-600 text-white shadow-lg hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-amber-500/25'
-                  : 'bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25'
+                  ? 'bg-linear-to-r from-amber-600 to-amber-700 text-white shadow-lg hover:scale-105 hover:from-amber-700 hover:to-amber-800 hover:shadow-amber-500/25'
+                  : 'bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:scale-105 hover:from-blue-700 hover:to-blue-800 hover:shadow-blue-500/25'
               }
             `}
             onClick={e => e.stopPropagation()}
           >
-            {featured ? '🔥 Xem chi tiết' : 'Xem chi tiết'}
+            {featured ? 'Xem chi tiết' : 'Xem chi tiết'}
           </Link>
         </div>
       </div>

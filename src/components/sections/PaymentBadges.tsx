@@ -19,7 +19,7 @@ const PAYMENT_METHODS = [
     name: 'MoMo',
     description: 'Ví điện tử',
     color: 'bg-pink-500',
-    textColor: 'text-pink-600',
+    textColor: 'text-pink-700', // Darker for better contrast (WCAG AA)
     bgLight: 'bg-pink-50',
     // Keyword để SEO tools detect
     keywords: ['momo', 'ví momo', 'thanh toán momo']
@@ -62,6 +62,7 @@ type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 function PaymentBadge({ method }: { method: PaymentMethod }) {
   return (
     <div
+      role="listitem"
       data-payment-method={method.id}
       data-testid={`payment-badge-${method.id}`}
       className={`

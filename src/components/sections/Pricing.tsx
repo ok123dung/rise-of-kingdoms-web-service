@@ -88,7 +88,7 @@ export default function Pricing() {
               `}
             >
               {tier.featured && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-4 py-1 text-sm font-semibold text-white shadow-md">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-amber-600 px-4 py-1 text-sm font-semibold text-white shadow-md">
                   {t.pricing.popular}
                 </div>
               )}
@@ -129,7 +129,7 @@ export default function Pricing() {
                   block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold transition-colors
                   ${
                     tier.featured
-                      ? 'bg-amber-500 text-white hover:bg-amber-600'
+                      ? 'bg-amber-600 text-white hover:bg-amber-700'
                       : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
                   }
                 `}
