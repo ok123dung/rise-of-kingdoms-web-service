@@ -46,7 +46,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   return (
     <html lang="vi">
       <body>
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-orange-100 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-red-50 to-orange-100 px-4 py-12 sm:px-6 lg:px-8">
           <div className="w-full max-w-md space-y-8">
             <div className="rounded-xl bg-white p-8 text-center shadow-lg">
               {/* Error Icon */}

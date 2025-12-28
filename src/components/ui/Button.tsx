@@ -21,14 +21,14 @@ export interface ButtonProps {
 
 const ButtonVariants = {
   primary:
-    'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25',
+    'bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25',
   secondary:
-    'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-lg hover:scale-105 hover:from-gray-600 hover:to-gray-700',
+    'bg-linear-to-r from-gray-500 to-gray-600 text-white shadow-lg hover:scale-105 hover:from-gray-600 hover:to-gray-700',
   outline:
     'border-2 border-blue-500 text-blue-600 bg-transparent hover:bg-blue-500 hover:text-white',
   ghost: 'bg-transparent text-blue-600 hover:bg-blue-50',
   premium:
-    'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-amber-500/25'
+    'bg-linear-to-r from-amber-500 to-amber-600 text-white shadow-lg hover:scale-105 hover:from-amber-600 hover:to-amber-700 hover:shadow-amber-500/25'
 }
 
 const ButtonSizes = {

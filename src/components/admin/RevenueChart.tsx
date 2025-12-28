@@ -130,7 +130,7 @@ export default function RevenueChart() {
                   <div className="mt-1 text-xs text-gray-600">{item.bookings} đơn</div>
                 </div>
                 <div
-                  className="min-h-[20px] w-full rounded-t bg-gradient-to-t from-blue-600 to-blue-400 transition-all duration-200 hover:from-blue-700 hover:to-blue-500"
+                  className="min-h-[20px] w-full rounded-t bg-linear-to-t from-blue-600 to-blue-400 transition-all duration-200 hover:from-blue-700 hover:to-blue-500"
                   style={{
                     height: `${(item.revenue / maxRevenue) * 160}px`
                   }}

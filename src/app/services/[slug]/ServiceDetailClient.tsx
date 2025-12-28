@@ -54,7 +54,7 @@ export default function ServiceDetailClient({ slug, serviceData }: ServiceDetail
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+      <main className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         {/* Hero Section */}
         <section className="section-padding-y container-max">
           <div className="animate-fadeInUp mx-auto max-w-4xl text-center">
@@ -145,7 +145,7 @@ export default function ServiceDetailClient({ slug, serviceData }: ServiceDetail
                       onClick={() => setSelectedTierIndex(index)}
                     >
                       {tier.isPopular && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 to-red-500 px-4 py-1 text-xs font-bold text-white shadow-sm">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-linear-to-r from-amber-500 to-red-500 px-4 py-1 text-xs font-bold text-white shadow-sm">
                           {t.pricing.popular}
                         </div>
                       )}
@@ -191,7 +191,7 @@ export default function ServiceDetailClient({ slug, serviceData }: ServiceDetail
               </div>
 
               {/* Contact Support */}
-              <div className="card animate-fadeInUp bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+              <div className="card animate-fadeInUp bg-linear-to-r from-blue-500 to-purple-600 text-white">
                 <h3 className="mb-4 text-xl font-bold">🤝 {t.common.contact}?</h3>
                 <p className="mb-6 text-sm opacity-90">{t.hero.subtitle}</p>
                 <div className="space-y-3">

@@ -100,7 +100,7 @@ export default async function RecentBookings() {
               bookings.map(booking => (
                 <li key={booking.id} className="py-4">
                   <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
                         <span className="text-sm font-medium text-gray-700">
                           {booking.users.full_name.charAt(0).toUpperCase()}
@@ -137,7 +137,7 @@ export default async function RecentBookings() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <Link
                         className="inline-flex items-center rounded-full bg-white p-1.5 text-gray-400 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         href={`/admin/bookings/${booking.id}`}

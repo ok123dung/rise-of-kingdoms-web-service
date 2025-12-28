@@ -101,7 +101,7 @@ export default function PaymentBadges() {
   return (
     <section
       aria-label="Phương thức thanh toán"
-      className="bg-gradient-to-b from-gray-50 to-white py-12"
+      className="bg-linear-to-b from-gray-50 to-white py-12"
       data-testid="payment-badges-section"
     >
       <div className="container-max px-4">

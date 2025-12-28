@@ -62,13 +62,13 @@ export default function NotFound() {
   return (
     <>
       <Header />
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+      <main className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         <div className="container-max section-padding text-center">
           {/* Main Error Section */}
           <div className="animate-fadeInUp mx-auto max-w-2xl">
             {/* 404 Animation */}
             <div className="relative mb-8">
-              <div className="animate-bounce bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-8xl font-bold text-transparent md:text-9xl">
+              <div className="animate-bounce bg-linear-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-8xl font-bold text-transparent md:text-9xl">
                 404
               </div>
               <div className="absolute -right-4 -top-4 h-12 w-12 animate-ping rounded-full bg-amber-500 opacity-75" />
@@ -176,7 +176,7 @@ export default function NotFound() {
 
           {/* Help Section */}
           <div className="mx-auto mt-16 max-w-2xl">
-            <div className="card bg-gradient-to-r from-blue-500 to-purple-600 text-center text-white">
+            <div className="card bg-linear-to-r from-blue-500 to-purple-600 text-center text-white">
               <h3 className="mb-4 text-xl font-bold">🤔 Vẫn không tìm thấy những gì bạn cần?</h3>
               <p className="mb-6 opacity-90">
                 Đội ngũ hỗ trợ 24/7 của chúng tôi luôn sẵn sàng giúp đỡ bạn!

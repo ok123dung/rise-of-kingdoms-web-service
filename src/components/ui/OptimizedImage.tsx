@@ -79,8 +79,8 @@ const OptimizedImage = memo(function OptimizedImage({
       {isLoading && (
         <div
           className={cn(
-            'absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200',
-            'bg-[length:200%_100%] bg-no-repeat'
+            'absolute inset-0 animate-pulse bg-linear-to-r from-gray-200 via-gray-300 to-gray-200',
+            'bg-size-[200%_100%] bg-no-repeat'
           )}
         />
       )}

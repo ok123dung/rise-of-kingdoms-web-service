@@ -108,7 +108,7 @@ export default function AboutPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+      <main className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         {/* Hero Section */}
         <section className="section-padding-y container-max">
           <div className="animate-fadeInUp mx-auto max-w-4xl text-center">
@@ -228,7 +228,7 @@ export default function AboutPage() {
                 {teamMembers.map((member, index) => (
                   <div key={index} className="card hover-lift">
                     <div className="mb-6 text-center">
-                      <div className="mx-auto mb-4 h-24 w-24 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 p-1">
+                      <div className="mx-auto mb-4 h-24 w-24 rounded-full bg-linear-to-r from-amber-400 to-amber-600 p-1">
                         <div className="flex h-full w-full items-center justify-center rounded-full bg-slate-200">
                           <Crown className="h-8 w-8 text-amber-600" />
                         </div>
@@ -262,7 +262,7 @@ export default function AboutPage() {
                         <ul className="space-y-1 text-sm text-slate-600">
                           {member.achievements.map((achievement, i) => (
                             <li key={i} className="flex items-start gap-2">
-                              <Star className="mt-0.5 h-3 w-3 flex-shrink-0 text-amber-500" />
+                              <Star className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
                               <span>{achievement}</span>
                             </li>
                           ))}
@@ -289,7 +289,7 @@ export default function AboutPage() {
                 {values.map((value, index) => (
                   <div key={index} className="card hover-lift">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 rounded-xl bg-amber-100 p-3">
+                      <div className="shrink-0 rounded-xl bg-amber-100 p-3">
                         <value.icon className="h-6 w-6 text-amber-600" />
                       </div>
                       <div>
@@ -302,7 +302,7 @@ export default function AboutPage() {
               </div>
 
               {/* Why Choose Us */}
-              <div className="card mt-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+              <div className="card mt-16 bg-linear-to-r from-blue-500 to-purple-600 text-white">
                 <div className="text-center">
                   <h3 className="mb-6 text-2xl font-bold">Tại sao chọn RoK Services?</h3>
 
@@ -347,7 +347,7 @@ export default function AboutPage() {
               <div className="mx-auto max-w-4xl">
                 <div className="relative">
                   {/* Timeline line */}
-                  <div className="absolute left-1/2 h-full w-1 -translate-x-1/2 transform rounded-full bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600" />
+                  <div className="absolute left-1/2 h-full w-1 -translate-x-1/2 transform rounded-full bg-linear-to-b from-amber-200 via-amber-400 to-amber-600" />
 
                   <div className="space-y-16">
                     {milestones.map((milestone, index) => (
@@ -385,7 +385,7 @@ export default function AboutPage() {
 
         {/* Call to Action */}
         <section className="section-padding container-max">
-          <div className="card bg-gradient-to-r from-amber-500 to-amber-600 text-center text-white">
+          <div className="card bg-linear-to-r from-amber-500 to-amber-600 text-center text-white">
             <h2 className="mb-4 text-3xl font-bold">Sẵn sàng bắt đầu hành trình với chúng tôi?</h2>
             <p className="mb-8 text-xl opacity-90">
               Hãy để RoK Services đồng hành cùng bạn trên con đường chinh phục Rise of Kingdoms

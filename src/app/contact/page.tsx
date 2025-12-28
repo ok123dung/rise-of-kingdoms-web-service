@@ -70,7 +70,7 @@ export default function ContactPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+      <main className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         <div className="container-max section-padding">
           {/* Header Section */}
           <div className="animate-fadeInUp mx-auto mb-16 max-w-3xl text-center">
@@ -298,7 +298,7 @@ export default function ContactPage() {
               </div>
 
               {/* Discord & Social */}
-              <div className="card bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+              <div className="card bg-linear-to-r from-blue-500 to-purple-600 text-white">
                 <h3 className="mb-4 text-xl font-bold">🎮 Tham gia cộng đồng</h3>
                 <p className="mb-6 opacity-90">
                   Kết nối với 1000+ game thủ RoK, chia sẻ kinh nghiệm và nhận tips miễn phí\!

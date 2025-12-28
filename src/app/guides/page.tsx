@@ -146,7 +146,7 @@ export default function GuidesPage() {
     <>
       <FAQSchema faqs={faqItems} />
       <Header />
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+      <main className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         {/* Hero Section */}
         <section className="section-padding-y container-max">
           <div className="animate-fadeInUp mx-auto max-w-4xl text-center">
@@ -219,7 +219,7 @@ export default function GuidesPage() {
             {featuredGuides.map(guide => (
               <div key={guide.id} className="card hover-lift group">
                 <div className="relative mb-4">
-                  <div className="flex h-48 w-full items-center justify-center rounded-lg bg-gradient-to-r from-amber-400 to-amber-600">
+                  <div className="flex h-48 w-full items-center justify-center rounded-lg bg-linear-to-r from-amber-400 to-amber-600">
                     <div className="text-4xl text-white">📖</div>
                   </div>
                   <div className="absolute left-3 top-3 flex items-center gap-2">
@@ -278,7 +278,7 @@ export default function GuidesPage() {
             {allGuides.map(guide => (
               <div key={guide.id} className="card hover-lift group">
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 rounded-xl bg-amber-100 p-3">
+                  <div className="shrink-0 rounded-xl bg-amber-100 p-3">
                     {getTypeIcon(guide.type)}
                   </div>
                   <div className="flex-1">
@@ -343,7 +343,7 @@ export default function GuidesPage() {
 
         {/* CTA Section */}
         <section className="section-padding container-max">
-          <div className="card bg-gradient-to-r from-blue-500 to-purple-600 text-center text-white">
+          <div className="card bg-linear-to-r from-blue-500 to-purple-600 text-center text-white">
             <h3 className="mb-4 text-2xl font-bold">
               🎯 Cần hướng dẫn riêng cho tình huống của bạn?
             </h3>

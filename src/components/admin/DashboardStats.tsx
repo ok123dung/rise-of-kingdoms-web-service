@@ -185,9 +185,9 @@ export default async function DashboardStats() {
                 }`}
               >
                 {stat.changeType === 'increase' ? (
-                  <TrendingUp className="h-4 w-4 flex-shrink-0 self-center" />
+                  <TrendingUp className="h-4 w-4 shrink-0 self-center" />
                 ) : (
-                  <TrendingDown className="h-4 w-4 flex-shrink-0 self-center" />
+                  <TrendingDown className="h-4 w-4 shrink-0 self-center" />
                 )}
                 <span className="ml-1">{Math.abs(stat.change).toFixed(1)}%</span>
               </p>

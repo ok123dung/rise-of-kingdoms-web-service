@@ -5,7 +5,7 @@ export default function Loading() {
         {/* Logo Animation */}
         <div className="relative mx-auto mb-4 h-16 w-16">
           <div className="absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-20" />
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg">
             <svg
               className="h-8 w-8 animate-spin text-white"
               fill="none"

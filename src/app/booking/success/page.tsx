@@ -27,19 +27,19 @@ export default function BookingSuccessPage() {
               <h3 className="mb-4 font-semibold text-gray-900">Bước tiếp theo:</h3>
               <ul className="space-y-3 text-gray-600">
                 <li className="flex items-start space-x-3">
-                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600">
                     1
                   </span>
                   <span>Kiểm tra email xác nhận (có thể trong mục Spam)</span>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600">
                     2
                   </span>
                   <span>Chuẩn bị sẵn thông tin tài khoản/câu hỏi cần tư vấn</span>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600">
                     3
                   </span>
                   <span>Tham gia Discord để được hỗ trợ nhanh nhất</span>

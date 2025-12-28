@@ -115,7 +115,7 @@ const BookingItem = memo(({ booking }: { booking: ActiveBooking }) => {
               </div>
               {booking.assignedStaff && (
                 <div className="flex items-center gap-2">
-                  <div className="relative flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-xs font-semibold text-white">
+                  <div className="relative flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-br from-amber-500 to-orange-600 text-xs font-semibold text-white">
                     {booking.assignedStaff.avatar ? (
                       <Image fill alt={booking.assignedStaff.name} className="rounded-full object-cover" sizes="20px" src={booking.assignedStaff.avatar} />
                     ) : (
@@ -136,7 +136,7 @@ const BookingItem = memo(({ booking }: { booking: ActiveBooking }) => {
               <span className="font-medium">{booking.progress}%</span>
             </div>
             <div className="h-2 w-full rounded-full bg-gray-200">
-              <div className="h-2 rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-300" style={{ width: `${booking.progress}%` }} />
+              <div className="h-2 rounded-full bg-linear-to-r from-amber-600 to-amber-400 transition-all duration-300" style={{ width: `${booking.progress}%` }} />
             </div>
           </div>
         )}

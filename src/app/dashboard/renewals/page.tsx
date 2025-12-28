@@ -112,7 +112,7 @@ export default function RenewalsPage() {
           {renewals.filter(r => r.status === 'expiring').length > 0 && (
             <div className="border-l-4 border-yellow-400 bg-yellow-50 p-4">
               <div className="flex">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
                 </div>
                 <div className="ml-3">
@@ -131,7 +131,7 @@ export default function RenewalsPage() {
                   <div className="px-4 py-4 sm:px-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <div className="bg-rok-gold/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full">
+                        <div className="bg-rok-gold/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
                           <span className="text-2xl">
                             {renewal.bookings.service_tiers.services.icon}
                           </span>
@@ -179,7 +179,7 @@ export default function RenewalsPage() {
                     <div className="mt-2 sm:flex sm:justify-between">
                       <div className="sm:flex">
                         <p className="flex items-center text-sm text-gray-500">
-                          <ClockIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" />
+                          <ClockIcon className="mr-1.5 h-5 w-5 shrink-0 text-gray-400" />
                           Thời gian sử dụng:{' '}
                           {format(new Date(renewal.bookings.start_date), 'dd/MM/yyyy', {
                             locale: vi

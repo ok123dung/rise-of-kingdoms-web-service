@@ -9,7 +9,7 @@ export default function PrivacyPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+      <main className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         {/* Header Section */}
         <section className="section-padding-y container-max">
           <div className="animate-fadeInUp mx-auto max-w-4xl text-center">
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
                 {/* Introduction */}
                 <div className="mb-8 rounded-xl border-l-4 border-green-500 bg-green-50 p-6">
                   <div className="flex items-start gap-3">
-                    <Lock className="mt-1 h-6 w-6 flex-shrink-0 text-green-600" />
+                    <Lock className="mt-1 h-6 w-6 shrink-0 text-green-600" />
                     <div>
                       <h3 className="mb-2 text-lg font-bold text-green-800">Cam kết bảo mật</h3>
                       <p className="mb-0 text-green-700">
@@ -336,7 +336,7 @@ export default function PrivacyPage() {
                     </h2>
                     <div className="rounded-xl border-l-4 border-orange-500 bg-orange-50 p-6">
                       <div className="flex items-start gap-3">
-                        <AlertTriangle className="mt-1 h-6 w-6 flex-shrink-0 text-orange-600" />
+                        <AlertTriangle className="mt-1 h-6 w-6 shrink-0 text-orange-600" />
                         <div>
                           <h3 className="mb-2 text-lg font-bold text-orange-800">
                             Lưu ý về độ tuổi

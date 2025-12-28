@@ -30,7 +30,7 @@ export default function Hero() {
       </div>
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-slate-900/30" />
+      <div className="absolute inset-0 bg-linear-to-t from-slate-900/50 via-transparent to-slate-900/30" />
 
       <div className="container-max relative z-10">
         <div className="animate-fadeInUp text-center">
@@ -69,7 +69,7 @@ export default function Hero() {
         <div className="mt-20 grid grid-cols-1 gap-8 md:grid-cols-3">
           <div className="group text-center">
             <div className="glassmorphism hover-lift p-8">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 transition-transform duration-300 group-hover:scale-110">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-r from-amber-400 to-amber-600 transition-transform duration-300 group-hover:scale-110">
                 <Users className="h-8 w-8 text-white" />
               </div>
               <div className="animate-pulse-slow mb-2 text-4xl font-bold text-white">1000+</div>
@@ -80,7 +80,7 @@ export default function Hero() {
 
           <div className="group text-center">
             <div className="glassmorphism hover-lift p-8">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-blue-700 transition-transform duration-300 group-hover:scale-110">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-r from-blue-500 to-blue-700 transition-transform duration-300 group-hover:scale-110">
                 <Trophy className="h-8 w-8 text-white" />
               </div>
               <div className="animate-pulse-slow mb-2 text-4xl font-bold text-white">500+</div>
@@ -91,7 +91,7 @@ export default function Hero() {
 
           <div className="group text-center">
             <div className="glassmorphism hover-lift p-8">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 transition-transform duration-300 group-hover:scale-110">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-r from-amber-500 to-yellow-500 transition-transform duration-300 group-hover:scale-110">
                 <Star className="h-8 w-8 text-white" />
               </div>
               <div className="animate-pulse-slow mb-2 text-4xl font-bold text-white">4.9/5</div>

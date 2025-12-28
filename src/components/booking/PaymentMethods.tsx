@@ -119,7 +119,7 @@ export default function PaymentMethods({ booking }: PaymentMethodsProps) {
           Đây là môi trường thử nghiệm. Nhấn nút bên dưới để giả lập thanh toán thành công.
         </p>
         <button
-          className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-4 py-3 text-center font-semibold text-white shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-500/30 disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-xl bg-linear-to-r from-amber-500 to-orange-600 px-4 py-3 text-center font-semibold text-white shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 hover:shadow-amber-500/30 disabled:cursor-not-allowed disabled:opacity-70"
           disabled={isProcessing}
           onClick={() => void handlePayment()}
         >

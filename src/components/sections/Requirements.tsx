@@ -27,7 +27,7 @@ export default function Requirements() {
               <ul className="space-y-3">
                 {t.requirements.list.k1.map((item: string, index: number) => (
                   <li key={index} className="flex items-start">
-                    <CheckCircle2 className="mr-2 h-5 w-5 flex-shrink-0 text-green-500" />
+                    <CheckCircle2 className="mr-2 h-5 w-5 shrink-0 text-green-500" />
                     <span className="text-sm text-slate-600">{item}</span>
                   </li>
                 ))}
@@ -39,7 +39,7 @@ export default function Requirements() {
               <ul className="space-y-3">
                 {t.requirements.list.k2.map((item: string, index: number) => (
                   <li key={index} className="flex items-start">
-                    <CheckCircle2 className="mr-2 h-5 w-5 flex-shrink-0 text-green-500" />
+                    <CheckCircle2 className="mr-2 h-5 w-5 shrink-0 text-green-500" />
                     <span className="text-sm text-slate-600">{item}</span>
                   </li>
                 ))}
@@ -51,7 +51,7 @@ export default function Requirements() {
               <ul className="space-y-3">
                 {t.requirements.list.k4.map((item: string, index: number) => (
                   <li key={index} className="flex items-start">
-                    <CheckCircle2 className="mr-2 h-5 w-5 flex-shrink-0 text-green-500" />
+                    <CheckCircle2 className="mr-2 h-5 w-5 shrink-0 text-green-500" />
                     <span className="text-sm text-slate-600">{item}</span>
                   </li>
                 ))}

@@ -111,7 +111,7 @@ export default function Pricing() {
               <ul className="mb-8 flex-1 space-y-4">
                 {tier.features.map(feature => (
                   <li key={feature} className="flex items-start">
-                    <Check className="mr-3 h-5 w-5 flex-shrink-0 text-green-500" />
+                    <Check className="mr-3 h-5 w-5 shrink-0 text-green-500" />
                     <span className="text-sm text-slate-600">{feature}</span>
                   </li>
                 ))}

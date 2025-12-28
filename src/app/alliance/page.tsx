@@ -115,7 +115,7 @@ export default function AlliancePage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
+      <main className="min-h-screen bg-linear-to-br from-slate-50 via-amber-50/20 to-blue-50/30">
         {/* Hero Section */}
         <section className="section-padding-y container-max">
           <div className="animate-fadeInUp mx-auto max-w-4xl text-center">
@@ -300,7 +300,7 @@ export default function AlliancePage() {
 
               {/* CTA */}
               <div className="mt-12 text-center">
-                <div className="card inline-block bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+                <div className="card inline-block bg-linear-to-r from-purple-500 to-blue-600 text-white">
                   <h3 className="mb-4 text-xl font-bold">Muốn alliance của bạn xuất hiện ở đây?</h3>
                   <p className="mb-6 opacity-90">
                     Đăng ký để được featured trong Alliance Directory
@@ -350,7 +350,7 @@ export default function AlliancePage() {
               </div>
 
               {/* Features Overview */}
-              <div className="card border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
+              <div className="card border border-amber-200 bg-linear-to-r from-amber-50 to-orange-50">
                 <div className="mb-8 text-center">
                   <h3 className="mb-4 text-2xl font-bold text-slate-900">
                     🚀 Tất cả tools trong một dashboard
@@ -425,7 +425,7 @@ export default function AlliancePage() {
 
               {/* Pricing CTA */}
               <div className="mt-16 text-center">
-                <div className="card bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                <div className="card bg-linear-to-r from-blue-500 to-purple-600 text-white">
                   <h3 className="mb-4 text-2xl font-bold">📈 Nâng alliance lên tầm cao mới</h3>
                   <p className="mb-8 text-xl opacity-90">Bắt đầu với gói Basic chỉ 1M VNĐ/tháng</p>
                   <div className="flex flex-col justify-center gap-4 sm:flex-row">

@@ -77,7 +77,7 @@ export default function TwoFactorVerify({ onVerify, onCancel, email }: TwoFactor
 
         {error && (
           <div className="flex items-start rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            <AlertCircle className="mr-2 mt-0.5 h-4 w-4 flex-shrink-0" />
+            <AlertCircle className="mr-2 mt-0.5 h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
