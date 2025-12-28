@@ -3,6 +3,7 @@ import { Inter, Poppins } from 'next/font/google'
 
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { CSPNonceProvider } from '@/components/CSPNonceProvider'
+import { CriticalCSS } from '@/components/performance/CriticalCSS'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { MobileStickyActions } from '@/components/mobile/MobileOptimizations'
 import { PerformanceMonitor } from '@/components/performance/PerformanceMonitor'
@@ -123,6 +124,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html className={`${inter.variable} ${poppins.variable}`} lang="vi">
       <head>
+        {/* Critical CSS for LCP - renders hero before main CSS loads */}
+        <CriticalCSS nonce={nonce} />
         {/* Preconnect hints for faster resource loading - improves LCP */}
         {preconnectLinks.map(link => (
           <link
