@@ -8,6 +8,9 @@ import Pricing from '@/components/sections/Pricing'
 import Requirements from '@/components/sections/Requirements'
 import Services from '@/components/sections/Services'
 
+// Force static generation for optimal LCP - page is pre-rendered at build time
+export const dynamic = 'force-static'
+
 export default function HomePage() {
   return (
     <>
