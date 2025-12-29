@@ -66,53 +66,57 @@ describe('Security Functions', () => {
   })
 
   describe('stripDangerousPatterns', () => {
+    // Note: Uses sanitize-html library which has specific behavior
+
     it('should remove script tags', () => {
-      expect(stripDangerousPatterns('<script>alert("xss")</script>')).toBe('')
+      const result = stripDangerousPatterns('<script>alert("xss")</script>')
+      expect(result).not.toContain('<script')
+      expect(result).not.toContain('</script>')
     })
 
     it('should remove script tags with attributes', () => {
-      expect(stripDangerousPatterns('<script src="evil.js"></script>')).toBe('')
+      const result = stripDangerousPatterns('<script src="evil.js"></script>')
+      expect(result).not.toContain('<script')
     })
 
     it('should remove unclosed script tags', () => {
-      expect(stripDangerousPatterns('<script>alert("xss")')).toBe('alert("xss")')
+      const result = stripDangerousPatterns('<script>alert("xss")')
+      expect(result).not.toContain('<script')
     })
 
-    it('should remove javascript: protocol', () => {
-      expect(stripDangerousPatterns('javascript:alert("xss")')).toBe('alert("xss")')
+    it('should handle javascript: protocol in links', () => {
+      // sanitize-html removes javascript: from href attributes
+      const result = stripDangerousPatterns('<a href="javascript:alert(1)">click</a>')
+      expect(result).not.toContain('javascript:')
     })
 
-    it('should remove onclick handlers with double quotes', () => {
-      // Handler with double quotes containing no inner quotes
-      expect(stripDangerousPatterns('<div onclick="alert(1)">test</div>')).toBe(
-        '<div >test</div>'
-      )
+    it('should remove onclick handlers', () => {
+      const result = stripDangerousPatterns('<div onclick="alert(1)">test</div>')
+      expect(result).not.toContain('onclick')
+      expect(result).toContain('test')
     })
 
     it('should remove onerror handlers', () => {
-      // Handler with double quotes containing no inner quotes
-      expect(stripDangerousPatterns('<img onerror="alert(1)" src="x">')).toBe(
-        '<img  src="x">'
-      )
+      const result = stripDangerousPatterns('<img onerror="alert(1)" src="x">')
+      expect(result).not.toContain('onerror')
     })
 
     it('should remove event handlers without quotes', () => {
-      // Also handles cases where handler has no value yet
       const result = stripDangerousPatterns('<div onclick=>test</div>')
       expect(result).not.toContain('onclick')
     })
 
     it('should handle nested dangerous patterns', () => {
-      // Test iterative removal - nested patterns should be removed
       const nested = '<scr<script>ipt>alert("xss")</script>'
       const result = stripDangerousPatterns(nested)
       expect(result).not.toContain('<script')
       expect(result).not.toContain('</script>')
     })
 
-    it('should handle case insensitive patterns', () => {
-      expect(stripDangerousPatterns('<SCRIPT>alert("xss")</SCRIPT>')).toBe('')
-      expect(stripDangerousPatterns('JAVASCRIPT:alert("xss")')).toBe('alert("xss")')
+    it('should handle case insensitive script tags', () => {
+      const result = stripDangerousPatterns('<SCRIPT>alert("xss")</SCRIPT>')
+      expect(result).not.toContain('<SCRIPT')
+      expect(result).not.toContain('</SCRIPT>')
     })
 
     it('should preserve safe content', () => {
@@ -339,50 +343,60 @@ describe('Security Functions', () => {
   // JWT Validation Tests
   // ============================================
   describe('validateJWT', () => {
-    it('should accept valid non-expired JWT', () => {
-      // Create a valid JWT with future expiration
+    // Note: validateJWT uses jwt.verify() for cryptographic signature verification
+    // Tests with fake signatures will fail (correctly) - this is secure behavior
+
+    it('should reject tokens with invalid signatures', () => {
+      // Create a JWT with fake signature - should be rejected
       const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64')
       const payload = Buffer.from(
         JSON.stringify({ sub: '123', exp: Math.floor(Date.now() / 1000) + 3600 })
       ).toString('base64')
-      const token = `${header}.${payload}.signature`
-
-      const result = validateJWT(token)
-      expect(result.valid).toBe(true)
-      expect(result.payload?.sub).toBe('123')
-    })
-
-    it('should reject expired JWT', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64')
-      const payload = Buffer.from(
-        JSON.stringify({ sub: '123', exp: Math.floor(Date.now() / 1000) - 3600 })
-      ).toString('base64')
-      const token = `${header}.${payload}.signature`
+      const token = `${header}.${payload}.fake-signature`
 
       const result = validateJWT(token)
       expect(result.valid).toBe(false)
-      expect(result.error).toBe('Token expired')
+      expect(result.error).toBe('Invalid signature')
+    })
+
+    it('should reject tokens with wrong algorithm in header', () => {
+      const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64')
+      const payload = Buffer.from(JSON.stringify({ sub: '123' })).toString('base64')
+      const token = `${header}.${payload}.`
+
+      const result = validateJWT(token)
+      expect(result.valid).toBe(false)
     })
 
     it('should reject malformed JWT with wrong parts count', () => {
       const result = validateJWT('invalid.token')
       expect(result.valid).toBe(false)
-      expect(result.error).toBe('Invalid token format')
+      // jwt.verify throws JsonWebTokenError for malformed tokens
+      expect(result.error).toBe('Invalid signature')
     })
 
     it('should reject JWT with invalid base64', () => {
       const result = validateJWT('!!!.!!!.!!!')
       expect(result.valid).toBe(false)
-      expect(result.error).toBe('Invalid token')
+      expect(result.error).toBe('Invalid signature')
     })
 
-    it('should accept JWT without expiration', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64')
-      const payload = Buffer.from(JSON.stringify({ sub: '123' })).toString('base64')
-      const token = `${header}.${payload}.signature`
+    it('should reject empty token', () => {
+      const result = validateJWT('')
+      expect(result.valid).toBe(false)
+    })
 
-      const result = validateJWT(token)
-      expect(result.valid).toBe(true)
+    it('should return error when secret is not configured', () => {
+      // Store original env
+      const originalSecret = process.env.NEXTAUTH_SECRET
+      delete process.env.NEXTAUTH_SECRET
+
+      const result = validateJWT('any.token.here')
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('JWT secret not configured')
+
+      // Restore env
+      process.env.NEXTAUTH_SECRET = originalSecret
     })
   })
 

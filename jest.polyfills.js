@@ -92,17 +92,35 @@ if (typeof global.Request === 'undefined') {
   }
 }
 
-if (typeof global.Response === 'undefined') {
-  global.Response = class Response {
+if (typeof global.Response === 'undefined' || typeof global.Response.json !== 'function') {
+  class ResponsePolyfill {
     constructor(body, init = {}) {
       this._body = body
       this.status = init.status || 200
+      this.statusText = init.statusText || ''
+      this.ok = this.status >= 200 && this.status < 300
       this.headers = new Map(Object.entries(init.headers || {}))
     }
     json() {
       return Promise.resolve(typeof this._body === 'string' ? JSON.parse(this._body) : this._body)
     }
+    text() {
+      return Promise.resolve(typeof this._body === 'string' ? this._body : JSON.stringify(this._body))
+    }
+    // Static json method required by Next.js NextResponse.json()
+    static json(data, init = {}) {
+      const body = JSON.stringify(data)
+      const headers = {
+        'content-type': 'application/json',
+        ...(init.headers || {})
+      }
+      return new ResponsePolyfill(body, {
+        ...init,
+        headers
+      })
+    }
   }
+  global.Response = ResponsePolyfill
 }
 
 if (typeof global.Headers === 'undefined') {
