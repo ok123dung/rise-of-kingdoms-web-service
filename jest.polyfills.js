@@ -76,3 +76,39 @@ global.sessionStorage = localStorageMock
 
 // URL polyfill
 global.URL = global.URL || require('url').URL
+
+// Request/Response polyfills for Next.js API routes
+if (typeof global.Request === 'undefined') {
+  global.Request = class Request {
+    constructor(input, init = {}) {
+      this.url = typeof input === 'string' ? input : input.url
+      this.method = init.method || 'GET'
+      this.headers = new Map(Object.entries(init.headers || {}))
+      this._body = init.body
+    }
+    json() {
+      return Promise.resolve(JSON.parse(this._body || '{}'))
+    }
+  }
+}
+
+if (typeof global.Response === 'undefined') {
+  global.Response = class Response {
+    constructor(body, init = {}) {
+      this._body = body
+      this.status = init.status || 200
+      this.headers = new Map(Object.entries(init.headers || {}))
+    }
+    json() {
+      return Promise.resolve(typeof this._body === 'string' ? JSON.parse(this._body) : this._body)
+    }
+  }
+}
+
+if (typeof global.Headers === 'undefined') {
+  global.Headers = class Headers extends Map {
+    constructor(init = {}) {
+      super(Object.entries(init))
+    }
+  }
+}

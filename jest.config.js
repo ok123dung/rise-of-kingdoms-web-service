@@ -103,7 +103,7 @@ const customJestConfig = {
 
   // Transform ignore patterns - include ESM packages that need transformation
   transformIgnorePatterns: [
-    '/node_modules/(?!(node-fetch|lucide-react)/)',
+    '/node_modules/(?!(node-fetch|lucide-react|@upstash|uncrypto)/)',
     '^.+\\.module\\.(css|sass|scss)$'
   ],
 
@@ -132,9 +132,9 @@ const customJestConfig = {
 module.exports = async () => {
   const jestConfig = await createJestConfig(customJestConfig)()
 
-  // Override transformIgnorePatterns to allow lucide-react transformation
+  // Override transformIgnorePatterns to allow ESM packages transformation
   jestConfig.transformIgnorePatterns = [
-    '/node_modules/(?!(node-fetch|lucide-react)/)',
+    '/node_modules/(?!(node-fetch|lucide-react|@upstash|uncrypto)/)',
     '^.+\\.module\\.(css|sass|scss)$'
   ]
 

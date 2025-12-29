@@ -99,6 +99,46 @@ if (typeof window !== 'undefined') {
 
 // Mock Prisma client
 jest.mock('@/lib/db', () => ({
+  prismaAdmin: {
+    users: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn()
+    },
+    bookings: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    payments: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    service_tiers: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn()
+    },
+    $queryRaw: jest.fn(),
+    $executeRaw: jest.fn(),
+    $transaction: jest.fn(),
+    $connect: jest.fn(),
+    $disconnect: jest.fn()
+  },
   prisma: {
     user: {
       findUnique: jest.fn(),
