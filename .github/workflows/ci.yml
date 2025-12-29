@@ -110,6 +110,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-app
     continue-on-error: true  # E2E tests are optional - don't block CI
+    timeout-minutes: 15  # Prevent hanging tests
+    if: false  # Temporarily disabled until artifact storage is resolved
     steps:
       - name: Checkout
         uses: actions/checkout@v4
