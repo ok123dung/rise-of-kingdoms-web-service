@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useCallback, memo, useMemo } from 'react'
+import { useState, useCallback, memo, useMemo, useEffect } from 'react'
 
 import { X, Calendar, Clock, User, MessageSquare } from 'lucide-react'
 
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { clientLogger } from '@/lib/client-logger'
 
 interface BookingData {
@@ -51,6 +52,24 @@ const BookingModal = memo(function BookingModal({
   const [customerPhone, setCustomerPhone] = useState('')
   const [notes, setNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Focus trap for accessibility - WCAG 2.4.3
+  const { containerRef } = useFocusTrap<HTMLDivElement>({
+    enabled: isOpen,
+    onEscape: onClose,
+    initialFocus: '#booking-service'
+  })
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow
+      }
+    }
+  }, [isOpen])
 
   const selectedServiceData = useMemo(
     () => services.find(s => s.id === selectedService),
@@ -105,16 +124,44 @@ const BookingModal = memo(function BookingModal({
 
   if (!isOpen) return null
 
+  // Handle backdrop click
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="mx-4 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      role="presentation"
+      onClick={handleBackdropClick}
+    >
+      <div
+        ref={containerRef}
+        aria-describedby="booking-modal-description"
+        aria-labelledby="booking-modal-title"
+        aria-modal="true"
+        className="mx-4 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6"
+        role="dialog"
+      >
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-xl font-semibold text-gray-900">Đặt lịch dịch vụ</h3>
-          <button className="text-gray-400 hover:text-gray-600" onClick={onClose}>
+          <h3 className="text-xl font-semibold text-gray-900" id="booking-modal-title">
+            Đặt lịch dịch vụ
+          </h3>
+          <button
+            aria-label="Đóng modal"
+            className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="button"
+            onClick={onClose}
+          >
             <X className="h-6 w-6" />
           </button>
         </div>
+        <p className="sr-only" id="booking-modal-description">
+          Điền thông tin để đặt lịch dịch vụ Rise of Kingdoms
+        </p>
 
         <form className="space-y-6" onSubmit={e => void handleSubmit(e)}>
           {/* Service Selection */}

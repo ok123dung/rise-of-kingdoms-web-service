@@ -5,6 +5,7 @@ import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { CSPNonceProvider } from '@/components/CSPNonceProvider'
 import { CriticalCSS } from '@/components/performance/CriticalCSS'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { SkipLink } from '@/components/layout/SkipLink'
 import { MobileStickyActions } from '@/components/mobile/MobileOptimizations'
 import { PerformanceMonitor } from '@/components/performance/PerformanceMonitor'
 import Providers from '@/components/Providers'
@@ -140,6 +141,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className={`${inter.className} bg-gray-50 antialiased`}>
         <CSPNonceProvider>
+          {/* Skip link for keyboard navigation - WCAG 2.4.1 */}
+          <SkipLink />
           <GoogleAnalytics nonce={nonce} />
           <PerformanceMonitor />
           <ConversionTesting />
@@ -157,7 +160,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Providers>
             <ErrorBoundary>
               <div className="flex min-h-screen flex-col">
-                {children}
+                {/* Main content landmark with skip link target */}
+                <main id="main-content" className="flex-1">
+                  {children}
+                </main>
                 <FloatingSocialButtons />
                 <MobileStickyActions />
               </div>
