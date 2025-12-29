@@ -6,8 +6,10 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Fix Prisma EPERM on Windows - prevent Next.js from tracing Prisma files
-  experimental: {
-    outputFileTracingIgnores: ['node_modules/@prisma/**']
+  // Next.js 16: moved from experimental to top level
+  outputFileTracingIncludes: {},
+  outputFileTracingExcludes: {
+    '*': ['node_modules/@prisma/**']
   },
   typescript: {
     ignoreBuildErrors: false // Enforce type safety
