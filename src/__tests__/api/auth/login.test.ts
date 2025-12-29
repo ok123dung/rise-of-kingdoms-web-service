@@ -7,6 +7,22 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals'
 
 import { createMockRequest, parseResponse } from '../../utils/test-helpers'
 
+// Mock NextResponse to ensure consistent response handling in tests
+jest.mock('next/server', () => ({
+  NextResponse: {
+    json: (data: unknown, init?: { status?: number; headers?: Record<string, string> }) => {
+      const body = JSON.stringify(data)
+      return {
+        status: init?.status ?? 200,
+        ok: (init?.status ?? 200) >= 200 && (init?.status ?? 200) < 300,
+        headers: new Map(Object.entries(init?.headers ?? {})),
+        json: () => Promise.resolve(data),
+        text: () => Promise.resolve(body),
+      }
+    },
+  },
+}))
+
 // Mock dependencies before importing route
 // Use factory functions for middleware wrappers to ensure they work at module load time
 jest.mock('@/lib/db', () => ({
@@ -97,7 +113,7 @@ describe('POST /api/auth/login', () => {
   })
 
   describe('Successful Login', () => {
-    it.skip('should return 200 with token for valid credentials', async () => {
+    it('should return 200 with token for valid credentials', async () => {
       mockFindUnique.mockResolvedValue(validUser)
       mockCompare.mockResolvedValue(true)
 
@@ -238,7 +254,7 @@ describe('POST /api/auth/login', () => {
   })
 
   describe('Rate Limiting', () => {
-    it.skip('should return 429 when rate limit exceeded', async () => {
+    it('should return 429 when rate limit exceeded', async () => {
       mockIsAllowed.mockResolvedValue({
         allowed: false,
         retryAfter: 60,
@@ -262,7 +278,7 @@ describe('POST /api/auth/login', () => {
   })
 
   describe('Account Lockout', () => {
-    it.skip('should return 423 when account is locked', async () => {
+    it('should return 423 when account is locked', async () => {
       mockIsAccountLocked.mockResolvedValue({
         isLocked: true,
         failedAttempts: 5,
