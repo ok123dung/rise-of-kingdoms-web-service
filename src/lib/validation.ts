@@ -302,6 +302,36 @@ export function sanitizePhoneNumber(phone: string): string {
   return cleaned
 }
 
+// Login validation schema
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .email('Định dạng email không hợp lệ')
+    .min(1, 'Email là bắt buộc'),
+  password: z.string().min(1, 'Mật khẩu là bắt buộc')
+})
+
+// Pagination validation schema
+export const paginationSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  sort: z.string().optional(),
+  order: z.enum(['asc', 'desc']).default('desc')
+})
+
+// UUID validation schema
+export const uuidSchema = z.string().uuid('ID không hợp lệ')
+
+// Type exports
+export type SignupInput = z.infer<typeof signupSchema>
+export type LoginInput = z.infer<typeof loginSchema>
+export type BookingInput = z.infer<typeof bookingValidationSchema>
+export type PaymentInput = z.infer<typeof paymentValidationSchema>
+export type PaginationInput = z.infer<typeof paginationSchema>
+export type LeadInput = z.infer<typeof leadValidationSchema>
+export type ServiceInput = z.infer<typeof serviceValidationSchema>
+export type ServiceTierInput = z.infer<typeof service_tiersValidationSchema>
+
 // Export all schemas for use in API routes
 export {
   z,

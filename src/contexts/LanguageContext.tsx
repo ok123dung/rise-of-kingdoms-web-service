@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react'
 
 import { translations, type Language } from '@/lib/i18n/translations'
 
@@ -8,52 +8,47 @@ interface LanguageContextType {
   language: Language
   setLanguage: (lang: Language) => void
   t: typeof translations.vi
+  /** True when client hydration is complete and localStorage has been read */
+  isReady: boolean
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>('vi')
-  const [_mounted, setMounted] = useState(false)
+  // Start with default 'vi' to match server render exactly
+  const [language, setLanguageState] = useState<Language>('vi')
+  const [isReady, setIsReady] = useState(false)
 
+  // Hydrate from localStorage after mount to prevent mismatch
   useEffect(() => {
-    setMounted(true)
-    const savedLang = localStorage.getItem('language') as Language
+    const savedLang = localStorage.getItem('language') as Language | null
     if (savedLang && (savedLang === 'vi' || savedLang === 'en')) {
-      setLanguage(savedLang)
+      setLanguageState(savedLang)
     }
+    // Mark as ready after hydration
+    setIsReady(true)
   }, [])
 
   const handleSetLanguage = (lang: Language) => {
-    setLanguage(lang)
+    setLanguageState(lang)
     localStorage.setItem('language', lang)
   }
 
-  // Prevent hydration mismatch by rendering children only after mount,
-  // or just accept the default 'vi' for initial server render.
-  // For better UX (SEO), we render with default 'vi' on server and update on client.
+  // Memoize translations lookup for performance
+  const t = useMemo(() => translations[language] || translations.vi, [language])
 
-  const t = translations[language] || translations.vi
-
-  useEffect(() => {
-    // Debug logging - can be removed in production
-    // eslint-disable-next-line no-console
-    console.log('Language changed to:', language)
-    // eslint-disable-next-line no-console
-    console.log('Translations object updated:', t.common.home)
-  }, [language, t])
-
-  return (
-    <LanguageContext.Provider
-      value={{
-        language,
-        setLanguage: handleSetLanguage,
-        t
-      }}
-    >
-      {children}
-    </LanguageContext.Provider>
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(
+    () => ({
+      language,
+      setLanguage: handleSetLanguage,
+      t,
+      isReady
+    }),
+    [language, t, isReady]
   )
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
 }
 
 export function useLanguage() {
@@ -62,4 +57,25 @@ export function useLanguage() {
     throw new Error('useLanguage must be used within a LanguageProvider')
   }
   return context
+}
+
+/**
+ * Hydration-safe text component
+ * Shows translation key during SSR, actual translation after hydration
+ */
+export function LocalizedText({
+  tKey,
+  fallback
+}: {
+  tKey: keyof typeof translations.vi.common
+  fallback?: string
+}) {
+  const { t, isReady } = useLanguage()
+
+  // During SSR/hydration, show fallback or invisible placeholder
+  if (!isReady) {
+    return <span className="invisible">{fallback ?? tKey}</span>
+  }
+
+  return <>{t.common[tKey]}</>
 }
