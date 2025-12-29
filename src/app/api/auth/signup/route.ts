@@ -15,6 +15,7 @@ import {
 import { trackRequest } from '@/lib/monitoring'
 import { getLogger } from '@/lib/monitoring/logger'
 import { rateLimiters } from '@/lib/rate-limit'
+import { securityAudit, getClientInfo } from '@/lib/security-audit'
 import { signupSchema, sanitizeInput } from '@/lib/validation'
 
 interface SignupBody {
@@ -25,13 +26,17 @@ interface SignupBody {
 }
 
 const signupHandler = async function (request: NextRequest): Promise<NextResponse> {
+  const clientInfo = getClientInfo(request.headers)
+
   try {
     // CSRF protection - prevent cross-site request forgery
     const csrfValidation = validateCSRF(request)
     if (!csrfValidation.valid) {
-      getLogger().warn('CSRF validation failed on signup', {
+      void securityAudit.csrfViolation({
+        ...clientInfo,
+        endpoint: '/api/auth/signup',
+        method: 'POST',
         reason: csrfValidation.reason,
-        ip: request.headers.get('x-forwarded-for') ?? 'unknown'
       })
       return NextResponse.json(
         { error: 'Invalid request. Please refresh and try again.' },
@@ -43,6 +48,12 @@ const signupHandler = async function (request: NextRequest): Promise<NextRespons
     const clientId = request.headers.get('x-forwarded-for') ?? 'anonymous'
     const rateLimit = await rateLimiters.auth.isAllowed(clientId)
     if (!rateLimit.allowed) {
+      void securityAudit.rateLimited({
+        ...clientInfo,
+        endpoint: '/api/auth/signup',
+        method: 'POST',
+        reason: 'Too many signup attempts',
+      })
       return NextResponse.json(
         { error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.', retryAfter: rateLimit.retryAfter },
         { status: 429 }

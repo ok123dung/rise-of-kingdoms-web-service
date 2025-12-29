@@ -13,8 +13,8 @@ import { generateToken } from '@/lib/auth/jwt'
 import { prismaAdmin as prisma } from '@/lib/db'
 import { AuthenticationError, ValidationError, handleApiError, ErrorMessages } from '@/lib/errors'
 import { trackRequest } from '@/lib/monitoring'
-import { getLogger } from '@/lib/monitoring/logger'
 import { rateLimiters } from '@/lib/rate-limit'
+import { securityAudit, getClientInfo } from '@/lib/security-audit'
 import { sanitizeInput } from '@/lib/validation'
 
 // Login validation schema
@@ -29,11 +29,19 @@ interface LoginBody {
 }
 
 const loginHandler = async function (request: NextRequest): Promise<NextResponse> {
+  const clientInfo = getClientInfo(request.headers)
+
   try {
     // Rate limiting - prevent brute force attacks
     const clientId = request.headers.get('x-forwarded-for') ?? 'anonymous'
     const rateLimit = await rateLimiters.auth.isAllowed(clientId)
     if (!rateLimit.allowed) {
+      void securityAudit.rateLimited({
+        ...clientInfo,
+        endpoint: '/api/auth/login',
+        method: 'POST',
+        reason: 'Too many login attempts',
+      })
       return NextResponse.json(
         {
           error: 'Quá nhiều yêu cầu đăng nhập. Vui lòng thử lại sau.',
@@ -52,9 +60,12 @@ const loginHandler = async function (request: NextRequest): Promise<NextResponse
       const lockoutStatus = await isAccountLocked(emailForLockout)
       if (lockoutStatus.isLocked) {
         const duration = formatLockoutDuration(lockoutStatus.lockoutDuration ?? 0)
-        getLogger().warn('Login attempt on locked account', {
+        void securityAudit.loginBlocked({
+          ...clientInfo,
           email: emailForLockout,
-          lockoutUntil: lockoutStatus.lockoutUntil,
+          endpoint: '/api/auth/login',
+          reason: 'Account locked',
+          lockout_duration: lockoutStatus.lockoutDuration,
         })
         return NextResponse.json(
           {
@@ -95,8 +106,11 @@ const loginHandler = async function (request: NextRequest): Promise<NextResponse
     if (!user?.password) {
       // Record failed attempt for lockout
       await recordFailedAttempt(validatedData.email)
-      getLogger().warn('Login failed: user not found or no password', {
+      void securityAudit.loginFailed({
+        ...clientInfo,
         email: validatedData.email,
+        endpoint: '/api/auth/login',
+        reason: 'User not found or no password',
       })
       throw new AuthenticationError('Email hoặc mật khẩu không chính xác')
     }
@@ -106,13 +120,23 @@ const loginHandler = async function (request: NextRequest): Promise<NextResponse
     if (!isPasswordValid) {
       // Record failed attempt for lockout
       const lockoutResult = await recordFailedAttempt(validatedData.email)
-      getLogger().warn('Login failed: invalid password', {
+      void securityAudit.loginFailed({
+        ...clientInfo,
+        user_id: user.id,
         email: validatedData.email,
-        attemptsRemaining: lockoutResult.attemptsRemaining,
-        isLocked: lockoutResult.isLocked,
+        endpoint: '/api/auth/login',
+        reason: 'Invalid password',
+        attempts_remaining: lockoutResult.attemptsRemaining,
       })
       if (lockoutResult.isLocked) {
         const duration = formatLockoutDuration(lockoutResult.lockoutDuration ?? 0)
+        void securityAudit.accountLocked({
+          ...clientInfo,
+          user_id: user.id,
+          email: validatedData.email,
+          endpoint: '/api/auth/login',
+          lockout_duration: lockoutResult.lockoutDuration,
+        })
         return NextResponse.json(
           {
             error: `Quá nhiều lần đăng nhập thất bại. Tài khoản đã bị khóa trong ${duration}.`,
@@ -135,10 +159,11 @@ const loginHandler = async function (request: NextRequest): Promise<NextResponse
     await clearLockout(validatedData.email)
 
     // Log successful login
-    getLogger().info('User logged in', {
+    void securityAudit.loginSuccess({
+      ...clientInfo,
       user_id: user.id,
       email: user.email,
-      timestamp: new Date().toISOString()
+      endpoint: '/api/auth/login',
     })
 
     return NextResponse.json({
