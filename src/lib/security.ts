@@ -1,6 +1,12 @@
 import crypto from 'crypto'
 
+import jwt from 'jsonwebtoken'
+import sanitizeHtml from 'sanitize-html'
+
 import { type NextRequest, type NextResponse } from 'next/server'
+
+// Helper to get JWT secret - avoids hardcoding env var name in multiple places
+const getJwtSecret = (): string | undefined => process.env['NEXTAUTH_SECRET']
 
 // Security headers configuration
 export const securityHeaders = {
@@ -104,26 +110,18 @@ export function sanitizeInput(input: string): string {
 }
 
 // For cases where HTML is allowed but dangerous content must be stripped
-// Recommend using a library like DOMPurify instead of this function
+// Uses sanitize-html library for proper XSS prevention
 export function stripDangerousPatterns(input: string): string {
-  let sanitized = input.trim()
-
-  // Iteratively remove dangerous patterns to prevent bypass via nesting
-  let iterations = 0
-  const maxIterations = 10
-  let previous: string
-  do {
-    previous = sanitized
-    iterations++
-    sanitized = sanitized
-      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<script\b[^>]*>/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-      .replace(/on\w+\s*=/gi, '')
-  } while (sanitized !== previous && iterations < maxIterations)
-
-  return sanitized
+  return sanitizeHtml(input.trim(), {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      img: ['src', 'alt', 'title', 'width', 'height'],
+      a: ['href', 'name', 'target', 'rel'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto'],
+    disallowedTagsMode: 'discard',
+  })
 }
 
 // SQL injection prevention (for raw queries)
@@ -231,33 +229,37 @@ export function validatePhoneNumber(phone: string): boolean {
   return validPrefixes.includes(prefix)
 }
 
-// JWT token validation
+// JWT token validation - CRITICAL: Uses jwt.verify() for cryptographic signature verification
 export function validateJWT(token: string): {
   valid: boolean
-  payload?: { exp?: number; [key: string]: unknown }
+  payload?: jwt.JwtPayload
   error?: string
 } {
+  const secret = getJwtSecret()
+  if (!secret) {
+    console.error('JWT secret is not configured')
+    return { valid: false, error: 'JWT secret not configured' }
+  }
+
   try {
-    const parts = token.split('.')
-
-    if (parts.length !== 3) {
-      return { valid: false, error: 'Invalid token format' }
-    }
-
-    // Decode payload
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8')) as {
-      exp?: number
-      [key: string]: unknown
-    }
-
-    // Check expiration
-    if (payload.exp && payload.exp < Date.now() / 1000) {
-      return { valid: false, error: 'Token expired' }
-    }
+    // CRITICAL: Use jwt.verify() which validates the signature cryptographically
+    // This prevents token forgery attacks that the previous implementation was vulnerable to
+    const payload = jwt.verify(token, secret, {
+      algorithms: ['HS256'],
+    }) as jwt.JwtPayload
 
     return { valid: true, payload }
   } catch (error) {
-    return { valid: false, error: 'Invalid token' }
+    if (error instanceof jwt.TokenExpiredError) {
+      return { valid: false, error: 'Token expired' }
+    }
+    if (error instanceof jwt.JsonWebTokenError) {
+      return { valid: false, error: 'Invalid signature' }
+    }
+    if (error instanceof jwt.NotBeforeError) {
+      return { valid: false, error: 'Token not yet valid' }
+    }
+    return { valid: false, error: 'Token validation failed' }
   }
 }
 

@@ -2,9 +2,12 @@ const { withSentryConfig } = require('@sentry/nextjs')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Skip TypeScript errors during build (temporary - legacy code has type issues)
+  // Fix Prisma EPERM on Windows - prevent Next.js from tracing Prisma files
+  experimental: {
+    outputFileTracingIgnores: ['node_modules/@prisma/**']
+  },
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: false // Enforce type safety
   },
   // Image optimization with remotePatterns (Next.js 16)
   images: {
