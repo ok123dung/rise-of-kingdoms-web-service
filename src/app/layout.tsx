@@ -44,6 +44,8 @@ const poppins = Poppins({
   adjustFontFallback: true
 })
 
+const siteUrl = 'https://rokdbot.com'
+
 export const metadata: Metadata = {
   title: 'RoK Services - Dịch vụ Rise of Kingdoms #1 Việt Nam | Premium Gaming',
   description:
@@ -62,7 +64,7 @@ export const metadata: Metadata = {
     'top player RoK'
   ],
   authors: [{ name: 'RoK Services Team' }],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://rokdbot.com'),
+  metadataBase: new URL(siteUrl),
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -145,7 +147,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <OrganizationSchema
             description="Dịch vụ Rise of Kingdoms chuyên nghiệp #1 Việt Nam"
             name="RoK Services"
-            url={process.env.NEXT_PUBLIC_SITE_URL ?? 'https://rokdbot.com'}
+            url={siteUrl}
             nonce={nonce}
           />
           {/* Vietnamese Gaming SEO - Rich snippets for Vietnamese market */}
