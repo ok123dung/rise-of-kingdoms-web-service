@@ -156,7 +156,7 @@ export class BookingService {
   /**
    * Update booking status
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   async updateBookingStatus(
     booking_id: string,
     status: string,
@@ -195,7 +195,7 @@ export class BookingService {
   /**
    * Cancel booking
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   async cancelBooking(booking_id: string, user_id: string, reason: string): Promise<unknown> {
     const booking = await this.getBookingById(booking_id, user_id)
 

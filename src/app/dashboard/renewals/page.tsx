@@ -58,7 +58,7 @@ export default function RenewalsPage() {
         }
       ]
       setRenewals(mockRenewals)
-    } catch (error) {
+    } catch (_error) {
       // Error is handled by error boundary
     } finally {
       setLoading(false)

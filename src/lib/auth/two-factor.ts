@@ -127,7 +127,7 @@ export class TwoFactorAuthService {
         where: { user_id }
       })
 
-      if (!twoFactorAuth || !twoFactorAuth.enabled) {
+      if (!twoFactorAuth?.enabled) {
         return { verified: true } // 2FA not enabled, allow login
       }
 

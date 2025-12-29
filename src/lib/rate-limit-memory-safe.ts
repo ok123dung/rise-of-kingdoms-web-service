@@ -145,7 +145,7 @@ export class RedisRateLimiter {
       pipe.incr(key)
       pipe.expire(key, Math.ceil(this.config.window / 1000))
       const results = await pipe.exec()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const count = (results?.[0] as [Error | null, number])?.[1] ?? 1
       const remaining = Math.max(0, this.config.max - count)
       const success = count <= this.config.max

@@ -56,7 +56,7 @@ export default function FilesPage() {
     void fetchFiles() // Refresh file list
   }
   const handleDelete = async (key: string) => {
-    // eslint-disable-next-line no-alert
+     
     if (!window.confirm('Are you sure you want to delete this file?')) return
     try {
       const response = await fetch(`/api/files/${encodeURIComponent(key)}`, {

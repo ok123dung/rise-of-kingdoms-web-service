@@ -162,7 +162,7 @@ export function RealtimeNotifications() {
         </div>
       )}
 
-      {/* eslint-disable-next-line react/no-unknown-property */}
+      { }
       <style jsx>{`
         @keyframes slide-up {
           from {

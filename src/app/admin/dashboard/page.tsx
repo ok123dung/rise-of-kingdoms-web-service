@@ -195,6 +195,7 @@ export default async function AdminDashboard() {
               But since we are in a server component, we can't use onClick. 
               We should probably extract the Header to a client component or just link to signout.
           */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-800"
             href="/api/auth/signout"

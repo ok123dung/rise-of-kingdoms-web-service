@@ -98,10 +98,10 @@ export function emitOrderTracking(user_id: string, data: OrderTrackingEvent): vo
   }
 
   // Emit to user
-  ws.emitToUser(user_id, 'order:tracking', data)
+  ws.emitToUser(user_id, 'order:tracking', { ...data } as Record<string, unknown>)
 
   // Emit to booking room
-  ws.emitToBooking(data.booking_id, 'order:tracking', data)
+  ws.emitToBooking(data.booking_id, 'order:tracking', { ...data } as Record<string, unknown>)
 
   getLogger().info('Emitted order tracking event', {
     booking_id: data.booking_id,

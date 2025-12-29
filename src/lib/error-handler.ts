@@ -35,10 +35,10 @@ export interface ErrorContext {
 export function handleErrorWithSentry(error: Error | AppError, context?: ErrorContext): void {
   // Log to console in development
   if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
+     
     console.error('Error:', error)
     if (context) {
-      // eslint-disable-next-line no-console
+       
       console.error('Context:', context)
     }
   }

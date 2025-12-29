@@ -34,12 +34,12 @@ export function getEdgeLogger(): EdgeLogger {
     },
 
     error: (message: string, error?: Error, context?: Record<string, unknown>) => {
-      // eslint-disable-next-line no-console
+       
       console.error(formatMessage('error', message, context, error))
     },
 
     warn: (message: string, context?: Record<string, unknown>) => {
-      // eslint-disable-next-line no-console
+       
       console.warn(formatMessage('warn', message, context))
     },
 

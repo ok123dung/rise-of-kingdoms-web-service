@@ -153,6 +153,7 @@ export default function DiagnosticsPage() {
             </div>
 
             <div>
+              {/* eslint-disable @next/next/no-html-link-for-pages */}
               <h3 className="mb-2 font-medium">Test with regular anchor tags:</h3>
               <div className="space-x-4">
                 <a className="text-green-600 underline hover:text-green-800" href="/">

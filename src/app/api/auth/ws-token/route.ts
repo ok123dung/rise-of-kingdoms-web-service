@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest) {
     const token = generateWebSocketToken(session.user.id, session.user.email, session.user.role)
 
     return NextResponse.json({ token })
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ error: 'Failed to generate token' }, { status: 500 })
   }
 }

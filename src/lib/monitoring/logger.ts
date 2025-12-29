@@ -130,7 +130,7 @@ class Logger {
           entry.level === LogLevel.FATAL ||
           entry.level === LogLevel.WARN)
       ) {
-        // eslint-disable-next-line import/no-cycle -- Circular dependency between logger and db is unavoidable as logger needs db for persistence and db needs logger for monitoring
+         
         const { prisma } = await import('@/lib/db')
         if (!prisma) return // Safety check if prisma is null during build
         await prisma.system_logs.create({
@@ -156,7 +156,7 @@ class Logger {
       }
     } catch (error) {
       // Avoid infinite logging loop
-      // eslint-disable-next-line no-console
+       
       console.error('Failed to persist log to database:', error)
     }
   }
@@ -655,7 +655,7 @@ export class ApplicationMonitor {
   private checkDiskSpace(): { status: string; details?: Record<string, unknown> } {
     try {
       // Only check disk space in Node.js environment and not in Edge Runtime
-      // eslint-disable-next-line @typescript-eslint/prefer-optional-chain -- typeof check needed for Edge Runtime
+       
       if (typeof window === 'undefined' && typeof process !== 'undefined' && process?.memoryUsage) {
         // Simplified disk check - in production use proper disk usage tools
         const used = process.memoryUsage()

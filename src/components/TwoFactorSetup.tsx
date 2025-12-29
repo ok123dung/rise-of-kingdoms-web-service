@@ -48,7 +48,7 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
       } else {
         setError(data.error ?? 'Failed to start 2FA setup')
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -83,7 +83,7 @@ export default function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupP
       } else {
         setError(data.message ?? 'Invalid verification code')
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)

@@ -233,7 +233,7 @@ export default function TopCustomers() {
       ]
 
       setCustomers(mockCustomers)
-    } catch (err) {
+    } catch (_err) {
       setError('Không thể tải danh sách khách hàng')
     } finally {
       setLoading(false)

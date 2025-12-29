@@ -18,7 +18,7 @@ export default function BookingActions({ booking }: BookingActionsProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   const updateStatus = async (status: string) => {
-    // eslint-disable-next-line no-alert
+     
     if (!confirm(`Bạn có chắc chắn muốn chuyển trạng thái sang ${status}?`)) return
 
     setIsLoading(true)

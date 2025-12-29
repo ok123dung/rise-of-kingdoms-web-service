@@ -31,7 +31,7 @@ export function monitorPerformanceBudget() {
 
       try {
         observer.observe({ entryTypes: ['resource'] })
-      } catch (e) {
+      } catch (_e) {
         clientLogger.warn('Resource observer not supported')
       }
     }

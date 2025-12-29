@@ -152,7 +152,7 @@ export class SecureWebSocketServer {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       socket.emit = function (...args: any[]) {
         socket.lastActivity = Date.now()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return originalEmit.apply(socket, args as [string, ...any[]])
       }
       next()
@@ -216,7 +216,7 @@ export class SecureWebSocketServer {
             socket.lastActivity = Date.now()
 
             // Execute handler
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+             
             await handler(args[0] as T)
           } catch (error) {
             getLogger().error(`WebSocket event error: ${eventName}`, error as Error, {

@@ -1,6 +1,6 @@
 import { PrismaClient, type Prisma } from '@prisma/client'
 
-// eslint-disable-next-line import/no-cycle -- Circular dependency between db and logger is unavoidable as db needs logger for monitoring and logger needs db for persistence
+ 
 import { getLogger } from '@/lib/monitoring/logger'
 
 import type { UnwrapTuple } from '@prisma/client/runtime/library'
@@ -214,7 +214,7 @@ class EnhancedPrismaClient extends PrismaClient {
   }
 
   // Override $transaction to add timeout and retry logic
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   $transaction<P extends Prisma.PrismaPromise<unknown>[]>(arg: [...P]): Promise<UnwrapTuple<P>>
   $transaction<R>(
     fn: (
@@ -236,7 +236,7 @@ class EnhancedPrismaClient extends PrismaClient {
       ...(options as object)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+     
     return this.circuitBreaker.execute(async () => {
       try {
         if (Array.isArray(arg)) {

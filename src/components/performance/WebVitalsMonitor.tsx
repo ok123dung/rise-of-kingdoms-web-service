@@ -36,7 +36,7 @@ export function WebVitalsMonitor({ onMetric }: WebVitalsMonitorProps) {
       })
 
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
-    } catch (e) {
+    } catch (_e) {
       // LCP observer not supported
     }
 
@@ -60,7 +60,7 @@ export function WebVitalsMonitor({ onMetric }: WebVitalsMonitorProps) {
       })
 
       fidObserver.observe({ entryTypes: ['first-input'] })
-    } catch (e) {
+    } catch (_e) {
       // FID observer not supported
     }
 
@@ -76,7 +76,7 @@ export function WebVitalsMonitor({ onMetric }: WebVitalsMonitorProps) {
       })
 
       clsObserver.observe({ entryTypes: ['layout-shift'] })
-    } catch (e) {
+    } catch (_e) {
       // CLS observer not supported
     }
 

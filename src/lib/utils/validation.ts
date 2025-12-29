@@ -58,7 +58,7 @@ export function validatePassword(password: string): {
   }
 
   // Special character check
-  // eslint-disable-next-line no-useless-escape
+   
   if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
     score += 1
   } else {

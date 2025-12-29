@@ -60,7 +60,7 @@ export default function ContactPage() {
       } else {
         setSubmitStatus('error')
       }
-    } catch (error) {
+    } catch (_error) {
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)

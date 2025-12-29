@@ -39,7 +39,7 @@ export default function RevenueChart() {
       ]
 
       setData(mockData)
-    } catch (err) {
+    } catch (_err) {
       setError('Không thể tải dữ liệu doanh thu')
     } finally {
       setLoading(false)

@@ -132,7 +132,7 @@ export async function verifyWebhookNonce(provider: string, nonce: string): Promi
     // Parse nonce format: timestamp_randomhex
     const [timestampStr, randomHex] = nonce.split('_')
 
-    if (!timestampStr || !randomHex || randomHex.length !== 32) {
+    if (!timestampStr || randomHex?.length !== 32) {
       getLogger().warn('Invalid nonce format', { provider, nonce })
       return false
     }

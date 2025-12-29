@@ -34,13 +34,13 @@ export function loadEnvironment() {
     }
 
     // In development, show helpful error message
-    // eslint-disable-next-line no-console
+     
     console.error('\n⚠️  Environment Configuration Error\n')
-    // eslint-disable-next-line no-console
+     
     console.error((error as Error).message)
-    // eslint-disable-next-line no-console
+     
     console.error('\nPlease check your .env.local file and ensure all required variables are set.')
-    // eslint-disable-next-line no-console
+     
     console.error('See .env.example for reference.\n')
   }
 }
@@ -74,7 +74,7 @@ export function createSecureEnvProxy(): typeof process.env {
 
       // Warn when accessing sensitive values directly
       if (isSensitiveKey(prop) && process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
+         
         console.warn(`⚠️  Accessing sensitive environment variable: ${prop}`)
         // eslint-disable-next-line no-console
         console.trace()

@@ -124,7 +124,7 @@ const generateId = () => {
 const shouldRunIntegrationTests = process.env.RUN_INTEGRATION_TESTS === 'true'
 
 // Get prisma from the mocked module (uses test database)
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const { prisma } = require('@/lib/db')
 
 // Skip all tests unless explicitly enabled
@@ -557,7 +557,7 @@ describeIfDb('Payment Performance Tests', () => {
       await prisma.service_tiers.deleteMany({})
       await prisma.services.deleteMany({})
       await prisma.users.deleteMany({})
-    } catch (e) {
+    } catch (_e) {
       console.error('Cleanup error:', e)
     }
   })

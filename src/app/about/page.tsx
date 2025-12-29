@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 
+import Link from 'next/link'
 import { Star, Users, Trophy, Shield, Clock, Target, Award, Crown, Zap, Heart } from 'lucide-react'
 
 import Footer from '@/components/layout/Footer'
@@ -391,13 +392,13 @@ export default function AboutPage() {
               Hãy để RoK Services đồng hành cùng bạn trên con đường chinh phục Rise of Kingdoms
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <a
+              <Link
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-8 py-4 text-lg font-bold text-amber-600 transition-colors hover:bg-amber-50"
                 href="/services"
               >
                 <span>Xem dịch vụ</span>
                 <Trophy className="h-5 w-5" />
-              </a>
+              </Link>
               <a
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/20 px-8 py-4 text-lg font-bold text-white transition-colors hover:bg-white/30"
                 href="/contact"

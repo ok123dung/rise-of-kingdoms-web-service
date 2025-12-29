@@ -78,9 +78,9 @@ export async function* limitedStream(
 
   try {
     // Stream reading must be sequential, not parallel
-    // eslint-disable-next-line no-await-in-loop
+     
     while (true) {
-      // eslint-disable-next-line no-await-in-loop
+       
       const { done, value } = await reader.read()
       if (done) break
 

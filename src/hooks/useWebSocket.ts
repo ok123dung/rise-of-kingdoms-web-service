@@ -91,7 +91,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     }
   }, [session, autoConnect, reconnection, reconnectionAttempts, reconnectionDelay])
   // Subscribe to events
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const on = useCallback((event: string, handler: (...args: unknown[]) => void) => {
     if (!socketRef.current) return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

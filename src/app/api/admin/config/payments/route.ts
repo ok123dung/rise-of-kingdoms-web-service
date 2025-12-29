@@ -20,7 +20,7 @@ export async function GET() {
       status,
       report
     })
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to validate payment config' },
       { status: 500 }

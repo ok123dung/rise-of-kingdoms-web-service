@@ -91,7 +91,7 @@ export default function BookingDetailPage() {
   }, [session, params.id, fetchBookingDetail])
 
   const handleCancelBooking = async () => {
-    // eslint-disable-next-line no-alert
+     
     if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) {
       return
     }
