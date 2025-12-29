@@ -434,9 +434,7 @@ class RoKDiscordBot {
 let botInstance: RoKDiscordBot | null = null
 
 export function getDiscordBot(): RoKDiscordBot {
-  if (!botInstance) {
-    botInstance = new RoKDiscordBot()
-  }
+  botInstance ??= new RoKDiscordBot()
   return botInstance
 }
 

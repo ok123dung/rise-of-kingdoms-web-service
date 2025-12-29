@@ -35,7 +35,7 @@ export default function ServiceDetailClient({ slug, serviceData }: ServiceDetail
   const router = useRouter()
   const { t } = useLanguage()
   // Default to popular tier or middle tier
-  const defaultIndex = serviceData.tiers.findIndex(t => t.isPopular) ?? Math.floor(serviceData.tiers.length / 2)
+  const defaultIndex = serviceData.tiers.findIndex(tier => tier.isPopular) ?? Math.floor(serviceData.tiers.length / 2)
   const [selectedTierIndex, setSelectedTierIndex] = useState(defaultIndex >= 0 ? defaultIndex : 0)
 
   const service = serviceData
@@ -101,7 +101,7 @@ export default function ServiceDetailClient({ slug, serviceData }: ServiceDetail
               <div className="card animate-fadeInUp">
                 <h2 className="mb-6 text-2xl font-bold text-slate-900">Các gói dịch vụ</h2>
                 <div className="space-y-6">
-                  {service.tiers.map((tier, index) => (
+                  {service.tiers.map((tier, _index) => (
                     <div key={tier.id} className="border-b pb-4 last:border-0 last:pb-0">
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-semibold text-slate-900">{tier.name}</h3>

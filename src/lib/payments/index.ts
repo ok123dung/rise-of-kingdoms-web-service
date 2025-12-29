@@ -4,12 +4,12 @@
  */
 
 import {
-  PaymentProvider,
-  PaymentRequest,
-  PaymentResult,
-  PaymentVerification,
-  WebhookPayload,
-  PaymentProviderInterface
+  type PaymentProvider,
+  type PaymentRequest,
+  type PaymentResult,
+  type PaymentVerification,
+  type WebhookPayload,
+  type PaymentProviderInterface
 } from './types'
 import { VNPayPayment } from './vnpay'
 import { MoMoPayment } from './momo'

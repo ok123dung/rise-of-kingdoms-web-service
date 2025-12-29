@@ -105,7 +105,7 @@ export function withDatabaseConnection<T = unknown>(
       // Ensure connection is cleaned up
       try {
         await prisma.$disconnect()
-      } catch (disconnectError) {
+      } catch (_disconnectError) {
         logger.warn('Error disconnecting from database')
       }
     }

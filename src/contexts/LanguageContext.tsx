@@ -23,9 +23,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedLang = localStorage.getItem('language') as Language | null
     if (savedLang && (savedLang === 'vi' || savedLang === 'en')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Required for SSR hydration
       setLanguageState(savedLang)
     }
     // Mark as ready after hydration
+     
     setIsReady(true)
   }, [])
 

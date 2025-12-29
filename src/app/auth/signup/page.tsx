@@ -165,7 +165,7 @@ export default function SignUpPage() {
       // Safe JSON parsing - handle non-JSON responses
       let data: { message?: string; error?: { message?: string } } = {}
       const contentType = response.headers.get('content-type')
-      if (contentType && contentType.includes('application/json')) {
+      if (contentType?.includes('application/json')) {
         try {
           data = (await response.json()) as typeof data
         } catch {

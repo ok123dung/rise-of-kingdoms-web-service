@@ -360,9 +360,7 @@ class Logger {
 let loggerInstance: Logger | null = null
 
 export function getLogger(): Logger {
-  if (!loggerInstance) {
-    loggerInstance = new Logger()
-  }
+  loggerInstance ??= new Logger()
   return loggerInstance
 }
 

@@ -1,7 +1,7 @@
 export async function register() {
   // Skip during Vercel build phase - critical for deployment
   if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL_ENV === undefined && process.env.VERCEL) {
-    console.log('⏭️  Skipping instrumentation during build phase')
+    console.info('⏭️  Skipping instrumentation during build phase')
     return
   }
 
@@ -23,12 +23,12 @@ export async function register() {
 
       // Start webhook processor (only in production)
       if (process.env.NODE_ENV === 'production') {
-        startWebhookJobs()
+        void startWebhookJobs()
       }
 
       // Initialize WebSocket server if needed
       if (process.env.ENABLE_WEBSOCKET === 'true') {
-        const wsPort = parseInt(process.env.WS_PORT || '3001', 10)
+        const wsPort = parseInt(process.env.WS_PORT ?? '3001', 10)
         initializeWebSocketServer(wsPort)
       }
     } catch (error) {

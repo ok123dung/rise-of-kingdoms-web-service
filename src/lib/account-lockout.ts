@@ -38,12 +38,12 @@ class InMemoryLockoutStore {
   private lockouts: Map<string, { until: number; lockoutCount: number }> = new Map()
 
   getAttempts(key: string): { count: number; timestamps: number[] } {
-    return this.attempts.get(key) || { count: 0, timestamps: [] }
+    return this.attempts.get(key) ?? { count: 0, timestamps: [] }
   }
 
   recordAttempt(key: string, windowMs: number): number {
     const now = Date.now()
-    const existing = this.attempts.get(key) || { count: 0, timestamps: [] }
+    const existing = this.attempts.get(key) ?? { count: 0, timestamps: [] }
 
     // Filter timestamps within window
     existing.timestamps = existing.timestamps.filter((t) => now - t < windowMs)
@@ -74,7 +74,7 @@ class InMemoryLockoutStore {
 
   incrementLockoutCount(key: string): number {
     const existing = this.lockouts.get(key)
-    const count = (existing?.lockoutCount || 0) + 1
+    const count = (existing?.lockoutCount ?? 0) + 1
     return count
   }
 }
@@ -137,10 +137,10 @@ async function checkLockoutRedis(
 
     return {
       isLocked,
-      failedAttempts: failedAttempts || 0,
+      failedAttempts: failedAttempts ?? 0,
       lockoutUntil: isLocked ? lockoutUntil : undefined,
       lockoutDuration: isLocked && lockoutUntil ? lockoutUntil - now : undefined,
-      attemptsRemaining: Math.max(0, config.maxAttempts - (failedAttempts || 0)),
+      attemptsRemaining: Math.max(0, config.maxAttempts - (failedAttempts ?? 0)),
     }
   } catch {
     return checkLockoutInMemory(key, config)
@@ -199,7 +199,7 @@ async function recordFailedAttemptRedis(
     // Check if we need to lock out
     if (attempts >= config.maxAttempts) {
       // Get lockout count for progressive duration
-      const lockoutCount = (await client.get<number>(lockoutCountKey)) || 0
+      const lockoutCount = (await client.get<number>(lockoutCountKey)) ?? 0
       const durationIndex = Math.min(lockoutCount, config.lockoutDurations.length - 1)
       const duration = config.lockoutDurations[durationIndex]
       const lockoutUntil = Date.now() + duration

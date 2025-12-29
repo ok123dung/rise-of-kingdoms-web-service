@@ -157,6 +157,7 @@ export function FileUpload({
   }
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- Drag handlers for file drop zone, main interaction via input
     <div
       className={`relative ${className}`}
       onDragEnter={handleDrag}

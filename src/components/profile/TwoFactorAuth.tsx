@@ -71,7 +71,7 @@ export default function TwoFactorAuth() {
       } else {
         setMessage({ type: 'error', text: data.message ?? 'Failed to start setup' })
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage({ type: 'error', text: 'Error starting setup' })
     } finally {
       setLoading(false)
@@ -101,7 +101,7 @@ export default function TwoFactorAuth() {
       } else {
         setMessage({ type: 'error', text: data.message ?? 'Invalid code' })
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage({ type: 'error', text: 'Verification failed' })
     } finally {
       setLoading(false)
@@ -132,7 +132,7 @@ export default function TwoFactorAuth() {
       } else {
         setMessage({ type: 'error', text: data.error ?? 'Failed to disable 2FA' })
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage({ type: 'error', text: 'Error disabling 2FA' })
     } finally {
       setLoading(false)

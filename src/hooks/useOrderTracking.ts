@@ -67,7 +67,7 @@ export function useOrderTracking({
   const connect = useCallback(() => {
     if (socketRef.current?.connected) return
 
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3002'
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL ?? 'http://localhost:3002'
 
     const socket = io(wsUrl, {
       auth: { token: wsToken },

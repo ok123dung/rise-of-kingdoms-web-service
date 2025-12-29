@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const period = searchParams.get('period') || '30d'
+    const period = searchParams.get('period') ?? '30d'
     const { start, end } = getDateRange(period)
 
     // Revenue Analytics

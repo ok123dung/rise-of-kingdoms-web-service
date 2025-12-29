@@ -41,7 +41,7 @@ async function createPaymentHandler(request: NextRequest) {
     let validatedData
     try {
       validatedData = createPaymentSchema.parse(body)
-    } catch (error) {
+    } catch (_error) {
       throw new ValidationError('Invalid payment request data')
     }
 

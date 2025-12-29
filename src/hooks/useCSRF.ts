@@ -10,6 +10,7 @@ export function useCSRF() {
     const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
 
     if (metaToken) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Required for client-side token initialization
       setCSRFToken(metaToken)
     } else {
       // Try to get from cookie
@@ -19,6 +20,7 @@ export function useCSRF() {
         ?.split('=')[1]
 
       if (cookieToken) {
+         
         setCSRFToken(cookieToken)
       }
     }

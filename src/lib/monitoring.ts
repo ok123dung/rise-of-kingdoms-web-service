@@ -45,14 +45,14 @@ export class HealthMonitor {
   public async performHealthCheck(): Promise<HealthCheckResult> {
     const timestamp = new Date().toISOString()
     try {
-      // Run all health checks in parallel
+      // Run all health checks in parallel - wrap sync methods in Promise.resolve
       const [databaseCheck, redisCheck, externalApiCheck, diskSpaceCheck, memoryCheck] =
         await Promise.allSettled([
           this.checkDatabase(),
-          this.checkRedis(),
+          Promise.resolve(this.checkRedis()),
           this.checkExternalApis(),
-          this.checkDiskSpace(),
-          this.checkMemory()
+          Promise.resolve(this.checkDiskSpace()),
+          Promise.resolve(this.checkMemory())
         ])
       // Process results
       const checks = {
@@ -229,7 +229,7 @@ export class HealthMonitor {
         lastChecked: new Date().toISOString(),
         details: { type: 'serverless' }
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         status: 'warn',
         message: 'Cannot check disk space in serverless environment',

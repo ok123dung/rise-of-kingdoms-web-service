@@ -51,11 +51,12 @@ export function ServiceReviews({ serviceSlug, initialLimit = 5 }: ServiceReviews
   }
 
   useEffect(() => {
-    fetchReviews()
+    void fetchReviews()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchReviews is stable, only serviceSlug changes should trigger refetch
   }, [serviceSlug])
 
   const loadMore = () => {
-    fetchReviews(true)
+    void fetchReviews(true)
   }
 
   if (isLoading) {

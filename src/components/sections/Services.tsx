@@ -93,11 +93,13 @@ function ServiceCard({ service }: ServiceCardProps) {
       aria-labelledby={`service-title-${service.id}`}
       data-testid="service-card"
       role="article"
+      tabIndex={hasTiers ? 0 : undefined}
       className={`
         ${cardClass} hover-lift group relative cursor-pointer
         ${featured ? 'border-2 border-amber-200 shadow-2xl' : ''}
       `}
       onClick={() => hasTiers && setIsExpanded(!isExpanded)}
+      onKeyDown={(e) => hasTiers && (e.key === 'Enter' || e.key === ' ') && setIsExpanded(!isExpanded)}
       onMouseEnter={() => hasTiers && setIsExpanded(true)}
       onMouseLeave={() => hasTiers && setIsExpanded(false)}
     >

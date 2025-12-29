@@ -36,7 +36,7 @@ export function ReviewForm({ bookingId, serviceName, onSuccess }: ReviewFormProp
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit review')
+        throw new Error(data.error ?? 'Failed to submit review')
       }
 
       setIsSubmitted(true)
@@ -122,7 +122,7 @@ export function ReviewForm({ bookingId, serviceName, onSuccess }: ReviewFormProp
       )}
 
       <button
-        onClick={handleSubmit}
+        onClick={() => void handleSubmit()}
         disabled={isSubmitting || rating === 0}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >

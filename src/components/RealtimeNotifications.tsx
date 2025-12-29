@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { Bell, X, Check, AlertCircle, Info } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 import { useNotificationWebSocket } from '@/hooks/useWebSocket'
 
@@ -19,6 +21,7 @@ interface Notification {
 }
 
 export function RealtimeNotifications() {
+  const router = useRouter()
   const { isConnected, notifications, unreadCount, markAsRead } = useNotificationWebSocket()
 
   const [showDropdown, setShowDropdown] = useState(false)
@@ -28,6 +31,7 @@ export function RealtimeNotifications() {
   // Show toast for new notifications
   useEffect(() => {
     if (notifications.length > 0 && notifications[0] !== latestNotification) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Track latest notification for comparison
       setLatestNotification(notifications[0] as Notification)
       setShowToast(true)
 
@@ -55,7 +59,7 @@ export function RealtimeNotifications() {
     markAsRead(notification.id)
     // Navigate to relevant page based on notification type
     if (notification.link) {
-      window.location.href = notification.link
+      router.push(notification.link)
     }
   }
 
@@ -131,12 +135,12 @@ export function RealtimeNotifications() {
 
             {notifications.length > 10 && (
               <div className="border-t p-3 text-center">
-                <a
+                <Link
                   className="text-sm text-blue-600 hover:text-blue-700"
                   href="/dashboard/notifications"
                 >
                   Xem tất cả thông báo
-                </a>
+                </Link>
               </div>
             )}
           </div>

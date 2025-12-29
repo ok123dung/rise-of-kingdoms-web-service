@@ -3,11 +3,9 @@
 import { useState, useEffect } from 'react'
 import {
   CheckCircle,
-  Clock,
   CreditCard,
   Loader2,
   Package,
-  Truck,
   Star,
   AlertCircle
 } from 'lucide-react'
@@ -61,6 +59,7 @@ export function OrderTracker({
 
   useEffect(() => {
     if (lastStatusUpdate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Sync state from WebSocket updates
       setStatus(lastStatusUpdate.status)
       if (lastStatusUpdate.completion_percentage) {
         setProgress(lastStatusUpdate.completion_percentage)

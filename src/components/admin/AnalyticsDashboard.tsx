@@ -77,7 +77,8 @@ export function AnalyticsDashboard() {
   }
 
   useEffect(() => {
-    fetchAnalytics()
+    void fetchAnalytics()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchAnalytics is stable, only period changes should trigger refetch
   }, [period])
 
   const formatCurrency = (amount: number) => {
@@ -103,9 +104,9 @@ export function AnalyticsDashboard() {
   if (error || !data) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-        <p className="text-red-600">{error || 'No data available'}</p>
+        <p className="text-red-600">{error ?? 'No data available'}</p>
         <button
-          onClick={fetchAnalytics}
+          onClick={() => void fetchAnalytics()}
           className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
         >
           Thử lại
@@ -134,7 +135,7 @@ export function AnalyticsDashboard() {
             <option value="year">Năm nay</option>
           </select>
           <button
-            onClick={fetchAnalytics}
+            onClick={() => void fetchAnalytics()}
             className="rounded-lg border border-gray-300 p-2 hover:bg-gray-50"
           >
             <RefreshCw className="h-4 w-4" />

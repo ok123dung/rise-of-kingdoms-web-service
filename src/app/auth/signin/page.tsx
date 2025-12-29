@@ -76,7 +76,7 @@ function SignInContent() {
         // Safe JSON parsing - handle non-JSON responses
         let checkData: { error?: string; requires2FA?: boolean } = {}
         const contentType = checkResponse.headers.get('content-type')
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType?.includes('application/json')) {
           try {
             checkData = (await checkResponse.json()) as typeof checkData
           } catch {

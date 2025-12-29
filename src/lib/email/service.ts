@@ -664,9 +664,7 @@ export class EmailService {
 let emailServiceInstance: EmailService | null = null
 
 export function getEmailService(): EmailService {
-  if (!emailServiceInstance) {
-    emailServiceInstance = new EmailService()
-  }
+  emailServiceInstance ??= new EmailService()
   return emailServiceInstance
 }
 

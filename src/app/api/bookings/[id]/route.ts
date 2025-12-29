@@ -78,7 +78,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: booking })
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch booking' }, { status: 500 })
   }
 }

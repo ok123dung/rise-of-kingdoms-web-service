@@ -15,6 +15,7 @@ export default function ClientOnly({ children, fallback = null }: ClientOnlyProp
   const [hasMounted, setHasMounted] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Client mount detection
     setHasMounted(true)
   }, [])
 
@@ -33,6 +34,7 @@ export function useClientOnly() {
   const [hasMounted, setHasMounted] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Client mount detection
     setHasMounted(true)
   }, [])
 

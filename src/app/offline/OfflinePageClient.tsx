@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 export default function OfflinePageClient() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-blue-500 to-purple-600 px-4">
@@ -115,18 +117,18 @@ export default function OfflinePageClient() {
 
         {/* Navigation Links */}
         <div className="mt-8 flex justify-center space-x-4">
-          <a className="text-white underline transition-colors hover:text-blue-200" href="/">
+          <Link className="text-white underline transition-colors hover:text-blue-200" href="/">
             Trang chủ
-          </a>
-          <a
+          </Link>
+          <Link
             className="text-white underline transition-colors hover:text-blue-200"
             href="/services"
           >
             Dịch vụ
-          </a>
-          <a className="text-white underline transition-colors hover:text-blue-200" href="/contact">
+          </Link>
+          <Link className="text-white underline transition-colors hover:text-blue-200" href="/contact">
             Liên hệ
-          </a>
+          </Link>
         </div>
 
         {/* Connection Status */}

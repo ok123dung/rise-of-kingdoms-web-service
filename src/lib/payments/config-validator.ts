@@ -150,6 +150,7 @@ function validateBanking(): ValidationResult {
   const sepayKey = process.env.SEPAY_API_KEY
   const bankAccountNumber = process.env.BANK_ACCOUNT_NUMBER
 
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- Intentional truthy check, empty string should be falsy
   const isConfigured = !!(bankAccountNumber || sepayKey)
 
   if (!bankAccountNumber && !sepayKey) {

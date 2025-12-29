@@ -137,7 +137,7 @@ export async function GET(_request: NextRequest) {
         activeConnections: poolStatus[0]?.count || 0,
         status: 'healthy'
       }
-    } catch (poolError) {
+    } catch (_poolError) {
       diagnostics.checks.connectionPool = {
         status: 'unable to check',
         note: 'This is normal for some database providers'

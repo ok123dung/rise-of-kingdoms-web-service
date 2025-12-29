@@ -389,7 +389,7 @@ export const authOptions: NextAuthOptions = {
             updated_at: new Date()
           }
         })
-      } catch (error) {
+      } catch (_error) {
         // Lead might already exist, ignore error
       }
     }

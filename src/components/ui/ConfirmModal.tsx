@@ -36,6 +36,7 @@ export default function ConfirmModal({
   // Reset password when modal closes
   useEffect(() => {
     if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Legitimate reset on close
       setPassword('')
     }
   }, [isOpen])

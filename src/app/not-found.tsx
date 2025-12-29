@@ -49,6 +49,7 @@ export default function NotFound() {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
       return () => clearTimeout(timer)
     } else if (countdown === 0 && !isRedirecting) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Redirect trigger
       setIsRedirecting(true)
       router.push('/')
     }

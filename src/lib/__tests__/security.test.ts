@@ -3,6 +3,8 @@
  * Tests XSS prevention, SQL injection prevention, input validation, and cryptographic functions
  */
 
+import type { NextRequest } from 'next/server'
+
 import {
   sanitizeInput,
   stripDangerousPatterns,
@@ -569,7 +571,7 @@ describe('Security Functions', () => {
           method: 'GET',
           headers: { get: jest.fn() },
           cookies: { get: jest.fn() }
-        } as unknown as import('next/server').NextRequest
+        } as unknown as NextRequest
 
         expect(CSRFProtection.validateToken(mockRequest)).toBe(true)
       })
@@ -579,7 +581,7 @@ describe('Security Functions', () => {
           method: 'HEAD',
           headers: { get: jest.fn() },
           cookies: { get: jest.fn() }
-        } as unknown as import('next/server').NextRequest
+        } as unknown as NextRequest
 
         expect(CSRFProtection.validateToken(mockRequest)).toBe(true)
       })
@@ -589,7 +591,7 @@ describe('Security Functions', () => {
           method: 'OPTIONS',
           headers: { get: jest.fn() },
           cookies: { get: jest.fn() }
-        } as unknown as import('next/server').NextRequest
+        } as unknown as NextRequest
 
         expect(CSRFProtection.validateToken(mockRequest)).toBe(true)
       })
@@ -600,7 +602,7 @@ describe('Security Functions', () => {
           method: 'POST',
           headers: { get: jest.fn().mockReturnValue(token) },
           cookies: { get: jest.fn().mockReturnValue({ value: token }) }
-        } as unknown as import('next/server').NextRequest
+        } as unknown as NextRequest
 
         expect(CSRFProtection.validateToken(mockRequest)).toBe(true)
       })
@@ -610,7 +612,7 @@ describe('Security Functions', () => {
           method: 'POST',
           headers: { get: jest.fn().mockReturnValue('token-a') },
           cookies: { get: jest.fn().mockReturnValue({ value: 'token-b' }) }
-        } as unknown as import('next/server').NextRequest
+        } as unknown as NextRequest
 
         expect(CSRFProtection.validateToken(mockRequest)).toBe(false)
       })
@@ -620,7 +622,7 @@ describe('Security Functions', () => {
           method: 'POST',
           headers: { get: jest.fn().mockReturnValue(null) },
           cookies: { get: jest.fn().mockReturnValue({ value: 'token' }) }
-        } as unknown as import('next/server').NextRequest
+        } as unknown as NextRequest
 
         expect(CSRFProtection.validateToken(mockRequest)).toBe(false)
       })
@@ -630,7 +632,7 @@ describe('Security Functions', () => {
           method: 'POST',
           headers: { get: jest.fn().mockReturnValue('token') },
           cookies: { get: jest.fn().mockReturnValue(undefined) }
-        } as unknown as import('next/server').NextRequest
+        } as unknown as NextRequest
 
         expect(CSRFProtection.validateToken(mockRequest)).toBe(false)
       })

@@ -54,7 +54,7 @@ export default function ChangePasswordForm() {
       } else {
         setServerError(result.error ?? 'Đã có lỗi xảy ra')
       }
-    } catch (error) {
+    } catch (_error) {
       setServerError('Lỗi kết nối đến máy chủ')
     } finally {
       setIsLoading(false)
