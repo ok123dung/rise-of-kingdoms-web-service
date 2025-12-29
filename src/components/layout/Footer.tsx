@@ -163,7 +163,7 @@ export default function Footer() {
                 </button>
               </form>
 
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-400">
                 🔒 Không spam • Hủy đăng ký bất kỳ lúc nào
               </p>
             </div>
