@@ -5,7 +5,13 @@
 
 import { NextResponse } from 'next/server'
 
-import { withErrorHandler, compose, withApiMiddleware } from '../error-handler'
+import {
+  withErrorHandler,
+  compose,
+  withApiMiddleware,
+  withAuthAndError,
+  withRateLimitAndError
+} from '../error-handler'
 
 // Mock dependencies
 jest.mock('@/lib/errors', () => ({
@@ -215,6 +221,110 @@ describe('Error Handler Middleware', () => {
       const response = await wrapped(req)
 
       expect(response.status).toBe(500)
+    })
+  })
+
+  describe('withAuthAndError', () => {
+    it('should compose auth middleware with error handler', async () => {
+      const authCalled = jest.fn()
+      const authMiddleware = (handler: any) => async (req: any, ctx: any) => {
+        authCalled()
+        return handler(req, ctx)
+      }
+
+      const handler = jest.fn().mockResolvedValue(
+        NextResponse.json({ success: true })
+      )
+      const req = createMockRequest()
+
+      const wrapped = withAuthAndError(handler, authMiddleware)
+      await wrapped(req)
+
+      expect(authCalled).toHaveBeenCalled()
+      expect(handler).toHaveBeenCalled()
+    })
+
+    it('should handle auth middleware errors', async () => {
+      const authMiddleware = () => async () => {
+        throw new Error('Auth failed')
+      }
+
+      const handler = jest.fn()
+      const req = createMockRequest()
+
+      const wrapped = withAuthAndError(handler, authMiddleware)
+      const response = await wrapped(req)
+
+      expect(response.status).toBe(500)
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('should add request-id header when auth succeeds', async () => {
+      const authMiddleware = (handler: any) => async (req: any, ctx: any) => {
+        return handler(req, ctx)
+      }
+
+      const handler = jest.fn().mockResolvedValue(
+        NextResponse.json({ success: true })
+      )
+      const req = createMockRequest()
+
+      const wrapped = withAuthAndError(handler, authMiddleware)
+      const response = await wrapped(req)
+
+      expect(response.headers.get('x-request-id')).toBeDefined()
+    })
+  })
+
+  describe('withRateLimitAndError', () => {
+    it('should compose rate limit middleware with error handler', async () => {
+      const rateLimitCalled = jest.fn()
+      const rateLimitMiddleware = (handler: any) => async (req: any, ctx: any) => {
+        rateLimitCalled()
+        return handler(req, ctx)
+      }
+
+      const handler = jest.fn().mockResolvedValue(
+        NextResponse.json({ success: true })
+      )
+      const req = createMockRequest()
+
+      const wrapped = withRateLimitAndError(handler, rateLimitMiddleware)
+      await wrapped(req)
+
+      expect(rateLimitCalled).toHaveBeenCalled()
+      expect(handler).toHaveBeenCalled()
+    })
+
+    it('should handle rate limit exceeded error', async () => {
+      const rateLimitMiddleware = () => async () => {
+        throw new Error('Rate limit exceeded')
+      }
+
+      const handler = jest.fn()
+      const req = createMockRequest()
+
+      const wrapped = withRateLimitAndError(handler, rateLimitMiddleware)
+      const response = await wrapped(req)
+
+      expect(response.status).toBe(500)
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('should add request-id header when rate limit passes', async () => {
+      const rateLimitMiddleware = (handler: any) => async (req: any, ctx: any) => {
+        return handler(req, ctx)
+      }
+
+      const handler = jest.fn().mockResolvedValue(
+        NextResponse.json({ success: true })
+      )
+      const req = createMockRequest()
+
+      const wrapped = withRateLimitAndError(handler, rateLimitMiddleware)
+      const response = await wrapped(req)
+
+      expect(response.headers.get('x-request-id')).toBeDefined()
     })
   })
 })

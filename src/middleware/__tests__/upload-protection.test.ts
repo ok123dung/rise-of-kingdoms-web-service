@@ -285,15 +285,15 @@ describe('Upload Protection Middleware', () => {
     })
   })
 
-  // Note: limitedStream tests are skipped because ReadableStream
-  // is not available in Jest's Node environment without additional polyfills.
-  // These would need to be tested in an environment with Web Streams API support.
+  // Note: limitedStream requires Web Streams API (ReadableStream) which is not
+  // available in Jest's Node test environment without additional polyfills.
+  // These tests would need to run in a browser environment or with polyfills.
   describe.skip('limitedStream', () => {
-    it('should yield chunks within size limit', async () => {
+    it('should yield all chunks when within limit', async () => {
       // Requires ReadableStream polyfill
     })
 
-    it('should throw error when stream exceeds max size', async () => {
+    it('should throw when stream exceeds limit', async () => {
       // Requires ReadableStream polyfill
     })
   })
