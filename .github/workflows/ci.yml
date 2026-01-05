@@ -132,7 +132,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true  # Don't fail if artifact unavailable
         with:
           name: next-output
