@@ -1,6 +1,8 @@
 import { headers } from 'next/headers'
 import { Inter, Poppins } from 'next/font/google'
 
+import { Analytics as VercelAnalytics } from '@vercel/analytics/next'
+
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { CSPNonceProvider } from '@/components/CSPNonceProvider'
 import { CriticalCSS } from '@/components/performance/CriticalCSS'
@@ -144,6 +146,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {/* Skip link for keyboard navigation - WCAG 2.4.1 */}
           <SkipLink />
           <GoogleAnalytics nonce={nonce} />
+          <VercelAnalytics />
           <PerformanceMonitor />
           <ConversionTesting />
           <RevenueValidation />
