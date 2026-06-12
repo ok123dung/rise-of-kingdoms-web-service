@@ -1,0 +1,49 @@
+# RokdBot (RoK Services) — Full Reference
+
+> Dịch vụ Rise of Kingdoms chuyên nghiệp #1 Việt Nam. Website: https://rokdbot.com — Ngôn ngữ: Tiếng Việt.
+
+## RokdBot là gì?
+
+RokdBot (còn gọi là RoK Services) là nền tảng cung cấp dịch vụ chuyên nghiệp cho game chiến thuật Rise of Kingdoms (RoK), phục vụ người chơi Việt Nam và quốc tế. Đội ngũ gồm các top player hàng đầu Việt Nam, đã phục vụ hơn 1000 khách hàng.
+
+## Dịch vụ cung cấp
+
+### 1. Tư vấn chiến thuật (Strategy Consulting)
+- Lộ trình phát triển thành (city development) tối ưu theo từng giai đoạn
+- Xây dựng đội hình commander phù hợp với phong cách chơi và ngân sách
+- Tối ưu tài nguyên, tăng tốc, gem và sự kiện
+
+### 2. Quản lý liên minh (Alliance Management)
+- Vận hành và tổ chức alliance chuyên nghiệp
+- Điều phối rally, tổ chức chiến dịch chiếm pass/thánh địa
+- Xây dựng nội quy và hệ thống phân quyền alliance
+
+### 3. Training Commander
+- Hướng dẫn nâng cấp và ghép cặp commander hiệu quả
+- Tư vấn talent tree và trang bị (equipment) theo meta mới nhất
+
+### 4. Hỗ trợ KvK (Kingdom versus Kingdom)
+- Chiến lược KvK theo từng season (SoC, KoH...)
+- Hỗ trợ điều phối trận đánh 24/7 trong thời gian KvK
+
+## Câu hỏi thường gặp (FAQ)
+
+**RokdBot có an toàn cho tài khoản không?**
+Dịch vụ tập trung vào tư vấn và hỗ trợ chiến thuật bởi người chơi giàu kinh nghiệm.
+
+**Làm sao để đặt dịch vụ?**
+Truy cập https://rokdbot.com/services để xem danh sách dịch vụ và đặt qua trang https://rokdbot.com/contact hoặc hệ thống booking trên website.
+
+**RokdBot phục vụ khu vực nào?**
+Chủ yếu phục vụ người chơi Việt Nam, hỗ trợ cả người chơi quốc tế.
+
+## Liên kết chính
+
+- Trang chủ: https://rokdbot.com/
+- Dịch vụ: https://rokdbot.com/services
+- Tư vấn chiến thuật: https://rokdbot.com/services/strategy
+- Quản lý liên minh: https://rokdbot.com/services/alliance
+- Hướng dẫn RoK: https://rokdbot.com/guides
+- Giới thiệu: https://rokdbot.com/about
+- Liên hệ: https://rokdbot.com/contact
+- Sitemap: https://rokdbot.com/sitemap.xml

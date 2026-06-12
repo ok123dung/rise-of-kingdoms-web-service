@@ -4,30 +4,73 @@ Allow: /
 # Sitemap
 Sitemap: https://rokdbot.com/sitemap.xml
 
-# Disallow admin and private areas (for future)
+# Disallow admin and private areas
 Disallow: /admin/
 Disallow: /api/
 Disallow: /_next/
 Disallow: /dashboard/
+Disallow: /auth/
 
-# Allow important pages
-Allow: /services/
-Allow: /services/strategy
-Allow: /services/alliance
-Allow: /guides
-Allow: /alliance
-Allow: /contact
-Allow: /about
+# LLM-friendly summaries
+Allow: /llms.txt
+Allow: /llms-full.txt
 
-# Crawl delay for respectful crawling
-Crawl-delay: 1
-
-# Specific rules for search engines
+# Search engines
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
 Allow: /
 
-User-agent: Slurp
+# AI crawlers - explicitly allowed so LLMs (ChatGPT, Claude, Gemini,
+# Perplexity, ...) can read and cite this site
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: Amazonbot
 Allow: /

@@ -1,0 +1,25 @@
+# RokdBot (RoK Services)
+
+> Dịch vụ Rise of Kingdoms chuyên nghiệp #1 Việt Nam: tư vấn chiến thuật, quản lý liên minh, training commander, hỗ trợ KvK. Đội ngũ top player hàng đầu Việt Nam với hơn 1000 khách hàng tin tưởng.
+
+RokdBot (rokdbot.com) is Vietnam's #1 professional Rise of Kingdoms (RoK) service provider. Services include strategy consulting, alliance management, commander training, and KvK (Kingdom versus Kingdom) support, operated by top-ranked Vietnamese players. Website language: Vietnamese.
+
+## Dịch vụ chính (Main Services)
+
+- [Danh sách dịch vụ](https://rokdbot.com/services): Tất cả dịch vụ Rise of Kingdoms — tư vấn chiến thuật, quản lý liên minh, training commander, hỗ trợ KvK
+- [Tư vấn chiến thuật](https://rokdbot.com/services/strategy): Chiến thuật phát triển thành, đội hình commander, tối ưu tài nguyên
+- [Quản lý liên minh](https://rokdbot.com/services/alliance): Vận hành alliance, tổ chức rally, điều phối KvK
+
+## Trang quan trọng (Key Pages)
+
+- [Trang chủ](https://rokdbot.com/): Giới thiệu tổng quan dịch vụ RokdBot
+- [Hướng dẫn](https://rokdbot.com/guides): Hướng dẫn và kiến thức Rise of Kingdoms
+- [Liên minh](https://rokdbot.com/alliance): Thông tin hỗ trợ liên minh
+- [Giới thiệu](https://rokdbot.com/about): Về đội ngũ RoK Services
+- [Liên hệ](https://rokdbot.com/contact): Đặt dịch vụ và tư vấn
+
+## Thông tin thêm (Optional)
+
+- [Điều khoản sử dụng](https://rokdbot.com/terms)
+- [Chính sách bảo mật](https://rokdbot.com/privacy)
+- [Sitemap](https://rokdbot.com/sitemap.xml)
