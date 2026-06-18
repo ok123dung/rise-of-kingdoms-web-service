@@ -98,7 +98,7 @@ jobs:
           SKIP_ENV_VALIDATION: true
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         continue-on-error: true  # Don't fail build if artifact upload fails (quota issues)
         with:
           name: next-output
@@ -145,7 +145,7 @@ jobs:
           CI: true
 
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: playwright-report
